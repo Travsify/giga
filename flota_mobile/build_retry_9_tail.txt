@@ -1,0 +1,100 @@
+﻿[        ] Transforming firebase-common-ktx-20.4.3.aar (com.google.firebase:firebase-common-ktx:20.4.3) with AarTransform
+[        ] Transforming play-services-location-21.2.0.aar (com.google.android.gms:play-services-location:21.2.0) with ExtractAarTransform
+[        ] Transforming firebase-auth-interop-20.0.0.aar (com.google.firebase:firebase-auth-interop:20.0.0) with ExtractAarTransform
+[        ] Transforming firebase-auth-interop-20.0.0.aar (com.google.firebase:firebase-auth-interop:20.0.0) with ExtractAarTransform
+[        ] Transforming firebase-common-20.4.3.aar (com.google.firebase:firebase-common:20.4.3) with ExtractAarTransform
+[        ] Caching disabled for ExtractAarTransform: C:\Users\USER\.gradle\caches\modules-2\files-2.1\com.google.firebase\firebase-auth-interop\20.0.0\b9aceac8aaaf00ae980b36c49b70446c950a4185\firebase-auth-interop-20.0.0.aar because:
+[        ]   Build cache is disabled
+[        ] Transforming firebase-auth-22.3.1.aar (com.google.firebase:firebase-auth:22.3.1) with AarTransform
+[        ] ExtractAarTransform: C:\Users\USER\.gradle\caches\modules-2\files-2.1\com.google.firebase\firebase-auth-interop\20.0.0\b9aceac8aaaf00ae980b36c49b70446c950a4185\firebase-auth-interop-20.0.0.aar is not up-to-date because:
+[        ]   No history is available.
+[        ] Caching disabled for ExtractAarTransform: C:\Users\USER\.gradle\caches\modules-2\files-2.1\com.google.firebase\firebase-common\20.4.3\2b3ccfa893ada44e80bc738e3d5a93f0f85096d2\firebase-common-20.4.3.aar because:
+[        ]   Build cache is disabled
+[        ] ExtractAarTransform: C:\Users\USER\.gradle\caches\modules-2\files-2.1\com.google.firebase\firebase-common\20.4.3\2b3ccfa893ada44e80bc738e3d5a93f0f85096d2\firebase-common-20.4.3.aar is not up-to-date because:
+[        ]   No history is available.
+[        ] Caching disabled for ExtractAarTransform: C:\Users\USER\.gradle\caches\modules-2\files-2.1\com.google.android.gms\play-services-location\21.2.0\ffb13c27f92e5a9cacd4f98500ac9530ee4ea3db\play-services-location-21.2.0.aar because:
+[   +1 ms]   Build cache is disabled
+[   +2 ms] ExtractAarTransform: C:\Users\USER\.gradle\caches\modules-2\files-2.1\com.google.android.gms\play-services-location\21.2.0\ffb13c27f92e5a9cacd4f98500ac9530ee4ea3db\play-services-location-21.2.0.aar is not up-to-date because:
+[        ]   No history is available.
+[ +191 ms] Transforming play-services-location-21.2.0.aar (com.google.android.gms:play-services-location:21.2.0) with AarTransform
+[  +11 ms] Transforming firebase-messaging-23.4.1.aar (com.google.firebase:firebase-messaging:23.4.1) with AarTransform
+[  +14 ms] Caching disabled for AarTransform: C:\Users\USER\.gradle\caches\transforms-3\f4d08ec662eec260e984cf58ec7e6e6d\transformed\firebase-messaging-23.4.1 because:
+[        ]   Build cache is disabled
+[        ] AarTransform: C:\Users\USER\.gradle\caches\transforms-3\f4d08ec662eec260e984cf58ec7e6e6d\transformed\firebase-messaging-23.4.1 is not up-to-date because:
+[        ]   No history is available.
+[        ] Transforming firebase-common-20.4.3.aar (com.google.firebase:firebase-common:20.4.3) with ExtractAarTransform
+[   +4 ms] Transforming firebase-auth-interop-20.0.0.aar (com.google.firebase:firebase-auth-interop:20.0.0) with AarTransform
+[        ] Caching disabled for AarTransform: C:\Users\USER\.gradle\caches\transforms-3\ed1d28ab214a7c2d52e83a54c4097804\transformed\firebase-auth-interop-20.0.0 because:
+[        ]   Build cache is disabled
+[        ] AarTransform: C:\Users\USER\.gradle\caches\transforms-3\ed1d28ab214a7c2d52e83a54c4097804\transformed\firebase-auth-interop-20.0.0 is not up-to-date because:
+[        ]   No history is available.
+[ +109 ms] Transforming firebase-common-20.4.3.aar (com.google.firebase:firebase-common:20.4.3) with ExtractAarTransform
+[        ] Caching disabled for AarTransform: C:\Users\USER\.gradle\caches\transforms-3\846239604ce6e9c73de7b194a8435a74\transformed\play-services-location-21.2.0 because:
+[   +2 ms]   Build cache is disabled
+[   +1 ms] AarTransform: C:\Users\USER\.gradle\caches\transforms-3\846239604ce6e9c73de7b194a8435a74\transformed\play-services-location-21.2.0 is not up-to-date because:
+[        ]   No history is available.
+[        ] Transforming firebase-common-20.4.3.aar (com.google.firebase:firebase-common:20.4.3) with ExtractAarTransform
+[        ] Caching disabled for AarTransform: C:\Users\USER\.gradle\caches\transforms-3\b283dab0b2829455478768238d4111ab\transformed\firebase-auth-22.3.1 because:
+[        ]   Build cache is disabled
+[        ] AarTransform: C:\Users\USER\.gradle\caches\transforms-3\b283dab0b2829455478768238d4111ab\transformed\firebase-auth-22.3.1 is not up-to-date because:
+[        ]   No history is available.
+[        ] Transforming firebase-common-20.4.3.aar (com.google.firebase:firebase-common:20.4.3) with AarTransform
+[   +5 ms] Transforming firebase-common-20.4.3.aar (com.google.firebase:firebase-common:20.4.3) with AarTransform
+[        ] Transforming firebase-common-20.4.3.aar (com.google.firebase:firebase-common:20.4.3) with AarTransform
+[   +4 ms] Transforming firebase-common-20.4.3.aar (com.google.firebase:firebase-common:20.4.3) with AarTransform
+[        ] Caching disabled for AarTransform: C:\Users\USER\.gradle\caches\transforms-3\8f9104074ff9edbb27ecf77288cc9a85\transformed\firebase-common-20.4.3 because:
+[        ]   Build cache is disabled
+[   +1 ms] AarTransform: C:\Users\USER\.gradle\caches\transforms-3\8f9104074ff9edbb27ecf77288cc9a85\transformed\firebase-common-20.4.3 is not up-to-date because:
+[        ]   No history is available.
+[        ] Transforming firebase-auth-interop-20.0.0.aar (com.google.firebase:firebase-auth-interop:20.0.0) with AarTransform
+[        ] Transforming firebase-common-20.4.3.aar (com.google.firebase:firebase-common:20.4.3) with ExtractAarTransform
+[        ] Transforming firebase-common-20.4.3.aar (com.google.firebase:firebase-common:20.4.3) with AarTransform
+[        ] Transforming firebase-common-20.4.3.aar (com.google.firebase:firebase-common:20.4.3) with ExtractAarTransform
+[  +19 ms] Transforming firebase-common-20.4.3.aar (com.google.firebase:firebase-common:20.4.3) with AarTransform
+[        ] Transforming play-services-auth-api-phone-17.4.0.aar (com.google.android.gms:play-services-auth-api-phone:17.4.0) with ExtractAarTransform
+[        ] Transforming firebase-appcheck-interop-17.0.0.aar (com.google.firebase:firebase-appcheck-interop:17.0.0) with ExtractAarTransform
+[        ] Transforming firebase-appcheck-interop-17.0.0.aar (com.google.firebase:firebase-appcheck-interop:17.0.0) with ExtractAarTransform
+[        ] Caching disabled for ExtractAarTransform: C:\Users\USER\.gradle\caches\modules-2\files-2.1\com.google.firebase\firebase-appcheck-interop\17.0.0\a2d353b2ee0209a8a1a008792c4754300364a2cd\firebase-appcheck-interop-17.0.0.aar because:
+[        ]   Build cache is disabled
+[        ] ExtractAarTransform: C:\Users\USER\.gradle\caches\modules-2\files-2.1\com.google.firebase\firebase-appcheck-interop\17.0.0\a2d353b2ee0209a8a1a008792c4754300364a2cd\firebase-appcheck-interop-17.0.0.aar is not up-to-date because:
+[        ]   No history is available.
+[   +1 ms] Transforming firebase-database-collection-18.0.1.aar (com.google.firebase:firebase-database-collection:18.0.1) with ExtractAarTransform
+[        ] Transforming play-services-base-18.5.0.aar (com.google.android.gms:play-services-base:18.5.0) with ExtractAarTransform
+[        ] Caching disabled for ExtractAarTransform: C:\Users\USER\.gradle\caches\modules-2\files-2.1\com.google.android.gms\play-services-auth-api-phone\17.4.0\f1ded1629c4342ca71db65bdd08b97175d835b29\play-services-auth-api-phone-17.4.0.aar because:
+[        ]   Build cache is disabled
+[        ] ExtractAarTransform: C:\Users\USER\.gradle\caches\modules-2\files-2.1\com.google.android.gms\play-services-auth-api-phone\17.4.0\f1ded1629c4342ca71db65bdd08b97175d835b29\play-services-auth-api-phone-17.4.0.aar is not up-to-date because:
+[        ]   No history is available.
+[        ] Caching disabled for ExtractAarTransform: C:\Users\USER\.gradle\caches\modules-2\files-2.1\com.google.firebase\firebase-database-collection\18.0.1\1ca1e729644a383b0035e960fd1bad4870f410ee\firebase-database-collection-18.0.1.aar because:
+[        ]   Build cache is disabled
+[   +1 ms] ExtractAarTransform: C:\Users\USER\.gradle\caches\modules-2\files-2.1\com.google.firebase\firebase-database-collection\18.0.1\1ca1e729644a383b0035e960fd1bad4870f410ee\firebase-database-collection-18.0.1.aar is not up-to-date because:
+[        ]   No history is available.
+[ +106 ms] Caching disabled for ExtractAarTransform: C:\Users\USER\.gradle\caches\modules-2\files-2.1\com.google.firebase\firebase-firestore\24.11.0\6de5cf1c3394969cf1753a83c85741b47447a0c4\firebase-firestore-24.11.0.aar because:
+[        ]   Build cache is disabled
+[        ] ExtractAarTransform: C:\Users\USER\.gradle\caches\modules-2\files-2.1\com.google.firebase\firebase-firestore\24.11.0\6de5cf1c3394969cf1753a83c85741b47447a0c4\firebase-firestore-24.11.0.aar is not up-to-date because:
+[        ]   No history is available.
+[        ] Transforming firebase-appcheck-interop-17.0.0.aar (com.google.firebase:firebase-appcheck-interop:17.0.0) with AarTransform
+[        ] Transforming firebase-appcheck-interop-17.0.0.aar (com.google.firebase:firebase-appcheck-interop:17.0.0) with AarTransform
+[        ] Transforming play-services-auth-api-phone-17.4.0.aar (com.google.android.gms:play-services-auth-api-phone:17.4.0) with AarTransform
+[        ] Caching disabled for AarTransform: C:\Users\USER\.gradle\caches\transforms-3\4d5009f10d1fcc22b4b6f1ea3c057cc2\transformed\firebase-appcheck-interop-17.0.0 because:
+[   +1 ms]   Build cache is disabled
+[        ] AarTransform: C:\Users\USER\.gradle\caches\transforms-3\4d5009f10d1fcc22b4b6f1ea3c057cc2\transformed\firebase-appcheck-interop-17.0.0 is not up-to-date because:
+[        ]   No history is available.
+[        ] Transforming firebase-database-collection-18.0.1.aar (com.google.firebase:firebase-database-collection:18.0.1) with AarTransform
+[        ] Caching disabled for AarTransform: C:\Users\USER\.gradle\caches\transforms-3\7c6964c2451d0fc530b8a3a208160af2\transformed\play-services-auth-api-phone-17.4.0 because:
+[        ]   Build cache is disabled
+[   +1 ms] AarTransform: C:\Users\USER\.gradle\caches\transforms-3\7c6964c2451d0fc530b8a3a208160af2\transformed\play-services-auth-api-phone-17.4.0 is not up-to-date because:
+[   +4 ms]   No history is available.
+[        ] Caching disabled for AarTransform: C:\Users\USER\.gradle\caches\transforms-3\78244c1158c08cf61822dfedb5a45a54\transformed\firebase-database-collection-18.0.1 because:
+[        ]   Build cache is disabled
+[        ] AarTransform: C:\Users\USER\.gradle\caches\transforms-3\78244c1158c08cf61822dfedb5a45a54\transformed\firebase-database-collection-18.0.1 is not up-to-date because:
+[        ]   No history is available.
+[        ] Transforming play-services-base-18.5.0.aar (com.google.android.gms:play-services-base:18.5.0) with ExtractAarTransform
+[        ] Transforming play-services-base-18.5.0.aar (com.google.android.gms:play-services-base:18.5.0) with ExtractAarTransform
+[        ] Transforming play-services-base-18.5.0.aar (com.google.android.gms:play-services-base:18.5.0) with ExtractAarTransform
+[        ] Transforming play-services-base-18.5.0.aar (com.google.android.gms:play-services-base:18.5.0) with ExtractAarTransform
+[        ] Caching disabled for ExtractAarTransform: C:\Users\USER\.gradle\caches\modules-2\files-2.1\com.google.android.gms\play-services-base\18.5.0\9b3fc5c98a0a082ce2804aa97d1f1bf39b01ce76\play-services-base-18.5.0.aar because:
+[        ]   Build cache is disabled
+[        ] ExtractAarTransform: C:\Users\USER\.gradle\caches\modules-2\files-2.1\com.google.android.gms\play-services-base\18.5.0\9b3fc5c98a0a082ce2804aa97d1f1bf39b01ce76\play-services-base-18.5.0.aar is not up-to-date because:
+[        ]   No history is available.
+[ +173 ms] Found locally available resource with matching checksum: [https://repo.maven.apache.org/maven2/com/google/maps/android/android-maps-utils/3.19.1/android-maps-utils-3.19.1.aar, C:\Users\USER\.gradle\caches\modules-2\files-2.1\com.google.maps.android\android-maps-utils\3.19.1\9b431cb2ad63024166d724560433a95e18c033ac\android-maps-utils-3.19.1.aar]
+[        ] Transforming firebase-firestore-24.11.0.aar (com.google.firebase:firebase-firestore:24.11.0) with AarTransform

@@ -1,0 +1,50 @@
+﻿heme.slateBlue.withOp
+acity(0.5)),
+[        ] [        
+]                    
+    ^^^^^^^^^
+[        ] [        
+] lib/features/auth/r
+egister_screen.dart:1
+56:41: Error: The 
+getter 'AppTheme' 
+isn't defined for 
+the type 
+'_FormInput'.
+[        ] [        
+]  - '_FormInput' is 
+from 'package:flota_m
+obile/features/auth/r
+egister_screen.dart' 
+('lib/features/auth/r
+egister_screen.dart')
+.
+[        ] [        
+] Try correcting the 
+name to the name of 
+an existing getter, 
+or defining a getter 
+or field named 
+'AppTheme'.
+[        ] [        
+]             
+hintStyle: 
+TextStyle(color: AppT
+heme.slateBlue.withOp
+acity(0.5)),
+[        ] [        
+]                    
+                     
+^^^^^^^^
+[        ] [        
+] lib/theme/app_theme
+.dart:18:16: Error: 
+Undefined name 
+'GoogleFonts'.
+[        ] [        
+]     textTheme: Goog
+leFonts.outfitTextThe
+me(
+[        ] [        
+]                
+^^^^^^^^^^^

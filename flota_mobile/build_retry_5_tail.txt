@@ -1,0 +1,50 @@
+﻿[        ]                      "target_ndk_api": 24
+[        ]                    },
+[        ]                    "c_compiler": {
+[        ]                      "ar": "C:\\Users\\USER\\AppData\\Local\\Android\\sdk\\ndk\\28.2.13676358\\toolchains\\llvm\\prebuilt\\windows-x86_64\\bin\\llvm-ar.exe",
+[        ]                      "cc": "C:\\Users\\USER\\AppData\\Local\\Android\\sdk\\ndk\\28.2.13676358\\toolchains\\llvm\\prebuilt\\windows-x86_64\\bin\\clang.exe",
+[        ]                      "ld": "C:\\Users\\USER\\AppData\\Local\\Android\\sdk\\ndk\\28.2.13676358\\toolchains\\llvm\\prebuilt\\windows-x86_64\\bin\\ld.lld.exe"
+[        ]                    },
+[        ]                    "link_mode_preference": "dynamic",
+[        ]                    "target_architecture": "x64",
+[        ]                    "target_os": "android"
+[        ]                  }
+[        ]                },
+[        ]                "linking_enabled": true
+[        ]              },
+[        ]              "out_dir_shared": "C:\\Users\\USER\\Desktop\\giga\\flota_mobile\\.dart_tool\\hooks_runner\\shared\\objective_c\\build\\",
+[        ]              "out_file": "C:\\Users\\USER\\Desktop\\giga\\flota_mobile\\.dart_tool\\hooks_runner\\objective_c\\7c1e27e5393c45720827102e0618940e\\output.json",
+[        ]              "package_name": "objective_c",
+[        ]              "package_root": "C:\\Users\\USER\\AppData\\Local\\Pub\\Cache\\hosted\\pub.dev\\objective_c-9.2.2\\",
+[        ]              "user_defines": {}
+[        ]            }
+[        ] [   +7 ms] Running `(cd C:\Users\USER\AppData\Local\Pub\Cache\hosted\pub.dev\objective_c-9.2.2\; PATH=C:\Program Files\Android\Android Studio\jbr\bin;C:\Program Files\Python312\Scripts\;C:\Program Files\Python312\;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;C:\Program Files\nodejs\;C:\FlutterVersions\flutter\bin;C:\Program Files\cursor\resources\app\bin;C:\Program Files\Git\cmd;C:\Users\USER\AppData\Local\Microsoft\WindowsApps;C:\Users\USER\AppData\Local\Programs\Microsoft VS Code\bin;C:\Users\USER\AppData\Roaming\npm;C:\Users\USER\AppData\Local\Programs\Antigravity\bin;C:\tools\php;C:\FlutterVersions\flutter\bin\mingit\cmd;C:\FlutterVersions\flutter\bin\mingit\cmd PROGRAMDATA=C:\ProgramData SYSTEMDRIVE=C: SYSTEMROOT=C:\WINDOWS TEMP=C:\Users\USER\AppData\Local\Temp TMP=C:\Users\USER\AppData\Local\Temp USERPROFILE=C:\Users\USER WINDIR=C:\WINDOWS C:\FlutterVersions\flutter\bin\cache\dart-sdk\bin\dart --packages=C:\Users\USER\Desktop\giga\flota_mobile\.dart_tool\package_config.json C:\Users\USER\Desktop\giga\flota_mobile\.dart_tool\hooks_runner\objective_c\7c1e27e5393c45720827102e0618940e\hook.dill --config=C:\Users\USER\Desktop\giga\flota_mobile\.dart_tool\hooks_runner\objective_c\7c1e27e5393c45720827102e0618940e\input.json )`.
+[ +588 ms] [ +593 ms] output.json contents:
+[        ]            {
+[        ]              "assets_for_linking": {},
+[        ]              "status": "success",
+[        ]              "timestamp": "2026-01-20 09:51:48.000"
+[        ]            }
+[        ] [   +4 ms] Building native assets for android_arm, android_arm64, android_x64 done.
+[        ] [   +8 ms] dart_build: Complete
+[        ] [  +15 ms] install_code_assets: Starting due to {}
+[        ] [   +9 ms] Writing native assets json to file:///C:/Users/USER/Desktop/giga/flota_mobile/.dart_tool/flutter_build/03c921e535f63f1250a66d64c9a7b3c7/native_assets.json.
+[        ] [   +8 ms] Writing C:\Users\USER\Desktop\giga\flota_mobile\.dart_tool\flutter_build\03c921e535f63f1250a66d64c9a7b3c7\native_assets.json done.
+[        ] [   +2 ms] install_code_assets: Complete
+[ +102 ms] [  +97 ms] Persisting file store
+[        ] [   +3 ms] Done persisting file store
+[        ] [  +10 ms] "flutter assemble" took 24,976ms.
+[        ] [        ] Running 1 shutdown hook
+[        ] [   +1 ms] Shutdown hooks complete
+[ +298 ms] [ +257 ms] exiting with code 1
+[        ] > Task :app:compileFlutterBuildRelease FAILED
+[  +91 ms] Could not execute [report metric STATISTICS_COLLECT_METRICS_OVERHEAD]
+[        ] Could not execute [report metric STATISTICS_COLLECT_METRICS_OVERHEAD]
+[        ] Could not execute [report metric STATISTICS_COLLECT_METRICS_OVERHEAD]
+[        ] 8 actionable tasks: 8 executed
+[        ] Watched directory hierarchies: [C:\FlutterVersions\flutter\packages\flutter_tools\gradle]
+[ +616 ms] Running Gradle task 'assembleRelease'... (completed in 49.3s)
+[ +137 ms] "flutter apk" took 51,979ms.
+[   +1 ms] Running 1 shutdown hook
+[   +3 ms] Shutdown hooks complete
+[ +258 ms] exiting with code 1

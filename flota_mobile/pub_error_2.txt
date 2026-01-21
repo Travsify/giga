@@ -1,0 +1,8 @@
+Resolving dependencies...
+Because firebase_messaging 16.1.1 depends on firebase_core ^4.4.0 and no versions of firebase_messaging match >16.1.1 <17.0.0, firebase_messaging ^16.1.1 requires firebase_core ^4.4.0.
+So, because flota_mobile depends on both firebase_core ^3.0.0 and firebase_messaging ^16.1.1, version solving failed.
+
+
+You can try the following suggestion to make the pubspec resolve:
+* Consider downgrading your constraint on firebase_messaging: flutter pub add firebase_messaging:^15.2.10
+Failed to update packages.

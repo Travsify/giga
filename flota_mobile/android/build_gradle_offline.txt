@@ -1,0 +1,22 @@
+e: file:///C:/Users/USER/Desktop/giga/flota_mobile/android/settings.gradle.kts:27:16: Expecting '}'
+
+FAILURE: Build failed with an exception.
+
+* Where:
+Settings file 'C:\Users\USER\Desktop\giga\flota_mobile\android\settings.gradle.kts' line: 27
+
+* What went wrong:
+Script compilation error:
+
+  Line 27: include(":app")
+                          ^ Expecting '}'
+
+1 error
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.
+
+BUILD FAILED in 1s

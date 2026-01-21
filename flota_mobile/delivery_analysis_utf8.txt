@@ -1,0 +1,177 @@
+﻿Analyzing 3 items...                                            
+
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\marketplace\delivery_request_screen.dart:86:42 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\marketplace\delivery_request_screen.dart:147:55 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\marketplace\delivery_request_screen.dart:152:70 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\marketplace\delivery_request_screen.dart:254:47 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\marketplace\delivery_request_screen.dart:421:69 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\marketplace\delivery_request_screen.dart:425:43 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\marketplace\home_screen.dart:50:57 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\marketplace\home_screen.dart:146:28 - deprecated_member_use
+warning - Unused import: 'package:flota_mobile/theme/app_theme.dart' - lib\features\marketplace\marketplace_screen.dart:6:8 - unused_import
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\marketplace\marketplace_screen.dart:223:65 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\marketplace\marketplace_screen.dart:233:54 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\marketplace\marketplace_screen.dart:238:88 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\marketplace\marketplace_screen.dart:272:50 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\marketplace\marketplace_screen.dart:275:82 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\marketplace\marketplace_screen.dart:284:43 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\marketplace\marketplace_screen.dart:295:81 - deprecated_member_use
+  error - Undefined name 'ScaffoldMessenger' - lib\features\wallet\checkout_screen.dart:21:7 - undefined_identifier
+  error - The name 'SnackBar' isn't a class - lib\features\wallet\checkout_screen.dart:22:15 - creation_with_non_type
+  error - The method 'Text' isn't defined for the type '_CheckoutScreenState' - lib\features\wallet\checkout_screen.dart:23:20 - undefined_method
+  error - Undefined name 'AppTheme' - lib\features\wallet\checkout_screen.dart:24:28 - undefined_identifier
+  error - The method 'go' isn't defined for the type 'BuildContext' - lib\features\wallet\checkout_screen.dart:28:15 - undefined_method
+  error - Undefined class 'Widget' - lib\features\wallet\checkout_screen.dart:33:3 - undefined_class
+  error - Undefined class 'BuildContext' - lib\features\wallet\checkout_screen.dart:33:16 - undefined_class
+  error - The method 'Scaffold' isn't defined for the type '_CheckoutScreenState' - lib\features\wallet\checkout_screen.dart:36:12 - undefined_method
+  error - Undefined name 'Colors' - lib\features\wallet\checkout_screen.dart:37:24 - undefined_identifier
+  error - The method 'Stack' isn't defined for the type '_CheckoutScreenState' - lib\features\wallet\checkout_screen.dart:38:13 - undefined_method
+  error - The method 'Positioned' isn't defined for the type '_CheckoutScreenState' - lib\features\wallet\checkout_screen.dart:41:11 - undefined_method
+  error - The method 'Container' isn't defined for the type '_CheckoutScreenState' - lib\features\wallet\checkout_screen.dart:44:20 - undefined_method
+  error - The method 'BoxDecoration' isn't defined for the type '_CheckoutScreenState' - lib\features\wallet\checkout_screen.dart:47:27 - undefined_method
+  error - Undefined name 'BoxShape' - lib\features\wallet\checkout_screen.dart:48:24 - undefined_identifier
+  error - The method 'RadialGradient' isn't defined for the type '_CheckoutScreenState' - lib\features\wallet\checkout_screen.dart:49:27 - undefined_method
+  error - Undefined name 'AppTheme' - lib\features\wallet\checkout_screen.dart:51:21 - undefined_identifier
+  error - Undefined name 'Colors' - lib\features\wallet\checkout_screen.dart:52:21 - undefined_identifier
+  error - The method 'SafeArea' isn't defined for the type '_CheckoutScreenState' - lib\features\wallet\checkout_screen.dart:59:11 - undefined_method
+  error - The method 'Column' isn't defined for the type '_CheckoutScreenState' - lib\features\wallet\checkout_screen.dart:60:20 - undefined_method
+  error - Undefined name 'CrossAxisAlignment' - lib\features\wallet\checkout_screen.dart:61:35 - undefined_identifier
+  error - The method 'Padding' isn't defined for the type '_CheckoutScreenState' - lib\features\wallet\checkout_screen.dart:63:17 - undefined_method
+  error - Undefined name 'EdgeInsets' - lib\features\wallet\checkout_screen.dart:64:34 - undefined_identifier
+  error - The method 'Row' isn't defined for the type '_CheckoutScreenState' - lib\features\wallet\checkout_screen.dart:65:26 - undefined_method
+  error - The method 'IconButton' isn't defined for the type '_CheckoutScreenState' - lib\features\wallet\checkout_screen.dart:67:23 - undefined_method
+  error - The name 'Icon' isn't a class - lib\features\wallet\checkout_screen.dart:69:37 - creation_with_non_type
+  error - Undefined name 'Icons' - lib\features\wallet\checkout_screen.dart:69:42 - undefined_identifier
+  error - Undefined name 'Colors' - lib\features\wallet\checkout_screen.dart:69:83 - undefined_identifier
+  error - The method 'Text' isn't defined for the type '_CheckoutScreenState' - lib\features\wallet\checkout_screen.dart:71:23 - undefined_method
+  error - Undefined name 'GoogleFonts' - lib\features\wallet\checkout_screen.dart:73:32 - undefined_identifier
+  error - Undefined name 'FontWeight' - lib\features\wallet\checkout_screen.dart:75:39 - undefined_identifier
+  error - Undefined name 'Colors' - lib\features\wallet\checkout_screen.dart:76:34 - undefined_identifier
+  error - The method 'Expanded' isn't defined for the type '_CheckoutScreenState' - lib\features\wallet\checkout_screen.dart:83:17 - undefined_method
+  error - The method 'SingleChildScrollView' isn't defined for the type '_CheckoutScreenState' - lib\features\wallet\checkout_screen.dart:84:26 - undefined_method
+  error - Undefined name 'EdgeInsets' - lib\features\wallet\checkout_screen.dart:85:36 - undefined_identifier
+  error - The method 'Column' isn't defined for the type '_CheckoutScreenState' - lib\features\wallet\checkout_screen.dart:86:28 - undefined_method
+  error - Undefined name 'CrossAxisAlignment' - lib\features\wallet\checkout_screen.dart:87:43 - undefined_identifier
+  error - The method 'Text' isn't defined for the type '_CheckoutScreenState' - lib\features\wallet\checkout_screen.dart:90:34 - undefined_method
+  error - Undefined name 'GoogleFonts' - lib\features\wallet\checkout_screen.dart:92:36 - undefined_identifier
+  error - Undefined name 'FontWeight' - lib\features\wallet\checkout_screen.dart:94:43 - undefined_identifier
+  error - Undefined name 'Colors' - lib\features\wallet\checkout_screen.dart:95:38 - undefined_identifier
+  error - The name 'SizedBox' isn't a class - lib\features\wallet\checkout_screen.dart:99:31 - creation_with_non_type
+  error - The method 'Container' isn't defined for the type '_CheckoutScreenState' - lib\features\wallet\checkout_screen.dart:103:34 - undefined_method
+  error - Undefined name 'EdgeInsets' - lib\features\wallet\checkout_screen.dart:104:44 - undefined_identifier
+  error - The method 'BoxDecoration' isn't defined for the type '_CheckoutScreenState' - lib\features\wallet\checkout_screen.dart:105:41 - undefined_method
+  error - Undefined name 'Colors' - lib\features\wallet\checkout_screen.dart:106:38 - undefined_identifier
+  error - Undefined name 'BorderRadius' - lib\features\wallet\checkout_screen.dart:107:45 - undefined_identifier
+  error - Undefined name 'Border' - lib\features\wallet\checkout_screen.dart:108:39 - undefined_identifier
+  error - Undefined name 'Colors' - lib\features\wallet\checkout_screen.dart:108:57 - undefined_identifier
+  error - The method 'BoxShadow' isn't defined for the type '_CheckoutScreenState' - lib\features\wallet\checkout_screen.dart:110:33 - undefined_method
+  error - Undefined name 'Colors' - lib\features\wallet\checkout_screen.dart:111:42 - undefined_identifier
+  error - The name 'Offset' isn't a class - lib\features\wallet\checkout_screen.dart:113:49 - creation_with_non_type
+  error - The method 'Column' isn't defined for the type '_CheckoutScreenState' - lib\features\wallet\checkout_screen.dart:117:36 - undefined_method
+  error - Undefined name 'Icons' - lib\features\wallet\checkout_screen.dart:122:41 - undefined_identifier
+  error - The name 'Padding' isn't a class - lib\features\wallet\checkout_screen.dart:124:39 - creation_with_non_type
+  error - Undefined name 'EdgeInsets' - lib\features\wallet\checkout_screen.dart:125:44 - undefined_identifier
+  error - The method 'Divider' isn't defined for the type '_CheckoutScreenState' - lib\features\wallet\checkout_screen.dart:126:42 - undefined_method
+  error - Undefined name 'Icons' - lib\features\wallet\checkout_screen.dart:131:41 - undefined_identifier
+  error - The name 'Padding' isn't a class - lib\features\wallet\checkout_screen.dart:133:39 - creation_with_non_type
+  error - Undefined name 'EdgeInsets' - lib\features\wallet\checkout_screen.dart:134:44 - undefined_identifier
+  error - The method 'Divider' isn't defined for the type '_CheckoutScreenState' - lib\features\wallet\checkout_screen.dart:135:42 - undefined_method
+  error - Undefined name 'Icons' - lib\features\wallet\checkout_screen.dart:140:41 - undefined_identifier
+  error - The name 'SizedBox' isn't a class - lib\features\wallet\checkout_screen.dart:142:39 - creation_with_non_type
+  error - The method 'Row' isn't defined for the type '_CheckoutScreenState' - lib\features\wallet\checkout_screen.dart:143:33 - undefined_method
+  error - Undefined name 'MainAxisAlignment' - lib\features\wallet\checkout_screen.dart:144:54 - undefined_identifier
+  error - The method 'Text' isn't defined for the type '_CheckoutScreenState' - lib\features\wallet\checkout_screen.dart:146:37 - undefined_method
+  error - Undefined name 'GoogleFonts' - lib\features\wallet\checkout_screen.dart:148:46 - undefined_identifier
+  error - Undefined name 'Colors' - lib\features\wallet\checkout_screen.dart:150:48 - undefined_identifier
+  error - The method 'Text' isn't defined for the type '_CheckoutScreenState' - lib\features\wallet\checkout_screen.dart:153:37 - undefined_method
+  error - Undefined name 'GoogleFonts' - lib\features\wallet\checkout_screen.dart:155:46 - undefined_identifier
+  error - Undefined name 'FontWeight' - lib\features\wallet\checkout_screen.dart:157:53 - undefined_identifier
+  error - Undefined name 'AppTheme' - lib\features\wallet\checkout_screen.dart:158:48 - undefined_identifier
+  error - The name 'SizedBox' isn't a class - lib\features\wallet\checkout_screen.dart:168:31 - creation_with_non_type
+  error - The method 'Text' isn't defined for the type '_CheckoutScreenState' - lib\features\wallet\checkout_screen.dart:171:34 - undefined_method
+  error - Undefined name 'GoogleFonts' - lib\features\wallet\checkout_screen.dart:173:36 - undefined_identifier
+  error - Undefined name 'FontWeight' - lib\features\wallet\checkout_screen.dart:175:43 - undefined_identifier
+  error - Undefined name 'Colors' - lib\features\wallet\checkout_screen.dart:176:38 - undefined_identifier
+  error - The name 'SizedBox' isn't a class - lib\features\wallet\checkout_screen.dart:180:31 - creation_with_non_type
+  error - The method 'Column' isn't defined for the type '_CheckoutScreenState' - lib\features\wallet\checkout_screen.dart:184:34 - undefined_method
+  error - Undefined name 'Icons' - lib\features\wallet\checkout_screen.dart:189:39 - undefined_identifier
+  error - The name 'SizedBox' isn't a class - lib\features\wallet\checkout_screen.dart:193:37 - creation_with_non_type
+  error - Undefined name 'Icons' - lib\features\wallet\checkout_screen.dart:197:39 - undefined_identifier
+  error - The method 'Padding' isn't defined for the type '_CheckoutScreenState' - lib\features\wallet\checkout_screen.dart:210:17 - undefined_method
+  error - Undefined name 'EdgeInsets' - lib\features\wallet\checkout_screen.dart:211:34 - undefined_identifier
+  error - The method 'SizedBox' isn't defined for the type '_CheckoutScreenState' - lib\features\wallet\checkout_screen.dart:212:26 - undefined_method
+  error - The method 'ElevatedButton' isn't defined for the type '_CheckoutScreenState' - lib\features\wallet\checkout_screen.dart:214:28 - undefined_method
+  error - Undefined name 'ElevatedButton' - lib\features\wallet\checkout_screen.dart:216:30 - undefined_identifier
+  error - Undefined name 'EdgeInsets' - lib\features\wallet\checkout_screen.dart:217:40 - undefined_identifier
+  error - The method 'RoundedRectangleBorder' isn't defined for the type '_CheckoutScreenState' - lib\features\wallet\checkout_screen.dart:218:32 - undefined_method
+  error - Undefined name 'BorderRadius' - lib\features\wallet\checkout_screen.dart:218:69 - undefined_identifier
+  error - Undefined name 'AppTheme' - lib\features\wallet\checkout_screen.dart:219:42 - undefined_identifier
+  error - The name 'SizedBox' isn't a class - lib\features\wallet\checkout_screen.dart:223:33 - creation_with_non_type
+  error - The method 'CircularProgressIndicator' isn't defined for the type '_CheckoutScreenState' - lib\features\wallet\checkout_screen.dart:226:36 - undefined_method
+  error - Undefined name 'Colors' - lib\features\wallet\checkout_screen.dart:226:69 - undefined_identifier
+  error - The method 'Text' isn't defined for the type '_CheckoutScreenState' - lib\features\wallet\checkout_screen.dart:228:27 - undefined_method
+  error - Undefined name 'GoogleFonts' - lib\features\wallet\checkout_screen.dart:230:36 - undefined_identifier
+  error - Undefined name 'FontWeight' - lib\features\wallet\checkout_screen.dart:232:43 - undefined_identifier
+  error - Undefined name 'Colors' - lib\features\wallet\checkout_screen.dart:233:38 - undefined_identifier
+  error - Classes can only extend other classes - lib\features\wallet\checkout_screen.dart:248:27 - extends_non_class
+  error - Undefined class 'IconData' - lib\features\wallet\checkout_screen.dart:251:9 - undefined_class
+  error - Undefined class 'Widget' - lib\features\wallet\checkout_screen.dart:256:3 - undefined_class
+warning - The method doesn't override an inherited method - lib\features\wallet\checkout_screen.dart:256:10 - override_on_non_overriding_member
+  error - Undefined class 'BuildContext' - lib\features\wallet\checkout_screen.dart:256:16 - undefined_class
+  error - The method 'Row' isn't defined for the type '_SummaryRow' - lib\features\wallet\checkout_screen.dart:257:12 - undefined_method
+  error - Undefined name 'CrossAxisAlignment' - lib\features\wallet\checkout_screen.dart:258:27 - undefined_identifier
+  error - The method 'Icon' isn't defined for the type '_SummaryRow' - lib\features\wallet\checkout_screen.dart:260:9 - undefined_method
+  error - Undefined name 'Colors' - lib\features\wallet\checkout_screen.dart:260:37 - undefined_identifier
+  error - The name 'SizedBox' isn't a class - lib\features\wallet\checkout_screen.dart:261:15 - creation_with_non_type
+  error - The method 'Expanded' isn't defined for the type '_SummaryRow' - lib\features\wallet\checkout_screen.dart:262:9 - undefined_method
+  error - The method 'Column' isn't defined for the type '_SummaryRow' - lib\features\wallet\checkout_screen.dart:263:18 - undefined_method
+  error - Undefined name 'CrossAxisAlignment' - lib\features\wallet\checkout_screen.dart:264:33 - undefined_identifier
+  error - The method 'Text' isn't defined for the type '_SummaryRow' - lib\features\wallet\checkout_screen.dart:266:15 - undefined_method
+  error - Undefined name 'GoogleFonts' - lib\features\wallet\checkout_screen.dart:266:34 - undefined_identifier
+  error - Undefined name 'Colors' - lib\features\wallet\checkout_screen.dart:266:74 - undefined_identifier
+  error - The method 'Text' isn't defined for the type '_SummaryRow' - lib\features\wallet\checkout_screen.dart:267:15 - undefined_method
+  error - Undefined name 'GoogleFonts' - lib\features\wallet\checkout_screen.dart:269:24 - undefined_identifier
+  error - Undefined name 'FontWeight' - lib\features\wallet\checkout_screen.dart:269:69 - undefined_identifier
+  error - Undefined name 'Colors' - lib\features\wallet\checkout_screen.dart:269:93 - undefined_identifier
+  error - Classes can only extend other classes - lib\features\wallet\checkout_screen.dart:279:30 - extends_non_class
+  error - Undefined class 'IconData' - lib\features\wallet\checkout_screen.dart:282:9 - undefined_class
+  error - Undefined class 'VoidCallback' - lib\features\wallet\checkout_screen.dart:284:9 - undefined_class
+  error - Undefined class 'Widget' - lib\features\wallet\checkout_screen.dart:295:3 - undefined_class
+warning - The method doesn't override an inherited method - lib\features\wallet\checkout_screen.dart:295:10 - override_on_non_overriding_member
+  error - Undefined class 'BuildContext' - lib\features\wallet\checkout_screen.dart:295:16 - undefined_class
+  error - The method 'GestureDetector' isn't defined for the type '_PaymentOption' - lib\features\wallet\checkout_screen.dart:296:12 - undefined_method
+  error - The method 'AnimatedContainer' isn't defined for the type '_PaymentOption' - lib\features\wallet\checkout_screen.dart:298:14 - undefined_method
+  error - Undefined name 'EdgeInsets' - lib\features\wallet\checkout_screen.dart:300:24 - undefined_identifier
+  error - The method 'BoxDecoration' isn't defined for the type '_PaymentOption' - lib\features\wallet\checkout_screen.dart:301:21 - undefined_method
+  error - Undefined name 'AppTheme' - lib\features\wallet\checkout_screen.dart:302:31 - undefined_identifier
+  error - Undefined name 'Colors' - lib\features\wallet\checkout_screen.dart:302:72 - undefined_identifier
+  error - Undefined name 'BorderRadius' - lib\features\wallet\checkout_screen.dart:303:25 - undefined_identifier
+  error - Undefined name 'Border' - lib\features\wallet\checkout_screen.dart:304:19 - undefined_identifier
+  error - Undefined name 'AppTheme' - lib\features\wallet\checkout_screen.dart:305:33 - undefined_identifier
+  error - Undefined name 'Colors' - lib\features\wallet\checkout_screen.dart:305:56 - undefined_identifier
+  error - The method 'Row' isn't defined for the type '_PaymentOption' - lib\features\wallet\checkout_screen.dart:309:16 - undefined_method
+  error - The method 'Container' isn't defined for the type '_PaymentOption' - lib\features\wallet\checkout_screen.dart:311:13 - undefined_method
+  error - Undefined name 'EdgeInsets' - lib\features\wallet\checkout_screen.dart:312:30 - undefined_identifier
+  error - The method 'BoxDecoration' isn't defined for the type '_PaymentOption' - lib\features\wallet\checkout_screen.dart:313:27 - undefined_method
+  error - Undefined name 'AppTheme' - lib\features\wallet\checkout_screen.dart:314:37 - undefined_identifier
+  error - Undefined name 'Colors' - lib\features\wallet\checkout_screen.dart:314:60 - undefined_identifier
+  error - Undefined name 'BorderRadius' - lib\features\wallet\checkout_screen.dart:315:31 - undefined_identifier
+  error - The method 'Icon' isn't defined for the type '_PaymentOption' - lib\features\wallet\checkout_screen.dart:317:22 - undefined_method
+  error - Undefined name 'Colors' - lib\features\wallet\checkout_screen.dart:317:53 - undefined_identifier
+  error - Undefined name 'Colors' - lib\features\wallet\checkout_screen.dart:317:68 - undefined_identifier
+  error - The name 'SizedBox' isn't a class - lib\features\wallet\checkout_screen.dart:319:19 - creation_with_non_type
+  error - The method 'Expanded' isn't defined for the type '_PaymentOption' - lib\features\wallet\checkout_screen.dart:320:13 - undefined_method
+  error - The method 'Column' isn't defined for the type '_PaymentOption' - lib\features\wallet\checkout_screen.dart:321:22 - undefined_method
+  error - Undefined name 'CrossAxisAlignment' - lib\features\wallet\checkout_screen.dart:322:37 - undefined_identifier
+  error - The method 'Text' isn't defined for the type '_PaymentOption' - lib\features\wallet\checkout_screen.dart:324:19 - undefined_method
+  error - Undefined name 'GoogleFonts' - lib\features\wallet\checkout_screen.dart:326:28 - undefined_identifier
+  error - Undefined name 'FontWeight' - lib\features\wallet\checkout_screen.dart:326:59 - undefined_identifier
+  error - Undefined name 'Colors' - lib\features\wallet\checkout_screen.dart:326:97 - undefined_identifier
+  error - The method 'Text' isn't defined for the type '_PaymentOption' - lib\features\wallet\checkout_screen.dart:328:19 - undefined_method
+  error - Undefined name 'GoogleFonts' - lib\features\wallet\checkout_screen.dart:330:28 - undefined_identifier
+  error - Undefined name 'Colors' - lib\features\wallet\checkout_screen.dart:330:68 - undefined_identifier
+  error - The name 'Icon' isn't a class - lib\features\wallet\checkout_screen.dart:336:21 - creation_with_non_type
+  error - Undefined name 'Icons' - lib\features\wallet\checkout_screen.dart:336:26 - undefined_identifier
+  error - Undefined name 'AppTheme' - lib\features\wallet\checkout_screen.dart:336:61 - undefined_identifier
+  error - The name 'DeliveryRequest' isn't a type, so it can't be used in an 'as' expression - lib\main.dart:89:43 - cast_to_non_type
+

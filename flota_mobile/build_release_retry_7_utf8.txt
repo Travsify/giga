@@ -1,0 +1,253 @@
+﻿[ +312 ms] Artifact Instance of 'MaterialFonts' is not required, skipping update.
+[        ] Artifact Instance of 'GradleWrapper' is not required, skipping update.
+[        ] Artifact Instance of 'AndroidGenSnapshotArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'AndroidInternalBuildArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'IOSEngineArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'FlutterWebSdk' is not required, skipping update.
+[   +1 ms] Artifact Instance of 'LegacyCanvasKitRemover' is not required, skipping update.
+[        ] Artifact Instance of 'FlutterSdk' is not required, skipping update.
+[        ] Artifact Instance of 'WindowsEngineArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'MacOSEngineArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'LinuxEngineArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'LinuxFuchsiaSDKArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'MacOSFuchsiaSDKArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'FlutterRunnerSDKArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'FlutterRunnerDebugSymbols' is not required, skipping update.
+[        ] Artifact Instance of 'IosUsbArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'IosUsbArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'IosUsbArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'IosUsbArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'IosUsbArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'IosUsbArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'FontSubsetArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'PubDependencies' is not required, skipping update.
+[   +1 ms] executing: [C:\FlutterVersions\flutter/] git -c log.showSignature=false log HEAD -n 1 --pretty=format:%ad --date=iso
+[  +87 ms] Exit code 0 from: git -c log.showSignature=false log HEAD -n 1 --pretty=format:%ad --date=iso
+[        ] 2025-12-11 11:50:07 -0500
+[  +21 ms] Artifact Instance of 'AndroidGenSnapshotArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'AndroidInternalBuildArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'IOSEngineArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'FlutterWebSdk' is not required, skipping update.
+[        ] Artifact Instance of 'FlutterEngineStamp' is not required, skipping update.
+[        ] Artifact Instance of 'LegacyCanvasKitRemover' is not required, skipping update.
+[   +4 ms] Artifact Instance of 'WindowsEngineArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'MacOSEngineArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'LinuxEngineArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'LinuxFuchsiaSDKArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'MacOSFuchsiaSDKArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'FlutterRunnerSDKArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'FlutterRunnerDebugSymbols' is not required, skipping update.
+[  +79 ms] Artifact Instance of 'MaterialFonts' is not required, skipping update.
+[        ] Artifact Instance of 'GradleWrapper' is not required, skipping update.
+[   +4 ms] Artifact Instance of 'AndroidInternalBuildArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'IOSEngineArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'FlutterWebSdk' is not required, skipping update.
+[        ] Artifact Instance of 'FlutterEngineStamp' is not required, skipping update.
+[        ] Artifact Instance of 'LegacyCanvasKitRemover' is not required, skipping update.
+[        ] Artifact Instance of 'FlutterSdk' is not required, skipping update.
+[        ] Artifact Instance of 'WindowsEngineArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'MacOSEngineArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'LinuxEngineArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'LinuxFuchsiaSDKArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'MacOSFuchsiaSDKArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'FlutterRunnerSDKArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'FlutterRunnerDebugSymbols' is not required, skipping update.
+[        ] Artifact Instance of 'IosUsbArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'IosUsbArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'IosUsbArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'IosUsbArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'IosUsbArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'IosUsbArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'FontSubsetArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'PubDependencies' is not required, skipping update.
+[ +145 ms] executing: [C:\Users\USER\Desktop\giga\flota_mobile/] C:\FlutterVersions\flutter\bin\cache\dart-sdk\bin\dart pub --suppress-analytics --directory . get --example
+Resolving dependencies...
+flutter : Because no 
+versions of 
+http_interceptor 
+match >1.0.2 <2.0.0 
+and http_interceptor 
+1.0.2 depends on 
+http ^0.13.3, 
+http_interceptor 
+^1.0.2 requires http 
+^0.13.3.
+At line:1 char:18
++ ... er pub get; 
+flutter build apk 
+--release --verbose 
+> build_release_ret 
+...
++                 ~~~
+~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~
+    + CategoryInfo   
+           : 
+NotSpecified: (B    
+ecause no vers...s 
+ht    tp 
+^0.13.3.:String) [   
+ ], RemoteException
+    + 
+FullyQualifiedError  
+  Id : 
+NativeCommandErr    
+or
+ 
+And because 
+google_fonts >=4.0.5 
+depends on http 
+^1.0.0, 
+http_interceptor 
+^1.0.2 is 
+incompatible with 
+google_fonts >=4.0.5.
+So, because 
+flota_mobile depends 
+on both google_fonts 
+^6.1.0 and 
+http_interceptor 
+^1.0.2, version 
+solving failed.
+
+
+You can try one of 
+the following 
+suggestions to make 
+the pubspec resolve:
+* Try upgrading your 
+constraint on 
+http_interceptor: 
+flutter pub add http_
+interceptor:^2.0.0
+* Consider 
+downgrading your 
+constraint on 
+google_fonts: 
+flutter pub add 
+google_fonts:^4.0.4
+[+1630 ms] pub get failed
+           command: "C:\FlutterVersions\flutter\bin\cache\dart-sdk\bin\dart pub --suppress-analytics --directory . get --example"
+           pub env: {
+             "FLUTTER_ROOT": "C:\FlutterVersions\flutter",
+             "PUB_ENVIRONMENT": "flutter_cli:verify:apk",
+           }
+           exit code: 1
+
+[  +20 ms] "flutter apk" took 1,892ms.
+[ +100 ms] Failed to 
+update packages.
+[   +3 ms] 
+           #0      
+throwToolExit (packag
+e:flutter_tools/src/b
+ase/common.dart:34:3)
+           #1      _D
+efaultPub._runWithStd
+ioInherited (package:
+flutter_tools/src/dar
+t/pub.dart:486:7)
+           
+<asynchronous 
+suspension>
+           #2      
+_DefaultPub.get (pack
+age:flutter_tools/src
+/dart/pub.dart:346:5)
+           
+<asynchronous 
+suspension>
+           #3      Fl
+utterCommand.verifyTh
+enRunCommand (package
+:flutter_tools/src/ru
+nner/flutter_command.
+dart:1865:7)
+           
+<asynchronous 
+suspension>
+           #4      Fl
+utterCommand.run.<ano
+nymous closure> (pack
+age:flutter_tools/src
+/runner/flutter_comma
+nd.dart:1559:27)
+           
+<asynchronous 
+suspension>
+           #5      Ap
+pContext.run.<anonymo
+us closure> (package:
+flutter_tools/src/bas
+e/context.dart:154:19
+)
+           
+<asynchronous 
+suspension>
+           #6      Co
+mmandRunner.runComman
+d (package:args/comma
+nd_runner.dart:212:13
+)
+           
+<asynchronous 
+suspension>
+           #7      Fl
+utterCommandRunner.ru
+nCommand.<anonymous 
+closure> (package:flu
+tter_tools/src/runner
+/flutter_command_runn
+er.dart:487:9)
+           
+<asynchronous 
+suspension>
+           #8      Ap
+pContext.run.<anonymo
+us closure> (package:
+flutter_tools/src/bas
+e/context.dart:154:19
+)
+           
+<asynchronous 
+suspension>
+           #9      Fl
+utterCommandRunner.ru
+nCommand (package:flu
+tter_tools/src/runner
+/flutter_command_runn
+er.dart:422:5)
+           
+<asynchronous 
+suspension>
+           #10     
+run.<anonymous 
+closure>.<anonymous 
+closure> (package:flu
+tter_tools/runner.dar
+t:104:11)
+           
+<asynchronous 
+suspension>
+           #11     Ap
+pContext.run.<anonymo
+us closure> (package:
+flutter_tools/src/bas
+e/context.dart:154:19
+)
+           
+<asynchronous 
+suspension>
+           #12     
+main (package:flutter
+_tools/executable.dar
+t:103:3)
+           
+<asynchronous 
+suspension>
+
+
+[        ] Running 1 shutdown hook
+[  +13 ms] Shutdown hooks complete
+[        ] exiting with code 1

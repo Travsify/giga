@@ -1,0 +1,50 @@
+﻿[        ] Transforming gradle-kotlin-dsl-extensions-8.5.jar with ClasspathEntrySnapshotTransform
+[        ] Transforming gradle-kotlin-dsl-8.5.jar with ClasspathEntrySnapshotTransform
+[        ] Transforming gradle-kotlin-dsl-shared-runtime-8.5.jar with ClasspathEntrySnapshotTransform
+[        ] Transforming gradle-kotlin-dsl-tooling-models-8.5.jar with ClasspathEntrySnapshotTransform
+[        ] Transforming annotation-jvm-1.9.1.jar with ClasspathEntrySnapshotTransform
+[        ] Transforming gradle-8.11.1.jar with ClasspathEntrySnapshotTransform
+[        ] Transforming kotlin-reflect-1.9.20.jar with ClasspathEntrySnapshotTransform
+[        ] Transforming kotlinx-serialization-json-jvm-1.4.0.jar with ClasspathEntrySnapshotTransform
+[        ] Transforming kotlinx-serialization-core-jvm-1.4.0.jar with ClasspathEntrySnapshotTransform
+[        ] Transforming kotlin-stdlib-jdk8-1.8.0.jar with ClasspathEntrySnapshotTransform
+[        ] Transforming kotlin-stdlib-jdk7-1.8.0.jar with ClasspathEntrySnapshotTransform
+[        ] Transforming kotlin-stdlib-1.9.24.jar with ClasspathEntrySnapshotTransform
+[        ] Transforming kotlin-gradle-plugin-1.8.0-gradle76.jar with ClasspathEntrySnapshotTransform
+[        ] Transforming builder-8.11.1.jar with ClasspathEntrySnapshotTransform
+[        ] Transforming builder-model-8.11.1.jar with ClasspathEntrySnapshotTransform
+[        ] Transforming gradle-api-8.11.1.jar with ClasspathEntrySnapshotTransform
+[   +1 ms] Transforming kotlin-gradle-plugin-model-1.8.0.jar with ClasspathEntrySnapshotTransform
+[        ] Transforming kotlin-gradle-plugin-api-1.8.0-gradle76.jar with ClasspathEntrySnapshotTransform
+[        ] Transforming kotlin-gradle-plugin-api-1.8.0.jar with ClasspathEntrySnapshotTransform
+[        ] Transforming kotlin-tooling-core-1.8.0.jar with ClasspathEntrySnapshotTransform
+[        ] Transforming annotations-13.0.jar with ClasspathEntrySnapshotTransform
+[        ] Transforming manifest-merger-31.11.1.jar with ClasspathEntrySnapshotTransform
+[        ] Transforming zipflinger-8.11.1.jar with ClasspathEntrySnapshotTransform
+[        ] Transforming apksig-8.11.1.jar with ClasspathEntrySnapshotTransform
+[        ] Transforming apkzlib-8.11.1.jar with ClasspathEntrySnapshotTransform
+[        ] Transforming javawriter-2.5.0.jar with ClasspathEntrySnapshotTransform
+[        ] Transforming asm-9.7.1.jar with ClasspathEntrySnapshotTransform
+[        ] Transforming kotlin-native-utils-1.8.0.jar with ClasspathEntrySnapshotTransform
+[        ] Transforming kotlin-project-model-1.8.0.jar with ClasspathEntrySnapshotTransform
+[        ] Transforming kotlin-util-io-1.8.0.jar with ClasspathEntrySnapshotTransform
+[   +2 ms] Caching disabled for task ':gradle:compileKotlin' because:
+[        ]   Build cache is disabled
+[        ] Task ':gradle:compileKotlin' is not up-to-date because:
+[        ]   Output property 'classpathSnapshotProperties.classpathSnapshotDir' file C:\FlutterVersions\flutter\packages\flutter_tools\gradle\build\kotlin\compileKotlin\classpath-snapshot has been removed.
+[        ]   Output property 'classpathSnapshotProperties.classpathSnapshotDir' file C:\FlutterVersions\flutter\packages\flutter_tools\gradle\build\kotlin\compileKotlin\classpath-snapshot\shrunk-classpath-snapshot.bin has been removed.
+[        ]   Output property 'destinationDirectory' file C:\FlutterVersions\flutter\packages\flutter_tools\gradle\build\classes\kotlin\main has been removed.
+[        ] The input changes require a full rebuild for incremental task ':gradle:compileKotlin'.
+[        ] file or directory 'C:\FlutterVersions\flutter\packages\flutter_tools\gradle\src\main\java', not found
+[        ] file or directory 'C:\FlutterVersions\flutter\packages\flutter_tools\gradle\src\main\java', not found
+[        ] file or directory 'C:\FlutterVersions\flutter\packages\flutter_tools\gradle\src\main\java', not found
+[        ] file or directory 'C:\FlutterVersions\flutter\packages\flutter_tools\gradle\src\main\java', not found
+[   +1 ms] Kotlin source files: C:\FlutterVersions\flutter\packages\flutter_tools\gradle\src\main\kotlin\AppLinkSettings.kt, C:\FlutterVersions\flutter\packages\flutter_tools\gradle\src\main\kotlin\BaseApplicationNameHandler.kt, C:\FlutterVersions\flutter\packages\flutter_tools\gradle\src\main\kotlin\Deeplink.kt, C:\FlutterVersions\flutter\packages\flutter_tools\gradle\src\main\kotlin\DependencyVersionChecker.kt, C:\FlutterVersions\flutter\packages\flutter_tools\gradle\src\main\kotlin\FlutterAppPluginLoaderPlugin.kt, C:\FlutterVersions\flutter\packages\flutter_tools\gradle\src\main\kotlin\FlutterExtension.kt, C:\FlutterVersions\flutter\packages\flutter_tools\gradle\src\main\kotlin\FlutterPlugin.kt, C:\FlutterVersions\flutter\packages\flutter_tools\gradle\src\main\kotlin\FlutterPluginConstants.kt, C:\FlutterVersions\flutter\packages\flutter_tools\gradle\src\main\kotlin\FlutterPluginUtils.kt, C:\FlutterVersions\flutter\packages\flutter_tools\gradle\src\main\kotlin\IntentFilterCheck.kt, C:\FlutterVersions\flutter\packages\flutter_tools\gradle\src\main\kotlin\NativePluginLoaderReflectionBridge.kt, C:\FlutterVersions\flutter\packages\flutter_tools\gradle\src\main\kotlin\plugins\PluginHandler.kt, C:\FlutterVersions\flutter\packages\flutter_tools\gradle\src\main\kotlin\tasks\BaseFlutterTask.kt, C:\FlutterVersions\flutter\packages\flutter_tools\gradle\src\main\kotlin\tasks\BaseFlutterTaskHelper.kt, C:\FlutterVersions\flutter\packages\flutter_tools\gradle\src\main\kotlin\tasks\DeepLinkJsonFromManifestTask.kt, C:\FlutterVersions\flutter\packages\flutter_tools\gradle\src\main\kotlin\tasks\DeepLinkJsonFromManifestTaskHelper.kt, C:\FlutterVersions\flutter\packages\flutter_tools\gradle\src\main\kotlin\tasks\FlutterTask.kt, C:\FlutterVersions\flutter\packages\flutter_tools\gradle\src\main\kotlin\tasks\FlutterTaskHelper.kt, C:\FlutterVersions\flutter\packages\flutter_tools\gradle\src\main\kotlin\VersionFetcher.kt, C:\FlutterVersions\flutter\packages\flutter_tools\gradle\src\main\kotlin\VersionUtils.kt
+[        ] Java source files: 
+[        ] Script source files: 
+[        ] Script file extensions: 
+[        ] Using Kotlin/JVM incremental compilation
+[        ] [KOTLIN] Kotlin compilation 'jdkHome' argument: C:\Program Files\Android\Android Studio\jbr
+[        ] i: found daemon on port 17373 (6629256 ms old), trying to connect
+[        ] i: connected to the daemon
+[   +1 ms] Options for KOTLIN DAEMON: IncrementalCompilationOptions(super=CompilationOptions(compilerMode=INCREMENTAL_COMPILER, targetPlatform=JVM, reportCategories=[0, 3], reportSeverity=2, requestedCompilationResults=[0], kotlinScriptExtensions=[]), areFileChangesKnown=false, modifiedFiles=null, deletedFiles=null, classpathChanges=NotAvailableForNonIncrementalRun, workingDir=C:\FlutterVersions\flutter\packages\flutter_tools\gradle\build\kotlin\compileKotlin\cacheable, multiModuleICSettings=MultiModuleICSettings(buildHistoryFile=C:\FlutterVersions\flutter\packages\flutter_tools\gradle\build\kotlin\compileKotlin\local-state\build-history.bin, useModuleDetection=false), usePreciseJavaTracking=true, outputFiles=[C:\FlutterVersions\flutter\packages\flutter_tools\gradle\build\classes\kotlin\main, C:\FlutterVersions\flutter\packages\flutter_tools\gradle\build\kotlin\compileKotlin\cacheable, C:\FlutterVersions\flutter\packages\flutter_tools\gradle\build\kotlin\compileKotlin\local-state])

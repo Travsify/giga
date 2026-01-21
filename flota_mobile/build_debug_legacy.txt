@@ -1,0 +1,51 @@
+Resolving dependencies...
+Downloading packages...
+  _fe_analyzer_shared 91.0.0 (93.0.0 available)
+  analyzer 8.4.1 (10.0.1 available)
+  characters 1.4.0 (1.4.1 available)
+  code_assets 0.19.10 (1.0.0 available)
+  flutter_local_notifications 18.0.1 (19.5.0 available)
+  flutter_local_notifications_linux 5.0.0 (6.0.0 available)
+  flutter_local_notifications_platform_interface 8.0.0 (9.1.0 available)
+  geocoding_platform_interface 3.2.0 (5.0.0 available)
+  hooks 0.20.5 (1.0.0 available)
+  http 0.13.6 (1.6.0 available)
+  http_interceptor 1.0.2 (2.0.0 available)
+  intl 0.17.0 (0.20.2 available)
+  matcher 0.12.17 (0.12.18 available)
+  material_color_utilities 0.11.1 (0.13.0 available)
+  meta 1.17.0 (1.18.0 available)
+  native_toolchain_c 0.17.2 (0.17.4 available)
+  test 1.26.3 (1.29.0 available)
+  test_api 0.7.7 (0.7.9 available)
+  test_core 0.6.12 (0.6.15 available)
+  timezone 0.9.4 (0.11.0 available)
+Got dependencies!
+20 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+Running Gradle task 'assembleDebug'...                          
+
+FAILURE: Build failed with an exception.
+
+* Where:
+Build file 'C:\FlutterVersions\flutter\packages\flutter_tools\gradle\build.gradle.kts' line: 7
+
+* What went wrong:
+Plugin [id: 'org.jetbrains.kotlin.jvm', version: '1.9.20'] was not found in any of the following sources:
+
+- Gradle Core Plugins (plugin is not in 'org.gradle' namespace)
+- Included Builds (None of the included builds contain this plugin)
+- Plugin Repositories (could not resolve plugin artifact 'org.jetbrains.kotlin.jvm:org.jetbrains.kotlin.jvm.gradle.plugin:1.9.20')
+  Searched in the following repositories:
+    Gradle Central Plugin Repository
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+
+* Get more help at https://help.gradle.org
+
+BUILD FAILED in 5m 26s
+Running Gradle task 'assembleDebug'...                            327.3s
+Gradle task assembleDebug failed with exit code 1
