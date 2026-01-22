@@ -4,6 +4,11 @@ set -e
 echo "Running migrations..."
 php artisan migrate --force
 
+echo "Clearing old caches..."
+php artisan config:clear
+php artisan route:clear
+php artisan cache:clear
+
 echo "Caching config..."
 php artisan config:cache
 
