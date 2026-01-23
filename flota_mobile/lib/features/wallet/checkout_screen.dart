@@ -6,6 +6,8 @@ import 'package:animate_do/animate_do.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flota_mobile/features/marketplace/delivery_provider.dart';
 import 'package:flota_mobile/features/marketplace/data/models/delivery_models.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class CheckoutScreen extends ConsumerStatefulWidget {
   final DeliveryRequest deliveryRequest;
@@ -17,6 +19,38 @@ class CheckoutScreen extends ConsumerStatefulWidget {
 
 class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   String selectedMethod = 'Giga Wallet';
+  bool _hasNhsDiscount = false;
+  bool _isCheckingDiscount = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkNhsStatus();
+  }
+
+  Future<void> _checkNhsStatus() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      final doc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
+      if (mounted) {
+        setState(() {
+          _hasNhsDiscount = doc.data()?['has_nhs_discount'] ?? false;
+          _isCheckingDiscount = false;
+        });
+      }
+    } else {
+      if (mounted) setState(() => _isCheckingDiscount = false);
+    }
+  }
+
+  double get _effectiveFare {
+    final baseFare = widget.deliveryRequest.fare;
+    // NHS: Free delivery if order > £20
+    if (_hasNhsDiscount && baseFare >= 20) {
+      return 0.0;
+    }
+    return baseFare;
+  }
 
   Future<void> _handlePayment() async {
     if (selectedMethod == 'Stripe') {
@@ -188,11 +222,11 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                                       ],
                                     ),
                                     Text(
-                                      widget.deliveryRequest.fare == 0 ? 'FREE' : '£${widget.deliveryRequest.fare.toStringAsFixed(2)}',
+                                      _effectiveFare == 0 ? 'FREE' : '£${_effectiveFare.toStringAsFixed(2)}',
                                       style: GoogleFonts.outfit(
                                         fontSize: 24,
                                         fontWeight: FontWeight.w900,
-                                        color: widget.deliveryRequest.fare == 0 ? AppTheme.successGreen : AppTheme.primaryBlue,
+                                        color: _effectiveFare == 0 ? AppTheme.successGreen : AppTheme.primaryBlue,
                                       ),
                                     ),
                                   ],

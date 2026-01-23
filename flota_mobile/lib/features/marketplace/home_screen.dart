@@ -320,26 +320,41 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       title: 'NHS Heroes',
                       subtitle: 'Free delivery for NHS workers',
                       colors: [AppTheme.primaryBlue, AppTheme.accentCyan],
-                      onTap: () {
-                        showDialog(
+                      onTap: () async {
+                        final user = FirebaseAuth.instance.currentUser;
+                        if (user == null) return;
+                        
+                        final confirmed = await showDialog<bool>(
                           context: context,
                           builder: (context) => AlertDialog(
                             title: const Text('NHS Heroes'),
-                            content: const Text('Verified NHS staff get free delivery on orders over £20.'),
+                            content: const Text('Verified NHS staff get free delivery on orders over £20.\n\nBy activating, you confirm you are an NHS employee.'),
                             actions: [
-                              TextButton(onPressed: () => Navigator.pop(context), child: const Text('Close')),
+                              TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')),
                               ElevatedButton(
-                                onPressed: () {
-                                  Navigator.pop(context);
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(content: Text('NHS Discount Activated!')),
-                                  );
-                                },
-                                child: const Text('Activate'),
+                                onPressed: () => Navigator.pop(context, true),
+                                child: const Text('I Confirm & Activate'),
                               ),
                             ],
                           ),
                         );
+
+                        if (confirmed == true) {
+                          // Persist to Firestore
+                          await FirebaseFirestore.instance
+                              .collection('users')
+                              .doc(user.uid)
+                              .update({'has_nhs_discount': true});
+                          
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('NHS Discount Activated! Free delivery on orders over £20.'),
+                                backgroundColor: Colors.green,
+                              ),
+                            );
+                          }
+                        }
                       },
                     ),
                   ),
