@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Stripe\Stripe;
 use Stripe\PaymentIntent;
+use Illuminate\Support\Facades\Log;
 
 class PaymentController extends Controller
 {
@@ -54,6 +55,7 @@ class PaymentController extends Controller
         ]);
 
         try {
+            \Log::info('Creating payment intent for amount: ' . $request->amount . ' ' . $request->currency);
             $secret = env('STRIPE_SECRET');
             if (empty($secret) || $secret === 'sk_test_your_stripe_secret_key_here') {
                 return response()->json(['error' => 'STRIPE_SECRET is missing or using placeholder in Render env variables.'], 500);
