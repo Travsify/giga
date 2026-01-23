@@ -4,6 +4,10 @@ set -e
 echo "Running migrations..."
 php artisan migrate --force
 
+echo "Fixing permissions..."
+chmod -R 775 storage bootstrap/cache
+chown -R www-data:www-data storage bootstrap/cache || true
+
 echo "Clearing old caches..."
 php artisan config:clear
 php artisan route:clear
