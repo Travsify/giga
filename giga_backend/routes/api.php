@@ -35,6 +35,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/loyalty', [ProfileController::class, 'loyaltyInfo']);
     Route::post('/referral/submit', [ProfileController::class, 'submitReferral']);
 
+    // Payments
+    Route::post('/create-payment-intent', [App\Http\Controllers\Api\PaymentController::class, 'createPaymentIntent']);
+
     // Subscriptions
     Route::get('/subscription/status', [App\Http\Controllers\Api\SubscriptionController::class, 'status']);
     Route::post('/subscription/subscribe', [App\Http\Controllers\Api\SubscriptionController::class, 'subscribe']);
