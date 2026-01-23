@@ -54,7 +54,11 @@ class PaymentController extends Controller
         ]);
 
         try {
-            Stripe::setApiKey(env('STRIPE_SECRET'));
+            $secret = env('STRIPE_SECRET');
+            if (empty($secret) || $secret === 'sk_test_your_stripe_secret_key_here') {
+                return response()->json(['error' => 'STRIPE_SECRET is missing or using placeholder in Render env variables.'], 500);
+            }
+            Stripe::setApiKey($secret);
             $amount = $request->amount * 100; 
 
             $paymentIntent = PaymentIntent::create([
