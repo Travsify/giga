@@ -1,12 +1,18 @@
-#!/bin/bash
-set -e
+echo "Ensuring storage directories exist..."
+mkdir -p storage/framework/sessions
+mkdir -p storage/framework/views
+mkdir -p storage/framework/cache
+mkdir -p storage/logs
+
+echo "Fixing permissions aggressively..."
+chmod -R 777 storage bootstrap/cache
+
+echo "Redirecting logs to stderr..."
+# This ensures that even if file writes fail, logs go to Render Console
+sed -i 's/^LOG_CHANNEL=.*/LOG_CHANNEL=stderr/' .env || echo "LOG_CHANNEL=stderr" >> .env
 
 echo "Running migrations..."
 php artisan migrate --force
-
-echo "Fixing permissions..."
-chmod -R 775 storage bootstrap/cache
-chown -R www-data:www-data storage bootstrap/cache || true
 
 echo "Clearing old caches..."
 php artisan config:clear
