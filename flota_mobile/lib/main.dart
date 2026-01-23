@@ -11,7 +11,15 @@ import 'package:flota_mobile/features/onboarding/onboarding_screen.dart';
 import 'package:flota_mobile/features/splash/splash_screen.dart';
 import 'package:flota_mobile/features/marketplace/home_screen.dart';
 import 'package:flota_mobile/features/marketplace/delivery_request_screen.dart';
+import 'package:flota_mobile/features/marketplace/search_screen.dart';
 import 'package:flota_mobile/features/wallet/checkout_screen.dart';
+import 'package:flota_mobile/features/notifications/notification_screen.dart';
+import 'package:flota_mobile/features/orders/order_history_screen.dart';
+import 'package:flota_mobile/features/wallet/withdrawal_screen.dart';
+import 'package:flota_mobile/features/location/ulez_scanner_screen.dart';
+import 'package:flota_mobile/features/delivery/locker_map_screen.dart';
+import 'package:flota_mobile/features/sustainability/carbon_dashboard_screen.dart';
+import 'package:flota_mobile/features/marketplace/promo_list_screen.dart';
 import 'package:flota_mobile/features/tracking/rider_dashboard.dart';
 import 'package:flota_mobile/features/tracking/tracking_screen.dart';
 import 'package:flota_mobile/features/tracking/enhanced_tracking_screen.dart';
@@ -20,6 +28,7 @@ import 'package:flota_mobile/features/tracking/chat_screen.dart';
 import 'package:flota_mobile/features/delivery/parcel_locker_screen.dart';
 import 'package:flota_mobile/features/profile/profile_screen.dart';
 import 'package:flota_mobile/features/profile/giga_plus_screen.dart';
+import 'package:flota_mobile/features/wallet/wallet_screen.dart';
 import 'package:flota_mobile/theme/app_theme.dart';
 
 
@@ -119,6 +128,34 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const HomeScreen(),
       ),
       GoRoute(
+        path: '/search',
+        builder: (context, state) => const SearchScreen(),
+      ),
+      GoRoute(
+        path: '/notifications',
+        builder: (context, state) => const NotificationScreen(),
+      ),
+      GoRoute(
+        path: '/orders',
+        builder: (context, state) => const OrderHistoryScreen(),
+      ),
+      GoRoute(
+        path: '/ulez',
+        builder: (context, state) => const ULEZScannerScreen(),
+      ),
+      GoRoute(
+        path: '/lockers',
+        builder: (context, state) => const LockerMapScreen(),
+      ),
+      GoRoute(
+        path: '/carbon',
+        builder: (context, state) => const CarbonDashboardScreen(),
+      ),
+      GoRoute(
+        path: '/promos',
+        builder: (context, state) => const PromoListScreen(),
+      ),
+      GoRoute(
         path: '/delivery-request',
         builder: (context, state) => const DeliveryRequestScreen(),
       ),
@@ -163,6 +200,14 @@ final routerProvider = Provider<GoRouter>((ref) {
         GoRoute(
           path: '/giga-plus',
           builder: (context, state) => const GigaPlusScreen(),
+        ),
+        GoRoute(
+          path: '/wallet',
+          builder: (context, state) => const WalletScreen(),
+        ),
+        GoRoute(
+          path: '/withdraw',
+          builder: (context, state) => const WithdrawalScreen(),
         ),
       ],
   );

@@ -10,6 +10,7 @@ class AuthState {
   final String? role;
   final String? userName;
   final String? token;
+  final String? userId;
 
   AuthState({
     this.status = AuthStatus.unauthenticated,
@@ -17,6 +18,7 @@ class AuthState {
     this.role,
     this.userName,
     this.token,
+    this.userId,
   });
 
   AuthState copyWith({
@@ -25,6 +27,7 @@ class AuthState {
     String? role,
     String? userName,
     String? token,
+    String? userId,
   }) {
     return AuthState(
       status: status ?? this.status,
@@ -32,6 +35,7 @@ class AuthState {
       role: role ?? this.role,
       userName: userName ?? this.userName,
       token: token ?? this.token,
+      userId: userId ?? this.userId,
     );
   }
 }
@@ -53,6 +57,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
         final email = await _storage.read(key: 'user_email');
         final role = await _storage.read(key: 'user_role');
         final name = await _storage.read(key: 'user_name');
+        final userId = await _storage.read(key: 'user_id');
         
         state = state.copyWith(
           status: AuthStatus.authenticated,
@@ -60,6 +65,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
           userEmail: email,
           role: role ?? 'Customer',
           userName: name,
+          userId: userId,
         );
       } else {
         state = AuthState(status: AuthStatus.unauthenticated);
@@ -82,6 +88,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
       await _storage.write(key: 'user_email', value: user['email']);
       await _storage.write(key: 'user_role', value: user['role'] ?? 'Customer');
       await _storage.write(key: 'user_name', value: user['name']);
+      await _storage.write(key: 'user_id', value: user['id'].toString());
 
       state = state.copyWith(
         status: AuthStatus.authenticated,
@@ -89,6 +96,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
         userEmail: user['email'],
         role: user['role'] ?? 'Customer',
         userName: user['name'],
+        userId: user['id'].toString(),
       );
     } catch (e) {
       state = AuthState(status: AuthStatus.unauthenticated);
@@ -114,6 +122,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
       await _storage.write(key: 'user_email', value: user['email']);
       await _storage.write(key: 'user_role', value: user['role'] ?? 'Customer');
       await _storage.write(key: 'user_name', value: user['name']);
+      await _storage.write(key: 'user_id', value: user['id'].toString());
 
       state = state.copyWith(
         status: AuthStatus.authenticated,
@@ -121,6 +130,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
         userEmail: user['email'],
         role: user['role'] ?? 'Customer',
         userName: user['name'],
+        userId: user['id'].toString(),
       );
     } catch (e) {
       state = AuthState(status: AuthStatus.unauthenticated);

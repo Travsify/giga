@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:animate_do/animate_do.dart';
+import 'package:flota_mobile/features/location/traffic_service.dart';
 
 // Payment Method Chip Widget
 class PaymentMethodChip extends StatelessWidget {
@@ -112,8 +115,28 @@ Widget buildDiscountBanner({
 }
 
 // Live Heatmap Widget for Home Screen
-class LiveHeatmapWidget extends StatelessWidget {
+
+class LiveHeatmapWidget extends StatefulWidget {
   const LiveHeatmapWidget({super.key});
+
+  @override
+  State<LiveHeatmapWidget> createState() => _LiveHeatmapWidgetState();
+}
+
+class _LiveHeatmapWidgetState extends State<LiveHeatmapWidget> {
+  static const LatLng _london = LatLng(51.5074, -0.1278);
+  Map<String, dynamic>? _trafficStatus;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadTraffic();
+  }
+
+  Future<void> _loadTraffic() async {
+    final status = await TrafficService.getTFLStatus();
+    if (mounted) setState(() => _trafficStatus = status);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -171,34 +194,64 @@ class LiveHeatmapWidget extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 15),
-          Container(
-            height: 150,
+          SizedBox(
+            height: 200, // Increased height for better visibility
             width: double.infinity,
-            decoration: BoxDecoration(
-              color: Colors.grey[200],
-              borderRadius: BorderRadius.circular(16),
-              image: const DecorationImage(
-                image: NetworkImage('https://maps.googleapis.com/maps/api/staticmap?center=51.5283,-0.16&zoom=11&size=600x300&key=MOCK_KEY'), // Static mock map
-                fit: BoxFit.cover,
-              ),
-            ),
-            child: Center(
-              child: Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.6),
-                  borderRadius: BorderRadius.circular(12),
+            child: Stack(
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(16),
+                  child: GoogleMap(
+                    initialCameraPosition: const CameraPosition(
+                      target: _london,
+                      zoom: 11,
+                    ),
+                    myLocationEnabled: false,
+                    zoomControlsEnabled: false,
+                    liteModeEnabled: true,
+                    mapType: MapType.normal,
+                  ),
                 ),
-                child: const Text(
-                  'Central London: High Demand',
-                  style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-                ),
-              ),
+                if (_trafficStatus != null)
+                  Positioned(
+                    top: 10,
+                    left: 10,
+                    child: FadeInDown(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.95),
+                          borderRadius: BorderRadius.circular(12),
+                          boxShadow: [
+                             BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 4),
+                          ],
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.traffic_rounded, color: _trafficStatus!['color'], size: 16),
+                            const SizedBox(width: 8),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text('Traffic Status', style: TextStyle(fontSize: 10, color: Colors.grey)),
+                                Text(
+                                  _trafficStatus!['tube_status'],
+                                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
             ),
           ),
           const SizedBox(height: 12),
           Text(
-            'Riders are busy in Westminster and Soho. Expected pickup: 5-8 mins.',
+            'High demand in Central London. Expected pickup: 5-8 mins.',
             style: TextStyle(color: Colors.grey[600], fontSize: 13),
           ),
         ],

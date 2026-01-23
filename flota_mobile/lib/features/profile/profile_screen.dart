@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:flota_mobile/features/profile/profile_provider.dart';
 import 'package:flota_mobile/theme/app_theme.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:go_router/go_router.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});

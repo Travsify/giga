@@ -7,7 +7,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flota_mobile/theme/app_theme.dart';
 import 'package:flota_mobile/features/auth/auth_provider.dart';
-
+import 'package:flota_mobile/features/marketplace/weather_service.dart';
 import 'package:flota_mobile/features/marketplace/home_widgets.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
@@ -19,6 +19,23 @@ class HomeScreen extends ConsumerStatefulWidget {
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   int _currentIndex = 0;
+  Map<String, dynamic> _weather = {
+    'temp': '--',
+    'condition': 'Loading',
+    'icon': Icons.cloud,
+    'location': 'London',
+  };
+
+  @override
+  void initState() {
+    super.initState();
+    _loadWeather();
+  }
+
+  Future<void> _loadWeather() async {
+    final data = await WeatherService.getCurrentWeather();
+    if (mounted) setState(() => _weather = data);
+  }
 
   String _getGreeting() {
     final hour = DateTime.now().hour;
@@ -84,10 +101,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             // Weather Widget
                             Row(
                               children: [
-                                const Icon(Icons.cloud_outlined, color: Colors.white70, size: 16),
+                                Icon(_weather['icon'], color: Colors.white70, size: 16),
                                 const SizedBox(width: 6),
                                 Text(
-                                  '12°C, Light Rain in London',
+                                  '${_weather['temp']}, ${_weather['condition']} in ${_weather['location']}',
                                   style: GoogleFonts.outfit(
                                     color: Colors.white70,
                                     fontSize: 13,
@@ -111,28 +128,31 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               ),
                             ),
                             const SizedBox(width: 8),
-                            Container(
-                              padding: const EdgeInsets.all(8),
-                              decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.2),
-                                shape: BoxShape.circle,
-                              ),
-                              child: Stack(
-                                children: [
-                                  const Icon(Icons.notifications_outlined, color: Colors.white, size: 28),
-                                  Positioned(
-                                    right: 0,
-                                    top: 0,
-                                    child: Container(
-                                      width: 10,
-                                      height: 10,
-                                      decoration: const BoxDecoration(
-                                        color: Colors.redAccent,
-                                        shape: BoxShape.circle,
+                            GestureDetector(
+                              onTap: () => context.push('/notifications'),
+                              child: Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withOpacity(0.2),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Stack(
+                                  children: [
+                                    const Icon(Icons.notifications_outlined, color: Colors.white, size: 28),
+                                    Positioned(
+                                      right: 0,
+                                      top: 0,
+                                      child: Container(
+                                        width: 10,
+                                        height: 10,
+                                        decoration: const BoxDecoration(
+                                          color: Colors.redAccent,
+                                          shape: BoxShape.circle,
+                                        ),
                                       ),
                                     ),
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
                             ),
                           ],
@@ -186,7 +206,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                   ],
                                 ),
                                 ElevatedButton(
-                                  onPressed: () => context.push('/checkout'), // Redirect to fund logic
+                                  onPressed: () => context.push('/wallet'), // Redirect to wallet
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: Colors.white,
                                     foregroundColor: AppTheme.primaryBlue,
@@ -213,30 +233,33 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               padding: const EdgeInsets.all(20.0),
               child: FadeInUp(
                 delay: const Duration(milliseconds: 200),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
-                        blurRadius: 15,
-                        offset: const Offset(0, 5),
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.search_rounded, color: AppTheme.primaryBlue, size: 28),
-                      const SizedBox(width: 15),
-                      Expanded(
-                        child: Text(
-                          'Enter postcode (e.g., SW1A 1AA)',
-                          style: TextStyle(color: Colors.grey[400], fontSize: 16),
+                child: GestureDetector(
+                  onTap: () => context.push('/search'),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.05),
+                          blurRadius: 15,
+                          offset: const Offset(0, 5),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.search_rounded, color: AppTheme.primaryBlue, size: 28),
+                        const SizedBox(width: 15),
+                        Expanded(
+                          child: Text(
+                            'Enter postcode (e.g., SW1A 1AA)',
+                            style: TextStyle(color: Colors.grey[400], fontSize: 16),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -265,8 +288,24 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       subtitle: '20% off with NUS Extra',
                       colors: [const Color(0xFF667EEA), const Color(0xFF764BA2)],
                       onTap: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Student verification coming soon!')),
+                        showDialog(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                            title: const Text('Student Discount'),
+                            content: const Text('Use code GIGA-STUDENT-20 at checkout to get 20% off.'),
+                            actions: [
+                              TextButton(onPressed: () => Navigator.pop(context), child: const Text('Close')),
+                              ElevatedButton(
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(content: Text('Discount GIGA-STUDENT-20 applied!')),
+                                  );
+                                },
+                                child: const Text('Apply Now'),
+                              ),
+                            ],
+                          ),
                         );
                       },
                     ),
@@ -282,8 +321,24 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       subtitle: 'Free delivery for NHS workers',
                       colors: [AppTheme.primaryBlue, AppTheme.accentCyan],
                       onTap: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('NHS verification coming soon!')),
+                        showDialog(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                            title: const Text('NHS Heroes'),
+                            content: const Text('Verified NHS staff get free delivery on orders over £20.'),
+                            actions: [
+                              TextButton(onPressed: () => Navigator.pop(context), child: const Text('Close')),
+                              ElevatedButton(
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(content: Text('NHS Discount Activated!')),
+                                  );
+                                },
+                                child: const Text('Activate'),
+                              ),
+                            ],
+                          ),
                         );
                       },
                     ),
@@ -341,11 +396,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         child: FadeInLeft(
                           delay: const Duration(milliseconds: 500),
                           child: _ServiceTile(
-                            title: 'Eco Delivery',
-                            subtitle: 'Carbon Neutral',
-                            icon: Icons.pedal_bike_rounded,
+                            title: 'Eco Impact',
+                            subtitle: 'Carbon Saved',
+                            icon: Icons.eco_rounded,
                             color: AppTheme.successGreen,
-                            onTap: () => context.push('/delivery-request'),
+                            onTap: () => context.push('/carbon'),
                           ),
                         ),
                       ),
@@ -354,11 +409,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         child: FadeInRight(
                           delay: const Duration(milliseconds: 600),
                           child: _ServiceTile(
-                            title: 'Schedule',
-                            subtitle: 'Choose Time',
-                            icon: Icons.schedule_rounded,
-                            color: AppTheme.accentCyan,
-                            onTap: () => context.push('/multi-stop'),
+                            title: 'ULEZ Check',
+                            subtitle: 'Avoid Charges',
+                            icon: Icons.camera_alt_rounded,
+                            color: Colors.orange,
+                            onTap: () => context.push('/ulez'),
                           ),
                         ),
                       ),
@@ -375,7 +430,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             subtitle: 'Secure Pickup',
                             icon: Icons.inventory_2_outlined,
                             color: AppTheme.slateBlue,
-                            onTap: () => context.push('/parcel-locker'),
+                            onTap: () => context.push('/lockers'),
                           ),
                         ),
                       ),
@@ -414,7 +469,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
                       ),
                       TextButton(
-                        onPressed: () {},
+                        onPressed: () => context.push('/promos'),
                         child: const Text('View All'),
                       ),
                     ],
@@ -422,41 +477,44 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   const SizedBox(height: 10),
                   FadeInUp(
                     delay: const Duration(milliseconds: 500),
-                    child: Container(
-                      height: 120,
-                      width: double.infinity,
-                      decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                          colors: [Color(0xFF6A11CB), Color(0xFF2575FC)],
+                    child: GestureDetector(
+                      onTap: () => context.push('/giga-plus'),
+                      child: Container(
+                        height: 120,
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                            colors: [Color(0xFF6A11CB), Color(0xFF2575FC)],
+                          ),
+                          borderRadius: BorderRadius.circular(20),
                         ),
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Stack(
-                        children: [
-                          Positioned(
-                            right: -20,
-                            bottom: -20,
-                            child: Icon(Icons.stars_rounded, color: Colors.white.withOpacity(0.1), size: 150),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.all(20),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                const Text(
-                                  'Giga Premium',
-                                  style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18),
-                                ),
-                                const SizedBox(height: 5),
-                                Text(
-                                  'Get £10 off on first 3 deliveries',
-                                  style: TextStyle(color: Colors.white.withOpacity(0.9), fontSize: 12),
-                                ),
-                              ],
+                        child: Stack(
+                          children: [
+                            Positioned(
+                              right: -20,
+                              bottom: -20,
+                              child: Icon(Icons.stars_rounded, color: Colors.white.withOpacity(0.1), size: 150),
                             ),
-                          ),
-                        ],
+                            Padding(
+                              padding: const EdgeInsets.all(20),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  const Text(
+                                    'Giga Premium',
+                                    style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18),
+                                  ),
+                                  const SizedBox(height: 5),
+                                  Text(
+                                    'Join GIGA+ for free deliveries & more',
+                                    style: TextStyle(color: Colors.white.withOpacity(0.9), fontSize: 12),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
@@ -472,7 +530,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         currentIndex: _currentIndex,
         onTap: (index) {
           setState(() => _currentIndex = index);
+          if (index == 1) context.push('/orders');
           if (index == 2) context.push('/wallet');
+          if (index == 3) context.push('/profile');
         },
         type: BottomNavigationBarType.fixed,
         selectedItemColor: AppTheme.primaryBlue,

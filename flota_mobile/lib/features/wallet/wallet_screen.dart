@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flota_mobile/theme/app_theme.dart';
 import 'package:flota_mobile/core/payment_service.dart';
 import 'package:flota_mobile/core/error_handler.dart';
+import 'package:go_router/go_router.dart';
 
 class WalletScreen extends ConsumerStatefulWidget {
   const WalletScreen({super.key});
@@ -148,7 +149,7 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
                                 icon: Icons.arrow_upward,
                                 label: 'Withdraw',
                                 onPressed: () {
-                                  ErrorHandler.handleError(context, 'Withdrawal feature coming soon!');
+                                  context.push('/withdraw');
                                 },
                               ),
                             ],

@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:flota_mobile/theme/app_theme.dart';
 import 'package:flota_mobile/core/api_client.dart';
 import 'package:dio/dio.dart';
+import 'package:flota_mobile/features/auth/auth_provider.dart';
 
 class ChatScreen extends ConsumerStatefulWidget {
   final String deliveryId;
@@ -63,6 +64,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final authState = ref.watch(authProvider);
     return Scaffold(
       appBar: AppBar(
         title: Text('Chat with Rider', style: GoogleFonts.outfit()),
@@ -78,7 +80,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                   itemCount: _messages.length,
                   itemBuilder: (context, index) {
                     final msg = _messages[index];
-                    final isMe = msg['sender_id'].toString() == "1"; // Mock-ish logic for now
+                    final isMe = msg['sender_id'].toString() == authState.userId;
                     
                     return Align(
                       alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,

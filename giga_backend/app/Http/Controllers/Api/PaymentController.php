@@ -44,4 +44,33 @@ class PaymentController extends Controller
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
+
+    // Public version for demo (no user metadata)
+    public function createPaymentIntentPublic(Request $request)
+    {
+        $request->validate([
+            'amount' => 'required|numeric|min:1',
+            'currency' => 'required|string|in:gbp,usd,eur',
+        ]);
+
+        try {
+            Stripe::setApiKey(env('STRIPE_SECRET'));
+            $amount = $request->amount * 100; 
+
+            $paymentIntent = PaymentIntent::create([
+                'amount' => $amount,
+                'currency' => $request->currency,
+                'automatic_payment_methods' => [
+                    'enabled' => true,
+                ],
+            ]);
+
+            return response()->json([
+                'clientSecret' => $paymentIntent->client_secret,
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
 }

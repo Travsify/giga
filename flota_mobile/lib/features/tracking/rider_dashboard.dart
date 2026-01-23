@@ -5,15 +5,18 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flota_mobile/theme/app_theme.dart';
 import 'package:flota_mobile/core/location_service.dart';
 import 'package:flota_mobile/core/error_handler.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:flota_mobile/features/auth/auth_provider.dart';
 
-class RiderDashboard extends StatefulWidget {
+class RiderDashboard extends ConsumerStatefulWidget {
   const RiderDashboard({super.key});
 
   @override
-  State<RiderDashboard> createState() => _RiderDashboardState();
+  ConsumerState<RiderDashboard> createState() => _RiderDashboardState();
 }
 
-class _RiderDashboardState extends State<RiderDashboard> {
+class _RiderDashboardState extends ConsumerState<RiderDashboard> {
   bool isOnline = false;
   Position? _currentPosition;
 
@@ -168,7 +171,7 @@ class _RiderDashboardState extends State<RiderDashboard> {
                       Expanded(
                         child: _StatCard(
                           title: 'Today\'s Earnings',
-                          value: '\$128.50',
+                          value: '£128.50',
                           actionLabel: 'View Details',
                           color: AppTheme.primaryBlue,
                         ),
@@ -192,6 +195,9 @@ class _RiderDashboardState extends State<RiderDashboard> {
       ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: 0,
+        onTap: (index) {
+          if (index == 3) context.push('/profile');
+        },
         type: BottomNavigationBarType.fixed,
         selectedItemColor: AppTheme.primaryBlue,
         unselectedItemColor: AppTheme.textSecondary,
