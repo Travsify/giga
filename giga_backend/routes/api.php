@@ -12,8 +12,8 @@ use App\Http\Controllers\Api\ProfileController;
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 
-// Payment (Public for Demo - Consider securing in production)
-Route::post('/create-payment-intent', [App\Http\Controllers\Api\PaymentController::class, 'createPaymentIntentPublic']);
+// Payment (Public for Demo)
+Route::post('/create-payment-intent-public', [App\Http\Controllers\Api\PaymentController::class, 'createPaymentIntentPublic']);
 
 // Protected routes
 Route::middleware('auth:sanctum')->group(function () {
