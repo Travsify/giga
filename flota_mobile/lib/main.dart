@@ -14,7 +14,14 @@ import 'package:flota_mobile/features/marketplace/delivery_request_screen.dart';
 import 'package:flota_mobile/features/wallet/checkout_screen.dart';
 import 'package:flota_mobile/features/tracking/rider_dashboard.dart';
 import 'package:flota_mobile/features/tracking/tracking_screen.dart';
+import 'package:flota_mobile/features/tracking/enhanced_tracking_screen.dart';
+import 'package:flota_mobile/features/delivery/multi_stop_screen.dart';
+import 'package:flota_mobile/features/tracking/chat_screen.dart';
+import 'package:flota_mobile/features/delivery/parcel_locker_screen.dart';
+import 'package:flota_mobile/features/profile/profile_screen.dart';
+import 'package:flota_mobile/features/profile/giga_plus_screen.dart';
 import 'package:flota_mobile/theme/app_theme.dart';
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -129,7 +136,35 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/tracking',
         builder: (context, state) => const TrackingScreen(),
       ),
-    ],
+      GoRoute(
+        path: '/tracking/enhanced/:id',
+        builder: (context, state) => EnhancedTrackingScreen(
+          deliveryId: state.pathParameters['id'] ?? 'unknown',
+        ),
+      ),
+      GoRoute(
+        path: '/multi-stop',
+        builder: (context, state) => const MultiStopScreen(),
+      ),
+      GoRoute(
+        path: '/chat/:id',
+        builder: (context, state) => ChatScreen(
+          deliveryId: state.pathParameters['id'] ?? 'unknown',
+        ),
+      ),
+        GoRoute(
+          path: '/parcel-locker',
+          builder: (context, state) => const ParcelLockerScreen(),
+        ),
+        GoRoute(
+          path: '/profile',
+          builder: (context, state) => const ProfileScreen(),
+        ),
+        GoRoute(
+          path: '/giga-plus',
+          builder: (context, state) => const GigaPlusScreen(),
+        ),
+      ],
   );
 });
 

@@ -6,8 +6,10 @@ import 'package:go_router/go_router.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flota_mobile/theme/app_theme.dart';
 import 'package:flota_mobile/shared/map_picker_screen.dart';
-import 'package:flota_mobile/features/marketplace/delivery_provider.dart';
 import 'package:flota_mobile/features/marketplace/data/models/delivery_models.dart';
+import 'package:flota_mobile/features/marketplace/delivery_provider.dart';
+import 'package:flota_mobile/features/profile/profile_provider.dart';
+
 
 class DeliveryRequestScreen extends ConsumerStatefulWidget {
   const DeliveryRequestScreen({super.key});
@@ -18,6 +20,7 @@ class DeliveryRequestScreen extends ConsumerStatefulWidget {
 
 class _DeliveryRequestScreenState extends ConsumerState<DeliveryRequestScreen> {
   String selectedVehicle = 'Bike';
+  String selectedTier = 'Standard';
   
   String? pickupAddress;
   LatLng? pickupLatLng;
@@ -59,6 +62,7 @@ class _DeliveryRequestScreenState extends ConsumerState<DeliveryRequestScreen> {
           dropoffLat: dropoffLatLng!.latitude,
           dropoffLng: dropoffLatLng!.longitude,
           vehicleType: selectedVehicle,
+          serviceTier: selectedTier,
         ),
       );
     }
@@ -67,6 +71,8 @@ class _DeliveryRequestScreenState extends ConsumerState<DeliveryRequestScreen> {
   @override
   Widget build(BuildContext context) {
     final deliveryState = ref.watch(deliveryProvider);
+    final profileState = ref.watch(profileProvider);
+
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -83,7 +89,7 @@ class _DeliveryRequestScreenState extends ConsumerState<DeliveryRequestScreen> {
                 shape: BoxShape.circle,
                 gradient: RadialGradient(
                   colors: [
-                    AppTheme.primaryBlue.withValues(alpha: 0.1),
+                    AppTheme.primaryBlue.withOpacity(0.1),
                     Colors.transparent,
                   ],
                 ),
@@ -144,7 +150,7 @@ class _DeliveryRequestScreenState extends ConsumerState<DeliveryRequestScreen> {
                               borderRadius: BorderRadius.circular(24),
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.black.withValues(alpha: 0.04),
+                                  color: Colors.black.withOpacity(0.04),
                                   blurRadius: 24,
                                   offset: const Offset(0, 12),
                                 ),
@@ -179,6 +185,44 @@ class _DeliveryRequestScreenState extends ConsumerState<DeliveryRequestScreen> {
                             ),
                           ),
                         ),
+
+                        // Saved Places Quick Select
+                        if (profileState.user != null && (profileState.user?['home_address'] != null || profileState.user?['work_address'] != null))
+                          FadeInUp(
+                            delay: const Duration(milliseconds: 150),
+                            child: Padding(
+                              padding: const EdgeInsets.only(top: 16),
+                              child: Row(
+                                children: [
+                                  if (profileState.user?['home_address'] != null)
+                                    _SavedPlaceChip(
+                                      label: 'Home',
+                                      icon: Icons.home_rounded,
+                                      onTap: () {
+                                        setState(() {
+                                          dropoffAddress = profileState.user?['home_address'];
+                                          dropoffLatLng = const LatLng(51.5074, -0.1278); // London mock
+                                        });
+                                        _updateEstimation();
+                                      },
+                                    ),
+                                  const SizedBox(width: 12),
+                                  if (profileState.user?['work_address'] != null)
+                                    _SavedPlaceChip(
+                                      label: 'Work',
+                                      icon: Icons.work_rounded,
+                                      onTap: () {
+                                        setState(() {
+                                          dropoffAddress = profileState.user?['work_address'];
+                                          dropoffLatLng = const LatLng(51.5007, -0.1246); // Westminster mock
+                                        });
+                                        _updateEstimation();
+                                      },
+                                    ),
+                                ],
+                              ),
+                            ),
+                          ),
 
                         const SizedBox(height: 40),
                         
@@ -237,6 +281,55 @@ class _DeliveryRequestScreenState extends ConsumerState<DeliveryRequestScreen> {
                         ),
                         
                         const SizedBox(height: 40),
+                        
+                        FadeInLeft(
+                          delay: const Duration(milliseconds: 350),
+                          child: Text(
+                            "Service Tier",
+                            style: GoogleFonts.outfit(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black87,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        
+                        _ServiceTierCard(
+                          label: 'Standard',
+                          subtitle: 'Standard delivery time (30-45 mins)',
+                          isSelected: selectedTier == 'Standard',
+                          icon: Icons.delivery_dining_rounded,
+                          color: AppTheme.primaryBlue,
+                          onTap: () {
+                            setState(() => selectedTier = 'Standard');
+                            _updateEstimation();
+                          },
+                        ),
+                        _ServiceTierCard(
+                          label: 'Priority',
+                          subtitle: 'Fastest delivery. Direct rider (15-25 mins)',
+                          isSelected: selectedTier == 'Priority',
+                          icon: Icons.bolt_rounded,
+                          color: Colors.orange,
+                          onTap: () {
+                            setState(() => selectedTier = 'Priority');
+                            _updateEstimation();
+                          },
+                        ),
+                        _ServiceTierCard(
+                          label: 'Saver',
+                          subtitle: 'Eco-friendly. Flexible windows (60+ mins)',
+                          isSelected: selectedTier == 'Saver',
+                          icon: Icons.eco_rounded,
+                          color: Colors.green,
+                          onTap: () {
+                            setState(() => selectedTier = 'Saver');
+                            _updateEstimation();
+                          },
+                        ),
+                        
+                        const SizedBox(height: 40),
                       ],
                     ),
                   ),
@@ -266,48 +359,56 @@ class _DeliveryRequestScreenState extends ConsumerState<DeliveryRequestScreen> {
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(
-                                  'Estimated Fare',
-                                  style: GoogleFonts.outfit(
-                                    color: Colors.black54,
-                                  ),
-                                ),
-                                const SizedBox(height: 4),
-                                if (deliveryState.isLoading)
-                                  const SizedBox(
-                                    height: 24,
-                                    width: 24,
-                                    child: CircularProgressIndicator(strokeWidth: 2),
-                                  )
-                                else
                                   Text(
-                                    deliveryState.estimatedFare != null 
-                                      ? '£${deliveryState.estimatedFare!.toStringAsFixed(2)}'
-                                      : '£0.00',
+                                    'Estimated Fare',
                                     style: GoogleFonts.outfit(
-                                      fontSize: 28,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.black87,
+                                      color: Colors.black54,
                                     ),
                                   ),
-                              ],
-                            ),
-                            ElevatedButton(
-                              onPressed: (pickupLatLng != null && dropoffLatLng != null && deliveryState.estimatedFare != null)
-                                ? () {
-                                    final req = DeliveryRequest(
-                                      pickupAddress: pickupAddress!,
-                                      pickupLat: pickupLatLng!.latitude,
-                                      pickupLng: pickupLatLng!.longitude,
-                                      dropoffAddress: dropoffAddress!,
-                                      dropoffLat: dropoffLatLng!.latitude,
-                                      dropoffLng: dropoffLatLng!.longitude,
-                                      vehicleType: selectedVehicle,
-                                      fare: deliveryState.estimatedFare!,
-                                    );
-                                    context.push('/checkout', extra: req);
-                                  }
-                                : null,
+                                  const SizedBox(height: 4),
+                                  if (deliveryState.isLoading)
+                                    const SizedBox(
+                                      height: 24,
+                                      width: 24,
+                                      child: CircularProgressIndicator(strokeWidth: 2),
+                                    )
+                                  else
+                                    Text(
+                                      deliveryState.estimation != null 
+                                        ? '£${deliveryState.estimation!.finalFare.toStringAsFixed(2)}'
+                                        : '£0.00',
+                                      style: GoogleFonts.outfit(
+                                        fontSize: 28,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.black87,
+                                      ),
+                                    ),
+                                  if (deliveryState.estimation != null && deliveryState.estimation!.discount > 0)
+                                    FadeIn(
+                                      child: Text(
+                                        'Giga+ Discount applied',
+                                        style: TextStyle(color: AppTheme.successGreen, fontSize: 11, fontWeight: FontWeight.bold),
+                                      ),
+                                    ),
+                                ],
+                              ),
+                              ElevatedButton(
+                                onPressed: (pickupLatLng != null && dropoffLatLng != null && deliveryState.estimation != null)
+                                  ? () {
+                                      final req = DeliveryRequest(
+                                        pickupAddress: pickupAddress!,
+                                        pickupLat: pickupLatLng!.latitude,
+                                        pickupLng: pickupLatLng!.longitude,
+                                        dropoffAddress: dropoffAddress!,
+                                        dropoffLat: dropoffLatLng!.latitude,
+                                        dropoffLng: dropoffLatLng!.longitude,
+                                        vehicleType: selectedVehicle,
+                                        serviceTier: selectedTier,
+                                        fare: deliveryState.estimation!.finalFare,
+                                      );
+                                      context.push('/checkout', extra: req);
+                                    }
+                                  : null,
                               style: ElevatedButton.styleFrom(
                                 padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 18),
                                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
@@ -443,6 +544,99 @@ class _VehicleTypeCard extends StatelessWidget {
                 fontWeight: FontWeight.bold,
               ),
             ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+class _SavedPlaceChip extends StatelessWidget {
+  final String label;
+  final IconData icon;
+  final VoidCallback onTap;
+
+  const _SavedPlaceChip({
+    required this.label,
+    required this.icon,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return ActionChip(
+      avatar: Icon(icon, size: 18, color: AppTheme.primaryBlue),
+      label: Text(label),
+      onPressed: onTap,
+      backgroundColor: Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+        side: BorderSide(color: AppTheme.primaryBlue.withOpacity(0.2)),
+      ),
+    );
+  }
+}
+
+class _ServiceTierCard extends StatelessWidget {
+  final String label;
+  final String subtitle;
+  final bool isSelected;
+  final IconData icon;
+  final Color color;
+  final VoidCallback onTap;
+
+  const _ServiceTierCard({
+    required this.label,
+    required this.subtitle,
+    required this.isSelected,
+    required this.icon,
+    required this.color,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 300),
+        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: isSelected ? color.withOpacity(0.1) : Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: isSelected ? color : Colors.black.withOpacity(0.05),
+            width: 2,
+          ),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: color.withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, color: color, size: 20),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    label,
+                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  ),
+                  Text(
+                    subtitle,
+                    style: const TextStyle(color: Colors.grey, fontSize: 13),
+                  ),
+                ],
+              ),
+            ),
+            if (isSelected)
+              Icon(Icons.check_circle_rounded, color: color, size: 24),
           ],
         ),
       ),

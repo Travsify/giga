@@ -60,13 +60,13 @@ class _MarketplaceScreenState extends ConsumerState<MarketplaceScreen> {
      
      double baseFare = 0;
      switch(_selectedService) {
-       case 'bike': baseFare = 500; break;
-       case 'van': baseFare = 1500; break;
-       case 'truck': baseFare = 5000; break;
+       case 'bike': baseFare = 5; break;
+       case 'van': baseFare = 15; break;
+       case 'truck': baseFare = 50; break;
      }
      
      setState(() {
-       _estimatedFare = baseFare + 500;
+       _estimatedFare = baseFare + 5;
      });
   }
 
@@ -154,8 +154,8 @@ class _MarketplaceScreenState extends ConsumerState<MarketplaceScreen> {
                     _ServiceCard(
                       title: 'Standard Bike',
                       price: _estimatedFare != null && _selectedService == 'bike'
-                          ? '₦${_estimatedFare!.toStringAsFixed(0)}'
-                          : 'Starting at ₦500',
+                          ? '£${_estimatedFare!.toStringAsFixed(2)}'
+                          : 'Starting at £5.00',
                       eta: '5 mins away',
                       icon: Icons.motorcycle,
                       isSelected: _selectedService == 'bike',
@@ -167,8 +167,8 @@ class _MarketplaceScreenState extends ConsumerState<MarketplaceScreen> {
                     _ServiceCard(
                       title: 'Delivery Van',
                       price: _estimatedFare != null && _selectedService == 'van'
-                          ? '₦${_estimatedFare!.toStringAsFixed(0)}'
-                          : 'Starting at ₦1,500',
+                          ? '£${_estimatedFare!.toStringAsFixed(2)}'
+                          : 'Starting at £15.00',
                       eta: '12 mins away',
                       icon: Icons.local_shipping,
                       isSelected: _selectedService == 'van',

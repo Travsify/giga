@@ -16,6 +16,14 @@ class User extends Authenticatable
         'email',
         'password',
         'role',
+        'referral_code',
+        'referred_by_id',
+        'loyalty_points',
+        'uk_phone',
+        'home_address',
+        'work_address',
+        'is_giga_plus',
+        'giga_plus_expiry',
     ];
 
     protected $hidden = [
@@ -26,6 +34,8 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
+        'is_giga_plus' => 'boolean',
+        'giga_plus_expiry' => 'datetime',
     ];
 
     public function wallet()
@@ -46,5 +56,15 @@ class User extends Authenticatable
     public function logisticsCompany()
     {
         return $this->hasOne(LogisticsCompany::class);
+    }
+
+    public function referredBy()
+    {
+        return $this->belongsTo(User::class, 'referred_by_id');
+    }
+
+    public function referrals()
+    {
+        return $this->hasMany(User::class, 'referred_by_id');
     }
 }

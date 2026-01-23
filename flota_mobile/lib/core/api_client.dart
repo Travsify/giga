@@ -5,14 +5,14 @@ class ApiClient {
   late final Dio _dio;
   
   // Production URL
-  static const String _baseUrl = 'https://usegiga.site/api';
+  static const String _baseUrl = 'https://giga-ytn0.onrender.com/api';
 
   ApiClient() {
     _dio = Dio(
       BaseOptions(
         baseUrl: _baseUrl,
-        connectTimeout: const Duration(seconds: 15),
-        receiveTimeout: const Duration(seconds: 15),
+        connectTimeout: const Duration(seconds: 60),
+        receiveTimeout: const Duration(seconds: 60),
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',

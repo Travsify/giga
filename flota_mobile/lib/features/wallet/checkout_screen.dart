@@ -19,6 +19,14 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   String selectedMethod = 'Giga Wallet';
 
   Future<void> _handlePayment() async {
+    if (selectedMethod == 'Stripe') {
+      // Simulate Stripe Payment Sheet
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Processing Card Payment via Stripe...')),
+      );
+      await Future.delayed(const Duration(seconds: 2));
+    }
+
     final success = await ref.read(deliveryProvider.notifier).createDelivery(widget.deliveryRequest);
     
     if (success && mounted) {
@@ -139,6 +147,17 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                                   child: Divider(),
                                 ),
                                 _SummaryRow(
+                                  label: 'Service Tier',
+                                  value: widget.deliveryRequest.serviceTier,
+                                  icon: widget.deliveryRequest.serviceTier == 'Priority' 
+                                    ? Icons.bolt_rounded 
+                                    : (widget.deliveryRequest.serviceTier == 'Saver' ? Icons.eco_rounded : Icons.delivery_dining_rounded),
+                                ),
+                                const Padding(
+                                  padding: EdgeInsets.symmetric(vertical: 12),
+                                  child: Divider(),
+                                ),
+                                _SummaryRow(
                                   label: 'Vehicle',
                                   value: widget.deliveryRequest.vehicleType,
                                   icon: Icons.local_shipping_rounded,
@@ -147,19 +166,33 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                                 Row(
                                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   children: [
-                                    Text(
-                                      'Total Fare',
-                                      style: GoogleFonts.outfit(
-                                        fontSize: 16,
-                                        color: Colors.black54,
-                                      ),
+                                    Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          'Total Fare',
+                                          style: GoogleFonts.outfit(
+                                            fontSize: 16,
+                                            color: Colors.black54,
+                                          ),
+                                        ),
+                                        if (widget.deliveryRequest.fare == 0)
+                                          Text(
+                                            'Giga+ Benefit Applied',
+                                            style: GoogleFonts.outfit(
+                                              fontSize: 12,
+                                              color: AppTheme.successGreen,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                      ],
                                     ),
                                     Text(
-                                      '£${widget.deliveryRequest.fare.toStringAsFixed(2)}',
+                                      widget.deliveryRequest.fare == 0 ? 'FREE' : '£${widget.deliveryRequest.fare.toStringAsFixed(2)}',
                                       style: GoogleFonts.outfit(
                                         fontSize: 24,
                                         fontWeight: FontWeight.w900,
-                                        color: AppTheme.primaryBlue,
+                                        color: widget.deliveryRequest.fare == 0 ? AppTheme.successGreen : AppTheme.primaryBlue,
                                       ),
                                     ),
                                   ],
@@ -201,6 +234,14 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                                 icon: Icons.apple_rounded,
                                 isSelected: selectedMethod == 'Apple Pay',
                                 onTap: () => setState(() => selectedMethod = 'Apple Pay'),
+                              ),
+                              const SizedBox(height: 12),
+                              _PaymentOption(
+                                title: 'Debit / Credit Card',
+                                subtitle: 'Powered by Stripe',
+                                icon: Icons.credit_card_rounded,
+                                isSelected: selectedMethod == 'Stripe',
+                                onTap: () => setState(() => selectedMethod = 'Stripe'),
                               ),
                             ],
                           ),

@@ -2,7 +2,7 @@ import 'package:socket_io_client/socket_io_client.dart' as IO;
 
 class WebSocketService {
   static IO.Socket? _socket;
-  static const String _serverUrl = 'https://usegiga.site'; // Production WebSocket
+  static const String _serverUrl = 'https://giga-ytn0.onrender.com'; // Production WebSocket
 
   static void connect(String userId) {
     _socket = IO.io(_serverUrl, <String, dynamic>{

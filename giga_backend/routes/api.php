@@ -4,6 +4,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\DeliveryController;
+use App\Http\Controllers\Api\ChatController;
+use App\Http\Controllers\Api\ProfileController;
+
 
 // Public routes
 Route::post('/register', [AuthController::class, 'register']);
@@ -18,6 +21,22 @@ Route::middleware('auth:sanctum')->group(function () {
     // Deliveries
     Route::post('/deliveries/estimate', [DeliveryController::class, 'estimateFare']);
     Route::post('/deliveries', [DeliveryController::class, 'create']);
+    Route::post('/deliveries/{id}/proof', [DeliveryController::class, 'uploadProof']);
     Route::patch('/deliveries/{id}/status', [DeliveryController::class, 'updateStatus']);
     Route::get('/riders/nearby', [DeliveryController::class, 'getNearbyRiders']);
+
+    // Chat
+    Route::get('/deliveries/{id}/messages', [ChatController::class, 'index']);
+    Route::post('/deliveries/{id}/messages', [ChatController::class, 'store']);
+
+    // Profile & Loyalty
+    Route::get('/profile', [ProfileController::class, 'show']);
+    Route::patch('/profile', [ProfileController::class, 'update']);
+    Route::get('/loyalty', [ProfileController::class, 'loyaltyInfo']);
+    Route::post('/referral/submit', [ProfileController::class, 'submitReferral']);
+
+    // Subscriptions
+    Route::get('/subscription/status', [App\Http\Controllers\Api\SubscriptionController::class, 'status']);
+    Route::post('/subscription/subscribe', [App\Http\Controllers\Api\SubscriptionController::class, 'subscribe']);
+    Route::post('/subscription/cancel', [App\Http\Controllers\Api\SubscriptionController::class, 'cancel']);
 });

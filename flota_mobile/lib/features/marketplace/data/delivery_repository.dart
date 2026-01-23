@@ -8,11 +8,10 @@ class DeliveryRepository {
 
   DeliveryRepository(this._dio);
 
-  Future<double> estimateFare(DeliveryEstimationRequest request) async {
+  Future<DeliveryEstimationResponse> estimateFare(DeliveryEstimationRequest request) async {
     try {
       final response = await _dio.post('/deliveries/estimate', data: request.toJson());
-      // Expecting {'fare': 123.45}
-      return (response.data['fare'] as num).toDouble();
+      return DeliveryEstimationResponse.fromJson(response.data);
     } on DioException catch (e) {
       throw _handleError(e);
     }

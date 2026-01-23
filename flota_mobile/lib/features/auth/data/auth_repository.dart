@@ -47,8 +47,19 @@ class AuthRepository {
   }
 
   String _handleError(DioException e) {
-    if (e.response?.data != null && e.response?.data['message'] != null) {
-      return e.response?.data['message'];
+    final data = e.response?.data;
+    if (data != null) {
+      // Show full error details for debugging
+      if (data is Map) {
+        if (data['error'] != null) {
+          return data['error'].toString();
+        }
+        if (data['message'] != null) {
+          return data['message'].toString();
+        }
+      }
+      // Return entire response as string for debugging
+      return data.toString();
     }
     return e.message ?? 'An unexpected error occurred';
   }

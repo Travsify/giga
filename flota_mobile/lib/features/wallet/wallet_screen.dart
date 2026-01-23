@@ -29,8 +29,8 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
           controller: amountController,
           keyboardType: TextInputType.number,
           decoration: const InputDecoration(
-            labelText: 'Amount (₦)',
-            hintText: 'e.g. 5000',
+            labelText: 'Amount (£)',
+            hintText: 'e.g. 50.00',
           ),
         ),
         actions: [
@@ -132,7 +132,7 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
                           const Text('Total Balance', style: TextStyle(color: Colors.white70)),
                           const SizedBox(height: 5),
                           Text(
-                            '₦${balance.toStringAsFixed(2)}',
+                            '£${balance.toStringAsFixed(2)}',
                             style: const TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold),
                           ),
                           const SizedBox(height: 20),
@@ -195,7 +195,7 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
                           return _TransactionItem(
                             title: data['description'] ?? 'Transaction',
                             subtitle: 'Details', // Format timestamp here if needed
-                            amount: '₦$amount',
+                            amount: '£$amount',
                             isDebit: isDebit,
                           );
                         },

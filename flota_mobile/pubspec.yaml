@@ -51,6 +51,14 @@ dependencies:
   dio: ^5.4.1
   animate_do: ^4.2.0
 
+  # Phase 3: Safety & Advanced Features
+  camera: ^0.10.0
+  image_picker: ^1.0.0
+  qr_flutter: ^4.1.0
+  url_launcher: ^6.2.0
+  firebase_storage: ^11.6.0
+  share_plus: ^7.2.2
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

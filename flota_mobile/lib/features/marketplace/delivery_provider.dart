@@ -4,26 +4,26 @@ import 'package:flota_mobile/features/marketplace/data/models/delivery_models.da
 
 class DeliveryState {
   final bool isLoading;
-  final double? estimatedFare;
+  final DeliveryEstimationResponse? estimation;
   final String? error;
   final Map<String, dynamic>? lastCreatedDelivery;
 
   DeliveryState({
     this.isLoading = false,
-    this.estimatedFare,
+    this.estimation,
     this.error,
     this.lastCreatedDelivery,
   });
 
   DeliveryState copyWith({
     bool? isLoading,
-    double? estimatedFare,
+    DeliveryEstimationResponse? estimation,
     String? error,
     Map<String, dynamic>? lastCreatedDelivery,
   }) {
     return DeliveryState(
       isLoading: isLoading ?? this.isLoading,
-      estimatedFare: estimatedFare ?? this.estimatedFare,
+      estimation: estimation ?? this.estimation,
       error: error ?? this.error,
       lastCreatedDelivery: lastCreatedDelivery ?? this.lastCreatedDelivery,
     );
@@ -38,8 +38,8 @@ class DeliveryNotifier extends StateNotifier<DeliveryState> {
   Future<void> estimateFare(DeliveryEstimationRequest request) async {
     state = state.copyWith(isLoading: true, error: null);
     try {
-      final fare = await _repository.estimateFare(request);
-      state = state.copyWith(estimatedFare: fare, isLoading: false);
+      final estimation = await _repository.estimateFare(request);
+      state = state.copyWith(estimation: estimation, isLoading: false);
     } catch (e) {
       state = state.copyWith(error: e.toString(), isLoading: false);
     }

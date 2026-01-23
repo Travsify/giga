@@ -24,7 +24,13 @@ class Delivery extends Model
         'status',
         'assigned_at',
         'picked_up_at',
-        'delivered_at'
+        'delivered_at',
+        'proof_of_delivery_url',
+        'contactless_delivery',
+        'security_code',
+        'locker_id',
+        'locker_code',
+        'service_tier',
     ];
 
     protected $casts = [
@@ -32,6 +38,7 @@ class Delivery extends Model
         'picked_up_at' => 'datetime',
         'delivered_at' => 'datetime',
         'fare' => 'decimal:2',
+        'contactless_delivery' => 'boolean',
     ];
 
     public function customer()
