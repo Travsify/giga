@@ -14,6 +14,7 @@ Route::post('/login', [AuthController::class, 'login']);
 
 // Payment (Public for Demo)
 Route::post('/create-payment-intent-public', [App\Http\Controllers\Api\PaymentController::class, 'createPaymentIntentPublic']);
+Route::get('/diag', [App\Http\Controllers\Api\PaymentController::class, 'diag']);
 
 // Protected routes
 Route::middleware('auth:sanctum')->group(function () {

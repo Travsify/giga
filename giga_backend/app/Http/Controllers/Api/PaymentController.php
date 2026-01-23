@@ -10,6 +10,20 @@ use Illuminate\Support\Facades\Log;
 
 class PaymentController extends Controller
 {
+    public function diag()
+    {
+        return response()->json([
+            'status' => 'ok',
+            'time' => now()->toDateTimeString(),
+            'env' => [
+                'STRIPE_SECRET_SET' => !empty(env('STRIPE_SECRET')),
+                'STRIPE_SECRET_PLACEHOLDER' => env('STRIPE_SECRET') === 'sk_test_your_stripe_secret_key_here',
+                'APP_URL' => env('APP_URL'),
+                'DB_CONNECTION' => env('DB_CONNECTION'),
+            ]
+        ]);
+    }
+
     public function createPaymentIntent(Request $request)
     {
         $request->validate([
