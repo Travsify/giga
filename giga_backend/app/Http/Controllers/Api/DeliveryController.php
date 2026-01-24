@@ -10,6 +10,21 @@ use Illuminate\Support\Facades\Validator;
 
 class DeliveryController extends Controller
 {
+    public function index(Request $request)
+    {
+        $user = $request->user();
+        $query = Delivery::where('customer_id', $user->id);
+
+        if ($request->has('status')) {
+            $statuses = explode(',', $request->status);
+            $query->whereIn('status', $statuses);
+        }
+
+        $deliveries = $query->orderBy('created_at', 'desc')->get();
+
+        return response()->json($deliveries);
+    }
+
     public function estimateFare(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -18,7 +33,9 @@ class DeliveryController extends Controller
             'dropoff_lat' => 'required|numeric',
             'dropoff_lng' => 'required|numeric',
             'vehicle_type' => 'required|in:Bike,Van,Truck',
-            'service_tier' => 'required|in:Standard,Priority,Saver',
+            'service_tier' => 'required|in:Standard,Priority,Saver,Expo',
+            'parcel_size' => 'nullable|string',
+            'parcel_category' => 'nullable|string',
         ]);
 
         if ($validator->fails()) {
@@ -35,35 +52,60 @@ class DeliveryController extends Controller
         // UK Pricing in £
         $baseFare = match($request->vehicle_type) {
             'Bike' => 3.00,
-            'Van' => 8.00,
-            'Truck' => 25.00,
+            'Van' => 12.00, // Adjusted for UK market
+            'Truck' => 35.00, // Adjusted for UK market
         };
 
-        $distanceFare = $distance * 1.50; // £1.50 per km
+        $distanceRate = match($request->vehicle_type) {
+            'Bike' => 0.80,
+            'Van' => 1.50,
+            'Truck' => 2.50,
+        };
+
+        $distanceFare = $distance * $distanceRate;
+
+        // Size Multipliers
+        $sizeMultiplier = match($request->parcel_size) {
+            'Letter' => 0.8,
+            'Box' => 1.0,
+            'Medium' => 1.2,
+            'Large' => 1.5,
+            'Van Load' => 2.5,
+            default => 1.0,
+        };
+
+        // Category Surcharges
+        $categorySurcharge = match($request->parcel_category) {
+            'Fragile' => 5.00,
+            'Electronics' => 3.00,
+            'Hazardous' => 25.00, // Safety surcharge
+            default => 0.00,
+        };
 
         $tierMultiplier = match($request->service_tier) {
             'Standard' => 1.0,
-            'Priority' => 1.5,
-            'Saver' => 0.8,
+            'Priority', 'Expo' => 1.4,
+            'Saver' => 0.85,
         };
 
-        $totalFare = ($baseFare + $distanceFare) * $tierMultiplier;
+        $totalFare = (($baseFare + $distanceFare) * $sizeMultiplier * $tierMultiplier) + $categorySurcharge;
 
-        // Giga+ Benefit: £0 Delivery fee (Standard/Saver tiers) 
-        // We'll calculate the discount if the user is a premium member.
+        // Giga+ Benefit: Wave base fee or percentage discount
         $user = $request->user();
         $isGigaPlus = $user && (bool) $user->is_giga_plus;
         
         $discount = 0;
-        if ($isGigaPlus && in_array($request->service_tier, ['Standard', 'Saver'])) {
-            $discount = $totalFare; // Fully waive the fee
+        if ($isGigaPlus) {
+            if (in_array($request->service_tier, ['Standard', 'Saver'])) {
+                $discount = $totalFare * 0.25; // 25% discount for Giga+ members
+            }
         }
 
         return response()->json([
             'distance_km' => round($distance, 2),
             'estimated_total' => round($totalFare, 2),
             'discount' => round($discount, 2),
-            'final_fare' => round(max(0, $totalFare - $discount), 2),
+            'final_fare' => round(max(3.50, $totalFare - $discount), 2), // Minimum UK fare £3.50
             'currency' => 'GBP',
             'is_giga_plus' => $isGigaPlus,
         ]);

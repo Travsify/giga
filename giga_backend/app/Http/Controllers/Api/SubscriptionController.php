@@ -53,9 +53,19 @@ class SubscriptionController extends Controller
     /**
      * Cancel / Resume (Logic placeholder for real subscriptions)
      */
-    public function cancel()
+    public function cancel(Request $request)
     {
-        // For a mock, we'll just let it expire.
-        return response()->json(['message' => 'Auto-renewal disabled (Simulated).']);
+        $user = $request->user();
+        
+        $user->is_giga_plus = false;
+        // Don't clear expiry so they keep benefits until date
+        // But for mock assume immediate cancellation effect on auto-renewal
+        $user->save();
+
+        return response()->json([
+            'message' => 'Subscription cancelled successfully. Benefits will remain active until expiry.',
+            'is_giga_plus' => false,
+            'expiry' => $user->giga_plus_expiry ? $user->giga_plus_expiry->toDateTimeString() : null
+        ]);
     }
 }

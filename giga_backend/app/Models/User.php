@@ -24,6 +24,7 @@ class User extends Authenticatable
         'work_address',
         'is_giga_plus',
         'giga_plus_expiry',
+        'business_id',
     ];
 
     protected $hidden = [
@@ -56,6 +57,11 @@ class User extends Authenticatable
     public function logisticsCompany()
     {
         return $this->hasOne(LogisticsCompany::class);
+    }
+
+    public function business()
+    {
+        return $this->belongsTo(LogisticsCompany::class, 'business_id');
     }
 
     public function referredBy()
