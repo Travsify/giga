@@ -31,6 +31,8 @@ class AppSettingsSeeder extends Seeder
             // ========================
             // AUTHENTICATION
             // ========================
+            ['group' => 'auth', 'key' => 'auth_email_enabled', 'value' => '1', 'type' => 'boolean', 'label' => 'Email Login Enabled', 'is_public' => true],
+            ['group' => 'auth', 'key' => 'auth_phone_enabled', 'value' => '1', 'type' => 'boolean', 'label' => 'Phone Login Enabled', 'is_public' => true],
             ['group' => 'auth', 'key' => 'email_verification_enabled', 'value' => '1', 'type' => 'boolean', 'label' => 'Email Verification Required'],
             ['group' => 'auth', 'key' => 'phone_verification_enabled', 'value' => '1', 'type' => 'boolean', 'label' => 'Phone Verification Required'],
             ['group' => 'auth', 'key' => 'sms_provider', 'value' => 'log', 'type' => 'string', 'label' => 'SMS Provider', 'description' => 'twilio, vonage, termii, messagebird, log'],

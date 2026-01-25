@@ -31,6 +31,7 @@ class AppConfigSettings extends Page
             'splash_image_url' => AppSetting::get('splash_image_url', ''),
             'splash_duration_ms' => AppSetting::get('splash_duration_ms', 2000),
             'onboarding_enabled' => AppSetting::get('onboarding_enabled', true),
+            'onboarding_slides' => AppSetting::get('onboarding_slides', []),
         ]);
     }
 
@@ -71,19 +72,44 @@ class AppConfigSettings extends Page
                             ->rows(2),
                     ]),
 
-                Forms\Components\Section::make('Splash & Onboarding')
+                Forms\Components\Section::make('Splash Screen')
                     ->schema([
-                        Forms\Components\TextInput::make('splash_image_url')
-                            ->label('Custom Splash Image URL')
-                            ->url()
-                            ->helperText('Leave empty for default'),
+                        Forms\Components\FileUpload::make('splash_image_url')
+                            ->label('Splash Image')
+                            ->image()
+                            ->directory('splash')
+                            ->visibility('public')
+                            ->helperText('Upload a custom splash screen image'),
                         Forms\Components\TextInput::make('splash_duration_ms')
-                            ->label('Splash Duration (ms)')
+                            ->label('Duration (ms)')
                             ->numeric()
                             ->default(2000),
-                        Forms\Components\Toggle::make('onboarding_enabled')
-                            ->label('Show Onboarding for New Users'),
                     ])->columns(2),
+
+                Forms\Components\Section::make('Onboarding Screens')
+                    ->schema([
+                        Forms\Components\Toggle::make('onboarding_enabled')
+                            ->label('Enable Onboarding'),
+                        
+                        Forms\Components\Repeater::make('onboarding_slides')
+                            ->label('Slides')
+                            ->schema([
+                                Forms\Components\FileUpload::make('image')
+                                    ->label('Slide Image')
+                                    ->image()
+                                    ->directory('onboarding')
+                                    ->visibility('public')
+                                    ->required(),
+                                Forms\Components\TextInput::make('title')
+                                    ->required(),
+                                Forms\Components\Textarea::make('description')
+                                    ->rows(2)
+                                    ->required(),
+                            ])
+                            ->columnSpanFull()
+                            ->grid(2)
+                            ->itemLabel(fn (array $state): ?string => $state['title'] ?? null),
+                    ]),
             ])
             ->statePath('data');
     }

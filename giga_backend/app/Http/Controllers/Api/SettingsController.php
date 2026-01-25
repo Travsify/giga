@@ -49,4 +49,15 @@ class SettingsController extends Controller
             ],
         ]);
     }
+    /**
+     * Get list of active countries
+     */
+    public function getCountries(): JsonResponse
+    {
+        $countries = \App\Models\Country::where('is_active', true)->get();
+        return response()->json([
+            'success' => true,
+            'data' => $countries
+        ]);
+    }
 }

@@ -30,6 +30,7 @@ Route::middleware('throttle:5,1')->group(function () {
 // App Settings (Public - no auth required)
 Route::get('/settings', [SettingsController::class, 'index']);
 Route::get('/settings/check-version/{version}', [SettingsController::class, 'checkVersion']);
+Route::get('/countries', [App\Http\Controllers\Api\SettingsController::class, 'getCountries']);
 
 // Payment (Public for Demo)
 Route::post('/create-payment-intent-public', [PaymentController::class, 'createPaymentIntentPublic']);
@@ -90,6 +91,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // Payments
     Route::post('/create-payment-intent', [App\Http\Controllers\Api\PaymentController::class, 'createPaymentIntent']);
     Route::post('/payment/confirm', [App\Http\Controllers\Api\PaymentController::class, 'confirmPayment']);
+    Route::post('/wallet/redeem', [App\Http\Controllers\Api\PaymentController::class, 'redeem']);
     Route::get('/wallet/transactions', [App\Http\Controllers\Api\PaymentController::class, 'getTransactions']);
 
     // Subscriptions

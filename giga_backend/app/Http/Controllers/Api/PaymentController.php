@@ -146,6 +146,79 @@ class PaymentController extends Controller
             return response()->json(['error' => 'Failed to confirm payment: ' . $e->getMessage()], 500);
         }
     }
+    public function redeem(Request $request) {
+        $request->validate(['code' => 'required|string']);
+
+        try {
+            return \Illuminate\Support\Facades\DB::transaction(function () use ($request) {
+                // 1. Find the card
+                $card = \App\Models\GiftCard::where('code', $request->code)
+                    ->where('is_active', true)
+                    ->lockForUpdate() // Prevent race conditions
+                    ->first();
+
+                if (!$card) {
+                    return response()->json(['error' => 'Invalid or inactive gift card'], 404);
+                }
+
+                // 2. Validate Expiry
+                if ($card->expires_at && $card->expires_at->isPast()) {
+                    return response()->json(['error' => 'This gift card has expired'], 400);
+                }
+
+                // 3. Validate Usage Limit
+                if ($card->current_uses >= $card->max_uses) {
+                    return response()->json(['error' => 'This gift card has technically been fully redeemed.'], 400);
+                }
+
+                $user = $request->user();
+
+                // 4. Validate Currency Mismatch (CRITICAL)
+                // If user has no wallet yet, we allow creating one with the card's currency
+                // But if they have a wallet, it MUST match.
+                $wallet = $user->wallet()->firstOrCreate(
+                    [], 
+                    ['balance' => 0.00, 'currency' => $card->currency_code]
+                );
+
+                if (strtoupper($wallet->currency) !== strtoupper($card->currency_code)) {
+                    return response()->json([
+                        'error' => "Currency Mismatch. This card is in {$card->currency_code} but your wallet is in {$wallet->currency}."
+                    ], 400);
+                }
+
+                // 5. Credit Wallet
+                $wallet->balance += $card->amount;
+                $wallet->save();
+
+                // 6. Record Transaction
+                $wallet->transactions()->create([
+                    'amount' => $card->amount,
+                    'type' => 'credit',
+                    'description' => 'Gift Card Redeemed: ' . $card->code, // Masked in prod usually
+                    'reference' => 'GIFT_' . $card->id . '_' . time(),
+                    'status' => 'completed',
+                    'currency' => $card->currency_code,
+                    'category' => 'gift_card'
+                ]);
+
+                // 7. Increment Usage
+                $card->increment('current_uses');
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Gift card redeemed successfully!',
+                    'amount' => $card->amount,
+                    'new_balance' => $wallet->balance,
+                ]);
+            });
+
+        } catch (\Exception $e) {
+             Log::error('Gift Card Redemption Error: ' . $e->getMessage());
+             return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
     public function getTransactions(Request $request)
     {
         try {

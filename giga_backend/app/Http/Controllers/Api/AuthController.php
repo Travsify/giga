@@ -26,6 +26,8 @@ class AuthController extends Controller
                 'company_name' => 'required_if:role,Company|string|max:255',
                 'registration_number' => 'required_if:role,Company|string|unique:logistics_companies',
                 'company_type' => 'required_if:role,Company|string',
+                'country_code' => 'nullable|string|size:2',
+                'currency_code' => 'nullable|string|size:3',
             ]);
 
             if ($validator->fails()) {
@@ -39,6 +41,8 @@ class AuthController extends Controller
                     'password' => Hash::make($request->password),
                     'role' => $request->role,
                     'uk_phone' => $request->uk_phone,
+                    'country_code' => $request->country_code ?? 'GB',
+                    'currency_code' => $request->currency_code ?? 'GBP',
                 ]);
 
                 if ($request->role === 'Company') {
@@ -70,7 +74,7 @@ class AuthController extends Controller
                 Wallet::create([
                     'user_id' => $user->id,
                     'balance' => 0.00,
-                    'currency' => 'GBP',
+                    'currency' => $user->currency_code ?? 'GBP',
                 ]);
 
                 $token = $user->createToken('auth_token')->plainTextToken;

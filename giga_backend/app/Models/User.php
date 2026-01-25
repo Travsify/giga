@@ -27,6 +27,8 @@ class User extends Authenticatable implements FilamentUser
         'is_giga_plus',
         'giga_plus_expiry',
         'business_id',
+        'country_code',
+        'currency_code',
     ];
 
     protected $hidden = [

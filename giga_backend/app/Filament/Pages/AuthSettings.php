@@ -21,6 +21,8 @@ class AuthSettings extends Page
     public function mount(): void
     {
         $this->form->fill([
+            'auth_email_enabled' => AppSetting::get('auth_email_enabled', true),
+            'auth_phone_enabled' => AppSetting::get('auth_phone_enabled', true),
             'email_verification_enabled' => AppSetting::get('email_verification_enabled', true),
             'phone_verification_enabled' => AppSetting::get('phone_verification_enabled', true),
             'sms_provider' => AppSetting::get('sms_provider', 'log'),
@@ -38,6 +40,14 @@ class AuthSettings extends Page
     {
         return $form
             ->schema([
+                Forms\Components\Section::make('Login Methods')
+                    ->schema([
+                        Forms\Components\Toggle::make('auth_email_enabled')
+                            ->label('Enable Email Login'),
+                        Forms\Components\Toggle::make('auth_phone_enabled')
+                            ->label('Enable Phone Login'),
+                    ])->columns(2),
+
                 Forms\Components\Section::make('Verification Settings')
                     ->schema([
                         Forms\Components\Toggle::make('email_verification_enabled')
