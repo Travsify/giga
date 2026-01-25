@@ -4,199 +4,139 @@
 @source '../../../../app/Filament/**/*.php';
 @source '../../../../resources/views/filament/**/*.blade.php';
 
-@theme {
-    --color-primary-50: 239 246 255;
-    --color-primary-100: 219 234 254;
-    --color-primary-200: 191 219 254;
-    --color-primary-300: 147 197 253;
-    --color-primary-400: 96 165 250;
-    --color-primary-500: 59 130 246;
-    --color-primary-600: 37 99 235;
-    --color-primary-700: 29 78 216;
-    --color-primary-800: 30 64 175;
-    --color-primary-900: 30 58 138;
-    --color-primary-950: 23 37 84;
-}
-
-/* Giga Command Dashboard - High-Tech Industrial Overhaul */
+/* Modern Logistics Admin Theme - Inspired by Reference */
 
 :root {
-    --giga-neon-blue: #3B82F6;
-    --giga-neon-red: #EF4444;
-    --giga-dark-bg: #0B0E14;
-    --giga-card-bg: #141820;
-    --giga-sidebar-bg: #0F1219;
-    --giga-border: rgba(59, 130, 246, 0.2);
-    --giga-text: #E2E8F0;
-    --giga-text-dim: #94A3B8;
+    --giga-sidebar-bg: #1E293B; /* Dark Navy */
+    --giga-sidebar-text: #94A3B8;
+    --giga-sidebar-active-bg: rgba(255, 255, 255, 0.05);
+    --giga-accent-orange: #F97316;
+    --giga-main-bg: #F1F5F9;
+    --giga-card-bg: #FFFFFF;
+    --giga-primary-blue: #2563EB;
+    --giga-text-dark: #0F172A;
 }
 
-/* Base Body - Deep Space Dark */
-.fi-body {
-    background-color: var(--giga-dark-bg) !important;
-    color: var(--giga-text) !important;
-    background-image: 
-        radial-gradient(circle at 50% 50%, rgba(59, 130, 246, 0.05) 0%, transparent 50%),
-        linear-gradient(rgba(11, 14, 20, 0.8), rgba(11, 14, 20, 1)) !important;
-}
-
-/* Sidebar - Tech Console */
+/* Sidebar Styling */
 .fi-sidebar {
-    background: var(--giga-sidebar-bg) !important;
-    border-right: 1px solid var(--giga-border) !important;
-    box-shadow: 10px 0 30px rgba(0, 0, 0, 0.5) !important;
+    background-color: var(--giga-sidebar-bg) !important;
+    border-right: none !important;
 }
 
-/* Navigation Items */
-.fi-sidebar-nav .fi-sidebar-item {
-    margin: 4px 12px !important;
-    border-radius: 6px !important;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+.fi-sidebar-header {
+    background-color: transparent !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
 }
 
-.fi-sidebar-nav .fi-sidebar-item:hover {
-    background: rgba(59, 130, 246, 0.05) !important;
-    transform: translateX(4px);
+.fi-sidebar-item {
+    margin: 4px 16px !important;
 }
 
-.fi-sidebar-nav .fi-sidebar-item-active {
-    background: linear-gradient(90deg, rgba(59, 130, 246, 0.2) 0%, transparent 100%) !important;
-    border-left: 3px solid var(--giga-neon-blue) !important;
-    box-shadow: inset 5px 0 15px rgba(59, 130, 246, 0.1) !important;
+/* Sidebar Icons */
+.fi-sidebar-group-item .fi-sidebar-item-button .fi-sidebar-item-icon {
+    color: var(--giga-sidebar-text) !important;
+    transition: color 0.3s ease;
 }
 
-/* High-Tech Section Cards */
-.fi-section {
-    background: var(--giga-card-bg) !important;
-    border: 1px solid var(--giga-border) !important;
-    border-radius: 12px !important;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3) !important;
-    backdrop-filter: blur(10px) !important;
-}
-
-/* Glow Borders on Cards */
-.fi-section:hover {
-    border-color: rgba(59, 130, 246, 0.4) !important;
-    box-shadow: 0 0 20px rgba(59, 130, 246, 0.05) !important;
-}
-
-/* Dashboard Stats Overview */
-.fi-wi-stats-overview-stat {
-    background: var(--giga-card-bg) !important;
-    border: 1px solid var(--giga-border) !important;
-    transition: all 0.3s ease !important;
-}
-
-.fi-wi-stats-overview-stat:hover {
-    background: rgba(59, 130, 246, 0.03) !important;
-    border-color: var(--giga-neon-blue) !important;
-    transform: translateY(-2px);
-}
-
-/* NEON BUTTONS - VIBRANT & GLOWING */
-.fi-btn {
-    border-radius: 6px !important;
-    font-weight: 700 !important;
-    text-transform: uppercase !important;
-    letter-spacing: 1px !important;
-    transition: all 0.2s ease !important;
-    position: relative !important;
-    overflow: hidden !important;
-}
-
-.fi-btn-primary,
-.fi-btn-color-primary,
-.fi-ac-action[data-color="primary"] {
-    background: var(--giga-neon-blue) !important;
+/* Active Menu Item with Orange Left Border */
+.fi-sidebar-item-active {
+    background-color: var(--giga-sidebar-active-bg) !important;
     color: #FFFFFF !important;
-    box-shadow: 0 0 15px rgba(59, 130, 246, 0.4) !important;
-    border: none !important;
+    position: relative !important;
+    border-radius: 8px !important;
+}
+
+.fi-sidebar-item-active::before {
+    content: '';
+    position: absolute;
+    left: -16px; /* Align with sidebar edge */
+    top: 15%;
+    height: 70%;
+    width: 4px;
+    background-color: var(--giga-accent-orange);
+    border-radius: 0 4px 4px 0;
+}
+
+.fi-sidebar-item-active .fi-sidebar-item-icon {
+    color: #FFFFFF !important;
+}
+
+/* Main Content Area */
+.fi-body {
+    background-color: var(--giga-main-bg) !important;
+}
+
+/* Clean Cards */
+.fi-section, 
+.fi-wi-stats-overview-stat {
+    background-color: var(--giga-card-bg) !important;
+    border: 1px solid rgba(0, 0, 0, 0.05) !important;
+    border-radius: 12px !important;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03) !important;
+}
+
+/* Header Typography */
+.fi-header-heading {
+    color: var(--giga-text-dark) !important;
+    font-weight: 700 !important;
+    letter-spacing: -0.025em !important;
+}
+
+/* Stat Widgets */
+.fi-wi-stats-overview-stat-value {
+    color: var(--giga-text-dark) !important;
+    font-size: 1.875rem !important;
+    font-weight: 800 !important;
+}
+
+.fi-wi-stats-overview-stat-label {
+    color: #64748B !important;
+    text-transform: capitalize !important;
+    font-weight: 600 !important;
+}
+
+/* Primary Action Buttons */
+.fi-btn-primary, 
+.fi-btn-color-primary {
+    background-color: var(--giga-primary-blue) !important;
+    border-radius: 8px !important;
+    font-weight: 600 !important;
+    padding: 10px 20px !important;
+    box-shadow: 0 4px 15px rgba(37, 99, 235, 0.2) !important;
 }
 
 .fi-btn-primary:hover {
-    box-shadow: 0 0 25px rgba(59, 130, 246, 0.6) !important;
-    transform: scale(1.02) !important;
+    background-color: #1D4ED8 !important;
 }
 
-/* Red Secondary/Danger buttons for high-priority items */
-.fi-btn-color-danger,
-.fi-ac-action[data-color="danger"] {
-    background: var(--giga-neon-red) !important;
-    color: #FFFFFF !important;
-    box-shadow: 0 0 15px rgba(239, 68, 68, 0.4) !important;
+/* Tables */
+.fi-ta-header-cell {
+    background-color: #F8FAFC !important;
+    border-bottom: 2px solid #E2E8F0 !important;
 }
 
-/* INPUT FIELDS - TECH CONSOLE STYLE */
-.fi-input {
-    background: rgba(15, 18, 25, 0.8) !important;
-    border: 1px solid var(--giga-border) !important;
-    border-radius: 6px !important;
-    color: var(--giga-neon-blue) !important;
-    font-family: 'JetBrains Mono', 'Outfit', monospace !important;
-    font-weight: 600 !important;
-}
-
-.fi-input:focus {
-    border-color: var(--giga-neon-blue) !important;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2) !important;
-    background: rgba(15, 18, 25, 1) !important;
-}
-
-/* TYPOGRAPHY - VIBRANT & CLEAR */
-.fi-header-heading {
-    color: #FFFFFF !important;
-    font-weight: 800 !important;
-    text-transform: uppercase !important;
-    letter-spacing: 2px !important;
-    text-shadow: 0 0 10px rgba(59, 130, 246, 0.3) !important;
-}
-
-.fi-fo-field-wrp-label label {
-    color: var(--giga-text-dim) !important;
-    font-weight: 600 !important;
+.fi-ta-header-cell-label {
+    color: #64748B !important;
+    font-weight: 700 !important;
     text-transform: uppercase !important;
     font-size: 0.75rem !important;
-    letter-spacing: 1.5px !important;
 }
 
-/* TABLE STYLING - INDUSTRIAL CONTRAST */
-.fi-ta-header-cell {
-    background: rgba(59, 130, 246, 0.05) !important;
-    color: var(--giga-neon-blue) !important;
-    font-weight: 800 !important;
-    border-bottom: 2px solid var(--giga-neon-blue) !important;
-    text-transform: uppercase !important;
-    font-size: 0.7rem !important;
+/* Custom Scrollbar for Sidebar */
+.fi-sidebar-nav::-webkit-scrollbar {
+    width: 4px;
 }
 
-.fi-ta-record {
-    border-bottom: 1px solid rgba(255, 255, 255, 0.03) !important;
+.fi-sidebar-nav::-webkit-scrollbar-track {
+    background: transparent;
 }
 
-.fi-ta-record:hover {
-    background: rgba(59, 130, 246, 0.02) !important;
+.fi-sidebar-nav::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
 }
 
-/* STATUS BADGES - GLOWING NEONS */
-.fi-badge {
-    text-transform: uppercase !important;
-    font-weight: 800 !important;
-    border-radius: 4px !important;
-    border: 1px solid currentColor !important;
-    background: transparent !important;
-}
-
-.fi-badge-color-success { color: #10B981 !important; box-shadow: 0 0 8px rgba(16, 185, 129, 0.3) !important; }
-.fi-badge-color-danger { color: #EF4444 !important; box-shadow: 0 0 8px rgba(239, 68, 68, 0.3) !important; }
-.fi-badge-color-warning { color: #F59E0B !important; box-shadow: 0 0 8px rgba(245, 158, 11, 0.3) !important; }
-
-/* CUSTOM SCROLLBAR - TECH STYLE */
-::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: var(--giga-dark-bg); }
-::-webkit-scrollbar-thumb { background: var(--giga-border); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: var(--giga-neon-blue); }
-
-/* WIDGET LOGO */
+/* Logo/Brand Accent */
 .fi-logo {
-    filter: drop-shadow(0 0 5px var(--giga-neon-blue)) !important;
+    color: #FFFFFF !important;
 }
