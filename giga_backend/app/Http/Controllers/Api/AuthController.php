@@ -46,7 +46,7 @@ class AuthController extends Controller
                 ]);
 
                 if ($request->role === 'Company') {
-                    \App\Models\LogisticsCompany::create([
+                    $company = \App\Models\LogisticsCompany::create([
                         'user_id' => $user->id,
                         'name' => $request->company_name,
                         'registration_number' => $request->registration_number,
@@ -56,6 +56,9 @@ class AuthController extends Controller
                         'address' => $request->address ?? 'To be provided',
                         'is_verified' => false,
                     ]);
+
+                    $user->business_id = $company->id;
+                    $user->save();
                 }
 
                 // Check if email was pre-verified during signup flow

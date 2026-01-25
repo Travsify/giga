@@ -66,6 +66,11 @@ class User extends Authenticatable implements FilamentUser
         return $this->hasOne(LogisticsCompany::class);
     }
 
+    public function company()
+    {
+        return $this->hasOne(LogisticsCompany::class);
+    }
+
     public function business()
     {
         return $this->belongsTo(LogisticsCompany::class, 'business_id');
