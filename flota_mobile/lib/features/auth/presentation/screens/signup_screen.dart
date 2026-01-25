@@ -160,8 +160,13 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
     if (_nameController.text.isEmpty || 
         _emailController.text.isEmpty || 
         (isPhoneEnabled && _phoneController.text.isEmpty) || 
-        _passwordController.text.isEmpty) {
-       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please fill all fields')));
+        _passwordController.text.isEmpty ||
+        (_selectedRole == 'Company' && (
+          _companyNameController.text.isEmpty || 
+          _registrationNumberController.text.isEmpty || 
+          _companyTypeController.text.isEmpty
+        ))) {
+       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please fill all required fields')));
        return;
     }
 

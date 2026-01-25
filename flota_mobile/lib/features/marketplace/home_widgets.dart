@@ -139,6 +139,8 @@ class _LiveHeatmapWidgetState extends State<LiveHeatmapWidget> {
     if (mounted) setState(() => _trafficStatus = status);
   }
 
+  @override
+  Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Container(
       width: double.infinity,
@@ -179,7 +181,7 @@ class _LiveHeatmapWidgetState extends State<LiveHeatmapWidget> {
                     Container(
                       width: 8,
                       height: 8,
-                      decoration: const BoxDecoration(
+                      decoration: BoxDecoration(
                         color: Colors.red,
                         shape: BoxShape.circle,
                       ),
@@ -196,7 +198,7 @@ class _LiveHeatmapWidgetState extends State<LiveHeatmapWidget> {
           ),
           const SizedBox(height: 15),
           SizedBox(
-            height: 200, // Increased height for better visibility
+            height: 200,
             width: double.infinity,
             child: Stack(
               children: [

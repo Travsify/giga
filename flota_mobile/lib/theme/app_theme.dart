@@ -18,6 +18,9 @@ class AppTheme {
   static const Color successGreen = Color(0xFF10B981); // Tech Green
   static const Color accentCyan = Color(0xFF06B6D4);
   static const Color borderBlue = Color(0x333B82F6); // 20% opacity Tech Blue
+  static const Color slateBlue = textSecondary;
+  static const Color cardBg = surfaceColor;
+  static const Color primaryBlueDark = Color(0xFF1D4ED8);
 
   static ThemeData get darkTheme {
     return ThemeData(
@@ -113,5 +116,4 @@ class AppTheme {
 
   // Maintaining lightTheme alias for backward compatibility but using dark colors
   static ThemeData get lightTheme => darkTheme;
-}
 }
