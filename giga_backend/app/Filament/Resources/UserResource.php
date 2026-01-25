@@ -53,6 +53,14 @@ class UserResource extends Resource
                 Forms\Components\Select::make('business_id')
                     ->relationship('business', 'name')
                     ->searchable(),
+                Forms\Components\Select::make('country_id')
+                    ->relationship('country', 'name')
+                    ->searchable()
+                    ->preload()
+                    ->live(),
+                Forms\Components\Toggle::make('is_country_admin')
+                    ->label('Country Admin')
+                    ->visible(fn (Forms\Get $get) => filled($get('country_id'))),
             ]);
     }
 

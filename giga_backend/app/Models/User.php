@@ -29,6 +29,8 @@ class User extends Authenticatable implements FilamentUser
         'business_id',
         'country_code',
         'currency_code',
+        'country_id',
+        'is_country_admin',
     ];
 
     protected $hidden = [
@@ -41,6 +43,7 @@ class User extends Authenticatable implements FilamentUser
         'password' => 'hashed',
         'is_giga_plus' => 'boolean',
         'giga_plus_expiry' => 'datetime',
+        'is_country_admin' => 'boolean',
     ];
 
     public function wallet()
@@ -80,8 +83,14 @@ class User extends Authenticatable implements FilamentUser
 
     public function canAccessPanel(Panel $panel): bool
     {
-        // For development, allow access for a specific email or role
-        // You can adjust this logic based on your needs
-        return str_ends_with($this->email, '@giga.com') || $this->role === 'SuperAdmin';
+        // Allow access to superadmins and country admins
+        return str_ends_with($this->email, '@giga.com') 
+            || $this->role === 'SuperAdmin' 
+            || $this->is_country_admin;
+    }
+
+    public function country()
+    {
+        return $this->belongsTo(Country::class);
     }
 }

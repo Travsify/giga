@@ -17,7 +17,23 @@ class CountryResource extends Resource
 {
     protected static ?string $model = Country::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-globe-alt';
+
+    protected static ?string $navigationGroup = 'Operations';
+
+    protected static ?string $navigationLabel = 'Countries & Pricing';
+
+    protected static ?int $navigationSort = 2;
+
+    public static function canViewAny(): bool
+    {
+        return true;
+    }
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        return true;
+    }
 
     public static function form(Form $form): Form
     {
@@ -96,7 +112,7 @@ class CountryResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            RelationManagers\ServicePricesRelationManager::class,
         ];
     }
 

@@ -24,4 +24,23 @@ class Country extends Model
         'is_active' => 'boolean',
         'is_default' => 'boolean',
     ];
+
+    public function servicePrices()
+    {
+        return $this->hasMany(CountryServicePrice::class);
+    }
+
+    public function services()
+    {
+        return $this->belongsToMany(Service::class, 'country_service_prices')
+            ->withPivot([
+                'base_price',
+                'price_per_km',
+                'price_per_min',
+                'minimum_fare',
+                'commission_percentage',
+                'is_active',
+            ])
+            ->withTimestamps();
+    }
 }
