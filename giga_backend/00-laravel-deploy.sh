@@ -18,6 +18,9 @@ sed -i 's/^ASSET_URL=.*/ASSET_URL=https:\/\/giga-ytn0.onrender.com/' .env || ech
 echo "Running migrations..."
 php artisan migrate --force
 
+echo "Seeding default settings..."
+php artisan db:seed --class=AppSettingsSeeder --force || true
+
 echo "Clearing old caches..."
 php artisan config:clear
 php artisan route:clear

@@ -17,6 +17,7 @@ use App\Http\Controllers\Api\BulkBookingController;
 use App\Http\Controllers\Api\PromoController;
 use App\Http\Controllers\Api\LockerController;
 use App\Http\Controllers\Api\SustainabilityController;
+use App\Http\Controllers\Api\SettingsController;
 
 // Rate-limited auth routes (5 attempts per minute per IP)
 Route::middleware('throttle:5,1')->group(function () {
@@ -25,6 +26,10 @@ Route::middleware('throttle:5,1')->group(function () {
     Route::post('/forgot-password', [PasswordResetController::class, 'sendResetLink']);
     Route::post('/reset-password', [PasswordResetController::class, 'reset']);
 });
+
+// App Settings (Public - no auth required)
+Route::get('/settings', [SettingsController::class, 'index']);
+Route::get('/settings/check-version/{version}', [SettingsController::class, 'checkVersion']);
 
 // Payment (Public for Demo)
 Route::post('/create-payment-intent-public', [PaymentController::class, 'createPaymentIntentPublic']);
