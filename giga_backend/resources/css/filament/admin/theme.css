@@ -5,163 +5,198 @@
 @source '../../../../resources/views/filament/**/*.blade.php';
 
 @theme {
-    --color-primary-50: 255 247 237;
-    --color-primary-100: 255 237 213;
-    --color-primary-200: 254 215 170;
-    --color-primary-300: 253 186 116;
-    --color-primary-400: 251 146 60;
-    --color-primary-500: 249 115 22;
-    --color-primary-600: 234 88 12;
-    --color-primary-700: 194 65 12;
-    --color-primary-800: 154 52 18;
-    --color-primary-900: 124 45 18;
-    --color-primary-950: 67 20 7;
+    --color-primary-50: 239 246 255;
+    --color-primary-100: 219 234 254;
+    --color-primary-200: 191 219 254;
+    --color-primary-300: 147 197 253;
+    --color-primary-400: 96 165 250;
+    --color-primary-500: 59 130 246;
+    --color-primary-600: 37 99 235;
+    --color-primary-700: 29 78 216;
+    --color-primary-800: 30 64 175;
+    --color-primary-900: 30 58 138;
+    --color-primary-950: 23 37 84;
 }
 
-/* Giga Command Center - VIBRANT BRANDING OVERHAUL */
+/* Giga Command Dashboard - High-Tech Industrial Overhaul */
 
 :root {
-    --giga-blue: #0047C1;
-    --giga-orange: #FF6B00;
-    --giga-bg: #F0F4F8;
-    --giga-border: #94A3B8;
-    --giga-sidebar-bg: #FFFFFF;
+    --giga-neon-blue: #3B82F6;
+    --giga-neon-red: #EF4444;
+    --giga-dark-bg: #0B0E14;
+    --giga-card-bg: #141820;
+    --giga-sidebar-bg: #0F1219;
+    --giga-border: rgba(59, 130, 246, 0.2);
+    --giga-text: #E2E8F0;
+    --giga-text-dim: #94A3B8;
 }
 
-/* Main background */
+/* Base Body - Deep Space Dark */
 .fi-body {
-    background-color: var(--giga-bg) !important;
+    background-color: var(--giga-dark-bg) !important;
+    color: var(--giga-text) !important;
+    background-image: 
+        radial-gradient(circle at 50% 50%, rgba(59, 130, 246, 0.05) 0%, transparent 50%),
+        linear-gradient(rgba(11, 14, 20, 0.8), rgba(11, 14, 20, 1)) !important;
 }
 
-/* Sidebar Styling */
+/* Sidebar - Tech Console */
 .fi-sidebar {
     background: var(--giga-sidebar-bg) !important;
-    border-right: 3px solid var(--giga-orange) !important;
+    border-right: 1px solid var(--giga-border) !important;
+    box-shadow: 10px 0 30px rgba(0, 0, 0, 0.5) !important;
 }
 
-/* Navigation - ACTIVE MENU Orange */
+/* Navigation Items */
 .fi-sidebar-nav .fi-sidebar-item {
-    margin: 8px 14px !important;
-    border-radius: 10px !important;
-    transition: all 0.3s ease !important;
+    margin: 4px 12px !important;
+    border-radius: 6px !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.fi-sidebar-nav .fi-sidebar-item:hover {
+    background: rgba(59, 130, 246, 0.05) !important;
+    transform: translateX(4px);
 }
 
 .fi-sidebar-nav .fi-sidebar-item-active {
-    background: var(--giga-orange) !important;
+    background: linear-gradient(90deg, rgba(59, 130, 246, 0.2) 0%, transparent 100%) !important;
+    border-left: 3px solid var(--giga-neon-blue) !important;
+    box-shadow: inset 5px 0 15px rgba(59, 130, 246, 0.1) !important;
 }
 
-.fi-sidebar-nav .fi-sidebar-item-active span {
-    color: #FFFFFF !important;
-    font-weight: 800 !important;
+/* High-Tech Section Cards */
+.fi-section {
+    background: var(--giga-card-bg) !important;
+    border: 1px solid var(--giga-border) !important;
+    border-radius: 12px !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3) !important;
+    backdrop-filter: blur(10px) !important;
 }
 
-.fi-sidebar-nav .fi-sidebar-item-active .fi-sidebar-item-icon {
-    color: #FFFFFF !important;
+/* Glow Borders on Cards */
+.fi-section:hover {
+    border-color: rgba(59, 130, 246, 0.4) !important;
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.05) !important;
 }
 
-/* ALL BUTTONS - SOLID VIBRANT ORANGE */
+/* Dashboard Stats Overview */
+.fi-wi-stats-overview-stat {
+    background: var(--giga-card-bg) !important;
+    border: 1px solid var(--giga-border) !important;
+    transition: all 0.3s ease !important;
+}
+
+.fi-wi-stats-overview-stat:hover {
+    background: rgba(59, 130, 246, 0.03) !important;
+    border-color: var(--giga-neon-blue) !important;
+    transform: translateY(-2px);
+}
+
+/* NEON BUTTONS - VIBRANT & GLOWING */
 .fi-btn {
-    border-radius: 10px !important;
-    font-weight: 900 !important;
+    border-radius: 6px !important;
+    font-weight: 700 !important;
     text-transform: uppercase !important;
-    letter-spacing: 0.8px !important;
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    letter-spacing: 1px !important;
+    transition: all 0.2s ease !important;
+    position: relative !important;
+    overflow: hidden !important;
 }
 
 .fi-btn-primary,
 .fi-btn-color-primary,
-.fi-btn-color-gray,
-.fi-ac-action[data-color="primary"],
-.fi-ac-action[data-color="gray"] {
-    background: var(--giga-orange) !important;
+.fi-ac-action[data-color="primary"] {
+    background: var(--giga-neon-blue) !important;
     color: #FFFFFF !important;
-    box-shadow: 0 4px 12px rgba(255, 107, 0, 0.4) !important;
+    box-shadow: 0 0 15px rgba(59, 130, 246, 0.4) !important;
+    border: none !important;
 }
 
-.fi-btn:hover {
-    transform: translateY(-3px) scale(1.02) !important;
-    box-shadow: 0 8px 20px rgba(255, 107, 0, 0.5) !important;
+.fi-btn-primary:hover {
+    box-shadow: 0 0 25px rgba(59, 130, 246, 0.6) !important;
+    transform: scale(1.02) !important;
 }
 
-/* ALL TEXT - GIGA BLUE */
-.fi-header-heading,
-.fi-ta-header-cell,
-.fi-fo-field-wrp-label label,
-.fi-sidebar-item span,
-.fi-ta-text-item span,
-p, h1, h2, h3, h4, h5, h6,
-.fi-ta-header-cell div,
-.fi-section-header-heading,
-.fi-ta-empty-state-heading {
-    color: var(--giga-blue) !important;
+/* Red Secondary/Danger buttons for high-priority items */
+.fi-btn-color-danger,
+.fi-ac-action[data-color="danger"] {
+    background: var(--giga-neon-red) !important;
+    color: #FFFFFF !important;
+    box-shadow: 0 0 15px rgba(239, 68, 68, 0.4) !important;
 }
 
-/* Specific text visibility fixes */
-.fi-header-heading {
-    font-weight: 950 !important;
-    font-size: 2.8rem !important;
-    letter-spacing: -1.5px !important;
-}
-
-.fi-fo-field-wrp-label label {
-    font-weight: 900 !important;
-    font-size: 1.1rem !important;
-}
-
-/* INPUT FIELDS - VISIBLE BORDERS */
+/* INPUT FIELDS - TECH CONSOLE STYLE */
 .fi-input {
-    border: 3px solid var(--giga-blue) !important;
-    border-radius: 10px !important;
-    padding: 14px !important;
-    color: var(--giga-blue) !important; /* Text inside also Blue */
-    font-weight: 700 !important;
-    font-size: 1.1rem !important;
+    background: rgba(15, 18, 25, 0.8) !important;
+    border: 1px solid var(--giga-border) !important;
+    border-radius: 6px !important;
+    color: var(--giga-neon-blue) !important;
+    font-family: 'JetBrains Mono', 'Outfit', monospace !important;
+    font-weight: 600 !important;
 }
 
 .fi-input:focus {
-    box-shadow: 0 0 0 6px rgba(0, 71, 193, 0.2) !important;
+    border-color: var(--giga-neon-blue) !important;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2) !important;
+    background: rgba(15, 18, 25, 1) !important;
 }
 
-/* CARDS & SECTIONS */
-.fi-section {
-    background: #FFFFFF !important;
-    border: 2px solid var(--giga-blue) !important;
-    border-radius: 24px !important;
-    box-shadow: 0 20px 50px -10px rgba(0, 71, 193, 0.1) !important;
+/* TYPOGRAPHY - VIBRANT & CLEAR */
+.fi-header-heading {
+    color: #FFFFFF !important;
+    font-weight: 800 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 2px !important;
+    text-shadow: 0 0 10px rgba(59, 130, 246, 0.3) !important;
 }
 
-/* TABLE STYLING */
+.fi-fo-field-wrp-label label {
+    color: var(--giga-text-dim) !important;
+    font-weight: 600 !important;
+    text-transform: uppercase !important;
+    font-size: 0.75rem !important;
+    letter-spacing: 1.5px !important;
+}
+
+/* TABLE STYLING - INDUSTRIAL CONTRAST */
 .fi-ta-header-cell {
-    background: rgba(0, 71, 193, 0.05) !important;
-    border-bottom: 3px solid var(--giga-orange) !important;
+    background: rgba(59, 130, 246, 0.05) !important;
+    color: var(--giga-neon-blue) !important;
+    font-weight: 800 !important;
+    border-bottom: 2px solid var(--giga-neon-blue) !important;
+    text-transform: uppercase !important;
+    font-size: 0.7rem !important;
 }
 
-/* STATUS BADGES */
+.fi-ta-record {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.03) !important;
+}
+
+.fi-ta-record:hover {
+    background: rgba(59, 130, 246, 0.02) !important;
+}
+
+/* STATUS BADGES - GLOWING NEONS */
 .fi-badge {
-    font-weight: 900 !important;
+    text-transform: uppercase !important;
+    font-weight: 800 !important;
+    border-radius: 4px !important;
+    border: 1px solid currentColor !important;
+    background: transparent !important;
 }
 
-.fi-badge-color-success {
-    background: #2E7D32 !important;
-    color: #FFFFFF !important;
-}
+.fi-badge-color-success { color: #10B981 !important; box-shadow: 0 0 8px rgba(16, 185, 129, 0.3) !important; }
+.fi-badge-color-danger { color: #EF4444 !important; box-shadow: 0 0 8px rgba(239, 68, 68, 0.3) !important; }
+.fi-badge-color-warning { color: #F59E0B !important; box-shadow: 0 0 8px rgba(245, 158, 11, 0.3) !important; }
 
-.fi-badge-color-danger {
-    background: #D32F2F !important;
-    color: #FFFFFF !important;
-}
+/* CUSTOM SCROLLBAR - TECH STYLE */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--giga-dark-bg); }
+::-webkit-scrollbar-thumb { background: var(--giga-border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--giga-neon-blue); }
 
-/* LOGO GLOW */
+/* WIDGET LOGO */
 .fi-logo {
-    filter: drop-shadow(0 0 10px rgba(255, 107, 0, 0.5)) !important;
-}
-
-@keyframes pulse-orange {
-    0% { box-shadow: 0 0 0 0 rgba(255, 107, 0, 0.6); }
-    70% { box-shadow: 0 0 0 15px rgba(255, 107, 0, 0); }
-    100% { box-shadow: 0 0 0 0 rgba(255, 107, 0, 0); }
-}
-
-.fi-btn-primary {
-    animation: pulse-orange 2s infinite ease-in-out;
+    filter: drop-shadow(0 0 5px var(--giga-neon-blue)) !important;
 }
