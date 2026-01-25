@@ -16,7 +16,9 @@ class RiderResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-user-circle';
 
-    protected static ?string $navigationGroup = 'User Management';
+    protected static ?string $navigationGroup = 'Operations';
+
+    protected static ?string $navigationLabel = 'Drivers';
 
     public static function form(Form $form): Form
     {

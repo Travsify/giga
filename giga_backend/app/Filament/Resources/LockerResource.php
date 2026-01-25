@@ -16,7 +16,7 @@ class LockerResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-archive-box';
 
-    protected static ?string $navigationGroup = 'Infrastructure';
+    protected static ?string $navigationGroup = 'Settings';
 
     public static function form(Form $form): Form
     {

@@ -16,7 +16,7 @@ class LogisticsCompanyResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-building-office-2';
 
-    protected static ?string $navigationGroup = 'Business Management';
+    protected static ?string $navigationGroup = 'Management';
 
     public static function form(Form $form): Form
     {

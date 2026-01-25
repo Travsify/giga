@@ -16,7 +16,7 @@ class WalletResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-credit-card';
 
-    protected static ?string $navigationGroup = 'Financial Management';
+    protected static ?string $navigationGroup = 'Management';
 
     public static function form(Form $form): Form
     {
