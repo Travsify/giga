@@ -18,6 +18,11 @@ echo "Clearing old caches..."
 php artisan config:clear
 php artisan route:clear
 php artisan cache:clear
+php artisan view:clear
+
+echo "Clearing Filament caches..."
+php artisan filament:cache-components || true
+php artisan icons:cache || true
 
 echo "Caching config..."
 php artisan config:cache
