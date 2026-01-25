@@ -35,6 +35,8 @@ Route::get('/status', function() { return response()->json(['status' => 'online'
 // Public Signup Verification
 Route::post('/signup/verify-email/send', [EmailVerificationController::class, 'sendSignupCode']);
 Route::post('/signup/verify-email/confirm', [EmailVerificationController::class, 'verifySignupCode']);
+Route::post('/phone/send-otp', [App\Http\Controllers\Api\PhoneVerificationController::class, 'sendOtp']);
+Route::post('/phone/verify-otp', [App\Http\Controllers\Api\PhoneVerificationController::class, 'verifyOtp']);
 
 
 // Protected routes

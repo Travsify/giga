@@ -13,7 +13,7 @@ class ListWallets extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::class,
+            Actions\CreateAction::make(),
         ];
     }
 }

@@ -13,7 +13,7 @@ class EditRider extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            Actions\DeleteAction::class,
+            Actions\DeleteAction::make(),
         ];
     }
 }

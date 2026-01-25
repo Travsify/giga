@@ -22,45 +22,64 @@ class AuthController extends Controller
                 'password' => 'required|string|min:8',
                 'role' => 'required|in:Customer,Rider,Company',
                 'uk_phone' => 'nullable|string|unique:users',
+                // Business fields (conditional)
+                'company_name' => 'required_if:role,Company|string|max:255',
+                'registration_number' => 'required_if:role,Company|string|unique:logistics_companies',
+                'company_type' => 'required_if:role,Company|string',
             ]);
 
             if ($validator->fails()) {
                 return response()->json(['errors' => $validator->errors()], 422);
             }
 
-            $user = User::create([
-                'name' => $request->name,
-                'email' => $request->email,
-                'password' => Hash::make($request->password),
-                'role' => $request->role,
-                'uk_phone' => $request->uk_phone,
-            ]);
+            return DB::transaction(function () use ($request) {
+                $user = User::create([
+                    'name' => $request->name,
+                    'email' => $request->email,
+                    'password' => Hash::make($request->password),
+                    'role' => $request->role,
+                    'uk_phone' => $request->uk_phone,
+                ]);
 
-            // Check if email was pre-verified during signup flow
-            $isVerified = DB::table('email_verification_codes')
-                ->where('email', $request->email)
-                ->where('expires_at', '>', now())
-                ->exists();
+                if ($request->role === 'Company') {
+                    \App\Models\LogisticsCompany::create([
+                        'user_id' => $user->id,
+                        'name' => $request->company_name,
+                        'registration_number' => $request->registration_number,
+                        'company_type' => $request->company_type,
+                        'business_email' => $request->email,
+                        'contact_phone' => $request->uk_phone ?? '',
+                        'address' => $request->address ?? 'To be provided',
+                        'is_verified' => false,
+                    ]);
+                }
 
-            if ($isVerified) {
-                $user->email_verified_at = now();
-                $user->save();
-                DB::table('email_verification_codes')->where('email', $request->email)->delete();
-            }
+                // Check if email was pre-verified during signup flow
+                $isVerified = DB::table('email_verification_codes')
+                    ->where('email', $request->email)
+                    ->where('expires_at', '>', now())
+                    ->exists();
 
-            // Create wallet for user
-            Wallet::create([
-                'user_id' => $user->id,
-                'balance' => 0.00,
-                'currency' => 'GBP',
-            ]);
+                if ($isVerified) {
+                    $user->email_verified_at = now();
+                    $user->save();
+                    DB::table('email_verification_codes')->where('email', $request->email)->delete();
+                }
 
-            $token = $user->createToken('auth_token')->plainTextToken;
+                // Create wallet for user
+                Wallet::create([
+                    'user_id' => $user->id,
+                    'balance' => 0.00,
+                    'currency' => 'GBP',
+                ]);
 
-            return response()->json([
-                'user' => $user,
-                'token' => $token,
-            ], 201);
+                $token = $user->createToken('auth_token')->plainTextToken;
+
+                return response()->json([
+                    'user' => $user->load('company'),
+                    'token' => $token,
+                ], 201);
+            });
         } catch (\Exception $e) {
             Log::error('Registration Error: ' . $e->getMessage(), [
                 'file' => $e->getFile(),
