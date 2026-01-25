@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
@@ -8,6 +9,10 @@ import 'package:flota_mobile/features/marketplace/delivery_provider.dart';
 import 'package:flota_mobile/features/marketplace/data/models/delivery_models.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flota_mobile/core/payment_service.dart';
+import 'package:flota_mobile/features/auth/auth_provider.dart';
+import 'package:flota_mobile/features/profile/profile_provider.dart';
+import 'package:flota_mobile/core/settings_service.dart';
 
 class CheckoutScreen extends ConsumerStatefulWidget {
   final DeliveryRequest deliveryRequest;
@@ -21,6 +26,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   String selectedMethod = 'Giga Wallet';
   bool _hasNhsDiscount = false;
   bool _isCheckingDiscount = true;
+  bool _isProcessing = false;
 
   @override
   void initState() {
@@ -52,26 +58,106 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     return baseFare;
   }
 
+  bool _isGatewayAvailable(WidgetRef ref, String gateway) {
+    final countryCode = ref.watch(authProvider).countryCode;
+    final settings = ref.read(settingsServiceProvider);
+    
+    // Find country config
+    final country = settings.supportedCountries.firstWhere(
+      (c) => c.isoCode == countryCode,
+      orElse: () => settings.currentCountry ?? settings.supportedCountries.first
+    );
+    
+    // Check if gateway is in list (or COD feature for COD)
+    if (gateway == 'cod') return country.features.contains('cod');
+    return country.paymentGateways.contains(gateway);
+  }
+
   Future<void> _handlePayment() async {
-    if (selectedMethod == 'Stripe') {
-      // Simulate Stripe Payment Sheet
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Processing Card Payment via Stripe...')),
+    final messenger = ScaffoldMessenger.of(context);
+    final profile = ref.read(profileProvider);
+    final authState = ref.read(authProvider);
+    final user = profile.user;
+
+    // Handle COD
+    if (selectedMethod == 'COD') {
+       final success = await ref.read(deliveryProvider.notifier).createDelivery(widget.deliveryRequest);
+       if (success && mounted) {
+          messenger.showSnackBar(const SnackBar(content: Text('Delivery Booked! Please pay safely on arrival.'), backgroundColor: AppTheme.successGreen));
+          context.go('/marketplace');
+       }
+       return;
+    }
+    
+    // Handle Paystack (Stub)
+    if (selectedMethod == 'Paystack') {
+       messenger.showSnackBar(const SnackBar(content: Text('Paystack integration coming in next update.')));
+       return;
+    }
+
+    // Handle Stripe
+    if (selectedMethod == 'Stripe' || selectedMethod == 'Digital Wallet') {
+      if (user == null || user['email'] == null) {
+        messenger.showSnackBar(
+          const SnackBar(content: Text('Please wait for profile to load...')),
+        );
+        return;
+      }
+
+      setState(() => _isProcessing = true);
+      
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text('Processing ${selectedMethod == 'Stripe' ? 'Card' : 'Digital'} Payment...'),
+          duration: const Duration(seconds: 1),
+        ),
       );
-      await Future.delayed(const Duration(seconds: 2));
+
+      try {
+        await PaymentService.initialize();
+        final userId = authState.userId;
+        if (userId == null) throw 'User session expired';
+
+        final paymentSuccess = await PaymentService.fundWallet(
+          context, 
+          _effectiveFare, 
+          user['email'], 
+          userId,
+          currency: authState.currencyCode?.toLowerCase() ?? 'gbp',
+        );
+
+        if (!paymentSuccess) {
+          setState(() => _isProcessing = false);
+          return; 
+        }
+      } catch (e) {
+        setState(() => _isProcessing = false);
+        messenger.showSnackBar(
+          SnackBar(content: Text('Payment Error: $e'), backgroundColor: AppTheme.errorRed),
+        );
+        return;
+      }
     }
 
     final success = await ref.read(deliveryProvider.notifier).createDelivery(widget.deliveryRequest);
+    setState(() => _isProcessing = false);
     
     if (success && mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
+      messenger.showSnackBar(
         const SnackBar(
-          content: Text('Delivery Booked Successfully!'),
+          content: Text('Payment Successful & Delivery Booked!'),
           backgroundColor: AppTheme.successGreen,
         ),
       );
-      // Navigate to tracking or home
       context.go('/marketplace');
+    } else if (mounted) {
+      final error = ref.read(deliveryProvider).error ?? 'Transaction failed. Please try again.';
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(error),
+          backgroundColor: AppTheme.errorRed,
+        ),
+      );
     }
   }
 
@@ -222,7 +308,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                                       ],
                                     ),
                                     Text(
-                                      _effectiveFare == 0 ? 'FREE' : '£${_effectiveFare.toStringAsFixed(2)}',
+                                      _effectiveFare == 0 ? 'FREE' : '${ref.watch(authProvider).currencySymbol}${_effectiveFare.toStringAsFixed(2)}',
                                       style: GoogleFonts.outfit(
                                         fontSize: 24,
                                         fontWeight: FontWeight.w900,
@@ -261,22 +347,44 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                                 isSelected: selectedMethod == 'Giga Wallet',
                                 onTap: () => setState(() => selectedMethod = 'Giga Wallet'),
                               ),
-                              const SizedBox(height: 12),
-                              _PaymentOption(
-                                title: 'Apple Pay',
-                                subtitle: 'Secure payment via Apple',
-                                icon: Icons.apple_rounded,
-                                isSelected: selectedMethod == 'Apple Pay',
-                                onTap: () => setState(() => selectedMethod = 'Apple Pay'),
-                              ),
-                              const SizedBox(height: 12),
-                              _PaymentOption(
-                                title: 'Debit / Credit Card',
-                                subtitle: 'Powered by Stripe',
-                                icon: Icons.credit_card_rounded,
-                                isSelected: selectedMethod == 'Stripe',
-                                onTap: () => setState(() => selectedMethod = 'Stripe'),
-                              ),
+                              if (_isGatewayAvailable(ref, 'stripe')) ...[
+                                const SizedBox(height: 12),
+                                _PaymentOption(
+                                  title: Platform.isAndroid ? 'Google Pay' : 'Apple Pay',
+                                  subtitle: 'Secure payment via ${Platform.isAndroid ? 'Google' : 'Apple'}',
+                                  icon: Platform.isAndroid ? Icons.android_rounded : Icons.apple_rounded,
+                                  isSelected: selectedMethod == 'Digital Wallet',
+                                  onTap: () => setState(() => selectedMethod = 'Digital Wallet'),
+                                ),
+                                const SizedBox(height: 12),
+                                _PaymentOption(
+                                  title: 'Debit / Credit Card',
+                                  subtitle: 'Secure card payment via Stripe',
+                                  icon: Icons.credit_card_rounded,
+                                  isSelected: selectedMethod == 'Stripe',
+                                  onTap: () => setState(() => selectedMethod = 'Stripe'),
+                                ),
+                              ],
+                              if (_isGatewayAvailable(ref, 'paystack')) ...[
+                                const SizedBox(height: 12),
+                                _PaymentOption(
+                                  title: 'Paystack',
+                                  subtitle: 'Pay with Card, Bank Transfer or USSD',
+                                  icon: Icons.credit_score_rounded,
+                                  isSelected: selectedMethod == 'Paystack',
+                                  onTap: () => setState(() => selectedMethod = 'Paystack'),
+                                ),
+                              ],
+                              if (_isGatewayAvailable(ref, 'cod')) ...[
+                                const SizedBox(height: 12),
+                                _PaymentOption(
+                                  title: 'Cash on Delivery',
+                                  subtitle: 'Pay when your package arrives',
+                                  icon: Icons.local_atm_rounded,
+                                  isSelected: selectedMethod == 'COD',
+                                  onTap: () => setState(() => selectedMethod = 'COD'),
+                                ),
+                              ],
                             ],
                           ),
                         ),
@@ -291,14 +399,14 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                   child: SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
-                      onPressed: deliveryState.isLoading ? null : _handlePayment,
+                      onPressed: (deliveryState.isLoading || _isProcessing) ? null : _handlePayment,
                       style: ElevatedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 20),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                         backgroundColor: AppTheme.primaryBlue,
                         elevation: 0,
                       ),
-                      child: deliveryState.isLoading
+                      child: (deliveryState.isLoading || _isProcessing)
                         ? const SizedBox(
                             height: 24,
                             width: 24,

@@ -45,5 +45,11 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>This app needs camera access to take photos of parcels for delivery requests.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>This app needs access to the photo library to upload parcel photos from your gallery.</string>
+	<key>NSFaceIDUsageDescription</key>
+	<string>This app uses Face ID to provide a secure and convenient way to log into your account.</string>
 </dict>
 </plist>

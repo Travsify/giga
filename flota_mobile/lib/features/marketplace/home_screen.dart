@@ -9,6 +9,9 @@ import 'package:flota_mobile/theme/app_theme.dart';
 import 'package:flota_mobile/features/auth/auth_provider.dart';
 import 'package:flota_mobile/features/marketplace/weather_service.dart';
 import 'package:flota_mobile/features/marketplace/home_widgets.dart';
+import 'package:flota_mobile/features/sustainability/carbon_dashboard_screen.dart';
+import 'package:flota_mobile/features/location/ulez_service.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -116,6 +119,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         ),
                         Row(
                           children: [
+                            _UlezStatusBubble(),
+                            const SizedBox(width: 8),
                             GestureDetector(
                               onTap: () => context.push('/profile'),
                               child: Container(
@@ -196,7 +201,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                     ),
                                     const SizedBox(height: 5),
                                     Text(
-                                      '£${balance.toStringAsFixed(2)}',
+                                      '${ref.watch(authProvider).currencySymbol}${balance.toStringAsFixed(2)}',
                                       style: const TextStyle(
                                         color: Colors.white,
                                         fontSize: 28,
@@ -266,7 +271,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ),
           ),
 
-          // Discount Banners Section
+          // Logistics Banners Section
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.fromLTRB(20, 10, 20, 20),
@@ -274,50 +279,30 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Special Offers',
+                    'Picks for You',
                     style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 15),
-                  // Student Discount Banner
+                  // Business Logistics Banner
                   FadeInUp(
                     delay: const Duration(milliseconds: 400),
                     child: buildDiscountBanner(
                       context: context,
-                      icon: Icons.school_rounded,
-                      title: 'Student Discount',
-                      subtitle: '20% off with NUS Extra',
+                      icon: Icons.business_center_rounded,
+                      title: 'Giga for Business',
+                      subtitle: ref.watch(authProvider).role == 'Business' ? 'Manage your corporate account' : 'Bulk shipping for UK sellers',
                       colors: [const Color(0xFF667EEA), const Color(0xFF764BA2)],
-                      onTap: () {
-                        showDialog(
-                          context: context,
-                          builder: (context) => AlertDialog(
-                            title: const Text('Student Discount'),
-                            content: const Text('Use code GIGA-STUDENT-20 at checkout to get 20% off.'),
-                            actions: [
-                              TextButton(onPressed: () => Navigator.pop(context), child: const Text('Close')),
-                              ElevatedButton(
-                                onPressed: () {
-                                  Navigator.pop(context);
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(content: Text('Discount GIGA-STUDENT-20 applied!')),
-                                  );
-                                },
-                                child: const Text('Apply Now'),
-                              ),
-                            ],
-                          ),
-                        );
-                      },
+                      onTap: () => context.push(ref.watch(authProvider).role == 'Business' ? '/business-dashboard' : '/business-enrollment'),
                     ),
                   ),
                   const SizedBox(height: 12),
-                  // NHS Discount Banner
+                  // NHS Discount Banner (Social Impact)
                   FadeInUp(
                     delay: const Duration(milliseconds: 500),
                     child: buildDiscountBanner(
                       context: context,
                       icon: Icons.local_hospital_rounded,
-                      title: 'NHS Heroes',
+                      title: 'NHS & Service Heroes',
                       subtitle: 'Free delivery for NHS workers',
                       colors: [AppTheme.primaryBlue, AppTheme.accentCyan],
                       onTap: () async {
@@ -340,7 +325,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         );
 
                         if (confirmed == true) {
-                          // Persist to Firestore
                           await FirebaseFirestore.instance
                               .collection('users')
                               .doc(user.uid)
@@ -349,7 +333,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           if (context.mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
-                                content: Text('NHS Discount Activated! Free delivery on orders over £20.'),
+                                content: Text('NHS Discount Activated!'),
                                 backgroundColor: Colors.green,
                               ),
                             );
@@ -363,42 +347,76 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ),
           ),
 
-          // Quick Actions Grid
+          // Main Logistics Hero Actions (Send & Track)
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
+              padding: const EdgeInsets.fromLTRB(20, 10, 20, 10),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: FadeInLeft(
+                      child: _HeroActionCard(
+                        title: 'Send',
+                        subtitle: 'Move anything now',
+                        icon: Icons.local_shipping_outlined,
+                        color: AppTheme.primaryRed,
+                        onTap: () => context.push('/delivery-request'),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 15),
+                  Expanded(
+                    child: FadeInRight(
+                      child: _HeroActionCard(
+                        title: 'Track',
+                        subtitle: 'Live shipment status',
+                        icon: Icons.location_searching_rounded,
+                        color: AppTheme.primaryBlue,
+                        onTap: () => context.push('/tracking/enhanced/123'),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          // Secondary Logistics Services
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Quick Actions',
+                    'More Services',
                     style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 15),
                   Row(
                     children: [
                       Expanded(
-                        child: FadeInLeft(
+                        child: FadeInUp(
                           delay: const Duration(milliseconds: 300),
                           child: _ServiceTile(
-                            title: 'Send Parcel',
-                            subtitle: 'Express Delivery',
-                            icon: Icons.unarchive_outlined,
-                            color: const Color(0xFFFF4B2B),
-                            onTap: () => context.push('/delivery-request'),
+                            title: 'Multi-Stop',
+                            subtitle: 'Chain drop-offs',
+                            icon: Icons.alt_route_rounded,
+                            color: AppTheme.primaryBlue,
+                            onTap: () => context.push('/multi-stop'),
                           ),
                         ),
                       ),
                       const SizedBox(width: 15),
                       Expanded(
-                        child: FadeInRight(
+                        child: FadeInUp(
                           delay: const Duration(milliseconds: 400),
                           child: _ServiceTile(
-                            title: 'Track',
-                            subtitle: 'Real-time',
-                            icon: Icons.location_on_rounded,
-                            color: AppTheme.primaryBlue,
-                            onTap: () => context.push('/tracking/enhanced/123'),
+                            title: 'Scheduled',
+                            subtitle: 'Book for later',
+                            icon: Icons.calendar_month_rounded,
+                            color: Colors.orange,
+                            onTap: () => context.push('/delivery-request?scheduled=true'),
                           ),
                         ),
                       ),
@@ -408,41 +426,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   Row(
                     children: [
                       Expanded(
-                        child: FadeInLeft(
+                        child: FadeInUp(
                           delay: const Duration(milliseconds: 500),
                           child: _ServiceTile(
-                            title: 'Eco Impact',
-                            subtitle: 'Carbon Saved',
-                            icon: Icons.eco_rounded,
-                            color: AppTheme.successGreen,
-                            onTap: () => context.push('/carbon'),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 15),
-                      Expanded(
-                        child: FadeInRight(
-                          delay: const Duration(milliseconds: 600),
-                          child: _ServiceTile(
-                            title: 'ULEZ Check',
-                            subtitle: 'Avoid Charges',
-                            icon: Icons.camera_alt_rounded,
-                            color: Colors.orange,
-                            onTap: () => context.push('/ulez'),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 15),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: FadeInLeft(
-                          delay: const Duration(milliseconds: 700),
-                          child: _ServiceTile(
-                            title: 'Parcel Locker',
-                            subtitle: 'Secure Pickup',
+                            title: 'Giga Lockers',
+                            subtitle: 'Secure pickup',
                             icon: Icons.inventory_2_outlined,
                             color: AppTheme.slateBlue,
                             onTap: () => context.push('/lockers'),
@@ -450,10 +438,67 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         ),
                       ),
                       const SizedBox(width: 15),
-                      const Expanded(child: SizedBox()),
+                      Expanded(
+                        child: FadeInUp(
+                          delay: const Duration(milliseconds: 600),
+                          child: _ServiceTile(
+                            title: 'ULEZ Check',
+                            subtitle: 'Road compliance',
+                            icon: Icons.camera_alt_rounded,
+                            color: AppTheme.successGreen,
+                            onTap: () => context.push('/ulez'),
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                 ],
+              ),
+            ),
+          ),
+          
+          // Sustainability Impact (No dummy data)
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              child: FadeInUp(
+                child: ref.watch(sustainabilityStatsProvider).when(
+                  loading: () => Container(height: 100, color: Colors.grey[100]),
+                  error: (err, stack) => const SizedBox.shrink(),
+                  data: (stats) => Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: AppTheme.successGreen.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: AppTheme.successGreen.withOpacity(0.2)),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.eco_rounded, color: AppTheme.successGreen, size: 32),
+                        const SizedBox(width: 15),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                'Carbon Impact',
+                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                              ),
+                              Text(
+                                'You\'ve saved ${stats.totalCo2SavedKg.toStringAsFixed(1)}kg of CO2 this month.',
+                                style: TextStyle(color: Colors.grey[700], fontSize: 13),
+                              ),
+                            ],
+                          ),
+                        ),
+                        TextButton(
+                          onPressed: () => context.push('/carbon'),
+                          child: const Text('View Details'),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
               ),
             ),
           ),
@@ -461,9 +506,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           // Live Heatmap Widget
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(20, 30, 20, 0),
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
               child: FadeInUp(
-                delay: const Duration(milliseconds: 800),
+                delay: const Duration(milliseconds: 700),
                 child: const LiveHeatmapWidget(),
               ),
             ),
@@ -538,7 +583,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ),
           ),
           
-          const SliverPadding(padding: EdgeInsets.only(bottom: 30)),
+          const SliverPadding(padding: EdgeInsets.only(bottom: 100)), // Increased for overflow protection
         ],
       ),
       bottomNavigationBar: BottomNavigationBar(
@@ -559,6 +604,80 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           BottomNavigationBarItem(icon: Icon(Icons.account_balance_wallet_rounded), label: 'Wallet'),
           BottomNavigationBarItem(icon: Icon(Icons.person_pin_rounded), label: 'Profile'),
         ],
+      ),
+    );
+  }
+}
+
+class _HeroActionCard extends StatelessWidget {
+  final String title;
+  final String subtitle;
+  final IconData icon;
+  final Color color;
+  final VoidCallback onTap;
+
+  const _HeroActionCard({
+    required this.title,
+    required this.subtitle,
+    required this.icon,
+    required this.color,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        height: 180,
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: color,
+          borderRadius: BorderRadius.circular(24),
+          boxShadow: [
+            BoxShadow(
+              color: color.withOpacity(0.3),
+              blurRadius: 15,
+              offset: const Offset(0, 8),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.2),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, color: Colors.white, size: 32),
+            ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 22,
+                  ),
+                ),
+                Text(
+                  subtitle,
+                  style: TextStyle(
+                    color: Colors.white.withOpacity(0.8),
+                    fontSize: 12,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -615,10 +734,14 @@ class _ServiceTile extends StatelessWidget {
                 Text(
                   title,
                   style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
                 Text(
                   subtitle,
                   style: TextStyle(color: Colors.grey[500], fontSize: 12),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),
@@ -628,4 +751,59 @@ class _ServiceTile extends StatelessWidget {
     );
   }
 }
+
+class _UlezStatusBubble extends StatefulWidget {
+  @override
+  State<_UlezStatusBubble> createState() => _UlezStatusBubbleState();
+}
+
+class _UlezStatusBubbleState extends State<_UlezStatusBubble> {
+  bool? _isInZone;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkUlez();
+  }
+
+  Future<void> _checkUlez() async {
+    // Mocking current location to Central London for ULEZ check
+    final inZone = await ULEZService.isAddressInULEZ(const LatLng(51.5074, -0.1278));
+    if (mounted) setState(() => _isInZone = inZone);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_isInZone == null) return const SizedBox.shrink();
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: _isInZone! ? Colors.orange.withOpacity(0.2) : Colors.green.withOpacity(0.2),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: _isInZone! ? Colors.orange : Colors.green, width: 0.5),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            _isInZone! ? Icons.warning_amber_rounded : Icons.check_circle_outline,
+            color: Colors.white,
+            size: 10,
+          ),
+          const SizedBox(width: 4),
+          Text(
+            _isInZone! ? 'ULEZ: Inside' : 'ULEZ: Clear',
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 10,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 

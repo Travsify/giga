@@ -7,6 +7,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:flota_mobile/theme/app_theme.dart';
 import 'package:flota_mobile/features/auth/biometric_provider.dart';
 import 'package:flota_mobile/core/api_client.dart';
+import 'package:flota_mobile/core/settings_service.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -20,6 +21,26 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _passwordController = TextEditingController();
   bool _isPasswordVisible = false;
   bool _isPhoneLogin = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Defer to next frame to read providers safely if needed, or read directly if not listening.
+    // However, for initialization logic based on settings, we can do it in build 
+    // or use a post-frame callback. 
+    // A better approach is to set initial values if we had settings loaded before.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final settings = ref.read(settingsServiceProvider);
+      final emailEnabled = settings.get<bool>('auth_email_enabled', true);
+      final phoneEnabled = settings.get<bool>('auth_phone_enabled', true);
+      
+      if (!emailEnabled && phoneEnabled) {
+         setState(() => _isPhoneLogin = true);
+      } else if (emailEnabled && !phoneEnabled) {
+         setState(() => _isPhoneLogin = false);
+      }
+    });
+  }
 
   @override
   void dispose() {
@@ -185,31 +206,56 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   const SizedBox(height: 30),
 
                   // Login Type Toggle
-                  FadeInUp(
-                    delay: const Duration(milliseconds: 100),
-                    child: Container(
-                      height: 50,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFF1F5F9),
-                        borderRadius: BorderRadius.circular(15),
-                      ),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: GestureDetector(
-                              onTap: () => setState(() => _isPhoneLogin = false),
-                              child: _ToggleTab(label: 'Email', isActive: !_isPhoneLogin),
-                            ),
+                  Consumer(
+                    builder: (context, ref, child) {
+                      final settings = ref.watch(settingsServiceProvider);
+                      final emailEnabled = settings.get<bool>('auth_email_enabled', true);
+                      final phoneEnabled = settings.get<bool>('auth_phone_enabled', true);
+
+                      // If one is disabled, force the other mode updates automatically if we rebuild state, 
+                      // but here we just hide the toggle.
+                      // We need to ensure _isPhoneLogin matches the enabled state if only one is allowed.
+                      
+                      // Using a post-frame callback or simple logic in build is risky for state changes,
+                      // but for UI rendering it is fine.
+                      
+                      if (!emailEnabled && !phoneEnabled) {
+                        return const Center(child: Text("Login is currently disabled."));
+                      }
+
+                      if (!emailEnabled || !phoneEnabled) {
+                         // Only one enabled, hide toggle and force mode (logic handled in build logic below effectively)
+                         // But we want to ensure the UI reflects the single mode.
+                         return const SizedBox.shrink();
+                      }
+
+                      return FadeInUp(
+                        delay: const Duration(milliseconds: 100),
+                        child: Container(
+                          height: 50,
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFF1F5F9),
+                            borderRadius: BorderRadius.circular(15),
                           ),
-                          Expanded(
-                            child: GestureDetector(
-                              onTap: () => setState(() => _isPhoneLogin = true),
-                              child: _ToggleTab(label: 'Phone', isActive: _isPhoneLogin),
-                            ),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: GestureDetector(
+                                  onTap: () => setState(() => _isPhoneLogin = false),
+                                  child: _ToggleTab(label: 'Email', isActive: !_isPhoneLogin),
+                                ),
+                              ),
+                              Expanded(
+                                child: GestureDetector(
+                                  onTap: () => setState(() => _isPhoneLogin = true),
+                                  child: _ToggleTab(label: 'Phone', isActive: _isPhoneLogin),
+                                ),
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
-                    ),
+                        ),
+                      );
+                    },
                   ),
 
                   const SizedBox(height: 30),
@@ -327,38 +373,51 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   const SizedBox(height: 40),
                   
                   // Social Login Section
-                  FadeInUp(
-                    delay: const Duration(milliseconds: 500),
-                    child: Column(
-                      children: [
-                        Row(
+                  Consumer(
+                    builder: (context, ref, child) {
+                      final settings = ref.watch(settingsServiceProvider);
+                      final googleEnabled = settings.get<bool>('google_auth_enabled', false);
+                      final appleEnabled = settings.get<bool>('apple_auth_enabled', false);
+                      
+                      if (!googleEnabled && !appleEnabled) return const SizedBox.shrink();
+
+                      return FadeInUp(
+                        delay: const Duration(milliseconds: 500),
+                        child: Column(
                           children: [
-                            Expanded(child: Divider(color: Colors.black.withOpacity(0.05))),
-                            Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 16),
-                              child: Text(
-                                'Or continue with',
-                                style: TextStyle(
-                                  color: Colors.black.withOpacity(0.3),
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 14,
+                            Row(
+                              children: [
+                                Expanded(child: Divider(color: Colors.black.withOpacity(0.05))),
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                                  child: Text(
+                                    'Or continue with',
+                                    style: TextStyle(
+                                      color: Colors.black.withOpacity(0.3),
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 14,
+                                    ),
+                                  ),
                                 ),
-                              ),
+                                Expanded(child: Divider(color: Colors.black.withOpacity(0.05))),
+                              ],
                             ),
-                            Expanded(child: Divider(color: Colors.black.withOpacity(0.05))),
+                            const SizedBox(height: 24),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                if (googleEnabled) ...[
+                                  _SocialButton(icon: Icons.g_mobiledata_rounded, color: AppTheme.primaryRed, onTap: () {}),
+                                  if (appleEnabled) const SizedBox(width: 20),
+                                ],
+                                if (appleEnabled)
+                                  _SocialButton(icon: Icons.apple_rounded, color: Colors.black, onTap: () {}),
+                              ],
+                            ),
                           ],
                         ),
-                        const SizedBox(height: 24),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            _SocialButton(icon: Icons.g_mobiledata_rounded, color: AppTheme.primaryRed, onTap: () {}),
-                            const SizedBox(width: 20),
-                            _SocialButton(icon: Icons.apple_rounded, color: Colors.black, onTap: () {}),
-                          ],
-                        ),
-                      ],
-                    ),
+                      );
+                    },
                   ),
                   
                   const SizedBox(height: 48),

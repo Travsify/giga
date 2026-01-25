@@ -7,6 +7,8 @@ import 'package:animate_do/animate_do.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flota_mobile/theme/app_theme.dart';
 import 'package:flota_mobile/core/api_client.dart';
+import 'package:flota_mobile/core/settings_service.dart';
+import 'package:flota_mobile/features/auth/domain/models/country_model.dart';
 
 class SignupScreen extends ConsumerStatefulWidget {
   final String? initialRole;
@@ -172,6 +174,8 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
         companyName: _selectedRole == 'Company' ? _companyNameController.text.trim() : null,
         registrationNumber: _selectedRole == 'Company' ? _registrationNumberController.text.trim() : null,
         companyType: _selectedRole == 'Company' ? _companyTypeController.text.trim() : null,
+        countryCode: ref.read(settingsServiceProvider).currentCountry?.isoCode,
+        currencyCode: ref.read(settingsServiceProvider).currentCountry?.currencyCode,
       );
       if (mounted) {
         // GoRouter will now handle redirection to /verify-email 
@@ -276,6 +280,72 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                     delay: const Duration(milliseconds: 300),
                     child: Column(
                       children: [
+                        // Country Selector
+                        Consumer(
+                          builder: (context, ref, _) {
+                            final settings = ref.watch(settingsServiceProvider);
+                            final countries = settings.supportedCountries;
+                            final current = settings.currentCountry;
+
+                            if (countries.isEmpty) return const SizedBox.shrink();
+
+                            return Padding(
+                              padding: const EdgeInsets.only(bottom: 24),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Padding(
+                                    padding: EdgeInsets.only(left: 4, bottom: 10),
+                                    child: Text(
+                                      'Country',
+                                      style: TextStyle(
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.w700,
+                                        color: Colors.black87,
+                                      ),
+                                    ),
+                                  ),
+                                  Container(
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFFF8FAFC),
+                                      borderRadius: BorderRadius.circular(16),
+                                      border: Border.all(color: const Color(0xFFE2E8F0)),
+                                    ),
+                                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                                    child: DropdownButtonHideUnderline(
+                                      child: DropdownButton<Country>(
+                                        value: current,
+                                        isExpanded: true,
+                                        hint: const Text("Select Country"),
+                                        items: countries.map((c) {
+                                          return DropdownMenuItem(
+                                            value: c,
+                                            child: Row(
+                                              children: [
+                                                Text(c.isoCode, style: const TextStyle(fontWeight: FontWeight.bold)),
+                                                const SizedBox(width: 10),
+                                                Text(c.name),
+                                                const Spacer(),
+                                                Text(c.currencySymbol, style: const TextStyle(color: Colors.grey)),
+                                              ],
+                                            ),
+                                          );
+                                        }).toList(),
+                                        onChanged: (val) {
+                                          if (val != null) {
+                                            settings.setCountry(val);
+                                            setState(() {}); // refresh UI if needed
+                                          }
+                                        },
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
+                        ),
+
                         _CustomTextField(
                           controller: _nameController,
                           label: 'Full Name',

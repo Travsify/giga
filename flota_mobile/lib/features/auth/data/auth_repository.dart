@@ -27,7 +27,11 @@ class AuthRepository {
     String? ukPhone,
     String? companyName,
     String? registrationNumber,
+    String? companyName,
+    String? registrationNumber,
     String? companyType,
+    String? countryCode,
+    String? currencyCode,
   }) async {
     try {
       final response = await _dio.post('register', data: {
@@ -39,6 +43,8 @@ class AuthRepository {
         'company_name': companyName,
         'registration_number': registrationNumber,
         'company_type': companyType,
+        'country_code': countryCode,
+        'currency_code': currencyCode,
       });
       return response.data;
     } on DioException catch (e) {

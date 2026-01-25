@@ -6,8 +6,10 @@ import 'package:flota_mobile/features/auth/auth_provider.dart';
 import 'package:flota_mobile/features/auth/presentation/screens/login_screen.dart';
 import 'package:flota_mobile/features/auth/presentation/screens/signup_screen.dart';
 import 'package:flota_mobile/features/auth/presentation/screens/forgot_password_screen.dart';
+import 'package:flota_mobile/features/auth/presentation/screens/email_verification_screen.dart';
 import 'package:flota_mobile/features/marketplace/data/models/delivery_models.dart';
 import 'package:flota_mobile/features/onboarding/onboarding_screen.dart';
+import 'package:flota_mobile/features/onboarding/welcome_screen.dart';
 import 'package:flota_mobile/features/splash/splash_screen.dart';
 import 'package:flota_mobile/features/marketplace/home_screen.dart';
 import 'package:flota_mobile/features/marketplace/delivery_request_screen.dart';
@@ -19,7 +21,7 @@ import 'package:flota_mobile/features/wallet/withdrawal_screen.dart';
 import 'package:flota_mobile/features/location/ulez_scanner_screen.dart';
 import 'package:flota_mobile/features/delivery/locker_map_screen.dart';
 import 'package:flota_mobile/features/sustainability/carbon_dashboard_screen.dart';
-import 'package:flota_mobile/features/marketplace/promo_list_screen.dart';
+import 'package:flota_mobile/features/promos/screens/offers_screen.dart';
 import 'package:flota_mobile/features/tracking/rider_dashboard.dart';
 import 'package:flota_mobile/features/tracking/tracking_screen.dart';
 import 'package:flota_mobile/features/tracking/enhanced_tracking_screen.dart';
@@ -29,18 +31,94 @@ import 'package:flota_mobile/features/delivery/parcel_locker_screen.dart';
 import 'package:flota_mobile/features/profile/profile_screen.dart';
 import 'package:flota_mobile/features/profile/giga_plus_screen.dart';
 import 'package:flota_mobile/features/wallet/wallet_screen.dart';
+import 'package:flota_mobile/features/wallet/payment_methods_screen.dart';
+import 'package:flota_mobile/features/wallet/help_support_screen.dart';
+import 'package:flota_mobile/features/profile/privacy_policy_screen.dart';
+import 'package:flota_mobile/features/profile/terms_conditions_screen.dart';
+import 'package:flota_mobile/features/business/presentation/screens/business_enrollment_screen.dart';
+import 'package:flota_mobile/features/business/presentation/screens/business_dashboard_screen.dart';
+import 'package:flota_mobile/features/business/presentation/screens/bulk_booking_screen.dart';
+import 'package:flota_mobile/features/business/presentation/screens/billing_screen.dart';
+import 'package:flota_mobile/features/business/presentation/screens/team_management_screen.dart';
+import 'package:flota_mobile/features/business/presentation/screens/api_key_screen.dart';
 import 'package:flota_mobile/theme/app_theme.dart';
 
 
+import 'package:flota_mobile/features/business/presentation/screens/business_dashboard_screen.dart';
+import 'package:flota_mobile/features/business/presentation/screens/team_management_screen.dart';
+import 'package:flota_mobile/features/business/presentation/screens/billing_screen.dart';
+import 'package:flota_mobile/features/business/presentation/screens/bulk_shipping_screen.dart';
+
+import 'firebase_options.dart';
+
+import 'package:flota_mobile/core/settings_service.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(); // Requires google-services.json
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+  
+  // Create container to read providers before runApp
+  final container = ProviderContainer();
+  
+  // Initialize settings
+  try {
+    await container.read(settingsInitProvider.future);
+    
+    // Check version/maintenance
+    final updateStatus = await container.read(settingsServiceProvider).checkVersion();
+    
+    if (updateStatus.state == UpdateState.maintenance) {
+      runApp(MaintenanceApp(message: updateStatus.message));
+      return;
+    }
+  } catch (e) {
+    print('Error initializing settings: $e');
+  }
   
   runApp(
-    const ProviderScope(
-      child: MyApp(),
+    UncontrolledProviderScope(
+      container: container,
+      child: const MyApp(),
     ),
   );
+}
+
+class MaintenanceApp extends StatelessWidget {
+  final String? message;
+  const MaintenanceApp({super.key, this.message});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: Scaffold(
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(32.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.build_rounded, size: 64, color: Colors.orange),
+                const SizedBox(height: 24),
+                Text(
+                  "Under Maintenance",
+                   style: GoogleFonts.outfit(fontSize: 24, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  message ?? "We are currently performing scheduled maintenance. Please check back later.",
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.outfit(fontSize: 16, color: Colors.black54),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 class RouterNotifier extends ChangeNotifier {
@@ -66,30 +144,41 @@ final routerProvider = Provider<GoRouter>((ref) {
       final authState = ref.read(authProvider);
       
       final isLoggingIn = state.matchedLocation == '/login';
-      final isRegistering = state.matchedLocation == '/register';
+      final isRegistering = state.matchedLocation.startsWith('/register');
       final isOnboarding = state.matchedLocation == '/onboarding';
       final isSplash = state.matchedLocation == '/splash';
       final isForgotPassword = state.matchedLocation == '/forgot-password';
 
       final isAuthenticated = authState.status == AuthStatus.authenticated;
       final isAuthenticating = authState.status == AuthStatus.loading;
+      final isVerified = authState.isEmailVerified;
 
       // While checking auth status at splash, don't redirect yet
       if (isAuthenticating && isSplash) return null;
 
       if (!isAuthenticated) {
-        // If not logged in and on a protected route, go to onboarding (for first time) or login
+        // If not logged in and on a protected route, go to onboarding/welcome
         if (isLoggingIn || isRegistering || isOnboarding || isSplash || isForgotPassword) {
-          // If on splash, move to onboarding
+          // If on splash, move to onboarding (first launch)
           if (isSplash && !isAuthenticating) return '/onboarding';
           return null;
         }
-        return '/login';
+        // DEFAULT for all other unauthenticated states
+        return '/welcome';
       }
 
-      // If authenticated, NEVER stay on auth/onboarding/splash pages
-      if (isLoggingIn || isRegistering || isSplash || isOnboarding) {
-        return authState.role == 'Rider' ? '/rider' : '/marketplace';
+      // 1. If authenticated BUT NOT VERIFIED, force /verify-email
+      if (!isVerified) {
+        if (state.matchedLocation == '/verify-email') return null;
+        return '/verify-email';
+      }
+
+      // 2. If authenticated AND VERIFIED, NEVER stay on auth/onboarding/splash/verify pages
+      final isVerifyPage = state.matchedLocation == '/verify-email';
+      if (isLoggingIn || isRegistering || isSplash || isOnboarding || isVerifyPage) {
+        if (authState.role == 'Rider') return '/rider';
+        if (authState.role == 'Business' || authState.role == 'Company') return '/business';
+        return '/marketplace';
       }
 
       // If user is accessing wrong dashboard, move them
@@ -112,8 +201,18 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const OnboardingScreen(),
       ),
       GoRoute(
+        path: '/welcome',
+        builder: (context, state) => const WelcomeScreen(),
+      ),
+      GoRoute(
         path: '/login',
         builder: (context, state) => const LoginScreen(),
+      ),
+      GoRoute(
+        path: '/register/:role',
+        builder: (context, state) => SignupScreen(
+          initialRole: state.pathParameters['role'],
+        ),
       ),
       GoRoute(
         path: '/register',
@@ -124,8 +223,25 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const ForgotPasswordScreen(),
       ),
       GoRoute(
+        path: '/verify-email',
+        builder: (context, state) {
+          final isPhone = state.queryParameters['isPhone'] == 'true';
+          final phoneNumber = state.queryParameters['phoneNumber'];
+          return EmailVerificationScreen(isPhone: isPhone, phoneNumber: phoneNumber);
+        },
+      ),
+      GoRoute(
         path: '/marketplace',
         builder: (context, state) => const HomeScreen(),
+      ),
+      GoRoute(
+        path: '/business',
+        builder: (context, state) => const BusinessDashboardScreen(),
+        routes: [
+          GoRoute(path: 'team', builder: (context, state) => const TeamManagementScreen()),
+          GoRoute(path: 'billing', builder: (context, state) => const BillingScreen()),
+          GoRoute(path: 'bulk-shipping', builder: (context, state) => const BulkShippingScreen()),
+        ],
       ),
       GoRoute(
         path: '/search',
@@ -153,11 +269,13 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/promos',
-        builder: (context, state) => const PromoListScreen(),
+        builder: (context, state) => const OffersScreen(),
       ),
       GoRoute(
         path: '/delivery-request',
-        builder: (context, state) => const DeliveryRequestScreen(),
+        builder: (context, state) => DeliveryRequestScreen(
+          initiallyScheduled: state.queryParameters['scheduled'] == 'true',
+        ),
       ),
       GoRoute(
         path: '/checkout',
@@ -208,6 +326,46 @@ final routerProvider = Provider<GoRouter>((ref) {
         GoRoute(
           path: '/withdraw',
           builder: (context, state) => const WithdrawalScreen(),
+        ),
+        GoRoute(
+          path: '/payment-methods',
+          builder: (context, state) => const PaymentMethodsScreen(),
+        ),
+        GoRoute(
+          path: '/support',
+          builder: (context, state) => const HelpSupportScreen(),
+        ),
+        GoRoute(
+          path: '/privacy',
+          builder: (context, state) => const PrivacyPolicyScreen(),
+        ),
+        GoRoute(
+          path: '/terms',
+          builder: (context, state) => const TermsConditionsScreen(),
+        ),
+        GoRoute(
+          path: '/business-enrollment',
+          builder: (context, state) => const BusinessEnrollmentScreen(),
+        ),
+        GoRoute(
+          path: '/business-dashboard',
+          builder: (context, state) => const BusinessDashboardScreen(),
+        ),
+        GoRoute(
+          path: '/bulk-booking',
+          builder: (context, state) => const BulkBookingScreen(),
+        ),
+        GoRoute(
+          path: '/billing',
+          builder: (context, state) => const BillingScreen(),
+        ),
+        GoRoute(
+          path: '/team',
+          builder: (context, state) => const TeamManagementScreen(),
+        ),
+        GoRoute(
+          path: '/api-keys',
+          builder: (context, state) => const ApiKeyScreen(),
         ),
       ],
   );

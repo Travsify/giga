@@ -5,6 +5,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:flota_mobile/features/profile/profile_provider.dart';
 import 'package:flota_mobile/theme/app_theme.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flota_mobile/core/payment_service.dart';
+import 'package:flota_mobile/features/auth/auth_provider.dart';
 
 class GigaPlusScreen extends ConsumerWidget {
   const GigaPlusScreen({super.key});
@@ -74,7 +76,7 @@ class GigaPlusScreen extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   if (isGigaPlus)
-                    _buildActiveStatus(expiry)
+                    _buildActiveStatus(context, ref, expiry)
                   else
                     const Text(
                       'Membership Benefits',
@@ -114,11 +116,11 @@ class GigaPlusScreen extends ConsumerWidget {
                         child: Column(
                           children: [
                             const Text(
-                              'Only £9.99 / month',
+                              'Only £39.99 / month',
                               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                             ),
                             const Text(
-                              'Cancel anytime. 7-day free trial.',
+                              'Instant professional logistics access.',
                               style: TextStyle(color: Colors.grey),
                             ),
                             const SizedBox(height: 24),
@@ -126,17 +128,44 @@ class GigaPlusScreen extends ConsumerWidget {
                               width: double.infinity,
                               child: ElevatedButton(
                                 onPressed: () async {
+                                  final authState = ref.read(authProvider);
+                                  if (authState.status != AuthStatus.authenticated) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(content: Text('Please log in to join Giga+')),
+                                    );
+                                    return;
+                                  }
+
                                   try {
-                                    await ref.read(profileProvider.notifier).subscribe();
-                                    if (context.mounted) {
-                                      ScaffoldMessenger.of(context).showSnackBar(
-                                        const SnackBar(content: Text('Welcome to Giga+!')),
-                                      );
+                                    // 1. Initialize Stripe
+                                    await PaymentService.initialize();
+                                    
+                                    // 2. Charge £39.99
+                                    final success = await PaymentService.fundWallet(
+                                      context, 
+                                      39.99, 
+                                      authState.userEmail!, 
+                                      authState.userId!
+                                    );
+
+                                    if (success) {
+                                      // 3. Activate Subscription on Backend
+                                      await ref.read(profileProvider.notifier).subscribe();
+                                      if (context.mounted) {
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          const SnackBar(
+                                            content: Text('Welcome to Giga+! Membership active.'),
+                                            backgroundColor: AppTheme.successGreen,
+                                          ),
+                                        );
+                                      }
                                     }
                                   } catch (e) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(content: Text(e.toString())),
-                                    );
+                                    if (context.mounted) {
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(content: Text(e.toString())),
+                                      );
+                                    }
                                   }
                                 },
                                 style: ElevatedButton.styleFrom(
@@ -194,7 +223,7 @@ class GigaPlusScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildActiveStatus(String? expiry) {
+  Widget _buildActiveStatus(BuildContext context, WidgetRef ref, String? expiry) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(20),
@@ -214,6 +243,57 @@ class GigaPlusScreen extends ConsumerWidget {
           Text(
             'Next billing date: ${expiry?.split(' ')[0] ?? 'N/A'}',
             style: TextStyle(color: Colors.green[800]),
+          ),
+          const SizedBox(height: 20),
+          OutlinedButton(
+            onPressed: () async {
+              // Confirm Dialog
+              final confirm = await showDialog<bool>(
+                context: context,
+                builder: (context) => AlertDialog(
+                  title: const Text('Cancel Membership?'),
+                  content: const Text('You will lose all Giga+ benefits at the end of your billing cycle. Are you sure?'),
+                  actions: [
+                    TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Keep Benefits')),
+                    TextButton(
+                      onPressed: () => Navigator.pop(context, true), 
+                      style: TextButton.styleFrom(foregroundColor: Colors.red),
+                      child: const Text('Confirm Cancel'),
+                    ),
+                  ],
+                ),
+              );
+
+              if (confirm == true) {
+                // assume we have a cancel method in ProfileNotifier (we need to verify/add it)
+                // Actually, ProfileProvider might not have it yet. 
+                // Let's check ProfileProvider or use a direct repository call or ad-hoc.
+                // Better to add it to ProfileProvider.
+                try {
+                   // We need to access the provider. 
+                   // Accessing via ref.read(profileProvider.notifier).cancelSubscription()
+                   // I need to ensure that method exists.
+                   // I will assume I need to add it to ProfileProvider first.
+                   // For now, I'll put the logic here assuming I'll update provider next.
+                   await ref.read(profileProvider.notifier).cancelSubscription();
+                   if (context.mounted) {
+                     ScaffoldMessenger.of(context).showSnackBar(
+                       const SnackBar(content: Text('Membership cancelled. You still have access until expiry.')),
+                     );
+                   }
+                } catch (e) {
+                   if (context.mounted) {
+                     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
+                   }
+                }
+              }
+            },
+            style: OutlinedButton.styleFrom(
+              foregroundColor: Colors.red[700],
+              side: BorderSide(color: Colors.red[300]!),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+            child: const Text('Cancel Membership'),
           ),
         ],
       ),

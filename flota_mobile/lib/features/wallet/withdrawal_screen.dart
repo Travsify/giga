@@ -106,7 +106,7 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
                   ),
                   const SizedBox(height: 10),
                   Text(
-                    '£${amount.toStringAsFixed(2)} will arrive in your bank\nwithin 2 hours via Faster Payments.',
+                    '${ref.watch(authProvider).currencySymbol}${amount.toStringAsFixed(2)} will arrive in your bank\nwithin 2 hours via Faster Payments.',
                     textAlign: TextAlign.center,
                     style: TextStyle(color: Colors.grey[600]),
                   ),
@@ -187,7 +187,7 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            '£${_currentBalance.toStringAsFixed(2)}',
+                            '${ref.watch(authProvider).currencySymbol}${_currentBalance.toStringAsFixed(2)}',
                             style: GoogleFonts.outfit(
                               color: Colors.white,
                               fontSize: 28,
@@ -216,7 +216,7 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
                   keyboardType: const TextInputType.numberWithOptions(decimal: true),
                   style: GoogleFonts.outfit(fontSize: 24, fontWeight: FontWeight.bold),
                   decoration: InputDecoration(
-                    prefixText: '£ ',
+                    prefixText: '${ref.watch(authProvider).currencySymbol} ',
                     prefixStyle: GoogleFonts.outfit(fontSize: 24, fontWeight: FontWeight.bold),
                     hintText: '0.00',
                     filled: true,
@@ -229,7 +229,7 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
                   ),
                   validator: (value) {
                     final amount = double.tryParse(value ?? '') ?? 0;
-                    if (amount < 10) return 'Minimum withdrawal is £10';
+                    if (amount < 10) return 'Minimum withdrawal is ${ref.read(authProvider).currencySymbol}10';
                     if (amount > _currentBalance) return 'Insufficient funds';
                     return null;
                   },
@@ -237,7 +237,7 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
               ),
               const SizedBox(height: 8),
               Text(
-                'Minimum withdrawal: £10',
+                'Minimum withdrawal: ${ref.watch(authProvider).currencySymbol}10',
                 style: TextStyle(color: Colors.grey[500], fontSize: 12),
               ),
               const SizedBox(height: 24),

@@ -1,26 +1,48 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flota_mobile/theme/app_theme.dart';
+import 'package:flota_mobile/features/auth/auth_provider.dart';
+import 'package:flota_mobile/features/marketplace/delivery_provider.dart';
 
-class OrderHistoryScreen extends StatefulWidget {
+class OrderHistoryScreen extends ConsumerStatefulWidget {
   const OrderHistoryScreen({super.key});
 
   @override
-  State<OrderHistoryScreen> createState() => _OrderHistoryScreenState();
+  ConsumerState<OrderHistoryScreen> createState() => _OrderHistoryScreenState();
 }
 
-class _OrderHistoryScreenState extends State<OrderHistoryScreen> with SingleTickerProviderStateMixin {
+class _OrderHistoryScreenState extends ConsumerState<OrderHistoryScreen> with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  final user = FirebaseAuth.instance.currentUser;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
+    _tabController.addListener(_handleTabSelection);
+    
+    // Initial fetch
+    Future.microtask(() => _fetchOrders());
+  }
+
+  void _handleTabSelection() {
+    if (_tabController.indexIsChanging) {
+      _fetchOrders();
+    }
+  }
+
+  void _fetchOrders() {
+    final statusMap = [
+      ['pending', 'accepted', 'in_transit', 'picked_up'], // Active
+      ['scheduled'], // Scheduled
+      ['delivered', 'cancelled'], // Completed
+    ];
+    
+    ref.read(deliveryProvider.notifier).fetchUserDeliveries(
+      statuses: statusMap[_tabController.index],
+    );
   }
 
   @override
@@ -29,19 +51,31 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> with SingleTick
     super.dispose();
   }
 
-  Stream<QuerySnapshot> _getOrdersStream(String status) {
-    if (user == null) return const Stream.empty();
-    
-    return FirebaseFirestore.instance
-        .collection('deliveries')
-        .where('user_id', isEqualTo: user!.uid)
-        .where('status', isEqualTo: status)
-        .orderBy('created_at', descending: true)
-        .snapshots();
-  }
-
   @override
   Widget build(BuildContext context) {
+    final authState = ref.watch(authProvider);
+    final deliveryState = ref.watch(deliveryProvider);
+
+    if (authState.status != AuthStatus.authenticated) {
+      return Scaffold(
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.lock_outline, size: 64, color: Colors.grey),
+              const SizedBox(height: 16),
+              const Text('Please log in to view orders'),
+              const SizedBox(height: 24),
+              ElevatedButton(
+                onPressed: () => context.go('/login'),
+                child: const Text('Go to Login'),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
     return Scaffold(
       backgroundColor: Colors.grey[50],
       appBar: AppBar(
@@ -67,110 +101,92 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> with SingleTick
           ],
         ),
       ),
-      body: TabBarView(
-        controller: _tabController,
-        children: [
-          _buildOrderList(['pending', 'accepted', 'in_transit', 'picked_up']),
-          _buildOrderList(['scheduled']),
-          _buildOrderList(['delivered', 'cancelled']),
-        ],
+      body: RefreshIndicator(
+        onRefresh: () async => _fetchOrders(),
+        child: deliveryState.isLoading && deliveryState.userDeliveries.isEmpty
+            ? const Center(child: CircularProgressIndicator())
+            : TabBarView(
+                controller: _tabController,
+                children: [
+                  _buildOrderList(deliveryState.userDeliveries),
+                  _buildOrderList(deliveryState.userDeliveries),
+                  _buildOrderList(deliveryState.userDeliveries),
+                ],
+              ),
       ),
     );
   }
 
-  Widget _buildOrderList(List<String> statuses) {
-    if (user == null) {
-      return const Center(child: Text('Please log in to view orders'));
+  Widget _buildOrderList(List<Map<String, dynamic>> orders) {
+    if (orders.isEmpty) {
+      return _buildEmptyState();
     }
 
-    return StreamBuilder<QuerySnapshot>(
-      stream: FirebaseFirestore.instance
-          .collection('deliveries')
-          .where('user_id', isEqualTo: user!.uid)
-          .where('status', whereIn: statuses)
-          .orderBy('created_at', descending: true)
-          .snapshots(),
-      builder: (context, snapshot) {
-        if (snapshot.hasError) {
-          return Center(child: Text('Error: ${snapshot.error}'));
-        }
-
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        }
-
-        final orders = snapshot.data?.docs ?? [];
-
-        if (orders.isEmpty) {
-          return _buildEmptyState(statuses.contains('delivered') ? 'completed' : 'active');
-        }
-
-        return RefreshIndicator(
-          onRefresh: () async {
-            // Firestore auto-refreshes, but this gives user feedback
-            await Future.delayed(const Duration(milliseconds: 500));
-          },
-          child: ListView.builder(
-            padding: const EdgeInsets.all(16),
-            itemCount: orders.length,
-            itemBuilder: (context, index) {
-              final order = orders[index].data() as Map<String, dynamic>;
-              final orderId = orders[index].id;
-              
-              return FadeInUp(
-                delay: Duration(milliseconds: index * 100),
-                child: _OrderCard(
-                  orderId: orderId,
-                  orderData: order,
-                  onTap: () => context.push('/tracking/enhanced/$orderId'),
-                ),
-              );
-            },
+    return ListView.builder(
+      padding: const EdgeInsets.all(16),
+      itemCount: orders.length,
+      itemBuilder: (context, index) {
+        final order = orders[index];
+        final orderId = order['id'].toString();
+        
+        return FadeInUp(
+          delay: Duration(milliseconds: index * 50),
+          child: _OrderCard(
+            orderId: orderId,
+            orderData: order,
+            onTap: () => context.push('/tracking/enhanced/$orderId'),
           ),
         );
       },
     );
   }
 
-  Widget _buildEmptyState(String type) {
+  Widget _buildEmptyState() {
+    final type = _tabController.index == 2 ? 'completed' : 'active';
     final isCompleted = type == 'completed';
     
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            isCompleted ? Icons.inventory_2_outlined : Icons.local_shipping_outlined,
-            size: 80,
-            color: Colors.grey[300],
-          ),
-          const SizedBox(height: 16),
-          Text(
-            isCompleted ? 'No completed orders yet' : 'No active orders',
-            style: GoogleFonts.outfit(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: Colors.grey[500],
+    return SingleChildScrollView(
+      physics: const AlwaysScrollableScrollPhysics(),
+      child: Container(
+        height: MediaQuery.of(context).size.height * 0.6,
+        alignment: Alignment.center,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              isCompleted ? Icons.inventory_2_outlined : Icons.local_shipping_outlined,
+              size: 80,
+              color: Colors.grey[300],
             ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            isCompleted ? 'Your delivery history will appear here' : 'Book a delivery to get started',
-            style: TextStyle(color: Colors.grey[400]),
-          ),
-          const SizedBox(height: 24),
-          if (!isCompleted)
-            ElevatedButton.icon(
-              onPressed: () => context.push('/delivery-request'),
-              icon: const Icon(Icons.add),
-              label: const Text('Book Delivery'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppTheme.primaryBlue,
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            const SizedBox(height: 16),
+            Text(
+              isCompleted ? 'No completed orders yet' : 'No active orders',
+              style: GoogleFonts.outfit(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.grey[500],
               ),
             ),
-        ],
+            const SizedBox(height: 8),
+            Text(
+              isCompleted ? 'Your delivery history will appear here' : 'Book a delivery to get started',
+              style: TextStyle(color: Colors.grey[400]),
+            ),
+            const SizedBox(height: 24),
+            if (!isCompleted)
+              ElevatedButton.icon(
+                onPressed: () => context.push('/delivery-request'),
+                icon: const Icon(Icons.add),
+                label: const Text('Book Delivery'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppTheme.primaryBlue,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+              ),
+          ],
+        ),
       ),
     );
   }
@@ -191,6 +207,7 @@ class _OrderCard extends StatelessWidget {
     switch (status.toLowerCase()) {
       case 'pending':
         return Colors.orange;
+      case 'assigned':
       case 'accepted':
       case 'picked_up':
       case 'in_transit':
@@ -215,9 +232,8 @@ class _OrderCard extends StatelessWidget {
     final status = orderData['status'] ?? 'pending';
     final pickupAddress = orderData['pickup_address'] ?? 'Unknown';
     final dropoffAddress = orderData['dropoff_address'] ?? 'Unknown';
-    final fare = orderData['fare'] ?? 0.0;
-    final riderName = orderData['rider_name'];
-    final createdAt = orderData['created_at'] as Timestamp?;
+    final fare = orderData['fare']?.toString() ?? '0.00';
+    final riderName = orderData['rider']?['name'];
 
     return GestureDetector(
       onTap: onTap,
@@ -238,12 +254,11 @@ class _OrderCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header: Order ID + Status
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  '#${orderId.substring(0, 8).toUpperCase()}',
+                  '#${orderId.length > 8 ? orderId.substring(0, 8).toUpperCase() : orderId}',
                   style: GoogleFonts.outfit(
                     fontWeight: FontWeight.bold,
                     fontSize: 16,
@@ -267,8 +282,6 @@ class _OrderCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 16),
-
-            // Route
             Row(
               children: [
                 Column(
@@ -306,8 +319,6 @@ class _OrderCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 16),
-            
-            // Footer: Rider Info + Fare
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -332,7 +343,7 @@ class _OrderCard extends StatelessWidget {
                     style: TextStyle(color: Colors.grey[400], fontSize: 13, fontStyle: FontStyle.italic),
                   ),
                 Text(
-                  '£${fare.toStringAsFixed(2)}',
+                  '£$fare',
                   style: GoogleFonts.outfit(
                     fontWeight: FontWeight.bold,
                     fontSize: 16,
@@ -341,8 +352,6 @@ class _OrderCard extends StatelessWidget {
                 ),
               ],
             ),
-
-            // Quick Actions
             const SizedBox(height: 16),
             Row(
               children: [

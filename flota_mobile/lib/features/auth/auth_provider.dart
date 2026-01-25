@@ -14,6 +14,8 @@ class AuthState {
   final String? referralCode;
   final String? businessId;
   final bool isEmailVerified;
+  final String? countryCode;
+  final String? currencyCode;
 
   AuthState({
     this.status = AuthStatus.unauthenticated,
@@ -25,7 +27,18 @@ class AuthState {
     this.referralCode,
     this.businessId,
     this.isEmailVerified = false,
+    this.countryCode,
+    this.currencyCode,
   });
+
+  String get currencySymbol {
+    switch(currencyCode) {
+      case 'NGN': return '₦';
+      case 'GHS': return '₵';
+      case 'USD': return '\$';
+      case 'GBP': default: return '£';
+    }
+  }
 
   AuthState copyWith({
     AuthStatus? status,
@@ -37,6 +50,8 @@ class AuthState {
     String? referralCode,
     String? businessId,
     bool? isEmailVerified,
+    String? countryCode,
+    String? currencyCode,
   }) {
     return AuthState(
       status: status ?? this.status,
@@ -48,6 +63,8 @@ class AuthState {
       referralCode: referralCode ?? this.referralCode,
       businessId: businessId ?? this.businessId,
       isEmailVerified: isEmailVerified ?? this.isEmailVerified,
+      countryCode: countryCode ?? this.countryCode,
+      currencyCode: currencyCode ?? this.currencyCode,
     );
   }
 }
@@ -72,6 +89,8 @@ class AuthNotifier extends StateNotifier<AuthState> {
         final userId = await _storage.read(key: 'user_id');
         final referralCode = await _storage.read(key: 'user_referral_code');
         final businessId = await _storage.read(key: 'user_business_id');
+        final countryCode = await _storage.read(key: 'user_country_code');
+        final currencyCode = await _storage.read(key: 'user_currency_code');
         final isVerified = await _storage.read(key: 'is_email_verified') == 'true';
         
         state = state.copyWith(
@@ -84,6 +103,8 @@ class AuthNotifier extends StateNotifier<AuthState> {
           referralCode: referralCode,
           businessId: businessId,
           isEmailVerified: isVerified,
+          countryCode: countryCode,
+          currencyCode: currencyCode,
         );
       } else {
         state = AuthState(status: AuthStatus.unauthenticated);
@@ -109,6 +130,8 @@ class AuthNotifier extends StateNotifier<AuthState> {
       await _storage.write(key: 'user_id', value: user['id'].toString());
       await _storage.write(key: 'user_referral_code', value: user['referral_code']);
       await _storage.write(key: 'user_business_id', value: user['business_id']?.toString());
+      await _storage.write(key: 'user_country_code', value: user['country_code']);
+      await _storage.write(key: 'user_currency_code', value: user['currency_code']);
 
       // Store credentials for biometric login
       await _storage.write(key: 'saved_email', value: login);
@@ -127,6 +150,8 @@ class AuthNotifier extends StateNotifier<AuthState> {
         referralCode: user['referral_code'],
         businessId: user['business_id']?.toString(),
         isEmailVerified: isVerified,
+        countryCode: user['country_code'],
+        currencyCode: user['currency_code'],
       );
     } catch (e) {
       state = AuthState(status: AuthStatus.unauthenticated);
@@ -139,6 +164,8 @@ class AuthNotifier extends StateNotifier<AuthState> {
     String? companyName,
     String? registrationNumber,
     String? companyType,
+    String? countryCode,
+    String? currencyCode,
   }) async {
     state = state.copyWith(status: AuthStatus.loading);
     try {
@@ -151,6 +178,8 @@ class AuthNotifier extends StateNotifier<AuthState> {
         companyName: companyName,
         registrationNumber: registrationNumber,
         companyType: companyType,
+        countryCode: countryCode,
+        currencyCode: currencyCode,
       );
       
       final token = response['token'];
@@ -163,6 +192,8 @@ class AuthNotifier extends StateNotifier<AuthState> {
       await _storage.write(key: 'user_name', value: user['name']);
       await _storage.write(key: 'user_id', value: user['id'].toString());
       await _storage.write(key: 'user_business_id', value: user['business_id']?.toString());
+      await _storage.write(key: 'user_country_code', value: user['country_code']);
+      await _storage.write(key: 'user_currency_code', value: user['currency_code']);
 
       final isVerified = user['email_verified_at'] != null;
       await _storage.write(key: 'is_email_verified', value: isVerified.toString());
@@ -176,6 +207,8 @@ class AuthNotifier extends StateNotifier<AuthState> {
         userId: user['id'].toString(),
         businessId: user['business_id']?.toString(),
         isEmailVerified: isVerified,
+        countryCode: user['country_code'],
+        currencyCode: user['currency_code'],
       );
     } catch (e) {
       state = AuthState(status: AuthStatus.unauthenticated);

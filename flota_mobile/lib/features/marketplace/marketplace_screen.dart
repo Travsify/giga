@@ -154,8 +154,8 @@ class _MarketplaceScreenState extends ConsumerState<MarketplaceScreen> {
                     _ServiceCard(
                       title: 'Standard Bike',
                       price: _estimatedFare != null && _selectedService == 'bike'
-                          ? '£${_estimatedFare!.toStringAsFixed(2)}'
-                          : 'Starting at £5.00',
+                          ? '${ref.watch(authProvider).currencySymbol}${_estimatedFare!.toStringAsFixed(2)}'
+                          : 'Starting at ${ref.watch(authProvider).currencySymbol}5.00',
                       eta: '5 mins away',
                       icon: Icons.motorcycle,
                       isSelected: _selectedService == 'bike',
@@ -167,8 +167,8 @@ class _MarketplaceScreenState extends ConsumerState<MarketplaceScreen> {
                     _ServiceCard(
                       title: 'Delivery Van',
                       price: _estimatedFare != null && _selectedService == 'van'
-                          ? '£${_estimatedFare!.toStringAsFixed(2)}'
-                          : 'Starting at £15.00',
+                          ? '${ref.watch(authProvider).currencySymbol}${_estimatedFare!.toStringAsFixed(2)}'
+                          : 'Starting at ${ref.watch(authProvider).currencySymbol}15.00',
                       eta: '12 mins away',
                       icon: Icons.local_shipping,
                       isSelected: _selectedService == 'van',

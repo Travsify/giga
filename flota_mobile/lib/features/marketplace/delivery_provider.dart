@@ -7,12 +7,14 @@ class DeliveryState {
   final DeliveryEstimationResponse? estimation;
   final String? error;
   final Map<String, dynamic>? lastCreatedDelivery;
+  final List<Map<String, dynamic>> userDeliveries;
 
   DeliveryState({
     this.isLoading = false,
     this.estimation,
     this.error,
     this.lastCreatedDelivery,
+    this.userDeliveries = const [],
   });
 
   DeliveryState copyWith({
@@ -20,12 +22,14 @@ class DeliveryState {
     DeliveryEstimationResponse? estimation,
     String? error,
     Map<String, dynamic>? lastCreatedDelivery,
+    List<Map<String, dynamic>>? userDeliveries,
   }) {
     return DeliveryState(
       isLoading: isLoading ?? this.isLoading,
       estimation: estimation ?? this.estimation,
       error: error ?? this.error,
       lastCreatedDelivery: lastCreatedDelivery ?? this.lastCreatedDelivery,
+      userDeliveries: userDeliveries ?? this.userDeliveries,
     );
   }
 }
@@ -54,6 +58,16 @@ class DeliveryNotifier extends StateNotifier<DeliveryState> {
     } catch (e) {
       state = state.copyWith(error: e.toString(), isLoading: false);
       return false;
+    }
+  }
+
+  Future<void> fetchUserDeliveries({List<String>? statuses}) async {
+    state = state.copyWith(isLoading: true, error: null);
+    try {
+      final deliveries = await _repository.getDeliveries(statuses: statuses);
+      state = state.copyWith(userDeliveries: deliveries, isLoading: false);
+    } catch (e) {
+      state = state.copyWith(error: e.toString(), isLoading: false);
     }
   }
 }

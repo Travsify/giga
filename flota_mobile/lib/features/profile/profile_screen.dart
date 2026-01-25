@@ -3,9 +3,12 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flota_mobile/features/profile/profile_provider.dart';
+import 'package:flota_mobile/features/auth/auth_provider.dart';
 import 'package:flota_mobile/theme/app_theme.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:flota_mobile/shared/map_picker_screen.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
@@ -15,12 +18,14 @@ class ProfileScreen extends ConsumerStatefulWidget {
 }
 
 class _ProfileScreenState extends ConsumerState<ProfileScreen> {
+  final _nameController = TextEditingController();
   final _phoneController = TextEditingController();
   final _homeController = TextEditingController();
   final _workController = TextEditingController();
 
   @override
   void dispose() {
+    _nameController.dispose();
     _phoneController.dispose();
     _homeController.dispose();
     _workController.dispose();
@@ -30,6 +35,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   void _showEditProfile() {
     final user = ref.read(profileProvider).user;
     if (user != null) {
+      _nameController.text = user['name'] ?? '';
       _phoneController.text = user['uk_phone'] ?? '';
       _homeController.text = user['home_address'] ?? '';
       _workController.text = user['work_address'] ?? '';
@@ -75,6 +81,16 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             ),
             const SizedBox(height: 20),
             TextField(
+              controller: _nameController,
+              decoration: const InputDecoration(
+                labelText: 'Full Name',
+                prefixIcon: Icon(Icons.person_outline),
+                hintText: 'Enter your name',
+              ),
+              textCapitalization: TextCapitalization.words,
+            ),
+            const SizedBox(height: 16),
+            TextField(
               controller: _phoneController,
               decoration: const InputDecoration(
                 labelText: 'UK Phone Number',
@@ -86,19 +102,51 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             const SizedBox(height: 16),
             TextField(
               controller: _homeController,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 labelText: 'Home Address',
-                prefixIcon: Icon(Icons.home),
+                prefixIcon: const Icon(Icons.home),
                 hintText: 'Enter your home address',
+                suffixIcon: IconButton(
+                  icon: const Icon(Icons.map_outlined, color: AppTheme.primaryBlue),
+                  onPressed: () async {
+                    final result = await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const MapPickerScreen(title: 'Home Location'),
+                      ),
+                    );
+                    if (result != null && result is Map) {
+                      setState(() {
+                        _homeController.text = result['address'];
+                      });
+                    }
+                  },
+                ),
               ),
             ),
             const SizedBox(height: 16),
             TextField(
               controller: _workController,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 labelText: 'Work Address',
-                prefixIcon: Icon(Icons.work),
+                prefixIcon: const Icon(Icons.work),
                 hintText: 'Enter your work address',
+                suffixIcon: IconButton(
+                  icon: const Icon(Icons.map_outlined, color: AppTheme.primaryBlue),
+                  onPressed: () async {
+                    final result = await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const MapPickerScreen(title: 'Work Location'),
+                      ),
+                    );
+                    if (result != null && result is Map) {
+                      setState(() {
+                        _workController.text = result['address'];
+                      });
+                    }
+                  },
+                ),
               ),
             ),
             const SizedBox(height: 24),
@@ -107,6 +155,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               child: ElevatedButton(
                 onPressed: () async {
                   await ref.read(profileProvider.notifier).updateProfile(
+                    name: _nameController.text,
                     ukPhone: _phoneController.text,
                     homeAddress: _homeController.text,
                     workAddress: _workController.text,
@@ -123,6 +172,33 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     );
   }
 
+  void _showLogoutConfirmation() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Logout', style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
+        content: const Text('Are you sure you want to log out of Giga?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('Cancel', style: TextStyle(color: Colors.grey[600])),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              await ref.read(authProvider.notifier).logout();
+              if (mounted) context.go('/welcome');
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red[600],
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            ),
+            child: const Text('Logout'),
+          ),
+        ],
+      ),
+    );
+  }
+
   void _showReferralDialog() {
     final referralCode = ref.read(profileProvider).loyalty?['referral_code'] ?? '';
     
@@ -133,7 +209,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text('Enter a friend\'s code to get £10 credit instantly.'),
+            Text('Enter a friend\'s code to get ${ref.watch(authProvider).currencySymbol}10 credit instantly.'),
             const SizedBox(height: 16),
             TextField(
               decoration: InputDecoration(
@@ -203,7 +279,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       ),
                       const SizedBox(height: 12),
                       Text(
-                        user?['name'] ?? 'Guest',
+                        user?['name']?.isNotEmpty == true 
+                            ? user!['name'] 
+                            : (user?['email']?.split('@')[0] ?? 'Complete Profile'),
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 24,
@@ -234,6 +312,21 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                           fontSize: 14,
                         ),
                       ),
+                      const SizedBox(height: 12),
+                      ElevatedButton.icon(
+                        onPressed: _showEditProfile,
+                        icon: const Icon(Icons.edit, size: 16),
+                        label: const Text('Edit Profile'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.white24,
+                          foregroundColor: Colors.white,
+                          elevation: 0,
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -250,7 +343,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   _buildLoyaltyCard(loyalty),
                   const SizedBox(height: 24),
 
-                  _sectionHeader('Membership'),
+                  _sectionHeader('Membership & Account'),
                   _buildSavedPlaceTile(
                     'Giga+ Subscription',
                     profileState.subscription?['is_giga_plus'] == true 
@@ -258,6 +351,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         : 'Explore Premium Benefits',
                     Icons.star_rounded,
                     onTap: () => context.push('/giga-plus'),
+                  ),
+                  _buildSavedPlaceTile(
+                    ref.watch(authProvider).role == 'Business' ? 'Manage Business' : 'Join Giga for Business',
+                    ref.watch(authProvider).role == 'Business' ? 'Corporate dashboard & billing' : 'Scale your logistics',
+                    Icons.business_center_rounded,
+                    onTap: () => context.push(ref.watch(authProvider).role == 'Business' ? '/business-dashboard' : '/business-enrollment'),
                   ),
                   const SizedBox(height: 12),
                   
@@ -279,11 +378,37 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   _sectionHeader('Referral Rewards'),
                   _buildReferralCard(loyalty),
                   
+                  const SizedBox(height: 24),
+                  _sectionHeader('Account & Legal'),
+                  _buildSavedPlaceTile(
+                    'Privacy Policy',
+                    'How we handle your data',
+                    Icons.privacy_tip_outlined,
+                    onTap: () => context.push('/privacy'),
+                  ),
+                  _buildSavedPlaceTile(
+                    'Terms & Conditions',
+                    'Standard service agreement',
+                    Icons.description_outlined,
+                    onTap: () => context.push('/terms'),
+                  ),
+                  _buildSavedPlaceTile(
+                    'Logout',
+                    'Securely sign out of your account',
+                    Icons.logout_rounded,
+                    onTap: () => _showLogoutConfirmation(),
+                  ),
+                  
                   const SizedBox(height: 32),
                   SizedBox(
                     width: double.infinity,
                     child: OutlinedButton.icon(
-                      onPressed: () => ref.read(profileProvider.notifier).refresh(),
+                      onPressed: () async {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Refreshing your profile...'), duration: Duration(seconds: 1)),
+                        );
+                        await ref.read(profileProvider.notifier).refresh();
+                      },
                       icon: const Icon(Icons.refresh),
                       label: const Text('Refresh Profile'),
                       style: OutlinedButton.styleFrom(
@@ -329,11 +454,15 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: AppTheme.primaryRed,
+        gradient: const LinearGradient(
+          colors: [Color(0xFF6366F1), Color(0xFF4F46E5)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: AppTheme.primaryRed.withOpacity(0.3),
+            color: const Color(0xFF4F46E5).withOpacity(0.3),
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),
@@ -351,7 +480,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               ),
               const SizedBox(height: 4),
               Text(
-                '£${loyalty?['loyalty_points'] ?? '0.00'}',
+                '${ref.watch(authProvider).currencySymbol}${loyalty?['loyalty_points'] ?? '0.00'}',
                 style: const TextStyle(
                   color: Colors.white,
                   fontSize: 32,
@@ -383,20 +512,28 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   }
 
   Widget _buildSavedPlaceTile(String title, String subtitle, IconData icon, {VoidCallback? onTap}) {
-    return Card(
+    return Container(
       margin: const EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 10, offset: const Offset(0, 4)),
+        ],
+      ),
       child: ListTile(
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         leading: Container(
           padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
             color: AppTheme.primaryBlue.withOpacity(0.1),
             borderRadius: BorderRadius.circular(10),
           ),
-          child: Icon(icon, color: AppTheme.primaryBlue),
+          child: Icon(icon, color: AppTheme.primaryBlue, size: 20),
         ),
-        title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
-        subtitle: Text(subtitle, maxLines: 1, overflow: TextOverflow.ellipsis),
-        trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+        title: Text(title, style: GoogleFonts.outfit(fontWeight: FontWeight.w600, fontSize: 16)),
+        subtitle: Text(subtitle, style: TextStyle(color: Colors.grey[500], fontSize: 13), maxLines: 1, overflow: TextOverflow.ellipsis),
+        trailing: Icon(Icons.chevron_right, color: Colors.grey[300], size: 20),
         onTap: onTap,
       ),
     );
@@ -430,7 +567,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Refer & Earn £10',
+                      'Refer & Earn ${ref.watch(authProvider).currencySymbol}10',
                       style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                     ),
                     Text(
@@ -490,7 +627,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             children: [
               _infoItem(loyalty?['referral_count']?.toString() ?? '0', 'Referrals'),
               Container(width: 1, height: 30, color: Colors.grey[200]),
-              _infoItem('£${loyalty?['referral_earnings'] ?? '0'}', 'Earned'),
+              _infoItem('${ref.watch(authProvider).currencySymbol}${loyalty?['referral_earnings'] ?? '0'}', 'Earned'),
             ],
           ),
         ],

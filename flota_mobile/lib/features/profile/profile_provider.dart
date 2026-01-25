@@ -99,6 +99,16 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
       rethrow;
     }
   }
+  Future<void> cancelSubscription() async {
+    state = state.copyWith(isLoading: true);
+    try {
+      await _repository.cancelSubscription();
+      await refresh();
+    } catch (e) {
+      state = state.copyWith(error: e.toString(), isLoading: false);
+      rethrow;
+    }
+  }
 }
 
 final profileProvider = StateNotifierProvider<ProfileNotifier, ProfileState>((ref) {

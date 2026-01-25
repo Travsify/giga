@@ -61,6 +61,15 @@ class ProfileRepository {
     }
   }
 
+  Future<Map<String, dynamic>> cancelSubscription() async {
+    try {
+      final response = await _dio.post('/subscription/cancel');
+      return response.data;
+    } on DioException catch (e) {
+      throw _handleError(e);
+    }
+  }
+
   String _handleError(DioException e) {
     final data = e.response?.data;
     if (data != null && data is Map) {

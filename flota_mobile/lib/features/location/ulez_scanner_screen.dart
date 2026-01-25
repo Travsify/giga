@@ -21,7 +21,7 @@ class _ULEZScannerScreenState extends State<ULEZScannerScreen> {
   Future<void> _checkLocation() async {
     setState(() => _isLoading = true);
     final inZone = await ULEZService.isAddressInULEZ(_initialPos);
-    final charge = ULEZService.calculateCharge(false); // Assume non-electric for demo
+    final charge = ULEZService.calculateCharge(isElectric: false); // Assume non-electric for demo
     
     setState(() {
       _isLoading = false;

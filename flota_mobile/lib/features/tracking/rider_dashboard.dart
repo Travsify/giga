@@ -171,7 +171,7 @@ class _RiderDashboardState extends ConsumerState<RiderDashboard> {
                       Expanded(
                         child: _StatCard(
                           title: 'Today\'s Earnings',
-                          value: '£128.50',
+                          value: '${ref.watch(authProvider).currencySymbol}128.50',
                           actionLabel: 'View Details',
                           color: AppTheme.primaryBlue,
                         ),

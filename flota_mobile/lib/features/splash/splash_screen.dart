@@ -1,17 +1,27 @@
 import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flota_mobile/theme/app_theme.dart';
+import 'package:flota_mobile/core/settings_service.dart';
 
-class SplashScreen extends StatelessWidget {
+class SplashScreen extends ConsumerWidget {
   const SplashScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Watch settings to ensure they are loaded
+    final settingsRec = ref.watch(settingsInitProvider);
+    
+    // Get actual settings values
+    final settings = ref.read(settingsServiceProvider);
+    final splashPath = settings.get<String>('splash_image_url', '');
+    final splashImageUrl = settings.getAssetUrl(splashPath);
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: Stack(
         children: [
-          // Background Gradient Decor
+          // Background Decor
           Positioned(
             top: -100,
             right: -100,
@@ -38,10 +48,12 @@ class SplashScreen extends StatelessWidget {
                   duration: const Duration(milliseconds: 1000),
                   child: Hero(
                     tag: 'app_logo',
-                    child: Image.asset(
-                      'assets/images/logo.png', // Using the standard logo
-                      width: 180,
-                    ),
+                    child: splashImageUrl.isNotEmpty
+                        ? Image.network(splashImageUrl, width: 180)
+                        : Image.asset(
+                            'assets/images/logo.png',
+                            width: 180,
+                          ),
                   ),
                 ),
                 const SizedBox(height: 40),

@@ -3,10 +3,10 @@ import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'dart:math';
 
-// Base URL for Android Emulator (10.0.2.2 points to localhost)
-// For physical device, use your machine's IP address
+// Render Production Backend
 const String kApiBaseUrl = 'https://giga-ytn0.onrender.com/api'; 
 
 // NOTE: flutter_paystack is currently incompatible with the project's build configuration.
@@ -20,15 +20,21 @@ class PaymentService {
     debugPrint('PaymentService: Stripe Initialized');
   }
 
-  static Future<bool> fundWallet(BuildContext context, double amount, String email) async {
+  static Future<bool> fundWallet(BuildContext context, double amount, String email, String userId, {String currency = 'gbp'}) async {
+    debugPrint('PaymentService: Starting fundWallet for $currency $amount');
     try {
       // 1. Create Payment Intent on Backend
-      // TODO: Replace with actual backend call (Dio)
-       final paymentIntent = await _createPaymentIntent(amount, 'gbp');
+      debugPrint('PaymentService: Creating payment intent...');
+       final paymentIntent = await _createPaymentIntent(amount, currency);
        
-       if (paymentIntent == null) throw 'Failed to create payment intent';
+       if (paymentIntent == null) {
+         debugPrint('PaymentService: Payment intent creation failed');
+         throw 'Failed to create payment intent. Please check your internet connection or server status.';
+       }
+       debugPrint('PaymentService: Payment intent created successfully');
 
       // 2. Initialize Payment Sheet
+      debugPrint('PaymentService: Initializing payment sheet...');
       await Stripe.instance.initPaymentSheet(
         paymentSheetParameters: SetupPaymentSheetParameters(
           paymentIntentClientSecret: paymentIntent['clientSecret'],
@@ -36,47 +42,65 @@ class PaymentService {
           style: ThemeMode.light,
         ),
       );
+      debugPrint('PaymentService: Payment sheet initialized');
 
       // 3. Present Payment Sheet
+      debugPrint('PaymentService: Presenting payment sheet...');
       await Stripe.instance.presentPaymentSheet();
+      debugPrint('PaymentService: Payment sheet dismissed (Success)');
 
-      // 4. If successful, confirm with backend and update wallet
-      // In a real flow, the webhook handles this safely. 
-      // For now, we manually assume success and update Firestore.
+      // 4. Confirm with Backend
+      const storage = FlutterSecureStorage();
+      final token = await storage.read(key: 'auth_token');
       
-      final user = FirebaseAuth.instance.currentUser;
-      if (user != null) {
-          final userRef = FirebaseFirestore.instance.collection('users').doc(user.uid);
-          final mockRef = 'STRIPE_${DateTime.now().millisecondsSinceEpoch}';
-
-          await FirebaseFirestore.instance.runTransaction((transaction) async {
-             final snapshot = await transaction.get(userRef);
-             final currentBalance = snapshot.data()?['wallet_balance'] ?? 0.0;
-             transaction.update(userRef, {'wallet_balance': currentBalance + amount});
-             
-             // Add transaction record
-             final txRef = userRef.collection('transactions').doc();
-             transaction.set(txRef, {
-               'amount': amount,
-               'type': 'credit',
-               'reference': mockRef,
-               'created_at': FieldValue.serverTimestamp(),
-               'description': 'Wallet Funding (Stripe)',
-               'currency': 'GBP',
-             });
-          });
-          return true;
+      if (token == null) {
+        throw 'Authentication token not found. Please log in again.';
       }
-      return false;
-      
+
+      final dio = Dio(BaseOptions(
+        baseUrl: kApiBaseUrl,
+        connectTimeout: const Duration(seconds: 45),
+        receiveTimeout: const Duration(seconds: 45),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+         }
+      ));
+
+      final confirmResponse = await dio.post('/payment/confirm', data: {
+        'payment_intent_id': paymentIntent['id'], // Assuming paymentIntent contains the ID
+      });
+
+      if (confirmResponse.statusCode == 200) {
+        debugPrint('Payment confirmed by backend: ${confirmResponse.data}');
+      } else {
+        throw 'Backend confirmation failed: ${confirmResponse.data}';
+      }
+
+      return true;
     } on StripeException catch (e) {
       debugPrint('Stripe Error: ${e.error.localizedMessage}');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Payment Failed: ${e.error.localizedMessage}')),
-      );
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Payment Failed: ${e.error.localizedMessage}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
       return false;
     } catch (e) {
       debugPrint('Payment Error: $e');
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Payment Error: $e'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 5),
+          ),
+        );
+      }
       return false;
     }
   }
@@ -84,20 +108,26 @@ class PaymentService {
   // Create Payment Intent via Backend
   static Future<Map<String, dynamic>?> _createPaymentIntent(double amount, String currency) async {
     try {
-      final dio = Dio();
+      final dio = Dio(BaseOptions(
+        connectTimeout: const Duration(seconds: 15),
+        receiveTimeout: const Duration(seconds: 15),
+      ));
       // Get current user token if needed for auth
       // final user = FirebaseAuth.instance.currentUser;
       // final token = await user?.getIdToken(); 
       // dio.options.headers['Authorization'] = 'Bearer $token';
 
       final response = await dio.post(
-        '$kApiBaseUrl/create-payment-intent',
+        '$kApiBaseUrl/create-payment-intent-public',
         data: {
           'amount': amount,
           'currency': currency,
         },
         options: Options(
             contentType: Headers.jsonContentType,
+            headers: {
+              'Accept': 'application/json',
+            },
             validateStatus: (status) => status! < 500, // Handle 400s manually
         ),
       );
@@ -106,11 +136,21 @@ class PaymentService {
         return response.data;
       } else {
         debugPrint('Backend Error: ${response.data}');
-        return null;
+        final errorMsg = response.data?['error'] ?? response.data?['message'] ?? 'Unknown error';
+        throw 'Backend Error (${response.statusCode}): $errorMsg';
       }
-    } catch (e) {
+    } on DioException catch (e) {
       debugPrint('Network Error creating payment intent: $e');
-      return null;
+      String msg = 'Network Error';
+      if (e.response != null) {
+        msg += ' (${e.response?.statusCode}): ${e.response?.data}';
+      } else {
+        msg += ': ${e.message}';
+      }
+      throw msg;
+    } catch (e) {
+      debugPrint('Error creating payment intent: $e');
+      throw 'Connection error: $e';
     }
   }
     
@@ -136,6 +176,37 @@ class PaymentService {
     } catch (e) {
       debugPrint('MockPaymentService Error: $e');
       return false;
+    }
+  }
+
+  static Future<Map<String, dynamic>> redeemGiftCard(String pin, String userId) async {
+    const storage = FlutterSecureStorage();
+    final token = await storage.read(key: 'auth_token');
+    if (token == null) throw 'Authentication token not found';
+
+    final dio = Dio(BaseOptions(
+      baseUrl: kApiBaseUrl,
+      headers: {
+        'Authorization': 'Bearer $token', 
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      }
+    ));
+
+    try {
+      final response = await dio.post('/wallet/redeem', data: {
+        'code': pin.trim().toUpperCase(),
+      });
+
+      return {
+        'amount': response.data['amount'],
+        'reference': 'GIGA-REDEEM',
+      };
+    } on DioException catch (e) {
+      if (e.response != null && e.response!.data is Map) {
+         throw e.response!.data['error'] ?? 'Redemption failed';
+      }
+      throw 'Network error: ${e.message}';
     }
   }
 }
