@@ -1,0 +1,222 @@
+/* Giga Command Center - Colorful Theme */
+
+/* Background Gradient */
+:root {
+    --giga-bg-start: #f0f4ff;
+    --giga-bg-end: #fce4ec;
+    --giga-blue: #667eea;
+    --giga-purple: #764ba2;
+    --giga-orange: #f5576c;
+    --giga-pink: #f093fb;
+    --giga-green: #4facfe;
+    --giga-teal: #00f2fe;
+    --giga-yellow: #fee140;
+    --giga-coral: #fa709a;
+}
+
+/* Main background gradient */
+.fi-body {
+    background: linear-gradient(
+        135deg,
+        var(--giga-bg-start) 0%,
+        var(--giga-bg-end) 100%
+    ) !important;
+    min-height: 100vh;
+}
+
+/* Sidebar Styling */
+.fi-sidebar {
+    background: linear-gradient(180deg, #ffffff 0%, #f8f9ff 100%) !important;
+    border-right: 1px solid rgba(102, 126, 234, 0.1) !important;
+}
+
+/* Colorful Navigation Items */
+.fi-sidebar-nav .fi-sidebar-item {
+    margin: 4px 8px !important;
+    border-radius: 12px !important;
+    transition: all 0.3s ease !important;
+}
+
+.fi-sidebar-nav .fi-sidebar-item:hover {
+    transform: translateX(4px);
+}
+
+/* Dashboard - Blue Gradient */
+.fi-sidebar-item[href$="/admin"]:not([href*="/"]):first-of-type,
+.fi-sidebar-nav a[href$="/admin"] {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    color: white !important;
+}
+
+.fi-sidebar-nav a[href$="/admin"] .fi-sidebar-item-icon,
+.fi-sidebar-nav a[href$="/admin"] span {
+    color: white !important;
+}
+
+/* Custom Stat Card Gradients */
+.fi-wi-stats-overview-stat:nth-child(1) {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    color: white !important;
+    border: none !important;
+    box-shadow: 0 8px 32px rgba(102, 126, 234, 0.3) !important;
+}
+
+.fi-wi-stats-overview-stat:nth-child(2) {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%) !important;
+    color: white !important;
+    border: none !important;
+    box-shadow: 0 8px 32px rgba(245, 87, 108, 0.3) !important;
+}
+
+.fi-wi-stats-overview-stat:nth-child(3) {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%) !important;
+    color: white !important;
+    border: none !important;
+    box-shadow: 0 8px 32px rgba(79, 172, 254, 0.3) !important;
+}
+
+.fi-wi-stats-overview-stat:nth-child(4),
+.fi-wi-stats-overview-stat:last-child {
+    background: linear-gradient(135deg, #fa709a 0%, #fee140 100%) !important;
+    color: white !important;
+    border: none !important;
+    box-shadow: 0 8px 32px rgba(250, 112, 154, 0.3) !important;
+}
+
+/* Override stat card text colors */
+.fi-wi-stats-overview-stat .fi-wi-stats-overview-stat-label,
+.fi-wi-stats-overview-stat .fi-wi-stats-overview-stat-value,
+.fi-wi-stats-overview-stat .fi-wi-stats-overview-stat-description {
+    color: white !important;
+}
+
+.fi-wi-stats-overview-stat .fi-wi-stats-overview-stat-description-icon {
+    color: rgba(255, 255, 255, 0.8) !important;
+}
+
+/* Section Cards */
+.fi-section {
+    background: rgba(255, 255, 255, 0.9) !important;
+    backdrop-filter: blur(10px) !important;
+    border-radius: 16px !important;
+    border: 1px solid rgba(255, 255, 255, 0.5) !important;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06) !important;
+}
+
+/* Table Styling */
+.fi-ta {
+    border-radius: 16px !important;
+    overflow: hidden !important;
+}
+
+.fi-ta-header-cell {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    color: white !important;
+}
+
+/* Status Badge Colors */
+.fi-badge-success {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%) !important;
+}
+
+.fi-badge-warning {
+    background: linear-gradient(135deg, #fa709a 0%, #fee140 100%) !important;
+}
+
+.fi-badge-danger {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%) !important;
+}
+
+.fi-badge-info {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+}
+
+/* Buttons */
+.fi-btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    border: none !important;
+    box-shadow: 0 4px 16px rgba(102, 126, 234, 0.4) !important;
+    transition: all 0.3s ease !important;
+}
+
+.fi-btn-primary:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 6px 24px rgba(102, 126, 234, 0.5) !important;
+}
+
+/* Header/Topbar */
+.fi-topbar {
+    background: rgba(255, 255, 255, 0.95) !important;
+    backdrop-filter: blur(20px) !important;
+    border-bottom: 1px solid rgba(102, 126, 234, 0.1) !important;
+}
+
+/* Widget Cards */
+.fi-wi-widget {
+    border-radius: 16px !important;
+    overflow: hidden !important;
+}
+
+/* Charts */
+.fi-wi-chart {
+    background: rgba(255, 255, 255, 0.9) !important;
+    border-radius: 16px !important;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06) !important;
+}
+
+/* Input Fields */
+.fi-input {
+    border-radius: 12px !important;
+    border: 2px solid rgba(102, 126, 234, 0.2) !important;
+    transition: all 0.3s ease !important;
+}
+
+.fi-input:focus {
+    border-color: #667eea !important;
+    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1) !important;
+}
+
+/* Toggle/Switch Colorful */
+.fi-toggle-on {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%) !important;
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 4px;
+}
+
+/* Animations */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fi-wi-widget {
+    animation: fadeInUp 0.5s ease-out;
+}
+
+/* Page Title */
+.fi-header-heading {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
