@@ -152,16 +152,20 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
 
   Future<void> _register() async {
 
-    if (_nameController.text.isEmpty || _emailController.text.isEmpty || _phoneController.text.isEmpty || _passwordController.text.isEmpty) {
+    final settings = ref.read(settingsServiceProvider);
+    final isPhoneEnabled = settings.get<bool>('auth_phone_enabled', true);
+    final isEmailReq = settings.get<bool>('email_verification_enabled', true);
+    final isPhoneReq = settings.get<bool>('phone_verification_enabled', true);
+
+    if (_nameController.text.isEmpty || 
+        _emailController.text.isEmpty || 
+        (isPhoneEnabled && _phoneController.text.isEmpty) || 
+        _passwordController.text.isEmpty) {
        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please fill all fields')));
        return;
     }
 
-    final settings = ref.read(settingsServiceProvider);
-    final isEmailReq = settings.get<bool>('email_verification_enabled', true);
-    final isPhoneReq = settings.get<bool>('phone_verification_enabled', true);
-
-    if ((isEmailReq && !_isEmailVerified) || (isPhoneReq && !_isPhoneVerified)) {
+    if ((isEmailReq && !_isEmailVerified) || (isPhoneEnabled && isPhoneReq && !_isPhoneVerified)) {
        String msg = 'Please verify your ';
        if (isEmailReq && !_isEmailVerified) msg += 'email';
        if (isEmailReq && !_isEmailVerified && isPhoneReq && !_isPhoneVerified) msg += ' and ';
