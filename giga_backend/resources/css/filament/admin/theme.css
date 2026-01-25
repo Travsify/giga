@@ -18,129 +18,147 @@
     --color-primary-950: 30 27 75;
 }
 
-/* Giga Command Center - High Visibility Theme */
+/* Giga Command Center - High Visibility Branding Overhaul */
 
 :root {
     --giga-blue: #0047C1;
     --giga-red: #D32F2F;
-    --giga-bg: #F4F7FE;
-    --giga-border: #CBD5E1;
-    --giga-text-rich: #1E293B;
+    --giga-bg: #F8FAFC;
+    --giga-border: #94A3B8; /* Stronger border color */
+    --giga-text: #0F172A;
+    --giga-sidebar-bg: #FFFFFF;
 }
 
-/* Main background - Clean & Professional */
+/* Main background - Clean & Solid */
 .fi-body {
-    background: var(--giga-bg) !important;
+    background-color: var(--giga-bg) !important;
+    background-image: none !important;
 }
 
-/* Sidebar Styling - Distinct Contrast */
+/* Sidebar Styling - Sharp & Clear */
 .fi-sidebar {
-    background: #FFFFFF !important;
-    border-right: 2px solid rgba(0, 71, 193, 0.1) !important;
+    background: var(--giga-sidebar-bg) !important;
+    border-right: 2px solid var(--giga-blue) !important;
 }
 
-/* Navigation Items - More Visible */
+/* Navigation - Team Branding */
 .fi-sidebar-nav .fi-sidebar-item {
     margin: 6px 12px !important;
     border-radius: 8px !important;
 }
 
 .fi-sidebar-nav .fi-sidebar-item-active {
-    background: rgba(0, 71, 193, 0.08) !important;
+    background: rgba(0, 71, 193, 0.1) !important;
     border-left: 4px solid var(--giga-blue) !important;
 }
 
-/* High Contrast Section Cards */
-.fi-section {
-    background: #FFFFFF !important;
-    border: 1px solid var(--giga-border) !important;
-    border-radius: 12px !important;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03) !important;
-}
-
-/* SUPER VISIBLE INPUTS */
-.fi-input {
-    border: 2px solid var(--giga-border) !important;
-    border-radius: 8px !important;
-    padding: 10px 14px !important;
-    color: var(--giga-text-rich) !important;
-    font-weight: 500 !important;
-}
-
-.fi-input:focus {
-    border-color: var(--giga-blue) !important;
-    box-shadow: 0 0 0 3px rgba(0, 71, 193, 0.2) !important;
-}
-
-/* Labels - Ultra Clear */
-.fi-fo-field-wrp-label label {
-    color: var(--giga-text-rich) !important;
+.fi-sidebar-nav .fi-sidebar-item-active span {
+    color: var(--giga-blue) !important;
     font-weight: 700 !important;
-    font-size: 0.95rem !important;
-    margin-bottom: 6px !important;
-    display: block !important;
 }
 
-/* SUPER CLICKABLE BUTTONS */
+/* ALL BUTTONS - GIGA BLUE (AS REQUESTED) */
 .fi-btn {
-    font-weight: 700 !important;
+    border-radius: 8px !important;
+    font-weight: 800 !important;
     text-transform: uppercase !important;
     letter-spacing: 0.5px !important;
-    transition: all 0.2s ease !important;
-    padding: 12px 24px !important;
-    border-radius: 8px !important;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    border: 2px solid transparent !important;
 }
 
-.fi-btn-primary {
+/* Force ALL primary, secondary, and standard buttons to Giga Blue */
+.fi-btn-primary,
+.fi-btn-color-primary,
+.fi-btn-color-gray,
+.fi-ac-action[data-color="primary"],
+.fi-ac-action[data-color="gray"] {
     background: var(--giga-blue) !important;
     color: #FFFFFF !important;
-    box-shadow: 0 4px 14px rgba(0, 71, 193, 0.3) !important;
+    box-shadow: 0 4px 6px -1px rgba(0, 71, 193, 0.2), 0 2px 4px -2px rgba(0, 71, 193, 0.1) !important;
 }
 
-.fi-btn-primary:hover {
-    background: #003796 !important;
-    transform: translateY(-1px);
-    box-shadow: 0 6px 20px rgba(0, 71, 193, 0.4) !important;
+.fi-btn:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1) !important;
 }
 
-/* Secondary/Cancel Buttons */
-.fi-ac-action[data-color="gray"],
-.fi-btn-color-gray {
-    background: #F1F5F9 !important;
-    border: 2px solid var(--giga-border) !important;
-    color: var(--giga-text-rich) !important;
-}
-
+/* Special case for Cancel/Gray buttons - subtly different but still visible */
 .fi-btn-color-gray:hover {
-    background: #E2E8F0 !important;
+    background: #003796 !important;
 }
 
-/* Danger Buttons */
-.fi-btn-color-danger {
+/* Danger buttons still keep Giga Red for warning */
+.fi-btn-color-danger,
+.fi-ac-action[data-color="danger"] {
     background: var(--giga-red) !important;
     color: #FFFFFF !important;
 }
 
-/* Page Titles */
-.fi-header-heading {
-    color: var(--giga-text-rich) !important;
-    font-weight: 800 !important;
-    font-size: 2rem !important;
-}
-
-/* Table Header - Strong Contrast */
-.fi-ta-header-cell {
-    background: #F8FAFC !important;
-    color: var(--giga-text-rich) !important;
-    font-weight: 700 !important;
-    border-bottom: 2px solid var(--giga-border) !important;
-}
-
-/* Checkboxes & Toggles */
-.fi-fo-checkbox {
+/* INPUT FIELDS - SUPER VISIBLE & CLICKABLE */
+.fi-input {
     border: 2px solid var(--giga-border) !important;
-    width: 20px !important;
-    height: 20px !important;
+    border-radius: 8px !important;
+    padding: 12px !important;
+    color: var(--giga-text) !important;
+    font-weight: 600 !important;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05) !important;
+}
+
+.fi-input:focus {
+    border-color: var(--giga-blue) !important;
+    box-shadow: 0 0 0 4px rgba(0, 71, 193, 0.15) !important;
+    outline: none !important;
+}
+
+/* TEXT VISIBILITY OVERHAUL */
+.fi-header-heading {
+    color: var(--giga-text) !important;
+    font-weight: 900 !important;
+    letter-spacing: -0.5px !important;
+}
+
+.fi-fo-field-wrp-label label {
+    color: var(--giga-text) !important;
+    font-weight: 800 !important;
+    font-size: 0.95rem !important;
+    margin-bottom: 8px !important;
+    display: block !important;
+}
+
+/* CARDS & SECTIONS */
+.fi-section {
+    background: #FFFFFF !important;
+    border: 2px solid rgba(0, 0, 0, 0.05) !important;
+    border-radius: 16px !important;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05) !important;
+}
+
+/* TABLE HEADER */
+.fi-ta-header-cell {
+    background: #F1F5F9 !important;
+    color: var(--giga-text) !important;
+    font-weight: 800 !important;
+    border-bottom: 2px solid var(--giga-blue) !important;
+}
+
+/* CUSTOM WOW FACTOR - MICRO-INTERACTIONS */
+/* Pulse effect on primary buttons */
+@keyframes button-hover-pulse {
+    0% { box-shadow: 0 0 0 0 rgba(0, 71, 193, 0.4); }
+    70% { box-shadow: 0 0 0 10px rgba(0, 71, 193, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(0, 71, 193, 0); }
+}
+
+.fi-btn-primary:active {
+    transform: scale(0.95) !important;
+}
+
+/* Checkbox & Toggles */
+.fi-fo-checkbox {
+    border: 2px solid var(--giga-blue) !important;
+    width: 22px !important;
+    height: 22px !important;
 }
 
 .fi-toggle-on {
