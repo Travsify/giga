@@ -1,6 +1,6 @@
 FROM php:8.2-fpm
 
-# Install system dependencies
+# Install system dependencies including Node.js
 RUN apt-get update && apt-get install -y \
     git \
     curl \
@@ -12,7 +12,9 @@ RUN apt-get update && apt-get install -y \
     libpq-dev \
     libicu-dev \
     libzip-dev \
-    nginx
+    nginx \
+    nodejs \
+    npm
 
 # Clear cache
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
@@ -29,8 +31,15 @@ WORKDIR /var/www
 # Copy existing application directory contents
 COPY . /var/www
 
-# Install dependencies
+# Install PHP dependencies
 RUN composer install --no-dev --optimize-autoloader
+
+# Install Node dependencies and build assets
+RUN npm install && npm run build
+
+# Publish Filament assets
+RUN php artisan filament:assets || true
+RUN php artisan vendor:publish --tag=laravel-assets --force || true
 
 # Copy nginx configuration
 COPY nginx.conf /etc/nginx/sites-available/default
