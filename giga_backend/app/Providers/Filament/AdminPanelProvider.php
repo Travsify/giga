@@ -30,9 +30,9 @@ class AdminPanelProvider extends PanelProvider
             ->brandName('Giga Logistics')
             ->darkMode(false)  // Light mode for colorful theme
             ->colors([
-                'primary' => Color::hex('#0047C1'), // Giga Blue
-                'success' => Color::hex('#2E7D32'), // Deep Green
-                'warning' => Color::hex('#F9A825'), // Deep Amber
+                'primary' => Color::hex('#FF6B00'), // Vibrant Orange for Buttons/Menus
+                'success' => Color::hex('#2E7D32'),
+                'warning' => Color::hex('#F9A825'),
                 'danger' => Color::hex('#D32F2F'),  // Giga Red
                 'gray' => Color::Slate,
             ])

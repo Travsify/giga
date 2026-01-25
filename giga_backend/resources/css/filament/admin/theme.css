@@ -5,44 +5,41 @@
 @source '../../../../resources/views/filament/**/*.blade.php';
 
 @theme {
-    --color-primary-50: 238 242 255;
-    --color-primary-100: 224 231 255;
-    --color-primary-200: 199 210 254;
-    --color-primary-300: 165 180 252;
-    --color-primary-400: 129 140 248;
-    --color-primary-500: 102 126 234;
-    --color-primary-600: 79 70 229;
-    --color-primary-700: 67 56 202;
-    --color-primary-800: 55 48 163;
-    --color-primary-900: 49 46 129;
-    --color-primary-950: 30 27 75;
+    --color-primary-50: 255 247 237;
+    --color-primary-100: 255 237 213;
+    --color-primary-200: 254 215 170;
+    --color-primary-300: 253 186 116;
+    --color-primary-400: 251 146 60;
+    --color-primary-500: 249 115 22;
+    --color-primary-600: 234 88 12;
+    --color-primary-700: 194 65 12;
+    --color-primary-800: 154 52 18;
+    --color-primary-900: 124 45 18;
+    --color-primary-950: 67 20 7;
 }
 
-/* Giga Command Center - The "Wow" Branding Overhaul */
+/* Giga Command Center - VIBRANT BRANDING OVERHAUL */
 
 :root {
     --giga-blue: #0047C1;
-    --giga-red: #D32F2F;
+    --giga-orange: #FF6B00;
     --giga-bg: #F0F4F8;
     --giga-border: #94A3B8;
-    --giga-text: #0F172A;
     --giga-sidebar-bg: #FFFFFF;
-    --giga-glow: rgba(0, 71, 193, 0.4);
 }
 
-/* Main background - Clean & Solid */
+/* Main background */
 .fi-body {
     background-color: var(--giga-bg) !important;
-    background-image: none !important;
 }
 
-/* Sidebar Styling - Command Station Feel */
+/* Sidebar Styling */
 .fi-sidebar {
     background: var(--giga-sidebar-bg) !important;
-    border-right: 3px solid var(--giga-blue) !important;
+    border-right: 3px solid var(--giga-orange) !important;
 }
 
-/* Navigation - High Contrast Branding */
+/* Navigation - ACTIVE MENU Orange */
 .fi-sidebar-nav .fi-sidebar-item {
     margin: 8px 14px !important;
     border-radius: 10px !important;
@@ -50,7 +47,7 @@
 }
 
 .fi-sidebar-nav .fi-sidebar-item-active {
-    background: var(--giga-blue) !important;
+    background: var(--giga-orange) !important;
 }
 
 .fi-sidebar-nav .fi-sidebar-item-active span {
@@ -62,108 +59,86 @@
     color: #FFFFFF !important;
 }
 
-/* ALL BUTTONS - SOLID GIGA BLUE */
+/* ALL BUTTONS - SOLID VIBRANT ORANGE */
 .fi-btn {
     border-radius: 10px !important;
     font-weight: 900 !important;
     text-transform: uppercase !important;
     letter-spacing: 0.8px !important;
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
-    border: 2px solid transparent !important;
 }
 
-/* Force primary and gray buttons to Giga Blue */
 .fi-btn-primary,
 .fi-btn-color-primary,
 .fi-btn-color-gray,
 .fi-ac-action[data-color="primary"],
 .fi-ac-action[data-color="gray"] {
-    background: var(--giga-blue) !important;
+    background: var(--giga-orange) !important;
     color: #FFFFFF !important;
-    box-shadow: 0 4px 12px var(--giga-glow) !important;
+    box-shadow: 0 4px 12px rgba(255, 107, 0, 0.4) !important;
 }
 
 .fi-btn:hover {
     transform: translateY(-3px) scale(1.02) !important;
-    box-shadow: 0 8px 20px var(--giga-glow) !important;
+    box-shadow: 0 8px 20px rgba(255, 107, 0, 0.5) !important;
 }
 
-/* DANGER BUTTONS - GIGA RED */
-.fi-btn-color-danger,
-.fi-ac-action[data-color="danger"] {
-    background: var(--giga-red) !important;
-    color: #FFFFFF !important;
-    box-shadow: 0 4px 12px rgba(211, 47, 47, 0.4) !important;
+/* ALL TEXT - GIGA BLUE */
+.fi-header-heading,
+.fi-ta-header-cell,
+.fi-fo-field-wrp-label label,
+.fi-sidebar-item span,
+.fi-ta-text-item span,
+p, h1, h2, h3, h4, h5, h6,
+.fi-ta-header-cell div,
+.fi-section-header-heading,
+.fi-ta-empty-state-heading {
+    color: var(--giga-blue) !important;
 }
 
-.fi-btn-color-danger:hover {
-    box-shadow: 0 8px 20px rgba(211, 47, 47, 0.5) !important;
-}
-
-/* FORMS - ULTRA VISIBLE & ACCURATE */
-.fi-input {
-    border: 2.5px solid var(--giga-border) !important;
-    border-radius: 10px !important;
-    padding: 14px !important;
-    color: var(--giga-text) !important;
-    font-weight: 600 !important;
-    font-size: 1rem !important;
-    background: #FFFFFF !important;
-}
-
-.fi-input:focus {
-    border-color: var(--giga-blue) !important;
-    box-shadow: 0 0 0 6px rgba(0, 71, 193, 0.1) !important;
-    outline: none !important;
-}
-
-/* TEXT VISIBILITY - NO MORE GUESSING */
+/* Specific text visibility fixes */
 .fi-header-heading {
-    color: var(--giga-text) !important;
-    font-weight: 900 !important;
-    font-size: 2.5rem !important;
-    letter-spacing: -1px !important;
+    font-weight: 950 !important;
+    font-size: 2.8rem !important;
+    letter-spacing: -1.5px !important;
 }
 
 .fi-fo-field-wrp-label label {
-    color: var(--giga-text) !important;
     font-weight: 900 !important;
-    font-size: 1.05rem !important;
-    margin-bottom: 10px !important;
-    display: block !important;
+    font-size: 1.1rem !important;
 }
 
-/* CARDS & SECTIONS - SHARP & CLEAN */
+/* INPUT FIELDS - VISIBLE BORDERS */
+.fi-input {
+    border: 3px solid var(--giga-blue) !important;
+    border-radius: 10px !important;
+    padding: 14px !important;
+    color: var(--giga-blue) !important; /* Text inside also Blue */
+    font-weight: 700 !important;
+    font-size: 1.1rem !important;
+}
+
+.fi-input:focus {
+    box-shadow: 0 0 0 6px rgba(0, 71, 193, 0.2) !important;
+}
+
+/* CARDS & SECTIONS */
 .fi-section {
     background: #FFFFFF !important;
-    border: 1px solid var(--giga-border) !important;
-    border-radius: 20px !important;
-    box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.05) !important;
-    padding: 24px !important;
+    border: 2px solid var(--giga-blue) !important;
+    border-radius: 24px !important;
+    box-shadow: 0 20px 50px -10px rgba(0, 71, 193, 0.1) !important;
 }
 
-/* TABLE STYLING - HIGH CONTRAST */
+/* TABLE STYLING */
 .fi-ta-header-cell {
-    background: var(--giga-text) !important;
-    color: #FFFFFF !important;
-    font-weight: 800 !important;
-    padding: 16px !important;
+    background: rgba(0, 71, 193, 0.05) !important;
+    border-bottom: 3px solid var(--giga-orange) !important;
 }
 
-.fi-ta-record {
-    transition: background 0.2s ease !important;
-}
-
-.fi-ta-record:hover {
-    background: rgba(0, 71, 193, 0.03) !important;
-}
-
-/* STATUS BADGES - VIBRANT & GLOWING */
+/* STATUS BADGES */
 .fi-badge {
-    font-weight: 800 !important;
-    text-transform: uppercase !important;
-    padding: 6px 12px !important;
-    border-radius: 6px !important;
+    font-weight: 900 !important;
 }
 
 .fi-badge-color-success {
@@ -172,26 +147,21 @@
 }
 
 .fi-badge-color-danger {
-    background: var(--giga-red) !important;
+    background: #D32F2F !important;
     color: #FFFFFF !important;
 }
 
-.fi-badge-color-warning {
-    background: #F9A825 !important;
-    color: #FFFFFF !important;
-}
-
-/* CUSTOM WOW FACTOR - GLOWING ASSETS */
+/* LOGO GLOW */
 .fi-logo {
-    filter: drop-shadow(0 0 8px var(--giga-glow)) !important;
+    filter: drop-shadow(0 0 10px rgba(255, 107, 0, 0.5)) !important;
 }
 
-@keyframes pulse-glow {
-    0% { filter: drop-shadow(0 0 5px var(--giga-glow)); }
-    50% { filter: drop-shadow(0 0 15px var(--giga-glow)); }
-    100% { filter: drop-shadow(0 0 5px var(--giga-glow)); }
+@keyframes pulse-orange {
+    0% { box-shadow: 0 0 0 0 rgba(255, 107, 0, 0.6); }
+    70% { box-shadow: 0 0 0 15px rgba(255, 107, 0, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(255, 107, 0, 0); }
 }
 
 .fi-btn-primary {
-    animation: pulse-glow 3s infinite ease-in-out;
+    animation: pulse-orange 2s infinite ease-in-out;
 }
