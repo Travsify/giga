@@ -52,9 +52,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           left: 20,
           right: 20,
         ),
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        decoration: BoxDecoration(
+          color: Theme.of(context).cardTheme.color,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+          border: Border.all(color: Theme.of(context).primaryColor.withOpacity(0.1)),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -181,7 +182,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text('Cancel', style: TextStyle(color: Colors.grey[600])),
+            child: Text('Cancel', style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.5))),
           ),
           ElevatedButton(
             onPressed: () async {
@@ -261,9 +262,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             pinned: true,
             flexibleSpace: FlexibleSpaceBar(
               background: Container(
-                decoration: const BoxDecoration(
+                decoration: BoxDecoration(
                   gradient: LinearGradient(
-                    colors: [AppTheme.primaryBlue, AppTheme.darkBlue],
+                    colors: [theme.primaryColor, theme.primaryColor.withOpacity(0.7)],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
@@ -318,7 +319,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         icon: const Icon(Icons.edit, size: 16),
                         label: const Text('Edit Profile'),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white24,
+                          backgroundColor: Colors.white12,
                           foregroundColor: Colors.white,
                           elevation: 0,
                           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -444,7 +445,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         style: GoogleFonts.outfit(
           fontSize: 18,
           fontWeight: FontWeight.bold,
-          color: AppTheme.textPrimary,
+          color: Theme.of(context).textTheme.bodyLarge?.color,
         ),
       ),
     );
@@ -512,13 +513,15 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   }
 
   Widget _buildSavedPlaceTile(String title, String subtitle, IconData icon, {VoidCallback? onTap}) {
+    final theme = Theme.of(context);
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: theme.cardTheme.color,
         borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: theme.primaryColor.withOpacity(0.1)),
         boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 10, offset: const Offset(0, 4)),
+          BoxShadow(color: Colors.black.withOpacity(0.2), blurRadius: 10, offset: const Offset(0, 4)),
         ],
       ),
       child: ListTile(
@@ -526,14 +529,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         leading: Container(
           padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
-            color: AppTheme.primaryBlue.withOpacity(0.1),
+            color: theme.primaryColor.withOpacity(0.1),
             borderRadius: BorderRadius.circular(10),
           ),
-          child: Icon(icon, color: AppTheme.primaryBlue, size: 20),
+          child: Icon(icon, color: theme.primaryColor, size: 20),
         ),
-        title: Text(title, style: GoogleFonts.outfit(fontWeight: FontWeight.w600, fontSize: 16)),
-        subtitle: Text(subtitle, style: TextStyle(color: Colors.grey[500], fontSize: 13), maxLines: 1, overflow: TextOverflow.ellipsis),
-        trailing: Icon(Icons.chevron_right, color: Colors.grey[300], size: 20),
+        title: Text(title, style: GoogleFonts.outfit(fontWeight: FontWeight.w600, fontSize: 16, color: theme.textTheme.bodyLarge?.color)),
+        subtitle: Text(subtitle, style: TextStyle(color: theme.textTheme.bodyMedium?.color?.withOpacity(0.6), fontSize: 13), maxLines: 1, overflow: TextOverflow.ellipsis),
+        trailing: Icon(Icons.chevron_right, color: theme.textTheme.bodyMedium?.color?.withOpacity(0.3), size: 20),
         onTap: onTap,
       ),
     );
@@ -542,12 +545,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   Widget _buildReferralCard(Map<String, dynamic>? loyalty) {
     final code = loyalty?['referral_code'] ?? 'GENERATING...';
     
+    final theme = Theme.of(context);
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: theme.cardTheme.color,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppTheme.primaryBlue.withOpacity(0.1)),
+        border: Border.all(color: theme.primaryColor.withOpacity(0.1)),
       ),
       child: Column(
         children: [
@@ -555,11 +559,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             children: [
               Container(
                 padding: const EdgeInsets.all(12),
-                decoration: const BoxDecoration(
-                  color: Color(0xFFE0F2FE),
+                decoration: BoxDecoration(
+                  color: theme.primaryColor.withOpacity(0.1),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(Icons.card_giftcard, color: AppTheme.primaryBlue),
+                child: Icon(Icons.card_giftcard, color: theme.primaryColor),
               ),
               const SizedBox(width: 16),
               Expanded(
@@ -583,20 +587,20 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
-              color: AppTheme.backgroundColor,
+              color: const Color(0xFF0F1219),
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.black.withOpacity(0.05)),
+              border: Border.all(color: theme.primaryColor.withOpacity(0.2)),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
                   code,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
                     letterSpacing: 2,
-                    color: AppTheme.primaryBlue,
+                    color: theme.primaryColor,
                   ),
                 ),
                 Row(

@@ -123,7 +123,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     final isLoading = authState.status == AuthStatus.loading;
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: Stack(
         children: [
           // Premium Background Design
@@ -146,7 +146,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           Container(
                             padding: const EdgeInsets.all(16),
                             decoration: BoxDecoration(
-                              color: Colors.white,
+                              color: Theme.of(context).cardTheme.color,
                               shape: BoxShape.circle,
                               boxShadow: [
                                 BoxShadow(
@@ -186,7 +186,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           style: GoogleFonts.outfit(
                             fontSize: 36,
                             fontWeight: FontWeight.w800,
-                            color: Colors.black87,
+                            color: Theme.of(context).textTheme.bodyLarge?.color,
                             letterSpacing: -1,
                           ),
                         ),
@@ -195,7 +195,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           'Log in to continue your journey',
                           style: TextStyle(
                             fontSize: 18,
-                            color: Colors.black54.withOpacity(0.4),
+                            color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.6),
                             fontWeight: FontWeight.w500,
                           ),
                         ),
@@ -436,7 +436,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               TextSpan(
                                 text: "Sign Up",
                                 style: TextStyle(
-                                  color: AppTheme.primaryBlue,
+                                  color: Theme.of(context).primaryColor,
                                   fontWeight: FontWeight.w900,
                                   decoration: TextDecoration.underline,
                                 ),
@@ -463,6 +463,7 @@ class _BackgroundDecor extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Stack(
       children: [
         Positioned(
@@ -475,8 +476,8 @@ class _BackgroundDecor extends StatelessWidget {
               shape: BoxShape.circle,
               gradient: RadialGradient(
                 colors: [
-                  AppTheme.primaryBlue.withOpacity(0.08),
-                  AppTheme.primaryBlue.withOpacity(0.01),
+                  theme.primaryColor.withOpacity(0.12),
+                  theme.primaryColor.withOpacity(0.01),
                 ],
               ),
             ),
@@ -492,8 +493,8 @@ class _BackgroundDecor extends StatelessWidget {
               shape: BoxShape.circle,
               gradient: RadialGradient(
                 colors: [
-                  AppTheme.primaryRed.withOpacity(0.05),
-                  AppTheme.primaryRed.withOpacity(0),
+                  theme.colorScheme.secondary.withOpacity(0.08),
+                  theme.colorScheme.secondary.withOpacity(0),
                 ],
               ),
             ),
@@ -525,6 +526,7 @@ class _CustomTextField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -532,38 +534,44 @@ class _CustomTextField extends StatelessWidget {
           padding: const EdgeInsets.only(left: 4, bottom: 10),
           child: Text(
             label,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.w700,
-              color: Colors.black87,
+              color: theme.textTheme.bodyLarge?.color?.withOpacity(0.8),
             ),
           ),
         ),
         Container(
           decoration: BoxDecoration(
-            color: const Color(0xFFF8FAFC),
+            color: theme.inputDecorationTheme.fillColor,
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: const Color(0xFFE2E8F0)),
+            border: Border.all(color: theme.colorScheme.primary.withOpacity(0.2)),
           ),
           child: TextField(
             controller: controller,
             obscureText: isPassword && !(isPasswordVisible ?? false),
-            style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+            style: TextStyle(
+              fontWeight: FontWeight.w600, 
+              fontSize: 16,
+              color: theme.textTheme.bodyLarge?.color,
+            ),
             decoration: InputDecoration(
               hintText: hint,
-              hintStyle: TextStyle(color: Colors.black.withOpacity(0.2)),
-              prefixIcon: Icon(icon, color: AppTheme.primaryBlue, size: 22),
+              hintStyle: TextStyle(color: theme.textTheme.bodyMedium?.color?.withOpacity(0.3)),
+              prefixIcon: Icon(icon, color: theme.primaryColor, size: 22),
               suffixIcon: isPassword
                   ? IconButton(
                       icon: Icon(
                         (isPasswordVisible ?? false) ? Icons.visibility_rounded : Icons.visibility_off_rounded,
-                        color: Colors.black26,
+                        color: theme.textTheme.bodyMedium?.color?.withOpacity(0.4),
                         size: 20,
                       ),
                       onPressed: onToggleVisibility,
                     )
                   : null,
               border: InputBorder.none,
+              enabledBorder: InputBorder.none,
+              focusedBorder: InputBorder.none,
               contentPadding: const EdgeInsets.symmetric(vertical: 18, horizontal: 16),
             ),
           ),
@@ -582,18 +590,19 @@ class _SocialButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return GestureDetector(
       onTap: onTap,
       child: Container(
         height: 60,
         width: 80,
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: theme.cardTheme.color,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: const Color(0xFFE2E8F0)),
+          border: Border.all(color: theme.colorScheme.primary.withOpacity(0.1)),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.02),
+              color: Colors.black.withOpacity(0.2),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),
@@ -613,21 +622,22 @@ class _ToggleTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return AnimatedContainer(
       duration: const Duration(milliseconds: 250),
       margin: const EdgeInsets.all(4),
       decoration: BoxDecoration(
-        color: isActive ? Colors.white : Colors.transparent,
+        color: isActive ? theme.primaryColor : Colors.transparent,
         borderRadius: BorderRadius.circular(12),
         boxShadow: isActive
-            ? [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 4))]
+            ? [BoxShadow(color: theme.primaryColor.withOpacity(0.3), blurRadius: 10, offset: const Offset(0, 4))]
             : [],
       ),
       alignment: Alignment.center,
       child: Text(
         label,
         style: TextStyle(
-          color: isActive ? AppTheme.primaryBlue : Colors.black45,
+          color: isActive ? Colors.white : theme.textTheme.bodyMedium?.color?.withOpacity(0.5),
           fontWeight: isActive ? FontWeight.w900 : FontWeight.w600,
           fontSize: 14,
         ),

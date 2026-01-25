@@ -67,7 +67,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 padding: const EdgeInsets.fromLTRB(20, 60, 20, 20),
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
-                    colors: [AppTheme.primaryBlue, AppTheme.primaryBlue.withOpacity(0.8)],
+                    colors: [theme.primaryColor, theme.primaryColor.withOpacity(0.7)],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
@@ -126,7 +126,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               child: Container(
                                 padding: const EdgeInsets.all(8),
                                 decoration: BoxDecoration(
-                                  color: Colors.white.withOpacity(0.2),
+                                  color: theme.primaryColor.withOpacity(0.2),
                                   shape: BoxShape.circle,
                                 ),
                                 child: const Icon(Icons.person_outline, color: Colors.white, size: 28),
@@ -138,7 +138,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               child: Container(
                                 padding: const EdgeInsets.all(8),
                                 decoration: BoxDecoration(
-                                  color: Colors.white.withOpacity(0.2),
+                                  color: theme.primaryColor.withOpacity(0.2),
                                   shape: BoxShape.circle,
                                 ),
                                 child: Stack(
@@ -178,9 +178,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             width: double.infinity,
                             padding: const EdgeInsets.all(24),
                             decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.15),
+                              color: theme.cardTheme.color?.withOpacity(0.6),
                               borderRadius: BorderRadius.circular(24),
-                              border: Border.all(color: Colors.white.withOpacity(0.2)),
+                              border: Border.all(color: theme.primaryColor.withOpacity(0.3)),
                               boxShadow: [
                                 BoxShadow(
                                   color: Colors.black.withOpacity(0.1),
@@ -213,8 +213,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                 ElevatedButton(
                                   onPressed: () => context.push('/wallet'), // Redirect to wallet
                                   style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.white,
-                                    foregroundColor: AppTheme.primaryBlue,
+                                    backgroundColor: theme.primaryColor,
+                                    foregroundColor: Colors.white,
                                     padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                                   ),
@@ -243,11 +243,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: theme.cardTheme.color,
                       borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: theme.primaryColor.withOpacity(0.1)),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
+                          color: Colors.black.withOpacity(0.2),
                           blurRadius: 15,
                           offset: const Offset(0, 5),
                         ),
@@ -318,6 +319,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')),
                               ElevatedButton(
                                 onPressed: () => Navigator.pop(context, true),
+                                style: ElevatedButton.styleFrom(backgroundColor: theme.primaryColor),
                                 child: const Text('I Confirm & Activate'),
                               ),
                             ],
@@ -359,7 +361,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         title: 'Send',
                         subtitle: 'Move anything now',
                         icon: Icons.local_shipping_outlined,
-                        color: AppTheme.primaryRed,
+                        color: theme.colorScheme.secondary,
                         onTap: () => context.push('/delivery-request'),
                       ),
                     ),
@@ -371,7 +373,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         title: 'Track',
                         subtitle: 'Live shipment status',
                         icon: Icons.location_searching_rounded,
-                        color: AppTheme.primaryBlue,
+                        color: theme.primaryColor,
                         onTap: () => context.push('/tracking/enhanced/123'),
                       ),
                     ),
@@ -402,7 +404,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             title: 'Multi-Stop',
                             subtitle: 'Chain drop-offs',
                             icon: Icons.alt_route_rounded,
-                            color: AppTheme.primaryBlue,
+                            color: theme.primaryColor,
                             onTap: () => context.push('/multi-stop'),
                           ),
                         ),
@@ -583,27 +585,33 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ),
           ),
           
-          const SliverPadding(padding: EdgeInsets.only(bottom: 100)), // Increased for overflow protection
+          const SliverPadding(padding: EdgeInsets.only(bottom: 150)),
         ],
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
-        onTap: (index) {
-          setState(() => _currentIndex = index);
-          if (index == 1) context.push('/orders');
-          if (index == 2) context.push('/wallet');
-          if (index == 3) context.push('/profile');
-        },
-        type: BottomNavigationBarType.fixed,
-        selectedItemColor: AppTheme.primaryBlue,
-        unselectedItemColor: Colors.grey[400],
-        showUnselectedLabels: true,
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home_filled), label: 'Home'),
-          BottomNavigationBarItem(icon: Icon(Icons.history_rounded), label: 'Orders'),
-          BottomNavigationBarItem(icon: Icon(Icons.account_balance_wallet_rounded), label: 'Wallet'),
-          BottomNavigationBarItem(icon: Icon(Icons.person_pin_rounded), label: 'Profile'),
-        ],
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          border: Border(top: BorderSide(color: theme.primaryColor.withOpacity(0.2), width: 1)),
+        ),
+        child: BottomNavigationBar(
+          currentIndex: _currentIndex,
+          onTap: (index) {
+            setState(() => _currentIndex = index);
+            if (index == 1) context.push('/orders');
+            if (index == 2) context.push('/wallet');
+            if (index == 3) context.push('/profile');
+          },
+          type: BottomNavigationBarType.fixed,
+          backgroundColor: const Color(0xFF0F1219),
+          selectedItemColor: theme.primaryColor,
+          unselectedItemColor: theme.textTheme.bodyMedium?.color?.withOpacity(0.4),
+          showUnselectedLabels: true,
+          items: const [
+            BottomNavigationBarItem(icon: Icon(Icons.home_filled), label: 'Home'),
+            BottomNavigationBarItem(icon: Icon(Icons.history_rounded), label: 'Orders'),
+            BottomNavigationBarItem(icon: Icon(Icons.account_balance_wallet_rounded), label: 'Wallet'),
+            BottomNavigationBarItem(icon: Icon(Icons.person_pin_rounded), label: 'Profile'),
+          ],
+        ),
       ),
     );
   }
@@ -636,8 +644,8 @@ class _HeroActionCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(24),
           boxShadow: [
             BoxShadow(
-              color: color.withOpacity(0.3),
-              blurRadius: 15,
+              color: color.withOpacity(0.4),
+              blurRadius: 20,
               offset: const Offset(0, 8),
             ),
           ],
@@ -649,7 +657,7 @@ class _HeroActionCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.2),
+                color: Colors.white.withOpacity(0.25),
                 shape: BoxShape.circle,
               ),
               child: Icon(icon, color: Colors.white, size: 32),
@@ -663,12 +671,13 @@ class _HeroActionCard extends StatelessWidget {
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
                     fontSize: 22,
+                    letterSpacing: 1.0,
                   ),
                 ),
                 Text(
                   subtitle,
                   style: TextStyle(
-                    color: Colors.white.withOpacity(0.8),
+                    color: Colors.white.withOpacity(0.9),
                     fontSize: 12,
                   ),
                   maxLines: 2,
@@ -700,17 +709,19 @@ class _ServiceTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return GestureDetector(
       onTap: onTap,
       child: Container(
         height: 140,
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: theme.cardTheme.color,
           borderRadius: BorderRadius.circular(24),
+          border: Border.all(color: theme.primaryColor.withOpacity(0.1)),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.03),
+              color: Colors.black.withOpacity(0.2),
               blurRadius: 10,
               offset: const Offset(0, 5),
             ),
@@ -723,7 +734,7 @@ class _ServiceTile extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: color.withOpacity(0.1),
+                color: color.withOpacity(0.15),
                 shape: BoxShape.circle,
               ),
               child: Icon(icon, color: color, size: 28),
@@ -733,13 +744,17 @@ class _ServiceTile extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold, 
+                    fontSize: 16,
+                    color: theme.textTheme.bodyLarge?.color,
+                  ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
                 Text(
                   subtitle,
-                  style: TextStyle(color: Colors.grey[500], fontSize: 12),
+                  style: TextStyle(color: theme.textTheme.bodyMedium?.color?.withOpacity(0.6), fontSize: 12),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),

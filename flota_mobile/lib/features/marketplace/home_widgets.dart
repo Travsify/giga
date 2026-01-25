@@ -19,14 +19,15 @@ class PaymentMethodChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return GestureDetector(
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.2),
+          color: theme.primaryColor.withOpacity(0.15),
           borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: Colors.white.withOpacity(0.3)),
+          border: Border.all(color: theme.primaryColor.withOpacity(0.3)),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -138,17 +139,17 @@ class _LiveHeatmapWidgetState extends State<LiveHeatmapWidget> {
     if (mounted) setState(() => _trafficStatus = status);
   }
 
-  @override
-  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: theme.cardTheme.color,
         borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: theme.primaryColor.withOpacity(0.1)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
+            color: Colors.black.withOpacity(0.2),
             blurRadius: 10,
             offset: const Offset(0, 5),
           ),
@@ -220,10 +221,11 @@ class _LiveHeatmapWidgetState extends State<LiveHeatmapWidget> {
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.95),
+                          color: const Color(0xFF0F1219).withOpacity(0.95),
                           borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: theme.primaryColor.withOpacity(0.2)),
                           boxShadow: [
-                             BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 4),
+                             BoxShadow(color: Colors.black.withOpacity(0.3), blurRadius: 4),
                           ],
                         ),
                         child: Row(
