@@ -11,6 +11,10 @@ echo "Redirecting logs to stderr..."
 # This ensures that even if file writes fail, logs go to Render Console
 sed -i 's/^LOG_CHANNEL=.*/LOG_CHANNEL=stderr/' .env || echo "LOG_CHANNEL=stderr" >> .env
 
+echo "Fixing ASSET_URL for HTTPS..."
+# Force HTTPS for all asset URLs on Render
+sed -i 's/^ASSET_URL=.*/ASSET_URL=https:\/\/giga-ytn0.onrender.com/' .env || echo "ASSET_URL=https://giga-ytn0.onrender.com" >> .env
+
 echo "Running migrations..."
 php artisan migrate --force
 
