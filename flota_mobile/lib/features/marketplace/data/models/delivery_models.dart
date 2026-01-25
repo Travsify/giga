@@ -23,6 +23,14 @@ class DeliveryStopModel {
 }
 
 class DeliveryEstimationRequest {
+  final double pickupLat;
+  final double pickupLng;
+  final double dropoffLat;
+  final double dropoffLng;
+  final String vehicleType;
+  final String serviceTier;
+  final String? parcelCategory;
+  final String? parcelSize;
   final List<DeliveryStopModel>? stops;
 
   DeliveryEstimationRequest({

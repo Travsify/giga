@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flota_mobile/theme/app_theme.dart';
 import 'package:flota_mobile/core/api_client.dart';
+import 'package:flota_mobile/features/auth/auth_provider.dart';
 
 class BillingScreen extends ConsumerStatefulWidget {
   const BillingScreen({super.key});
@@ -58,7 +59,10 @@ class _BillingScreenState extends ConsumerState<BillingScreen> {
                   const SizedBox(height: 32),
                   Text('Invoice History', style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.w800)),
                   const SizedBox(height: 16),
-                  ...(_billingData?['invoices'] as List? ?? []).map((inv) => _InvoiceItem(invoice: inv)),
+                  ...(_billingData?['invoices'] as List? ?? []).map((inv) => _InvoiceItem(
+                        invoice: inv,
+                        currencySymbol: ref.watch(authProvider).currencySymbol,
+                      )),
                   if ((_billingData?['invoices'] as List? ?? []).isEmpty)
                     const Center(child: Text('No invoices found.', style: TextStyle(fontStyle: FontStyle.italic, color: Colors.grey))),
                 ],
@@ -123,7 +127,8 @@ class _BillingScreenState extends ConsumerState<BillingScreen> {
 
 class _InvoiceItem extends StatelessWidget {
   final dynamic invoice;
-  const _InvoiceItem({required this.invoice});
+  final String currencySymbol;
+  const _InvoiceItem({required this.invoice, required this.currencySymbol});
 
   @override
   Widget build(BuildContext context) {
@@ -151,7 +156,7 @@ class _InvoiceItem extends StatelessWidget {
           Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Text('${ref.watch(authProvider).currencySymbol}${invoice['amount'].toStringAsFixed(2)}', style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 16)),
+              Text('$currencySymbol${invoice['amount'].toStringAsFixed(2)}', style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 16)),
               Text(invoice['status'], style: TextStyle(color: invoice['status'] == 'Paid' ? Colors.green : Colors.orange, fontWeight: FontWeight.bold, fontSize: 12)),
             ],
           ),

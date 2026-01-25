@@ -11,6 +11,7 @@ import 'package:flota_mobile/shared/map_picker_screen.dart';
 import 'package:flota_mobile/features/marketplace/data/models/delivery_models.dart';
 import 'package:flota_mobile/features/marketplace/delivery_provider.dart';
 import 'package:flota_mobile/features/profile/profile_provider.dart';
+import 'package:flota_mobile/features/auth/auth_provider.dart';
 import 'package:intl/intl.dart';
 
 class DeliveryRequestScreen extends ConsumerStatefulWidget {

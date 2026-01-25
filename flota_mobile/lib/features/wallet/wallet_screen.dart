@@ -266,10 +266,10 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
             TextField(
               controller: amountController,
               keyboardType: const TextInputType.numberWithOptions(decimal: true),
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 labelText: "Amount (${ref.watch(authProvider).currencySymbol})",
                 hintText: "0.00",
-                prefixIcon: Icon(Icons.attach_money),
+                prefixIcon: const Icon(Icons.attach_money),
               ),
             ),
             const SizedBox(height: 24),
@@ -762,7 +762,6 @@ class _TransactionTile extends StatelessWidget {
           color: isCredit ? AppTheme.successGreen : AppTheme.errorRed,
           size: 20,
         ),
-      ),
       ),
       title: Text(description, style: const TextStyle(fontWeight: FontWeight.w600)),
       subtitle: Text(formattedDate, style: TextStyle(color: Colors.grey[400], fontSize: 12)),

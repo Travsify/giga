@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:flota_mobile/features/auth/auth_provider.dart';
 import 'package:flota_mobile/features/auth/presentation/screens/login_screen.dart';
 import 'package:flota_mobile/features/auth/presentation/screens/signup_screen.dart';
@@ -225,8 +226,8 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/verify-email',
         builder: (context, state) {
-          final isPhone = state.queryParameters['isPhone'] == 'true';
-          final phoneNumber = state.queryParameters['phoneNumber'];
+          final isPhone = state.uri.queryParameters['isPhone'] == 'true';
+          final phoneNumber = state.uri.queryParameters['phoneNumber'];
           return EmailVerificationScreen(isPhone: isPhone, phoneNumber: phoneNumber);
         },
       ),
@@ -274,7 +275,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/delivery-request',
         builder: (context, state) => DeliveryRequestScreen(
-          initiallyScheduled: state.queryParameters['scheduled'] == 'true',
+          initiallyScheduled: state.uri.queryParameters['scheduled'] == 'true',
         ),
       ),
       GoRoute(

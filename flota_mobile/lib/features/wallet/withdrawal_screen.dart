@@ -1,20 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flota_mobile/features/auth/auth_provider.dart';
 import 'package:flota_mobile/theme/app_theme.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:go_router/go_router.dart';
 import 'package:animate_do/animate_do.dart';
 
-class WithdrawalScreen extends StatefulWidget {
+class WithdrawalScreen extends ConsumerStatefulWidget {
   const WithdrawalScreen({super.key});
 
   @override
-  State<WithdrawalScreen> createState() => _WithdrawalScreenState();
+  ConsumerState<WithdrawalScreen> createState() => _WithdrawalScreenState();
 }
 
-class _WithdrawalScreenState extends State<WithdrawalScreen> {
+class _WithdrawalScreenState extends ConsumerState<WithdrawalScreen> {
   final _formKey = GlobalKey<FormState>();
   final _amountController = TextEditingController();
   final _sortCodeController = TextEditingController();

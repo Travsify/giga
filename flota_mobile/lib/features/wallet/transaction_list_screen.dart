@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flota_mobile/features/wallet/wallet_provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flota_mobile/theme/app_theme.dart';
+import 'package:flota_mobile/features/auth/auth_provider.dart';
 import 'package:intl/intl.dart';
 import 'package:animate_do/animate_do.dart';
 
@@ -52,7 +53,10 @@ class TransactionListScreen extends ConsumerWidget {
               final data = transactions[index];
               return FadeInUp(
                 delay: Duration(milliseconds: index * 50),
-                child: _TransactionTile(data: data),
+                child: _TransactionTile(
+                  data: data,
+                  currencySymbol: ref.read(authProvider).currencySymbol,
+                ),
               );
             },
           );
@@ -64,7 +68,8 @@ class TransactionListScreen extends ConsumerWidget {
 
 class _TransactionTile extends StatelessWidget {
   final Map<String, dynamic> data;
-  const _TransactionTile({required this.data});
+  final String currencySymbol;
+  const _TransactionTile({required this.data, required this.currencySymbol});
 
   @override
   Widget build(BuildContext context) {
@@ -115,7 +120,7 @@ class _TransactionTile extends StatelessWidget {
             ),
           ),
           Text(
-            '${isCredit ? '+' : '-'}${ref.read(authProvider).currencySymbol}${amount.abs().toStringAsFixed(2)}',
+            '${isCredit ? '+' : '-'}$currencySymbol${amount.abs().toStringAsFixed(2)}',
             style: GoogleFonts.outfit(
               fontWeight: FontWeight.bold,
               fontSize: 18,

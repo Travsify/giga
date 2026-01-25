@@ -562,7 +562,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 child: const Icon(Icons.card_giftcard, color: AppTheme.primaryBlue),
               ),
               const SizedBox(width: 16),
-              const Expanded(
+              Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [

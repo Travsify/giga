@@ -27,8 +27,7 @@ class AuthRepository {
     String? ukPhone,
     String? companyName,
     String? registrationNumber,
-    String? companyName,
-    String? registrationNumber,
+
     String? companyType,
     String? countryCode,
     String? currencyCode,

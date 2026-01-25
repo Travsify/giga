@@ -39,7 +39,7 @@ class BusinessDashboardScreen extends ConsumerWidget {
                 children: [
                   _buildHeader(authState),
                   const SizedBox(height: 32),
-                  _buildMetricsRow(),
+                  _buildMetricsRow(ref),
                   const SizedBox(height: 32),
                   _buildQuickActions(context),
                   const SizedBox(height: 32),
@@ -95,7 +95,7 @@ class BusinessDashboardScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildMetricsRow() {
+  Widget _buildMetricsRow(WidgetRef ref) {
     return Row(
       children: [
         Expanded(
