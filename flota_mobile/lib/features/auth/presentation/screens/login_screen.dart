@@ -212,20 +212,18 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       final emailEnabled = settings.get<bool>('auth_email_enabled', true);
                       final phoneEnabled = settings.get<bool>('auth_phone_enabled', true);
 
-                      // If one is disabled, force the other mode updates automatically if we rebuild state, 
-                      // but here we just hide the toggle.
-                      // We need to ensure _isPhoneLogin matches the enabled state if only one is allowed.
-                      
-                      // Using a post-frame callback or simple logic in build is risky for state changes,
-                      // but for UI rendering it is fine.
+                      // Ensure _isPhoneLogin is consistent with available options
+                      if (!phoneEnabled && _isPhoneLogin) {
+                        WidgetsBinding.instance.addPostFrameCallback((_) => setState(() => _isPhoneLogin = false));
+                      } else if (!emailEnabled && !_isPhoneLogin) {
+                        WidgetsBinding.instance.addPostFrameCallback((_) => setState(() => _isPhoneLogin = true));
+                      }
                       
                       if (!emailEnabled && !phoneEnabled) {
-                        return const Center(child: Text("Login is currently disabled."));
+                        return const Center(child: Text("Login is currently disabled.", style: TextStyle(color: Colors.red)));
                       }
 
                       if (!emailEnabled || !phoneEnabled) {
-                         // Only one enabled, hide toggle and force mode (logic handled in build logic below effectively)
-                         // But we want to ensure the UI reflects the single mode.
                          return const SizedBox.shrink();
                       }
 

@@ -7,8 +7,10 @@ import 'package:flota_mobile/features/auth/domain/models/country_model.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 
+import 'package:flutter/foundation.dart';
+
 /// Service to handle app-wide settings fetched from Admin Panel
-class SettingsService {
+class SettingsService extends ChangeNotifier {
   final ApiClient _apiClient;
   
   // Cache keys
@@ -62,6 +64,7 @@ class SettingsService {
         final data = response.data['data'] as Map<String, dynamic>;
         _settings = data;
         await _saveToCache(data);
+        notifyListeners();
       }
     } catch (e) {
       print('Error fetching settings: $e');
@@ -75,6 +78,7 @@ class SettingsService {
     if (jsonStr != null) {
       try {
         _settings = json.decode(jsonStr) as Map<String, dynamic>;
+        notifyListeners();
       } catch (e) {
         print('Error decoding cached settings: $e');
       }
@@ -162,6 +166,8 @@ class SettingsService {
            );
         }
         
+        notifyListeners();
+        
         // Try auto-detect location
         await detectConfiguredCountry();
       }
@@ -207,6 +213,7 @@ class SettingsService {
           );
           
           _currentCountry = detected;
+          notifyListeners();
         }
       }
     } catch (e) {
@@ -216,6 +223,7 @@ class SettingsService {
 
   void setCountry(Country country) {
     _currentCountry = country;
+    notifyListeners();
     // Persist selection if needed
   }
 }
@@ -230,7 +238,7 @@ class AppUpdateStatus {
 }
 
 // Provider
-final settingsServiceProvider = Provider<SettingsService>((ref) {
+final settingsServiceProvider = ChangeNotifierProvider<SettingsService>((ref) {
   final apiClient = ref.watch(apiClientProvider);
   return SettingsService(apiClient);
 });

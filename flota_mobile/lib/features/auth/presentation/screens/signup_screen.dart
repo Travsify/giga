@@ -373,16 +373,18 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                           isLoading: _isVerifyingEmail,
                         ),
                         const SizedBox(height: 24),
-                        _CustomTextField(
-                          controller: _phoneController,
-                          label: 'Phone Number',
-                          hint: '+44 7000 000000',
-                          icon: Icons.phone_android_rounded,
-                          isVerified: _isPhoneVerified,
-                          onVerify: ref.watch(settingsServiceProvider).get<bool>('phone_verification_enabled', true) ? _sendPhoneOtp : null,
-                          isLoading: _isVerifyingPhone,
-                        ),
-                        const SizedBox(height: 24),
+                        if (ref.watch(settingsServiceProvider).get<bool>('auth_phone_enabled', true)) ...[
+                          _CustomTextField(
+                            controller: _phoneController,
+                            label: 'Phone Number',
+                            hint: '+44 7000 000000',
+                            icon: Icons.phone_android_rounded,
+                            isVerified: _isPhoneVerified,
+                            onVerify: ref.watch(settingsServiceProvider).get<bool>('phone_verification_enabled', true) ? _sendPhoneOtp : null,
+                            isLoading: _isVerifyingPhone,
+                          ),
+                          const SizedBox(height: 24),
+                        ],
                         _CustomTextField(
                           controller: _passwordController,
                           label: 'Password',
