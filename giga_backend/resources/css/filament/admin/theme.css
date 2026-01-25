@@ -93,19 +93,26 @@ input[type="radio"]:checked {
     box-shadow: 0 0 0 2px #FFB800 !important;
 }
 
-/* Toggle Switches - Gold Styling */
-.fi-fo-toggle button[aria-checked="true"] {
+/* Toggle Switches - Gold Styling (Global) */
+button[role="switch"][aria-checked="true"],
+.fi-fo-toggle button[aria-checked="true"],
+.fi-ta-toggle button[aria-checked="true"],
+.fi-color-primary button[role="switch"][aria-checked="true"] {
     background-color: #FFB800 !important;
 }
 
-.fi-fo-toggle button[aria-checked="true"] span {
+button[role="switch"][aria-checked="true"] span,
+.fi-fo-toggle button[aria-checked="true"] span,
+.fi-ta-toggle button[aria-checked="true"] span {
     background-color: #FFFFFF !important;
 }
 
-/* Toggle Background when active */
-.fi-color-primary button[aria-checked="true"],
-.fi-fo-toggle-active {
-    background-color: #FFB800 !important;
+/* Focus and Ring states for Toggles */
+button[role="switch"][aria-checked="true"]:focus-visible,
+button[role="switch"][aria-checked="true"]:focus {
+    --tw-ring-color: #FFB800 !important;
+    outline: 2px solid #FFB800 !important;
+    outline-offset: 2px;
 }
 
 /* Stat Cards Color Overrides */
