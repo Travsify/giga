@@ -26,6 +26,19 @@ class DeliveryRepository {
     }
   }
 
+  Future<List<Map<String, dynamic>>> getDeliveries({List<String>? statuses}) async {
+    try {
+      final queryParams = <String, dynamic>{};
+      if (statuses != null && statuses.isNotEmpty) {
+        queryParams['status'] = statuses.join(',');
+      }
+      final response = await _dio.get('/deliveries', queryParameters: queryParams);
+      return List<Map<String, dynamic>>.from(response.data);
+    } on DioException catch (e) {
+      throw _handleError(e);
+    }
+  }
+
   String _handleError(DioException e) {
     if (e.response?.data != null && e.response?.data['message'] != null) {
       return e.response?.data['message'];

@@ -1,25 +1,109 @@
-import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:flota_mobile/theme/app_theme.dart';
-import 'package:go_router/go_router.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flota_mobile/features/marketplace/data/delivery_repository.dart';
+import 'package:flota_mobile/features/marketplace/data/models/delivery_models.dart';
 
-class MultiStopScreen extends StatefulWidget {
+class MultiStopScreen extends ConsumerStatefulWidget {
   const MultiStopScreen({super.key});
 
   @override
-  State<MultiStopScreen> createState() => _MultiStopScreenState();
+  ConsumerState<MultiStopScreen> createState() => _MultiStopScreenState();
 }
 
-class _MultiStopScreenState extends State<MultiStopScreen> {
+class _MultiStopScreenState extends ConsumerState<MultiStopScreen> {
   final List<Map<String, dynamic>> _stops = [
-    {'address': '123 Oxford St, W1D 2HG', 'type': 'pickup'},
-    {'address': '456 Regent St, W1B 5TA', 'type': 'dropoff'},
-    {'address': '789 Bond St, W1S 1DP', 'type': 'dropoff'},
+    {'address': 'Pickup Point', 'type': 'pickup', 'position': null},
+    {'address': 'Destination 1', 'type': 'dropoff', 'position': null},
   ];
+
+  double _totalDistance = 0.0;
+  double _apiFare = 0.0;
+  bool _isEstimating = false;
+  bool _isCreating = false;
+  GoogleMapController? _mapController;
+
+  void _calculateTotalDistance() async {
+    double distance = 0.0;
+    List<LatLng> positions = [];
+    for (var stop in _stops) {
+      if (stop['position'] != null) {
+        positions.add(stop['position'] as LatLng);
+      }
+    }
+
+    if (positions.length >= 2) {
+      for (int i = 0; i < positions.length - 1; i++) {
+        distance += LocationService.calculateDistance(
+          positions[i].latitude,
+          positions[i].longitude,
+          positions[i+1].latitude,
+          positions[i+1].longitude,
+        );
+      }
+      
+      setState(() {
+        _totalDistance = distance;
+        _isEstimating = true;
+      });
+
+      try {
+        final repository = ref.read(deliveryRepositoryProvider);
+        final request = DeliveryEstimationRequest(
+          pickupLat: positions.first.latitude,
+          pickupLng: positions.first.longitude,
+          dropoffLat: positions.last.latitude,
+          dropoffLng: positions.last.longitude,
+          vehicleType: 'Van', // Default, could be a selector
+          serviceTier: 'Standard',
+          stops: _stops.asMap().entries.map((e) => DeliveryStopModel(
+            address: e.value['address'],
+            lat: e.value['position']?.latitude ?? 0,
+            lng: e.value['position']?.longitude ?? 0,
+            type: e.value['type'],
+          )).toList(),
+        );
+
+        final result = await repository.estimateFare(request);
+        setState(() {
+          _apiFare = result.finalFare;
+          _isEstimating = false;
+        });
+      } catch (e) {
+        setState(() => _isEstimating = false);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Estimation failed: $e')),
+          );
+        }
+      }
+    } else {
+      setState(() => _totalDistance = 0.0);
+    }
+  }
+
+  Future<void> _pickLocation(int index) async {
+    final result = await Navigator.push<Map<String, dynamic>>(
+      context,
+      MaterialPageRoute(
+        builder: (context) => MapPickerScreen(
+          title: _stops[index]['type'] == 'pickup' ? 'Select Pickup' : 'Select Dropoff',
+          initialPosition: _stops[index]['position'] as LatLng?,
+        ),
+      ),
+    );
+
+    if (result != null) {
+      setState(() {
+        _stops[index]['address'] = result['address'];
+        _stops[index]['position'] = result['position'];
+      });
+      _calculateTotalDistance();
+      _updateMapCamera();
+    }
+  }
 
   void _addStop() {
     setState(() {
-      _stops.add({'address': 'Select Location', 'type': 'dropoff'});
+      _stops.add({'address': 'Select Location', 'type': 'dropoff', 'position': null});
     });
   }
 
@@ -28,6 +112,8 @@ class _MultiStopScreenState extends State<MultiStopScreen> {
       setState(() {
         _stops.removeAt(index);
       });
+      _calculateTotalDistance();
+      _updateMapCamera();
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Minimum 2 stops required')),
@@ -35,10 +121,52 @@ class _MultiStopScreenState extends State<MultiStopScreen> {
     }
   }
 
+  void _updateMapCamera() {
+    if (_mapController == null) return;
+    
+    final positions = _stops
+        .where((s) => s['position'] != null)
+        .map((s) => s['position'] as LatLng)
+        .toList();
+
+    if (positions.isEmpty) return;
+
+    if (positions.length == 1) {
+      _mapController!.animateCamera(CameraUpdate.newLatLngZoom(positions[0], 15));
+      return;
+    }
+
+    double minLat = positions[0].latitude;
+    double maxLat = positions[0].latitude;
+    double minLng = positions[0].longitude;
+    double maxLng = positions[0].longitude;
+
+    for (final pos in positions) {
+      if (pos.latitude < minLat) minLat = pos.latitude;
+      if (pos.latitude > maxLat) maxLat = pos.latitude;
+      if (pos.longitude < minLng) minLng = pos.longitude;
+      if (pos.longitude > maxLng) maxLng = pos.longitude;
+    }
+
+    _mapController!.animateCamera(
+      CameraUpdate.newLatLngBounds(
+        LatLngBounds(
+          southwest: LatLng(minLat, minLng),
+          northeast: LatLng(maxLat, maxLng),
+        ),
+        50,
+      ),
+    );
+  }
+
   double get _totalFare {
-    // Base fare £5.00 + £3.00 per additional stop
-    // Discount applied in display logic
-    return 5.00 + ((_stops.length - 1) * 3.00);
+    // Pricing logic: Base £5.00 + £1.50 per mile + £3.00 per extra stop
+    // _totalDistance is in km, convert to miles (1 km = 0.621371 miles)
+    double miles = _totalDistance * 0.621371;
+    double stopCharge = (_stops.length - 2) * 3.00;
+    if (stopCharge < 0) stopCharge = 0;
+    
+    return 5.00 + (miles * 1.50) + stopCharge;
   }
 
   @override
@@ -52,24 +180,61 @@ class _MultiStopScreenState extends State<MultiStopScreen> {
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => context.pop(),
         ),
+        actions: [
+          if (_isEstimating)
+            const Center(
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 16),
+                child: SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                ),
+              ),
+            ),
+        ],
       ),
       body: Column(
         children: [
-          // Route Map Preview (Placeholder)
+          // Route Map Preview (Fully Functional)
           Container(
-            height: 200,
+            height: 250,
             width: double.infinity,
-            color: Colors.grey[200],
+            decoration: BoxDecoration(
+              boxShadow: [
+                BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 10),
+              ],
+            ),
             child: Stack(
               children: [
-                Center(
-                  child: Icon(Icons.map, size: 64, color: Colors.grey[400]),
+                GoogleMap(
+                  onMapCreated: (controller) => _mapController = controller,
+                  initialCameraPosition: const CameraPosition(
+                    target: LatLng(51.5074, -0.1278), // London
+                    zoom: 11,
+                  ),
+                  markers: _stops
+                      .asMap()
+                      .entries
+                      .where((e) => e.value['position'] != null)
+                      .map((e) => Marker(
+                            markerId: MarkerId('stop_${e.key}'),
+                            position: e.value['position'] as LatLng,
+                            infoWindow: InfoWindow(title: e.key == 0 ? 'Pickup' : 'Stop ${e.key}'),
+                            icon: BitmapDescriptor.defaultMarkerWithHue(
+                              e.key == 0 ? BitmapDescriptor.hueAzure : BitmapDescriptor.hueRed,
+                            ),
+                          ))
+                      .toSet(),
+                  myLocationEnabled: false,
+                  zoomControlsEnabled: false,
+                  mapToolbarEnabled: false,
                 ),
                 Positioned(
-                  bottom: 10,
-                  right: 10,
+                  bottom: 15,
+                  right: 15,
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(20),
@@ -77,7 +242,21 @@ class _MultiStopScreenState extends State<MultiStopScreen> {
                         BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 4),
                       ],
                     ),
-                    child: const Text('Route Optimized', style: TextStyle(fontWeight: FontWeight.bold, color: AppTheme.successGreen)),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.auto_awesome, color: AppTheme.successGreen, size: 16),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Route Optimized',
+                          style: GoogleFonts.outfit(
+                            fontWeight: FontWeight.bold,
+                            color: AppTheme.successGreen,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ],
@@ -96,82 +275,97 @@ class _MultiStopScreenState extends State<MultiStopScreen> {
                   }
                   final item = _stops.removeAt(oldIndex);
                   _stops.insert(newIndex, item);
+                  _calculateTotalDistance();
+                  _updateMapCamera();
                 });
               },
               itemBuilder: (context, index) {
                 final stop = _stops[index];
                 final isPickup = index == 0;
+                final isFilled = stop['position'] != null;
                 
                 return Container(
                   key: ValueKey(stop),
-                  margin: const EdgeInsets.only(bottom: 15),
+                  margin: const EdgeInsets.only(bottom: 12),
                   decoration: BoxDecoration(
                     color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: isFilled ? AppTheme.primaryBlue.withOpacity(0.1) : Colors.transparent,
+                    ),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
-                        blurRadius: 8,
-                        offset: const Offset(0, 2),
+                        color: Colors.black.withOpacity(0.03),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
                       ),
                     ],
                   ),
                   child: ListTile(
-                    leading: Icon(Icons.drag_handle, color: Colors.grey[400]),
-                    title: Row(
-                      children: [
-                        Icon(
-                          isPickup ? Icons.my_location : Icons.location_on,
-                          color: isPickup ? AppTheme.primaryBlue : AppTheme.primaryRed,
-                          size: 20,
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(child: Text(stop['address'] as String, style: const TextStyle(fontWeight: FontWeight.w500))),
-                      ],
+                    onTap: () => _pickLocation(index),
+                    leading: const Icon(Icons.drag_handle, color: Colors.grey),
+                    title: Text(
+                      stop['address'] as String,
+                      style: GoogleFonts.outfit(
+                        fontWeight: isFilled ? FontWeight.w600 : FontWeight.w400,
+                        color: isFilled ? AppTheme.textPrimary : Colors.grey[400],
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                     subtitle: Text(
-                      isPickup ? 'Pickup Point' : 'Stop ${index}',
-                      style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                      isPickup ? 'Primary Pickup' : 'Delivery Stop ${index}',
+                      style: TextStyle(color: isPickup ? AppTheme.primaryBlue : Colors.grey[500], fontSize: 11),
                     ),
-                    trailing: index > 0 
-                      ? IconButton(
-                          icon: const Icon(Icons.close, color: Colors.grey),
-                          onPressed: () => _removeStop(index),
-                        )
-                      : const SizedBox(width: 48), // Balance spacing
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (index > 0)
+                          IconButton(
+                            icon: const Icon(Icons.remove_circle_outline, color: AppTheme.primaryRed, size: 20),
+                            onPressed: () => _removeStop(index),
+                          ),
+                        const Icon(Icons.chevron_right, color: Colors.grey),
+                      ],
+                    ),
                   ),
                 );
               },
             ),
           ),
           
-          // Add Stop Button
+          // Action Buttons
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: OutlinedButton.icon(
-              onPressed: _addStop,
-              icon: const Icon(Icons.add_location_alt),
-              label: const Text('Add Another Stop'),
-              style: OutlinedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                side: const BorderSide(color: AppTheme.primaryBlue),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-              ),
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 10),
+            child: Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: _isEstimating || _isCreating ? null : _addStop,
+                    icon: const Icon(Icons.add_location_alt_outlined),
+                    label: const Text('Add Stop'),
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 15),
+                      side: const BorderSide(color: AppTheme.primaryBlue),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
 
-          const SizedBox(height: 10),
-
-          // Total & Action
+          // Pricing & Checkout
           Container(
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.fromLTRB(25, 20, 25, 30),
             decoration: BoxDecoration(
               color: Colors.white,
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withOpacity(0.05),
-                  blurRadius: 10,
-                  offset: const Offset(0, -5),
+                  blurRadius: 20,
+                  offset: const Offset(0, -10),
                 ),
               ],
             ),
@@ -184,53 +378,77 @@ class _MultiStopScreenState extends State<MultiStopScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          '${_stops.length} Stops • 2.4 miles',
-                          style: TextStyle(color: Colors.grey[600]),
+                          '${(_totalDistance * 0.621371).toStringAsFixed(1)} miles • ${_stops.length} location(s)',
+                          style: GoogleFonts.outfit(color: Colors.grey[600], fontSize: 14),
                         ),
-                        const SizedBox(height: 4),
-                        Row(
-                          children: [
-                            Text(
-                              '£${_totalFare.toStringAsFixed(2)}',
-                              style: const TextStyle(
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                                color: AppTheme.primaryBlue,
-                              ),
-                            ),
-                            const SizedBox(width: 10),
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                               decoration: BoxDecoration(
-                                color: AppTheme.successGreen.withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: const Text(
-                                'Save 50%',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.bold,
-                                  color: AppTheme.successGreen,
-                                ),
-                              ),
-                            ),
-                          ],
+                        const SizedBox(height: 5),
+                        Text(
+                          _isEstimating ? 'Calculating...' : '£${_apiFare.toStringAsFixed(2)}',
+                          style: GoogleFonts.outfit(
+                            fontSize: 32,
+                            fontWeight: FontWeight.bold,
+                            color: AppTheme.primaryBlue,
+                          ),
                         ),
                       ],
                     ),
                     ElevatedButton(
-                      onPressed: () {
-                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Proceeding to confirmation...')),
-                        );
-                      },
+                      onPressed: (_totalDistance > 0 && !_isEstimating && !_isCreating)
+                          ? () async {
+                              setState(() => _isCreating = true);
+                              try {
+                                final repository = ref.read(deliveryRepositoryProvider);
+                                final pickup = _stops.first;
+                                final dropoff = _stops.last;
+                                
+                                final request = DeliveryRequest(
+                                  pickupAddress: pickup['address'],
+                                  pickupLat: pickup['position'].latitude,
+                                  pickupLng: pickup['position'].longitude,
+                                  dropoffAddress: dropoff['address'],
+                                  dropoffLat: dropoff['position'].latitude,
+                                  dropoffLng: dropoff['position'].longitude,
+                                  vehicleType: 'Van',
+                                  serviceTier: 'Standard',
+                                  fare: _apiFare,
+                                  description: 'Multi-stop delivery with ${_stops.length} locations',
+                                  stops: _stops.asMap().entries.map((e) => DeliveryStopModel(
+                                    address: e.value['address'],
+                                    lat: e.value['position']?.latitude ?? 0,
+                                    lng: e.value['position']?.longitude ?? 0,
+                                    type: e.value['type'],
+                                  )).toList(),
+                                );
+
+                                await repository.createDelivery(request);
+                                setState(() => _isCreating = false);
+                                if (mounted) {
+                                  context.push('/wallet'); // Go to payment
+                                }
+                              } catch (e) {
+                                setState(() => _isCreating = false);
+                                if (mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(content: Text('Order failed: $e')),
+                                  );
+                                }
+                              }
+                          }
+                          : null,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppTheme.primaryBlue,
                         foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        padding: const EdgeInsets.symmetric(horizontal: 35, vertical: 18),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                        elevation: 5,
+                        shadowColor: AppTheme.primaryBlue.withOpacity(0.4),
                       ),
-                      child: const Text('Confirm', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                      child: _isCreating 
+                        ? const SizedBox(width: 25, height: 25, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                        : Text(
+                            'Confirm',
+                            style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold),
+                          ),
                     ),
                   ],
                 ),

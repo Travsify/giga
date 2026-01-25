@@ -1,13 +1,16 @@
 import 'package:flota_mobile/features/auth/auth_provider.dart';
+import 'package:firebase_auth/firebase_auth.dart' as io;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flota_mobile/theme/app_theme.dart';
+import 'package:flota_mobile/core/api_client.dart';
 
 class SignupScreen extends ConsumerStatefulWidget {
-  const SignupScreen({super.key});
+  final String? initialRole;
+  const SignupScreen({super.key, this.initialRole});
 
   @override
   ConsumerState<SignupScreen> createState() => _SignupScreenState();
@@ -16,22 +19,146 @@ class SignupScreen extends ConsumerStatefulWidget {
 class _SignupScreenState extends ConsumerState<SignupScreen> {
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
+  final _phoneController = TextEditingController();
   final _passwordController = TextEditingController();
-  String _selectedRole = 'Customer';
+  final _companyNameController = TextEditingController();
+  final _registrationNumberController = TextEditingController();
+  final _companyTypeController = TextEditingController();
+  late String _selectedRole;
   bool _isPasswordVisible = false;
+  
+  // Verification States
+  bool _isEmailVerified = false;
+  bool _isPhoneVerified = false;
+  bool _isVerifyingEmail = false;
+  bool _isVerifyingPhone = false;
+  String? _phoneVerificationId;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedRole = widget.initialRole ?? 'Customer';
+  }
 
   @override
   void dispose() {
     _nameController.dispose();
     _emailController.dispose();
+    _phoneController.dispose();
     _passwordController.dispose();
+    _companyNameController.dispose();
+    _registrationNumberController.dispose();
+    _companyTypeController.dispose();
     super.dispose();
   }
 
+  // --- Email Verification Logic ---
+  Future<void> _sendEmailOtp() async {
+    final email = _emailController.text.trim();
+    if (email.isEmpty) {
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Enter email first')));
+      return;
+    }
+
+    setState(() => _isVerifyingEmail = true);
+    try {
+      final api = ref.read(apiClientProvider);
+      await api.dio.post('signup/verify-email/send', data: {'email': email});
+      if (mounted) _showOtpDialog(email, isEmail: true);
+    } catch (e) {
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
+    } finally {
+      if (mounted) setState(() => _isVerifyingEmail = false);
+    }
+  }
+
+  // _showEmailVerificationDialog is no longer needed as we use _showOtpDialog again
+
+    // --- Phone Verification Logic ---
+  Future<void> _sendPhoneOtp() async {
+    final phone = _phoneController.text.trim();
+    if (phone.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Enter phone number first')));
+      return;
+    }
+
+    setState(() => _isVerifyingPhone = true);
+    try {
+      final api = ref.read(apiClientProvider);
+      await api.dio.post('phone/send-otp', data: {'phone': phone});
+      if (mounted) _showOtpDialog(phone, isEmail: false);
+    } catch (e) {
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to send SMS: $e')));
+    } finally {
+      if (mounted) setState(() => _isVerifyingPhone = false);
+    }
+  }
+
+  void _showOtpDialog(String target, {required bool isEmail}) {
+    final codeController = TextEditingController();
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        title: Text('Verify ${isEmail ? 'Email' : 'Phone'}'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text('Enter the 6-digit code sent to $target'),
+            const SizedBox(height: 20),
+            TextField(
+              controller: codeController,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(hintText: '000000', border: OutlineInputBorder()),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+          ElevatedButton(
+            onPressed: () async {
+              final code = codeController.text.trim();
+              if (code.length != 6) return;
+              
+              try {
+                final api = ref.read(apiClientProvider);
+                if (isEmail) {
+                  await api.dio.post('signup/verify-email/confirm', data: {
+                    'email': target,
+                    'code': code,
+                  });
+                  setState(() => _isEmailVerified = true);
+                } else {
+                   // Backend Phone Verify
+                  await api.dio.post('phone/verify-otp', data: {
+                    'phone': target,
+                    'code': code,
+                  });
+                  setState(() => _isPhoneVerified = true);
+                }
+                if (mounted) Navigator.pop(context);
+              } catch (e) {
+                if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Invalid code')));
+              }
+            },
+            child: const Text('Verify'),
+          ),
+        ],
+      ),
+    );
+  }
+
   Future<void> _register() async {
-    // Basic validation
-    if (_nameController.text.isEmpty || _emailController.text.isEmpty || _passwordController.text.isEmpty) {
+
+    if (_nameController.text.isEmpty || _emailController.text.isEmpty || _phoneController.text.isEmpty || _passwordController.text.isEmpty) {
        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please fill all fields')));
+       return;
+    }
+
+    if (!_isEmailVerified || !_isPhoneVerified) {
+       ScaffoldMessenger.of(context).showSnackBar(
+         const SnackBar(content: Text('Please verify both your email and phone number.'), backgroundColor: Colors.orange)
+       );
        return;
     }
 
@@ -41,13 +168,15 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
         _emailController.text.trim(),
         _passwordController.text.trim(),
         _selectedRole,
+        ukPhone: _phoneController.text.trim(),
+        companyName: _selectedRole == 'Company' ? _companyNameController.text.trim() : null,
+        registrationNumber: _selectedRole == 'Company' ? _registrationNumberController.text.trim() : null,
+        companyType: _selectedRole == 'Company' ? _companyTypeController.text.trim() : null,
       );
       if (mounted) {
-        if (_selectedRole == 'Rider') {
-          context.go('/rider');
-        } else {
-          context.go('/marketplace');
-        }
+        // GoRouter will now handle redirection to /verify-email 
+        // because AuthNotifier.register sets AuthStatus.authenticated 
+        // but isEmailVerified will be false.
       }
     } catch (e) {
       if (mounted) {
@@ -135,27 +264,10 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                   
                   const SizedBox(height: 24),
 
-                  // Role Selection
-                  FadeInUp(
-                    delay: const Duration(milliseconds: 200),
-                    child: Row(
-                      children: [
-                        _RoleChip(
-                          label: 'Customer',
-                          isSelected: _selectedRole == 'Customer',
-                          icon: Icons.person_outline_rounded,
-                          onTap: () => setState(() => _selectedRole = 'Customer'),
-                        ),
-                        const SizedBox(width: 16),
-                        _RoleChip(
-                          label: 'Provider',
-                          isSelected: _selectedRole == 'Rider',
-                          icon: Icons.motorcycle_rounded,
-                          onTap: () => setState(() => _selectedRole = 'Rider'),
-                        ),
-                      ],
-                    ),
-                  ),
+                  // Role Selection (Hidden as it's passed via route)
+                  // FadeInUp(...)
+                  
+                  const SizedBox(height: 10),
                   
                   const SizedBox(height: 32),
                   
@@ -176,6 +288,19 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                           label: 'Email Address',
                           hint: 'your@email.com',
                           icon: Icons.alternate_email_rounded,
+                          isVerified: _isEmailVerified,
+                          onVerify: _sendEmailOtp,
+                          isLoading: _isVerifyingEmail,
+                        ),
+                        const SizedBox(height: 24),
+                        _CustomTextField(
+                          controller: _phoneController,
+                          label: 'Phone Number',
+                          hint: '+44 7000 000000',
+                          icon: Icons.phone_android_rounded,
+                          isVerified: _isPhoneVerified,
+                          onVerify: _sendPhoneOtp,
+                          isLoading: _isVerifyingPhone,
                         ),
                         const SizedBox(height: 24),
                         _CustomTextField(
@@ -187,6 +312,39 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                           onToggleVisibility: () => setState(() => _isPasswordVisible = !_isPasswordVisible),
                           icon: Icons.lock_outline_rounded,
                         ),
+                        
+                        if (_selectedRole == 'Company') ...[
+                          const SizedBox(height: 32),
+                          Text(
+                            'Business Details',
+                            style: GoogleFonts.outfit(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: AppTheme.primaryBlue,
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          _CustomTextField(
+                            controller: _companyNameController,
+                            label: 'Company Name',
+                            hint: 'Giga Logistics Ltd',
+                            icon: Icons.business_rounded,
+                          ),
+                          const SizedBox(height: 24),
+                          _CustomTextField(
+                            controller: _registrationNumberController,
+                            label: 'Registration Number',
+                            hint: 'UK12345678',
+                            icon: Icons.assignment_rounded,
+                          ),
+                          const SizedBox(height: 24),
+                          _CustomTextField(
+                            controller: _companyTypeController,
+                            label: 'Company Type',
+                            hint: 'Courier / Freight / Last Mile',
+                            icon: Icons.category_rounded,
+                          ),
+                        ],
                       ],
                     ),
                   ),
@@ -360,6 +518,9 @@ class _CustomTextField extends StatelessWidget {
   final bool isPassword;
   final bool? isPasswordVisible;
   final VoidCallback? onToggleVisibility;
+  final bool isVerified;
+  final VoidCallback? onVerify;
+  final bool isLoading;
 
   const _CustomTextField({
     required this.controller,
@@ -369,6 +530,9 @@ class _CustomTextField extends StatelessWidget {
     this.isPassword = false,
     this.isPasswordVisible,
     this.onToggleVisibility,
+    this.isVerified = false,
+    this.onVerify,
+    this.isLoading = false,
   });
 
   @override
@@ -410,7 +574,30 @@ class _CustomTextField extends StatelessWidget {
                       ),
                       onPressed: onToggleVisibility,
                     )
-                  : null,
+                  : (onVerify != null
+                      ? Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: TextButton(
+                            onPressed: (isVerified || isLoading) ? null : onVerify,
+                            style: TextButton.styleFrom(
+                              backgroundColor: isVerified 
+                                  ? Colors.green.withOpacity(0.1) 
+                                  : AppTheme.primaryBlue.withOpacity(0.1),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                            ),
+                            child: isLoading
+                                ? const SizedBox(height: 12, width: 12, child: CircularProgressIndicator(strokeWidth: 2))
+                                : Text(
+                                    isVerified ? 'VERIFIED' : 'VERIFY',
+                                    style: TextStyle(
+                                      color: isVerified ? Colors.green : AppTheme.primaryBlue,
+                                      fontWeight: FontWeight.w900,
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                          ),
+                        )
+                      : null),
               border: InputBorder.none,
               contentPadding: const EdgeInsets.symmetric(vertical: 18, horizontal: 16),
             ),

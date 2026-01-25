@@ -8,6 +8,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:dio/dio.dart';
 import 'package:flota_mobile/core/api_client.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class EnhancedTrackingScreen extends ConsumerStatefulWidget {
   final String deliveryId;
@@ -144,131 +145,179 @@ class _EnhancedTrackingScreenState extends ConsumerState<EnhancedTrackingScreen>
           final vehicleReg = data['vehicle_registration'] ?? 'N/A';
           final riderPhone = data['rider_phone'] ?? '';
           final status = data['status'] ?? 'pending';
+          final riderLat = data['rider_lat'] as double?;
+          final riderLng = data['rider_lng'] as double?;
+          final pickupLat = data['pickup_lat'] as double?;
+          final pickupLng = data['pickup_lng'] as double?;
+          final dropoffLat = data['dropoff_lat'] as double?;
+          final dropoffLng = data['dropoff_lng'] as double?;
 
-          return SingleChildScrollView(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Rider Verification Card
-                _RiderVerificationCard(
-                  riderName: riderName,
-                  riderRating: riderRating,
-                  vehicleReg: vehicleReg,
-                  riderPhone: riderPhone,
-                  onCall: () => _callRider(riderPhone),
+          return Column(
+            children: [
+              // Live Map View (if active)
+              if (status == 'accepted' || status == 'picked_up' || status == 'in_transit')
+                SizedBox(
+                  height: 300,
+                  child: GoogleMap(
+                    initialCameraPosition: CameraPosition(
+                      target: LatLng(riderLat ?? pickupLat ?? 0, riderLng ?? pickupLng ?? 0),
+                      zoom: 14,
+                    ),
+                    markers: {
+                      if (riderLat != null && riderLng != null)
+                        Marker(
+                          markerId: const MarkerId('rider'),
+                          position: LatLng(riderLat, riderLng),
+                          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueAzure),
+                          infoWindow: const InfoWindow(title: 'Rider Location'),
+                        ),
+                      if (pickupLat != null && pickupLng != null)
+                        Marker(
+                          markerId: const MarkerId('pickup'),
+                          position: LatLng(pickupLat, pickupLng),
+                          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueOrange),
+                          infoWindow: const InfoWindow(title: 'Pickup'),
+                        ),
+                      if (dropoffLat != null && dropoffLng != null)
+                        Marker(
+                          markerId: const MarkerId('dropoff'),
+                          position: LatLng(dropoffLat, dropoffLng),
+                          infoWindow: const InfoWindow(title: 'Destination'),
+                        ),
+                    },
+                    myLocationButtonEnabled: false,
+                    zoomControlsEnabled: false,
+                  ),
                 ),
                 
-                const SizedBox(height: 20),
-
-                // Safety Features Section
-                Text(
-                  'Safety Features',
-                  style: GoogleFonts.outfit(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 15),
-
-                // Contactless Delivery Toggle
-                _SafetyFeatureCard(
-                  icon: Icons.do_not_touch,
-                  title: 'Contactless Delivery',
-                  subtitle: _contactlessDelivery 
-                      ? 'Leave at door, photo required'
-                      : 'Hand to customer',
-                  trailing: Switch(
-                    value: _contactlessDelivery,
-                    onChanged: (value) {
-                      setState(() => _contactlessDelivery = value);
-                      // Update Firestore
-                      FirebaseFirestore.instance
-                          .collection('deliveries')
-                          .doc(widget.deliveryId)
-                          .update({'contactless_delivery': value});
-                          
-                      // Update Backend
-                      try {
-                        final dio = ref.read(apiClientProvider).dio;
-                        dio.patch(
-                          '/deliveries/${widget.deliveryId}/status',
-                          data: {'contactless_delivery': value},
-                        );
-                      } catch (e) {
-                        debugPrint('Failed to sync contactless status: $e');
-                      }
-                    },
-                    activeColor: AppTheme.successGreen,
-                  ),
-                ),
-
-                const SizedBox(height: 12),
-
-                  // Proof of Delivery
-                _SafetyFeatureCard(
-                  icon: Icons.camera_alt,
-                  title: 'Proof of Delivery',
-                  subtitle: status == 'delivered' 
-                      ? 'Photo available'
-                      : 'Tap to capture photo',
-                  trailing: status == 'delivered'
-                      ? IconButton(
-                          icon: const Icon(Icons.visibility, color: AppTheme.primaryBlue),
-                          onPressed: () {
-                            // View proof of delivery photo logic would go here
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Viewing delivery photo...')),
-                            );
-                          },
-                        )
-                      : IconButton(
-                          icon: const Icon(Icons.camera_alt_outlined, color: AppTheme.primaryBlue),
-                          onPressed: _captureProofOfDelivery,
-                        ),
-                ),
-
-                const SizedBox(height: 12),
-
-                // Chat with Rider
-                _SafetyFeatureCard(
-                  icon: Icons.chat_bubble_outline,
-                  title: 'Chat with Rider',
-                  subtitle: 'Send a message',
-                  trailing: IconButton(
-                    icon: const Icon(Icons.arrow_forward_ios, size: 18),
-                    onPressed: () {
-                      context.push('/chat/${widget.deliveryId}');
-                    },
-                  ),
-                ),
-
-                const SizedBox(height: 20),
-
-                // Emergency Contact Button
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton.icon(
-                    onPressed: _emergencyContact,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppTheme.errorRed,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Rider Verification Card
+                      _RiderVerificationCard(
+                        riderName: riderName,
+                        riderRating: riderRating,
+                        vehicleReg: vehicleReg,
+                        riderPhone: riderPhone,
+                        onCall: () => _callRider(riderPhone),
                       ),
-                    ),
-                    icon: const Icon(Icons.emergency),
-                    label: const Text('Emergency Contact'),
+                      
+                      const SizedBox(height: 20),
+
+                      // Safety Features Section
+                      Text(
+                        'Safety Features',
+                        style: GoogleFonts.outfit(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 15),
+
+                      // Contactless Delivery Toggle
+                      _SafetyFeatureCard(
+                        icon: Icons.do_not_touch,
+                        title: 'Contactless Delivery',
+                        subtitle: _contactlessDelivery 
+                            ? 'Leave at door, photo required'
+                            : 'Hand to customer',
+                        trailing: Switch(
+                          value: _contactlessDelivery,
+                          onChanged: (value) {
+                            setState(() => _contactlessDelivery = value);
+                            // Update Firestore
+                            FirebaseFirestore.instance
+                                .collection('deliveries')
+                                .doc(widget.deliveryId)
+                                .update({'contactless_delivery': value});
+                                
+                            // Update Backend
+                            try {
+                              final dio = ref.read(apiClientProvider).dio;
+                              dio.patch(
+                                '/deliveries/${widget.deliveryId}/status',
+                                data: {'contactless_delivery': value},
+                              );
+                            } catch (e) {
+                              debugPrint('Failed to sync contactless status: $e');
+                            }
+                          },
+                          activeColor: AppTheme.successGreen,
+                        ),
+                      ),
+
+                      const SizedBox(height: 12),
+
+                        // Proof of Delivery
+                      _SafetyFeatureCard(
+                        icon: Icons.camera_alt,
+                        title: 'Proof of Delivery',
+                        subtitle: status == 'delivered' 
+                            ? 'Photo available'
+                            : 'Tap to capture photo',
+                        trailing: status == 'delivered'
+                            ? IconButton(
+                                icon: const Icon(Icons.visibility, color: AppTheme.primaryBlue),
+                                onPressed: () {
+                                  // View proof of delivery photo logic would go here
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(content: Text('Viewing delivery photo...')),
+                                  );
+                                },
+                              )
+                            : IconButton(
+                                icon: const Icon(Icons.camera_alt_outlined, color: AppTheme.primaryBlue),
+                                onPressed: _captureProofOfDelivery,
+                              ),
+                      ),
+
+                      const SizedBox(height: 12),
+
+                      // Chat with Rider
+                      _SafetyFeatureCard(
+                        icon: Icons.chat_bubble_outline,
+                        title: 'Chat with Rider',
+                        subtitle: 'Send a message',
+                        trailing: IconButton(
+                          icon: const Icon(Icons.arrow_forward_ios, size: 18),
+                          onPressed: () {
+                            context.push('/chat/${widget.deliveryId}');
+                          },
+                        ),
+                      ),
+
+                      const SizedBox(height: 20),
+
+                      // Emergency Contact Button
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton.icon(
+                          onPressed: _emergencyContact,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppTheme.errorRed,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          icon: const Icon(Icons.emergency),
+                          label: const Text('Emergency Contact'),
+                        ),
+                      ),
+
+                      const SizedBox(height: 20),
+
+                      // Delivery Status
+                      _DeliveryStatusCard(status: status),
+                    ],
                   ),
                 ),
-
-                const SizedBox(height: 20),
-
-                // Delivery Status
-                _DeliveryStatusCard(status: status),
-              ],
-            ),
+              ),
+            ],
           );
         },
       ),

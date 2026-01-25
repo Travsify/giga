@@ -9,7 +9,7 @@ class AuthRepository {
 
   Future<Map<String, dynamic>> login(String email, String password) async {
     try {
-      final response = await _dio.post('/login', data: {
+      final response = await _dio.post('login', data: {
         'email': email,
         'password': password,
       });
@@ -24,13 +24,21 @@ class AuthRepository {
     required String email,
     required String password,
     required String role,
+    String? ukPhone,
+    String? companyName,
+    String? registrationNumber,
+    String? companyType,
   }) async {
     try {
-      final response = await _dio.post('/register', data: {
+      final response = await _dio.post('register', data: {
         'name': name,
         'email': email,
         'password': password,
         'role': role,
+        'uk_phone': ukPhone,
+        'company_name': companyName,
+        'registration_number': registrationNumber,
+        'company_type': companyType,
       });
       return response.data;
     } on DioException catch (e) {
@@ -40,9 +48,18 @@ class AuthRepository {
 
   Future<void> logout() async {
     try {
-      await _dio.post('/logout');
+      await _dio.post('logout');
     } catch (e) {
       // Even if logout fails on server, we might want to clear local state
+    }
+  }
+
+  Future<Map<String, dynamic>> getProfile() async {
+    try {
+      final response = await _dio.get('me');
+      return response.data;
+    } on DioException catch (e) {
+      throw _handleError(e);
     }
   }
 

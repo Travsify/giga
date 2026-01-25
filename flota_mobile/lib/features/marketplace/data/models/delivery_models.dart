@@ -1,10 +1,29 @@
+class DeliveryStopModel {
+  final String address;
+  final double lat;
+  final double lng;
+  final String type; // pickup, dropoff
+  final String? instructions;
+
+  DeliveryStopModel({
+    required this.address,
+    required this.lat,
+    required this.lng,
+    required this.type,
+    this.instructions,
+  });
+
+  Map<String, dynamic> toJson() => {
+    'address': address,
+    'lat': lat,
+    'lng': lng,
+    'type': type,
+    'instructions': instructions,
+  };
+}
+
 class DeliveryEstimationRequest {
-  final double pickupLat;
-  final double pickupLng;
-  final double dropoffLat;
-  final double dropoffLng;
-  final String vehicleType;
-  final String serviceTier;
+  final List<DeliveryStopModel>? stops;
 
   DeliveryEstimationRequest({
     required this.pickupLat,
@@ -13,6 +32,9 @@ class DeliveryEstimationRequest {
     required this.dropoffLng,
     required this.vehicleType,
     required this.serviceTier,
+    this.parcelCategory,
+    this.parcelSize,
+    this.stops,
   });
 
   Map<String, dynamic> toJson() => {
@@ -22,6 +44,9 @@ class DeliveryEstimationRequest {
     'dropoff_lng': dropoffLng,
     'vehicle_type': vehicleType,
     'service_tier': serviceTier,
+    'parcel_category': parcelCategory,
+    'parcel_size': parcelSize,
+    'stops': stops?.map((s) => s.toJson()).toList(),
   };
 }
 
@@ -35,8 +60,12 @@ class DeliveryRequest {
   final String vehicleType;
   final String serviceTier;
   final double fare;
-  final String? parcelType;
+  final String? parcelCategory;
+  final String? parcelSize;
+  final String? parcelPhotoUrl;
   final String? description;
+  final DateTime? scheduledTime;
+  final List<DeliveryStopModel>? stops;
 
   DeliveryRequest({
     required this.pickupAddress,
@@ -48,8 +77,12 @@ class DeliveryRequest {
     required this.vehicleType,
     required this.serviceTier,
     required this.fare,
-    this.parcelType,
+    this.parcelCategory,
+    this.parcelSize,
+    this.parcelPhotoUrl,
     this.description,
+    this.scheduledTime,
+    this.stops,
   });
 
   Map<String, dynamic> toJson() => {
@@ -62,8 +95,12 @@ class DeliveryRequest {
     'vehicle_type': vehicleType,
     'service_tier': serviceTier,
     'fare': fare,
-    'parcel_type': parcelType ?? 'Standard',
+    'parcel_category': parcelCategory ?? 'General',
+    'parcel_size': parcelSize ?? 'Medium',
+    'parcel_photo_url': parcelPhotoUrl,
     'description': description,
+    'scheduled_time': scheduledTime?.toIso8601String(),
+    'stops': stops?.map((s) => s.toJson()).toList(),
   };
 }
 

@@ -11,6 +11,9 @@ class AuthState {
   final String? userName;
   final String? token;
   final String? userId;
+  final String? referralCode;
+  final String? businessId;
+  final bool isEmailVerified;
 
   AuthState({
     this.status = AuthStatus.unauthenticated,
@@ -19,6 +22,9 @@ class AuthState {
     this.userName,
     this.token,
     this.userId,
+    this.referralCode,
+    this.businessId,
+    this.isEmailVerified = false,
   });
 
   AuthState copyWith({
@@ -28,6 +34,9 @@ class AuthState {
     String? userName,
     String? token,
     String? userId,
+    String? referralCode,
+    String? businessId,
+    bool? isEmailVerified,
   }) {
     return AuthState(
       status: status ?? this.status,
@@ -36,6 +45,9 @@ class AuthState {
       userName: userName ?? this.userName,
       token: token ?? this.token,
       userId: userId ?? this.userId,
+      referralCode: referralCode ?? this.referralCode,
+      businessId: businessId ?? this.businessId,
+      isEmailVerified: isEmailVerified ?? this.isEmailVerified,
     );
   }
 }
@@ -58,6 +70,9 @@ class AuthNotifier extends StateNotifier<AuthState> {
         final role = await _storage.read(key: 'user_role');
         final name = await _storage.read(key: 'user_name');
         final userId = await _storage.read(key: 'user_id');
+        final referralCode = await _storage.read(key: 'user_referral_code');
+        final businessId = await _storage.read(key: 'user_business_id');
+        final isVerified = await _storage.read(key: 'is_email_verified') == 'true';
         
         state = state.copyWith(
           status: AuthStatus.authenticated,
@@ -66,6 +81,9 @@ class AuthNotifier extends StateNotifier<AuthState> {
           role: role ?? 'Customer',
           userName: name,
           userId: userId,
+          referralCode: referralCode,
+          businessId: businessId,
+          isEmailVerified: isVerified,
         );
       } else {
         state = AuthState(status: AuthStatus.unauthenticated);
@@ -75,10 +93,10 @@ class AuthNotifier extends StateNotifier<AuthState> {
     }
   }
 
-  Future<void> login(String email, String password) async {
+  Future<void> login(String login, String password) async {
     state = state.copyWith(status: AuthStatus.loading);
     try {
-      final response = await _repository.login(email, password);
+      final response = await _repository.login(login, password);
       
       final token = response['token'];
       final user = response['user'];
@@ -89,6 +107,15 @@ class AuthNotifier extends StateNotifier<AuthState> {
       await _storage.write(key: 'user_role', value: user['role'] ?? 'Customer');
       await _storage.write(key: 'user_name', value: user['name']);
       await _storage.write(key: 'user_id', value: user['id'].toString());
+      await _storage.write(key: 'user_referral_code', value: user['referral_code']);
+      await _storage.write(key: 'user_business_id', value: user['business_id']?.toString());
+
+      // Store credentials for biometric login
+      await _storage.write(key: 'saved_email', value: login);
+      await _storage.write(key: 'saved_password', value: password);
+
+      final isVerified = user['email_verified_at'] != null;
+      await _storage.write(key: 'is_email_verified', value: isVerified.toString());
 
       state = state.copyWith(
         status: AuthStatus.authenticated,
@@ -97,6 +124,9 @@ class AuthNotifier extends StateNotifier<AuthState> {
         role: user['role'] ?? 'Customer',
         userName: user['name'],
         userId: user['id'].toString(),
+        referralCode: user['referral_code'],
+        businessId: user['business_id']?.toString(),
+        isEmailVerified: isVerified,
       );
     } catch (e) {
       state = AuthState(status: AuthStatus.unauthenticated);
@@ -104,7 +134,12 @@ class AuthNotifier extends StateNotifier<AuthState> {
     }
   }
 
-  Future<void> register(String name, String email, String password, String role) async {
+  Future<void> register(String name, String email, String password, String role, {
+    String? ukPhone,
+    String? companyName,
+    String? registrationNumber,
+    String? companyType,
+  }) async {
     state = state.copyWith(status: AuthStatus.loading);
     try {
       final response = await _repository.register(
@@ -112,6 +147,10 @@ class AuthNotifier extends StateNotifier<AuthState> {
         email: email,
         password: password,
         role: role,
+        ukPhone: ukPhone,
+        companyName: companyName,
+        registrationNumber: registrationNumber,
+        companyType: companyType,
       );
       
       final token = response['token'];
@@ -123,6 +162,10 @@ class AuthNotifier extends StateNotifier<AuthState> {
       await _storage.write(key: 'user_role', value: user['role'] ?? 'Customer');
       await _storage.write(key: 'user_name', value: user['name']);
       await _storage.write(key: 'user_id', value: user['id'].toString());
+      await _storage.write(key: 'user_business_id', value: user['business_id']?.toString());
+
+      final isVerified = user['email_verified_at'] != null;
+      await _storage.write(key: 'is_email_verified', value: isVerified.toString());
 
       state = state.copyWith(
         status: AuthStatus.authenticated,
@@ -131,6 +174,8 @@ class AuthNotifier extends StateNotifier<AuthState> {
         role: user['role'] ?? 'Customer',
         userName: user['name'],
         userId: user['id'].toString(),
+        businessId: user['business_id']?.toString(),
+        isEmailVerified: isVerified,
       );
     } catch (e) {
       state = AuthState(status: AuthStatus.unauthenticated);
@@ -138,14 +183,48 @@ class AuthNotifier extends StateNotifier<AuthState> {
     }
   }
 
+  Future<void> refreshUser() async {
+    try {
+      final response = await _repository.getProfile();
+      final user = response['user'];
+      
+      final isVerified = user['email_verified_at'] != null;
+      await _storage.write(key: 'is_email_verified', value: isVerified.toString());
+      
+      state = state.copyWith(
+        role: user['role'] ?? 'Customer',
+        userName: user['name'],
+        isEmailVerified: isVerified,
+      );
+    } catch (e) {
+      // If refresh fails, keep current state or log out if unauthorized
+    }
+  }
+
   Future<void> logout() async {
     try {
       await _repository.logout();
     } finally {
+      // Don't delete saved_email/saved_password so biometrics keep working
+      final savedEmail = await _storage.read(key: 'saved_email');
+      final savedPassword = await _storage.read(key: 'saved_password');
+      
       await _storage.deleteAll();
+      
+      if (savedEmail != null) await _storage.write(key: 'saved_email', value: savedEmail);
+      if (savedPassword != null) await _storage.write(key: 'saved_password', value: savedPassword);
+      
       state = AuthState(status: AuthStatus.unauthenticated);
     }
   }
+
+  Future<void> markAsVerified() async {
+    await _storage.write(key: 'is_verified', value: 'true');
+    state = state.copyWith(isEmailVerified: true);
+  }
+
+  Future<String?> getStoredEmail() => _storage.read(key: 'saved_email');
+  Future<String?> getStoredPassword() => _storage.read(key: 'saved_password');
 }
 
 final authProvider = StateNotifierProvider<AuthNotifier, AuthState>((ref) {

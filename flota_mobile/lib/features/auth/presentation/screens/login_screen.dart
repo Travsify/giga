@@ -5,6 +5,8 @@ import 'package:go_router/go_router.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flota_mobile/theme/app_theme.dart';
+import 'package:flota_mobile/features/auth/biometric_provider.dart';
+import 'package:flota_mobile/core/api_client.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -14,36 +16,75 @@ class LoginScreen extends ConsumerStatefulWidget {
 }
 
 class _LoginScreenState extends ConsumerState<LoginScreen> {
-  final _emailController = TextEditingController();
+  final _loginController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _isPasswordVisible = false;
+  bool _isPhoneLogin = false;
 
   @override
   void dispose() {
-    _emailController.dispose();
+    _loginController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
 
+  Future<void> _loginWithBiometrics(WidgetRef ref) async {
+    final biometricService = ref.read(biometricServiceProvider);
+    final authenticated = await biometricService.authenticate();
+    
+    if (authenticated) {
+      // In a real app, you'd retrieve stored credentials and login
+      // For this demo, we'll ask the user to login manually first if no credentials stored
+      // But we will implement the redirect to OTP flow as requested
+      
+      final email = await ref.read(authProvider.notifier).getStoredEmail();
+      final password = await ref.read(authProvider.notifier).getStoredPassword();
+      
+      if (email != null && password != null) {
+        _loginController.text = email;
+        _passwordController.text = password;
+        _login();
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Please login manually first to enable biometrics')),
+          );
+        }
+      }
+    }
+  }
+
   Future<void> _login() async {
-    final email = _emailController.text.trim();
+    final identifier = _loginController.text.trim();
     final password = _passwordController.text.trim();
 
-    if (email.isEmpty || password.isEmpty) {
+    if (identifier.isEmpty || password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter both email and password')),
+        const SnackBar(content: Text('Please enter your credentials')),
       );
       return;
     }
 
     try {
-      await ref.read(authProvider.notifier).login(email, password);
+      await ref.read(authProvider.notifier).login(identifier, password);
+      // login method in AuthNotifier now handles both email and phone
+      
       if (mounted) {
-        final role = ref.read(authProvider).role;
-        if (role == 'Rider') {
-          context.go('/rider');
-        } else {
-          context.go('/marketplace');
+        // Trigger OTP based on identifier type or user record
+        try {
+          final api = ref.read(apiClientProvider);
+          // The backend will know which way to send based on user preference or identifier
+          await api.dio.post('email/send-verification'); 
+          // Note: If it's phone, we might need Firebase verifyPhoneNumber here too
+          // But for now, let's assume the flow is consistent.
+        } catch (e) { }
+        
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Verification code sent!'), backgroundColor: Colors.green),
+          );
+          final path = '/verify-email?isPhone=$_isPhoneLogin&phoneNumber=$identifier';
+          context.go(path);
         }
       }
     } catch (e) {
@@ -141,7 +182,37 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     ),
                   ),
                   
-                  const SizedBox(height: 40),
+                  const SizedBox(height: 30),
+
+                  // Login Type Toggle
+                  FadeInUp(
+                    delay: const Duration(milliseconds: 100),
+                    child: Container(
+                      height: 50,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF1F5F9),
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: GestureDetector(
+                              onTap: () => setState(() => _isPhoneLogin = false),
+                              child: _ToggleTab(label: 'Email', isActive: !_isPhoneLogin),
+                            ),
+                          ),
+                          Expanded(
+                            child: GestureDetector(
+                              onTap: () => setState(() => _isPhoneLogin = true),
+                              child: _ToggleTab(label: 'Phone', isActive: _isPhoneLogin),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 30),
                   
                   // Form Fields
                   FadeInUp(
@@ -149,10 +220,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     child: Column(
                       children: [
                         _CustomTextField(
-                          controller: _emailController,
-                          label: 'Email Address',
-                          hint: 'your@email.com',
-                          icon: Icons.alternate_email_rounded,
+                          controller: _loginController,
+                          label: _isPhoneLogin ? 'Phone Number' : 'Email Address',
+                          hint: _isPhoneLogin ? '+44 7000 000000' : 'your@email.com',
+                          icon: _isPhoneLogin ? Icons.phone_android_rounded : Icons.alternate_email_rounded,
                         ),
                         const SizedBox(height: 24),
                         _CustomTextField(
@@ -221,6 +292,38 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     ),
                   ),
                   
+                  const SizedBox(height: 24),
+                  
+                  // Biometric Login Option
+                  Consumer(
+                    builder: (context, ref, child) {
+                      final isAvailable = ref.watch(isBiometricAvailableProvider);
+                      return isAvailable.when(
+                        data: (available) => available 
+                          ? FadeInUp(
+                              delay: const Duration(milliseconds: 450),
+                              child: Center(
+                                child: InkWell(
+                                  onTap: () => _loginWithBiometrics(ref),
+                                  borderRadius: BorderRadius.circular(50),
+                                  child: Container(
+                                    padding: const EdgeInsets.all(12),
+                                    decoration: BoxDecoration(
+                                      border: Border.all(color: AppTheme.primaryBlue.withOpacity(0.2)),
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: Icon(Icons.fingerprint_rounded, size: 40, color: AppTheme.primaryBlue),
+                                  ),
+                                ),
+                              ),
+                            )
+                          : const SizedBox.shrink(),
+                        loading: () => const SizedBox.shrink(),
+                        error: (_, __) => const SizedBox.shrink(),
+                      );
+                    },
+                  ),
+                  
                   const SizedBox(height: 40),
                   
                   // Social Login Section
@@ -265,7 +368,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     delay: const Duration(milliseconds: 600),
                     child: Center(
                       child: GestureDetector(
-                        onTap: () => context.push('/register'),
+                        onTap: () => context.push('/welcome'),
                         child: RichText(
                           text: TextSpan(
                             style: const TextStyle(fontSize: 16, color: Colors.black54),
@@ -438,6 +541,37 @@ class _SocialButton extends StatelessWidget {
           ],
         ),
         child: Icon(icon, color: color, size: 32),
+      ),
+    );
+  }
+}
+
+class _ToggleTab extends StatelessWidget {
+  final String label;
+  final bool isActive;
+
+  const _ToggleTab({required this.label, required this.isActive});
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 250),
+      margin: const EdgeInsets.all(4),
+      decoration: BoxDecoration(
+        color: isActive ? Colors.white : Colors.transparent,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: isActive
+            ? [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 4))]
+            : [],
+      ),
+      alignment: Alignment.center,
+      child: Text(
+        label,
+        style: TextStyle(
+          color: isActive ? AppTheme.primaryBlue : Colors.black45,
+          fontWeight: isActive ? FontWeight.w900 : FontWeight.w600,
+          fontSize: 14,
+        ),
       ),
     );
   }

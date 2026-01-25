@@ -1,48 +1,43 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flota_mobile/theme/app_theme.dart';
+import 'package:flota_mobile/features/delivery/data/locker_repository.dart';
 
-class LockerMapScreen extends StatefulWidget {
+class LockerMapScreen extends ConsumerStatefulWidget {
   const LockerMapScreen({super.key});
 
   @override
-  State<LockerMapScreen> createState() => _LockerMapScreenState();
+  ConsumerState<LockerMapScreen> createState() => _LockerMapScreenState();
 }
 
-class _LockerMapScreenState extends State<LockerMapScreen> {
-  static const LatLng _center = LatLng(51.5074, -0.1278); // London
-  final Set<Marker> _markers = {};
+class _LockerMapScreenState extends ConsumerState<LockerMapScreen> {
+  static const LatLng _center = LatLng(51.5074, -0.1278);
+  GoogleMapController? _controller;
 
-  @override
-  void initState() {
-    super.initState();
-    _loadMarkers();
-  }
-
-  void _loadMarkers() {
-    setState(() {
-      _markers.addAll([
-        const Marker(
-          markerId: MarkerId('locker_1'),
-          position: LatLng(51.5074, -0.1278),
-          infoWindow: InfoWindow(title: 'Giga Locker - Trafalgar'),
+  Set<Marker> _buildMarkers(List<Locker> lockers) {
+    return lockers.map((locker) {
+      final color = locker.status == 'available' 
+          ? BitmapDescriptor.hueGreen 
+          : locker.status == 'full' 
+              ? BitmapDescriptor.hueRed 
+              : BitmapDescriptor.hueOrange;
+      return Marker(
+        markerId: MarkerId('locker_${locker.id}'),
+        position: LatLng(locker.latitude, locker.longitude),
+        icon: BitmapDescriptor.defaultMarkerWithHue(color),
+        infoWindow: InfoWindow(
+          title: locker.name,
+          snippet: '${locker.availableCompartments}/${locker.totalCompartments} available',
         ),
-        const Marker(
-          markerId: MarkerId('locker_2'),
-          position: LatLng(51.5155, -0.1419),
-          infoWindow: InfoWindow(title: 'Giga Locker - Oxford Circus'),
-        ),
-        const Marker(
-          markerId: MarkerId('locker_3'),
-          position: LatLng(51.5045, -0.0865),
-          infoWindow: InfoWindow(title: 'Giga Locker - Shard'),
-        ),
-      ]);
-    });
+      );
+    }).toSet();
   }
 
   @override
   Widget build(BuildContext context) {
+    final lockersAsync = ref.watch(lockersProvider);
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Find a Locker', style: TextStyle(color: Colors.black)),
@@ -51,43 +46,62 @@ class _LockerMapScreenState extends State<LockerMapScreen> {
         elevation: 0,
         iconTheme: const IconThemeData(color: Colors.black),
       ),
-      body: Stack(
-        children: [
-          GoogleMap(
-            initialCameraPosition: const CameraPosition(target: _center, zoom: 12),
-            markers: _markers,
-            myLocationEnabled: true,
-            zoomControlsEnabled: false,
-          ),
-          Positioned(
-            bottom: 30,
-            left: 20,
-            right: 20,
-            child: Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
-                    blurRadius: 10,
-                    offset: const Offset(0, 5),
-                  ),
-                ],
-              ),
-              child: Row(
-                children: [
-                  const Icon(Icons.info_outline, color: AppTheme.primaryBlue),
-                  const SizedBox(width: 10),
-                  const Expanded(
-                    child: Text('Giga Lockers are open 24/7. Use your QR code to unlock.'),
-                  ),
-                ],
+      body: lockersAsync.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (err, stack) => Center(child: Text('Error: $err')),
+        data: (lockers) => Stack(
+          children: [
+            GoogleMap(
+              initialCameraPosition: const CameraPosition(target: _center, zoom: 12),
+              markers: _buildMarkers(lockers),
+              myLocationEnabled: true,
+              zoomControlsEnabled: false,
+              onMapCreated: (controller) => _controller = controller,
+            ),
+            Positioned(
+              bottom: 30,
+              left: 20,
+              right: 20,
+              child: Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 10,
+                      offset: const Offset(0, 5),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: AppTheme.primaryBlue.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Icon(Icons.info_outline, color: AppTheme.primaryBlue),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Text('Giga Lockers', style: TextStyle(fontWeight: FontWeight.bold)),
+                          Text('${lockers.length} locations • Open 24/7', style: TextStyle(color: Colors.grey[600], fontSize: 12)),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
