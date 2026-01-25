@@ -32,42 +32,54 @@
     margin: 4px 16px !important;
 }
 
-/* Sidebar Menu Text & Icons - Forced White */
+/* Sidebar Menu Text & Icons - Forced White by Default */
 .fi-sidebar-item-label,
 .fi-sidebar-item-icon,
 .fi-sidebar-group-label {
     color: #FFFFFF !important;
     opacity: 0.9 !important;
+    transition: color 0.2s ease !important;
 }
 
-.fi-sidebar-group-item .fi-sidebar-item-button .fi-sidebar-item-icon {
-    color: #FFFFFF !important;
-    transition: color 0.3s ease;
+/* Hover State: White Background, Blue Text */
+.fi-sidebar-item-button:hover {
+    background-color: #FFFFFF !important;
+    border-radius: 8px !important;
 }
 
-/* Active Menu Item with Orange Left Border */
+.fi-sidebar-item-button:hover .fi-sidebar-item-label,
+.fi-sidebar-item-button:hover .fi-sidebar-item-icon {
+    color: var(--giga-primary-blue) !important;
+    opacity: 1 !important;
+}
+
+/* Active State: Gold Background, Blue Text */
 .fi-sidebar-item-active {
-    background-color: var(--giga-sidebar-active-bg) !important;
-    color: #FFFFFF !important;
+    background-color: #FFB800 !important; /* Gold Background */
+    color: var(--giga-primary-blue) !important; /* Blue Text */
     position: relative !important;
     border-radius: 8px !important;
+    box-shadow: 0 4px 12px rgba(255, 184, 0, 0.3) !important;
 }
 
 .fi-sidebar-item-active .fi-sidebar-item-label,
 .fi-sidebar-item-active .fi-sidebar-item-icon {
-    color: #FFFFFF !important;
+    color: var(--giga-primary-blue) !important; /* Blue Text/Icon on Gold */
     opacity: 1 !important;
 }
 
+/* Sidebar Slider/Indicator: Visible in White */
 .fi-sidebar-item-active::before {
     content: '';
     position: absolute;
-    left: -16px; /* Align with sidebar edge */
-    top: 15%;
-    height: 70%;
-    width: 4px;
-    background-color: var(--giga-accent-orange);
+    left: -12px;
+    top: 20%;
+    height: 60%;
+    width: 6px;
+    background-color: #FFFFFF !important; /* White Slider */
     border-radius: 0 4px 4px 0;
+    box-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
+    z-index: 10;
 }
 
 /* Radio Buttons - Gold Styling */
