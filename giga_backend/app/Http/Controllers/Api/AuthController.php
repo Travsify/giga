@@ -23,9 +23,9 @@ class AuthController extends Controller
                 'role' => 'required|in:Customer,Rider,Company',
                 'uk_phone' => 'nullable|string|unique:users',
                 // Business fields (conditional)
-                'company_name' => 'required_if:role,Company|string|max:255',
-                'registration_number' => 'required_if:role,Company|string|unique:logistics_companies',
-                'company_type' => 'required_if:role,Company|string',
+                'company_name' => 'required_if:role,Company|nullable|string|max:255',
+                'registration_number' => 'required_if:role,Company|nullable|string|unique:logistics_companies',
+                'company_type' => 'required_if:role,Company|nullable|string',
                 'country_code' => 'nullable|string|size:2',
                 'currency_code' => 'nullable|string|size:3',
             ]);
