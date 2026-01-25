@@ -60,30 +60,15 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
   
-  // Create container to read providers before runApp
-  final container = ProviderContainer();
-  
-  // Initialize settings
-  try {
-    await container.read(settingsInitProvider.future);
-    
-    // Check version/maintenance
-    final updateStatus = await container.read(settingsServiceProvider).checkVersion();
-    
-    if (updateStatus.state == UpdateState.maintenance) {
-      runApp(MaintenanceApp(message: updateStatus.message));
-      return;
-    }
-  } catch (e) {
-    print('Error initializing settings: $e');
-  }
-  
+  // Run app immediately with cached/default data
   runApp(
-    UncontrolledProviderScope(
-      container: container,
+    ProviderScope(
       child: const MyApp(),
     ),
   );
+  
+  // Initialize settings in background (or handle in Splash)
+  // We'll move the maintenance check logic into the SplashScreen for better UX
 }
 
 class MaintenanceApp extends StatelessWidget {

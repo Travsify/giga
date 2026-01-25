@@ -22,9 +22,12 @@ class SettingsService {
   /// Initialize service: load cached settings then fetch fresh ones
   Future<void> init() async {
     await _loadFromCache();
-    // Fetch fresh settings in background, don't await if we want faster startup
-    // But for "force update" checks, we might want to await. 
-    // Let's try to fetch with a short timeout.
+    
+    // Fetch fresh settings in background to allow immediate UI rendering
+    _fetchFreshData();
+  }
+
+  Future<void> _fetchFreshData() async {
     try {
       await fetchCountries();
       await fetchSettings();

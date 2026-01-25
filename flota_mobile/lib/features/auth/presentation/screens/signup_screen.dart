@@ -157,9 +157,19 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
        return;
     }
 
-    if (!_isEmailVerified || !_isPhoneVerified) {
+    final settings = ref.read(settingsServiceProvider);
+    final isEmailReq = settings.get<bool>('email_verification_enabled', true);
+    final isPhoneReq = settings.get<bool>('phone_verification_enabled', true);
+
+    if ((isEmailReq && !_isEmailVerified) || (isPhoneReq && !_isPhoneVerified)) {
+       String msg = 'Please verify your ';
+       if (isEmailReq && !_isEmailVerified) msg += 'email';
+       if (isEmailReq && !_isEmailVerified && isPhoneReq && !_isPhoneVerified) msg += ' and ';
+       if (isPhoneReq && !_isPhoneVerified) msg += 'phone number';
+       msg += '.';
+       
        ScaffoldMessenger.of(context).showSnackBar(
-         const SnackBar(content: Text('Please verify both your email and phone number.'), backgroundColor: Colors.orange)
+         SnackBar(content: Text(msg), backgroundColor: Colors.orange)
        );
        return;
     }
@@ -359,7 +369,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                           hint: 'your@email.com',
                           icon: Icons.alternate_email_rounded,
                           isVerified: _isEmailVerified,
-                          onVerify: _sendEmailOtp,
+                          onVerify: ref.watch(settingsServiceProvider).get<bool>('email_verification_enabled', true) ? _sendEmailOtp : null,
                           isLoading: _isVerifyingEmail,
                         ),
                         const SizedBox(height: 24),
@@ -369,7 +379,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                           hint: '+44 7000 000000',
                           icon: Icons.phone_android_rounded,
                           isVerified: _isPhoneVerified,
-                          onVerify: _sendPhoneOtp,
+                          onVerify: ref.watch(settingsServiceProvider).get<bool>('phone_verification_enabled', true) ? _sendPhoneOtp : null,
                           isLoading: _isVerifyingPhone,
                         ),
                         const SizedBox(height: 24),

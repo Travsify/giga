@@ -1,0 +1,217 @@
+Running Gradle task 'assembleRelease'...                        
+Warning: Flutter support for your project's Gradle version (8.5.0) will soon be dropped. Please upgrade your Gradle version to a version of at least 8.7.0 soon.
+Alternatively, use the flag "--android-skip-build-dependency-validation" to bypass this check.
+
+Potential fix: Your project's gradle version is typically defined in the gradle wrapper file. By default, this can be found at C:\Users\USER\Desktop\giga\flota_mobile\android/gradle/wrapper/gradle-wrapper.properties. 
+For more information, see https://docs.gradle.org/current/userguide/gradle_wrapper.html.
+
+Warning: Flutter support for your project's Android Gradle Plugin version (Android Gradle Plugin version 8.2.1) will soon be dropped. Please upgrade your Android Gradle Plugin version to a version of at least Android Gradle Plugin version 8.6.0 soon.
+Alternatively, use the flag "--android-skip-build-dependency-validation" to bypass this check.
+
+Potential fix: Your project's AGP version is typically defined in the plugins block of the `settings.gradle` file (C:\Users\USER\Desktop\giga\flota_mobile\android/settings.gradle), by a plugin with the id of com.android.application. 
+If you don't see a plugins block, your project was likely created with an older template version. In this case it is most likely defined in the top-level build.gradle file (C:\Users\USER\Desktop\giga\flota_mobile\android/build.gradle) by the following line in the dependencies block of the buildscript: "classpath 'com.android.tools.build:gradle:<version>'".
+
+lib/features/delivery/multi_stop_screen.dart:5:8: Error: Error when reading 'lib/core/theme.dart': The system cannot find the file specified
+import 'package:flota_mobile/core/theme.dart';
+       ^
+lib/features/delivery/multi_stop_screen.dart:6:8: Error: Error when reading 'lib/services/location_service.dart': The system cannot find the path specified
+import 'package:flota_mobile/services/location_service.dart';
+       ^
+lib/features/delivery/multi_stop_screen.dart:9:8: Error: Error when reading 'lib/core/map_picker_screen.dart': The system cannot find the file specified
+import 'package:flota_mobile/core/map_picker_screen.dart';
+       ^
+lib/features/delivery/multi_stop_screen.dart:41:21: Error: The getter 'LocationService' isn't defined for the type '_MultiStopScreenState'.
+ - '_MultiStopScreenState' is from 'package:flota_mobile/features/delivery/multi_stop_screen.dart' ('lib/features/delivery/multi_stop_screen.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'LocationService'.
+        distance += LocationService.calculateDistance(
+                    ^^^^^^^^^^^^^^^
+lib/features/delivery/multi_stop_screen.dart:93:31: Error: The method 'MapPickerScreen' isn't defined for the type '_MultiStopScreenState'.
+ - '_MultiStopScreenState' is from 'package:flota_mobile/features/delivery/multi_stop_screen.dart' ('lib/features/delivery/multi_stop_screen.dart').
+Try correcting the name to the name of an existing method, or defining a method named 'MapPickerScreen'.
+        builder: (context) => MapPickerScreen(
+                              ^^^^^^^^^^^^^^^
+lib/features/delivery/multi_stop_screen.dart:254:63: Error: Not a constant expression.
+                        const Icon(Icons.auto_awesome, color: AppTheme.successGreen, size: 16),
+                                                              ^^^^^^^^
+lib/features/delivery/multi_stop_screen.dart:331:82: Error: Not a constant expression.
+                            icon: const Icon(Icons.remove_circle_outline, color: AppTheme.primaryRed, size: 20),
+                                                                                 ^^^^^^^^
+lib/features/delivery/multi_stop_screen.dart:355:53: Error: Not a constant expression.
+                      side: const BorderSide(color: AppTheme.primaryBlue),
+                                                    ^^^^^^^^
+lib/features/delivery/multi_stop_screen.dart:183:26: Error: The getter 'AppTheme' isn't defined for the type '_MultiStopScreenState'.
+ - '_MultiStopScreenState' is from 'package:flota_mobile/features/delivery/multi_stop_screen.dart' ('lib/features/delivery/multi_stop_screen.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'AppTheme'.
+        backgroundColor: AppTheme.primaryBlue,
+                         ^^^^^^^^
+lib/features/delivery/multi_stop_screen.dart:187:36: Error: The method 'pop' isn't defined for the type 'BuildContext'.
+ - 'BuildContext' is from 'package:flutter/src/widgets/framework.dart' ('/C:/FlutterVersions/flutter/packages/flutter/lib/src/widgets/framework.dart').
+Try correcting the name to the name of an existing method, or defining a method named 'pop'.
+          onPressed: () => context.pop(),
+                                   ^^^
+lib/features/delivery/multi_stop_screen.dart:260:36: Error: The getter 'AppTheme' isn't defined for the type '_MultiStopScreenState'.
+ - '_MultiStopScreenState' is from 'package:flota_mobile/features/delivery/multi_stop_screen.dart' ('lib/features/delivery/multi_stop_screen.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'AppTheme'.
+                            color: AppTheme.successGreen,
+                                   ^^^^^^^^
+lib/features/delivery/multi_stop_screen.dart:300:41: Error: The getter 'AppTheme' isn't defined for the type '_MultiStopScreenState'.
+ - '_MultiStopScreenState' is from 'package:flota_mobile/features/delivery/multi_stop_screen.dart' ('lib/features/delivery/multi_stop_screen.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'AppTheme'.
+                      color: isFilled ? AppTheme.primaryBlue.withOpacity(0.1) : Colors.transparent,
+                                        ^^^^^^^^
+lib/features/delivery/multi_stop_screen.dart:317:43: Error: The getter 'AppTheme' isn't defined for the type '_MultiStopScreenState'.
+ - '_MultiStopScreenState' is from 'package:flota_mobile/features/delivery/multi_stop_screen.dart' ('lib/features/delivery/multi_stop_screen.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'AppTheme'.
+                        color: isFilled ? AppTheme.textPrimary : Colors.grey[400],
+                                          ^^^^^^^^
+lib/features/delivery/multi_stop_screen.dart:324:58: Error: The getter 'AppTheme' isn't defined for the type '_MultiStopScreenState'.
+ - '_MultiStopScreenState' is from 'package:flota_mobile/features/delivery/multi_stop_screen.dart' ('lib/features/delivery/multi_stop_screen.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'AppTheme'.
+                      style: TextStyle(color: isPickup ? AppTheme.primaryBlue : Colors.grey[500], fontSize: 11),
+                                                         ^^^^^^^^
+lib/features/delivery/multi_stop_screen.dart:396:36: Error: The getter 'AppTheme' isn't defined for the type '_MultiStopScreenState'.
+ - '_MultiStopScreenState' is from 'package:flota_mobile/features/delivery/multi_stop_screen.dart' ('lib/features/delivery/multi_stop_screen.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'AppTheme'.
+                            color: AppTheme.primaryBlue,
+                                   ^^^^^^^^
+lib/features/delivery/multi_stop_screen.dart:432:43: Error: The method 'push' isn't defined for the type 'BuildContext'.
+ - 'BuildContext' is from 'package:flutter/src/widgets/framework.dart' ('/C:/FlutterVersions/flutter/packages/flutter/lib/src/widgets/framework.dart').
+Try correcting the name to the name of an existing method, or defining a method named 'push'.
+                                  context.push('/wallet'); // Go to payment
+                                          ^^^^
+lib/features/delivery/multi_stop_screen.dart:445:42: Error: The getter 'AppTheme' isn't defined for the type '_MultiStopScreenState'.
+ - '_MultiStopScreenState' is from 'package:flota_mobile/features/delivery/multi_stop_screen.dart' ('lib/features/delivery/multi_stop_screen.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'AppTheme'.
+                        backgroundColor: AppTheme.primaryBlue,
+                                         ^^^^^^^^
+lib/features/delivery/multi_stop_screen.dart:450:38: Error: The getter 'AppTheme' isn't defined for the type '_MultiStopScreenState'.
+ - '_MultiStopScreenState' is from 'package:flota_mobile/features/delivery/multi_stop_screen.dart' ('lib/features/delivery/multi_stop_screen.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'AppTheme'.
+                        shadowColor: AppTheme.primaryBlue.withOpacity(0.4),
+                                     ^^^^^^^^
+lib/features/profile/profile_screen.dart:570:49: Error: Not a constant expression.
+                      'Refer & Earn ${ref.watch(authProvider).currencySymbol}10',
+                                                ^^^^^^^^^^^^
+lib/features/profile/profile_screen.dart:570:39: Error: Not a constant expression.
+                      'Refer & Earn ${ref.watch(authProvider).currencySymbol}10',
+                                      ^^^
+lib/features/profile/profile_screen.dart:570:43: Error: Method invocation is not a constant expression.
+                      'Refer & Earn ${ref.watch(authProvider).currencySymbol}10',
+                                          ^^^^^
+lib/features/wallet/wallet_screen.dart:270:49: Error: Not a constant expression.
+                labelText: "Amount (${ref.watch(authProvider).currencySymbol})",
+                                                ^^^^^^^^^^^^
+lib/features/wallet/wallet_screen.dart:270:39: Error: Not a constant expression.
+                labelText: "Amount (${ref.watch(authProvider).currencySymbol})",
+                                      ^^^
+lib/features/wallet/wallet_screen.dart:270:43: Error: Method invocation is not a constant expression.
+                labelText: "Amount (${ref.watch(authProvider).currencySymbol})",
+                                          ^^^^^
+lib/features/wallet/wallet_screen.dart:766:7: Error: Expected ';' after this.
+      ),
+      ^
+lib/features/wallet/wallet_screen.dart:766:8: Error: Expected an identifier, but got ','.
+Try inserting an identifier before ','.
+      ),
+       ^
+lib/features/wallet/wallet_screen.dart:766:8: Error: Unexpected token ';'.
+      ),
+       ^
+lib/features/wallet/wallet_screen.dart:767:83: Error: Expected ';' after this.
+      title: Text(description, style: const TextStyle(fontWeight: FontWeight.w600)),
+                                                                                  ^
+lib/features/wallet/wallet_screen.dart:767:84: Error: Expected an identifier, but got ','.
+Try inserting an identifier before ','.
+      title: Text(description, style: const TextStyle(fontWeight: FontWeight.w600)),
+                                                                                   ^
+lib/features/wallet/wallet_screen.dart:767:84: Error: Unexpected token ';'.
+      title: Text(description, style: const TextStyle(fontWeight: FontWeight.w600)),
+                                                                                   ^
+lib/features/wallet/wallet_screen.dart:768:92: Error: Expected ';' after this.
+      subtitle: Text(formattedDate, style: TextStyle(color: Colors.grey[400], fontSize: 12)),
+                                                                                          ^
+lib/features/wallet/wallet_screen.dart:768:93: Error: Expected an identifier, but got ','.
+Try inserting an identifier before ','.
+      subtitle: Text(formattedDate, style: TextStyle(color: Colors.grey[400], fontSize: 12)),
+                                                                                          ^
+lib/features/wallet/wallet_screen.dart:768:93: Error: Unexpected token ';'.
+      subtitle: Text(formattedDate, style: TextStyle(color: Colors.grey[400], fontSize: 12)),
+                                                                                          ^
+lib/features/wallet/wallet_screen.dart:780:7: Error: Expected ';' after this.
+      ),
+      ^
+lib/features/wallet/wallet_screen.dart:780:8: Error: Expected an identifier, but got ','.
+Try inserting an identifier before ','.
+      ),
+       ^
+lib/features/wallet/wallet_screen.dart:780:8: Error: Unexpected token ';'.
+      ),
+       ^
+lib/features/wallet/wallet_screen.dart:781:5: Error: Expected an identifier, but got ')'.
+Try inserting an identifier before ')'.
+    );
+    ^
+lib/features/wallet/wallet_screen.dart:780:8: Error: Expected ';' after this.
+      ),
+       ^
+lib/features/wallet/wallet_screen.dart:781:5: Error: Unexpected token ';'.
+    );
+    ^
+lib/features/business/presentation/screens/business_dashboard_screen.dart:113:23: Error: The getter 'ref' isn't defined for the type 'BusinessDashboardScreen'.
+ - 'BusinessDashboardScreen' is from 'package:flota_mobile/features/business/presentation/screens/business_dashboard_screen.dart' ('lib/features/business/presentation/screens/business_dashboard_screen.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'ref'.
+            value: '${ref.watch(authProvider).currencySymbol}450.00',
+                      ^^^
+lib/features/business/presentation/screens/billing_screen.dart:96:26: Error: The getter 'authProvider' isn't defined for the type '_BillingScreenState'.
+ - '_BillingScreenState' is from 'package:flota_mobile/features/business/presentation/screens/billing_screen.dart' ('lib/features/business/presentation/screens/billing_screen.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'authProvider'.
+            '${ref.watch(authProvider).currencySymbol}${available.toStringAsFixed(2)}',
+                         ^^^^^^^^^^^^
+lib/features/business/presentation/screens/billing_screen.dart:102:55: Error: The getter 'authProvider' isn't defined for the type '_BillingScreenState'.
+ - '_BillingScreenState' is from 'package:flota_mobile/features/business/presentation/screens/billing_screen.dart' ('lib/features/business/presentation/screens/billing_screen.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'authProvider'.
+              _subMetric('CREDIT LIMIT', '${ref.watch(authProvider).currencySymbol}${limit.toStringAsFixed(2)}'),
+                                                      ^^^^^^^^^^^^
+lib/features/business/presentation/screens/billing_screen.dart:104:54: Error: The getter 'authProvider' isn't defined for the type '_BillingScreenState'.
+ - '_BillingScreenState' is from 'package:flota_mobile/features/business/presentation/screens/billing_screen.dart' ('lib/features/business/presentation/screens/billing_screen.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'authProvider'.
+              _subMetric('OUTSTANDING', '${ref.watch(authProvider).currencySymbol}${balance.toStringAsFixed(2)}'),
+                                                     ^^^^^^^^^^^^
+lib/features/business/presentation/screens/billing_screen.dart:154:23: Error: The getter 'ref' isn't defined for the type '_InvoiceItem'.
+ - '_InvoiceItem' is from 'package:flota_mobile/features/business/presentation/screens/billing_screen.dart' ('lib/features/business/presentation/screens/billing_screen.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'ref'.
+              Text('${ref.watch(authProvider).currencySymbol}${invoice['amount'].toStringAsFixed(2)}', style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 16)),
+                      ^^^
+lib/features/business/presentation/screens/billing_screen.dart:154:33: Error: The getter 'authProvider' isn't defined for the type '_InvoiceItem'.
+ - '_InvoiceItem' is from 'package:flota_mobile/features/business/presentation/screens/billing_screen.dart' ('lib/features/business/presentation/screens/billing_screen.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'authProvider'.
+              Text('${ref.watch(authProvider).currencySymbol}${invoice['amount'].toStringAsFixed(2)}', style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 16)),
+                                ^^^^^^^^^^^^
+lib/features/wallet/transaction_list_screen.dart:118:39: Error: The getter 'ref' isn't defined for the type '_TransactionTile'.
+ - '_TransactionTile' is from 'package:flota_mobile/features/wallet/transaction_list_screen.dart' ('lib/features/wallet/transaction_list_screen.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'ref'.
+            '${isCredit ? '+' : '-'}${ref.read(authProvider).currencySymbol}${amount.abs().toStringAsFixed(2)}',
+                                      ^^^
+lib/features/wallet/transaction_list_screen.dart:118:48: Error: The getter 'authProvider' isn't defined for the type '_TransactionTile'.
+ - '_TransactionTile' is from 'package:flota_mobile/features/wallet/transaction_list_screen.dart' ('lib/features/wallet/transaction_list_screen.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'authProvider'.
+            '${isCredit ? '+' : '-'}${ref.read(authProvider).currencySymbol}${amount.abs().toStringAsFixed(2)}',
+                                               ^^^^^^^^^^^^
+Target kernel_snapshot_program failed: Exception
+
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':app:compileFlutterBuildRelease'.
+> Process 'command 'C:\FlutterVersions\flutter\bin\flutter.bat'' finished with non-zero exit value 1
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.
+
+BUILD FAILED in 32s
+Running Gradle task 'assembleRelease'...                           33.0s
+Gradle task assembleRelease failed with exit code 1

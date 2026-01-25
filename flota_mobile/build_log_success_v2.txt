@@ -1,0 +1,59 @@
+Running Gradle task 'assembleRelease'...                        
+Warning: Flutter support for your project's Gradle version (8.5.0) will soon be dropped. Please upgrade your Gradle version to a version of at least 8.7.0 soon.
+Alternatively, use the flag "--android-skip-build-dependency-validation" to bypass this check.
+
+Potential fix: Your project's gradle version is typically defined in the gradle wrapper file. By default, this can be found at C:\Users\USER\Desktop\giga\flota_mobile\android/gradle/wrapper/gradle-wrapper.properties. 
+For more information, see https://docs.gradle.org/current/userguide/gradle_wrapper.html.
+
+Warning: Flutter support for your project's Android Gradle Plugin version (Android Gradle Plugin version 8.2.1) will soon be dropped. Please upgrade your Android Gradle Plugin version to a version of at least Android Gradle Plugin version 8.6.0 soon.
+Alternatively, use the flag "--android-skip-build-dependency-validation" to bypass this check.
+
+Potential fix: Your project's AGP version is typically defined in the plugins block of the `settings.gradle` file (C:\Users\USER\Desktop\giga\flota_mobile\android/settings.gradle), by a plugin with the id of com.android.application. 
+If you don't see a plugins block, your project was likely created with an older template version. In this case it is most likely defined in the top-level build.gradle file (C:\Users\USER\Desktop\giga\flota_mobile\android/build.gradle) by the following line in the dependencies block of the buildscript: "classpath 'com.android.tools.build:gradle:<version>'".
+
+lib/features/delivery/multi_stop_screen.dart:187:36: Error: The method 'pop' isn't defined for the type 'BuildContext'.
+ - 'BuildContext' is from 'package:flutter/src/widgets/framework.dart' ('/C:/FlutterVersions/flutter/packages/flutter/lib/src/widgets/framework.dart').
+Try correcting the name to the name of an existing method, or defining a method named 'pop'.
+          onPressed: () => context.pop(),
+                                   ^^^
+lib/features/delivery/multi_stop_screen.dart:432:43: Error: The method 'push' isn't defined for the type 'BuildContext'.
+ - 'BuildContext' is from 'package:flutter/src/widgets/framework.dart' ('/C:/FlutterVersions/flutter/packages/flutter/lib/src/widgets/framework.dart').
+Try correcting the name to the name of an existing method, or defining a method named 'push'.
+                                  context.push('/wallet'); // Go to payment
+                                          ^^^^
+lib/features/profile/profile_screen.dart:570:49: Error: Not a constant expression.
+                      'Refer & Earn ${ref.watch(authProvider).currencySymbol}10',
+                                                ^^^^^^^^^^^^
+lib/features/profile/profile_screen.dart:570:39: Error: Not a constant expression.
+                      'Refer & Earn ${ref.watch(authProvider).currencySymbol}10',
+                                      ^^^
+lib/features/profile/profile_screen.dart:570:43: Error: Method invocation is not a constant expression.
+                      'Refer & Earn ${ref.watch(authProvider).currencySymbol}10',
+                                          ^^^^^
+lib/features/wallet/wallet_screen.dart:270:49: Error: Not a constant expression.
+                labelText: "Amount (${ref.watch(authProvider).currencySymbol})",
+                                                ^^^^^^^^^^^^
+lib/features/wallet/wallet_screen.dart:270:39: Error: Not a constant expression.
+                labelText: "Amount (${ref.watch(authProvider).currencySymbol})",
+                                      ^^^
+lib/features/wallet/wallet_screen.dart:270:43: Error: Method invocation is not a constant expression.
+                labelText: "Amount (${ref.watch(authProvider).currencySymbol})",
+                                          ^^^^^
+Target kernel_snapshot_program failed: Exception
+
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':app:compileFlutterBuildRelease'.
+> Process 'command 'C:\FlutterVersions\flutter\bin\flutter.bat'' finished with non-zero exit value 1
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.
+
+BUILD FAILED in 33s
+Running Gradle task 'assembleRelease'...                           34.2s
+Gradle task assembleRelease failed with exit code 1

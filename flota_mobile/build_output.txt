@@ -1,0 +1,1024 @@
+Running Gradle task 'assembleRelease'...                        
+Warning: Flutter support for your project's Gradle version (8.5.0) will soon be dropped. Please upgrade your Gradle version to a version of at least 8.7.0 soon.
+Alternatively, use the flag "--android-skip-build-dependency-validation" to bypass this check.
+
+Potential fix: Your project's gradle version is typically defined in the gradle wrapper file. By default, this can be found at C:\Users\USER\Desktop\giga\flota_mobile\android/gradle/wrapper/gradle-wrapper.properties. 
+For more information, see https://docs.gradle.org/current/userguide/gradle_wrapper.html.
+
+Warning: Flutter support for your project's Android Gradle Plugin version (Android Gradle Plugin version 8.2.1) will soon be dropped. Please upgrade your Android Gradle Plugin version to a version of at least Android Gradle Plugin version 8.6.0 soon.
+Alternatively, use the flag "--android-skip-build-dependency-validation" to bypass this check.
+
+Potential fix: Your project's AGP version is typically defined in the plugins block of the `settings.gradle` file (C:\Users\USER\Desktop\giga\flota_mobile\android/settings.gradle), by a plugin with the id of com.android.application. 
+If you don't see a plugins block, your project was likely created with an older template version. In this case it is most likely defined in the top-level build.gradle file (C:\Users\USER\Desktop\giga\flota_mobile\android/build.gradle) by the following line in the dependencies block of the buildscript: "classpath 'com.android.tools.build:gradle:<version>'".
+
+lib/features/auth/data/auth_repository.dart:30:13: Error: Duplicated parameter name 'companyName'.
+    String? companyName,
+            ^^^^^^^^^^^
+lib/features/auth/data/auth_repository.dart:28:13: Context: Other parameter named 'companyName'.
+    String? companyName,
+            ^^^^^^^^^^^
+lib/features/auth/data/auth_repository.dart:31:13: Error: Duplicated parameter name 'registrationNumber'.
+    String? registrationNumber,
+            ^^^^^^^^^^^^^^^^^^
+lib/features/auth/data/auth_repository.dart:29:13: Context: Other parameter named 'registrationNumber'.
+    String? registrationNumber,
+            ^^^^^^^^^^^^^^^^^^
+lib/features/delivery/multi_stop_screen.dart:22:3: Error: Type 'GoogleMapController' not found.
+  GoogleMapController? _mapController;
+  ^^^^^^^^^^^^^^^^^^^
+lib/features/delivery/multi_stop_screen.dart:173:3: Error: Type 'Widget' not found.
+  Widget build(BuildContext context) {
+  ^^^^^^
+lib/features/delivery/multi_stop_screen.dart:173:16: Error: Type 'BuildContext' not found.
+  Widget build(BuildContext context) {
+               ^^^^^^^^^^^^
+lib/main.dart:228:33: Error: The getter 'queryParameters' isn't defined for the type 'GoRouterState'.
+ - 'GoRouterState' is from 'package:go_router/src/state.dart' ('../../../AppData/Local/Pub/Cache/hosted/pub.dev/go_router-12.1.3/lib/src/state.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'queryParameters'.
+          final isPhone = state.queryParameters['isPhone'] == 'true';
+                                ^^^^^^^^^^^^^^^
+lib/main.dart:229:37: Error: The getter 'queryParameters' isn't defined for the type 'GoRouterState'.
+ - 'GoRouterState' is from 'package:go_router/src/state.dart' ('../../../AppData/Local/Pub/Cache/hosted/pub.dev/go_router-12.1.3/lib/src/state.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'queryParameters'.
+          final phoneNumber = state.queryParameters['phoneNumber'];
+                                    ^^^^^^^^^^^^^^^
+lib/main.dart:277:37: Error: The getter 'queryParameters' isn't defined for the type 'GoRouterState'.
+ - 'GoRouterState' is from 'package:go_router/src/state.dart' ('../../../AppData/Local/Pub/Cache/hosted/pub.dev/go_router-12.1.3/lib/src/state.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'queryParameters'.
+          initiallyScheduled: state.queryParameters['scheduled'] == 'true',
+                                    ^^^^^^^^^^^^^^^
+lib/main.dart:107:27: Error: The getter 'GoogleFonts' isn't defined for the type 'MaintenanceApp'.
+ - 'MaintenanceApp' is from 'package:flota_mobile/main.dart' ('lib/main.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'GoogleFonts'.
+                   style: GoogleFonts.outfit(fontSize: 24, fontWeight: FontWeight.bold),
+                          ^^^^^^^^^^^
+lib/main.dart:113:26: Error: The getter 'GoogleFonts' isn't defined for the type 'MaintenanceApp'.
+ - 'MaintenanceApp' is from 'package:flota_mobile/main.dart' ('lib/main.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'GoogleFonts'.
+                  style: GoogleFonts.outfit(fontSize: 16, color: Colors.black54),
+                         ^^^^^^^^^^^
+lib/features/marketplace/data/models/delivery_models.dart:29:19: Error: 'pickupLat' isn't an instance field of this class.
+    required this.pickupLat,
+                  ^^^^^^^^^
+lib/features/marketplace/data/models/delivery_models.dart:30:19: Error: 'pickupLng' isn't an instance field of this class.
+    required this.pickupLng,
+                  ^^^^^^^^^
+lib/features/marketplace/data/models/delivery_models.dart:31:19: Error: 'dropoffLat' isn't an instance field of this class.
+    required this.dropoffLat,
+                  ^^^^^^^^^^
+lib/features/marketplace/data/models/delivery_models.dart:32:19: Error: 'dropoffLng' isn't an instance field of this class.
+    required this.dropoffLng,
+                  ^^^^^^^^^^
+lib/features/marketplace/data/models/delivery_models.dart:33:19: Error: 'vehicleType' isn't an instance field of this class.
+    required this.vehicleType,
+                  ^^^^^^^^^^^
+lib/features/marketplace/data/models/delivery_models.dart:34:19: Error: 'serviceTier' isn't an instance field of this class.
+    required this.serviceTier,
+                  ^^^^^^^^^^^
+lib/features/marketplace/data/models/delivery_models.dart:35:10: Error: 'parcelCategory' isn't an instance field of this class.
+    this.parcelCategory,
+         ^^^^^^^^^^^^^^
+lib/features/marketplace/data/models/delivery_models.dart:36:10: Error: 'parcelSize' isn't an instance field of this class.
+    this.parcelSize,
+         ^^^^^^^^^^
+lib/features/marketplace/data/models/delivery_models.dart:41:19: Error: The getter 'pickupLat' isn't defined for the type 'DeliveryEstimationRequest'.
+ - 'DeliveryEstimationRequest' is from 'package:flota_mobile/features/marketplace/data/models/delivery_models.dart' ('lib/features/marketplace/data/models/delivery_models.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'pickupLat'.
+    'pickup_lat': pickupLat,
+                  ^^^^^^^^^
+lib/features/marketplace/data/models/delivery_models.dart:42:19: Error: The getter 'pickupLng' isn't defined for the type 'DeliveryEstimationRequest'.
+ - 'DeliveryEstimationRequest' is from 'package:flota_mobile/features/marketplace/data/models/delivery_models.dart' ('lib/features/marketplace/data/models/delivery_models.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'pickupLng'.
+    'pickup_lng': pickupLng,
+                  ^^^^^^^^^
+lib/features/marketplace/data/models/delivery_models.dart:43:20: Error: The getter 'dropoffLat' isn't defined for the type 'DeliveryEstimationRequest'.
+ - 'DeliveryEstimationRequest' is from 'package:flota_mobile/features/marketplace/data/models/delivery_models.dart' ('lib/features/marketplace/data/models/delivery_models.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'dropoffLat'.
+    'dropoff_lat': dropoffLat,
+                   ^^^^^^^^^^
+lib/features/marketplace/data/models/delivery_models.dart:44:20: Error: The getter 'dropoffLng' isn't defined for the type 'DeliveryEstimationRequest'.
+ - 'DeliveryEstimationRequest' is from 'package:flota_mobile/features/marketplace/data/models/delivery_models.dart' ('lib/features/marketplace/data/models/delivery_models.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'dropoffLng'.
+    'dropoff_lng': dropoffLng,
+                   ^^^^^^^^^^
+lib/features/marketplace/data/models/delivery_models.dart:45:21: Error: The getter 'vehicleType' isn't defined for the type 'DeliveryEstimationRequest'.
+ - 'DeliveryEstimationRequest' is from 'package:flota_mobile/features/marketplace/data/models/delivery_models.dart' ('lib/features/marketplace/data/models/delivery_models.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'vehicleType'.
+    'vehicle_type': vehicleType,
+                    ^^^^^^^^^^^
+lib/features/marketplace/data/models/delivery_models.dart:46:21: Error: The getter 'serviceTier' isn't defined for the type 'DeliveryEstimationRequest'.
+ - 'DeliveryEstimationRequest' is from 'package:flota_mobile/features/marketplace/data/models/delivery_models.dart' ('lib/features/marketplace/data/models/delivery_models.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'serviceTier'.
+    'service_tier': serviceTier,
+                    ^^^^^^^^^^^
+lib/features/marketplace/data/models/delivery_models.dart:47:24: Error: The getter 'parcelCategory' isn't defined for the type 'DeliveryEstimationRequest'.
+ - 'DeliveryEstimationRequest' is from 'package:flota_mobile/features/marketplace/data/models/delivery_models.dart' ('lib/features/marketplace/data/models/delivery_models.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'parcelCategory'.
+    'parcel_category': parcelCategory,
+                       ^^^^^^^^^^^^^^
+lib/features/marketplace/data/models/delivery_models.dart:48:20: Error: The getter 'parcelSize' isn't defined for the type 'DeliveryEstimationRequest'.
+ - 'DeliveryEstimationRequest' is from 'package:flota_mobile/features/marketplace/data/models/delivery_models.dart' ('lib/features/marketplace/data/models/delivery_models.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'parcelSize'.
+    'parcel_size': parcelSize,
+                   ^^^^^^^^^^
+lib/features/marketplace/delivery_request_screen.dart:594:57: Error: The getter 'authProvider' isn't defined for the type '_DeliveryRequestScreenState'.
+ - '_DeliveryRequestScreenState' is from 'package:flota_mobile/features/marketplace/delivery_request_screen.dart' ('lib/features/marketplace/delivery_request_screen.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'authProvider'.
+                state.estimation != null ? "${ref.watch(authProvider).currencySymbol}${state.estimation!.finalFare.toStringAsFixed(2)}" : "-",
+                                                        ^^^^^^^^^^^^
+lib/features/wallet/withdrawal_screen.dart:109:24: Error: The getter 'ref' isn't defined for the type '_WithdrawalScreenState'.
+ - '_WithdrawalScreenState' is from 'package:flota_mobile/features/wallet/withdrawal_screen.dart' ('lib/features/wallet/withdrawal_screen.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'ref'.
+                    '${ref.watch(authProvider).currencySymbol}${amount.toStringAsFixed(2)} will arrive in your bank\nwithin 2 hours via Faster Payments.',
+                       ^^^
+lib/features/wallet/withdrawal_screen.dart:109:34: Error: The getter 'authProvider' isn't defined for the type '_WithdrawalScreenState'.
+ - '_WithdrawalScreenState' is from 'package:flota_mobile/features/wallet/withdrawal_screen.dart' ('lib/features/wallet/withdrawal_screen.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'authProvider'.
+                    '${ref.watch(authProvider).currencySymbol}${amount.toStringAsFixed(2)} will arrive in your bank\nwithin 2 hours via Faster Payments.',
+                                 ^^^^^^^^^^^^
+lib/features/wallet/withdrawal_screen.dart:190:32: Error: The getter 'ref' isn't defined for the type '_WithdrawalScreenState'.
+ - '_WithdrawalScreenState' is from 'package:flota_mobile/features/wallet/withdrawal_screen.dart' ('lib/features/wallet/withdrawal_screen.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'ref'.
+                            '${ref.watch(authProvider).currencySymbol}${_currentBalance.toStringAsFixed(2)}',
+                               ^^^
+lib/features/wallet/withdrawal_screen.dart:190:42: Error: The getter 'authProvider' isn't defined for the type '_WithdrawalScreenState'.
+ - '_WithdrawalScreenState' is from 'package:flota_mobile/features/wallet/withdrawal_screen.dart' ('lib/features/wallet/withdrawal_screen.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'authProvider'.
+                            '${ref.watch(authProvider).currencySymbol}${_currentBalance.toStringAsFixed(2)}',
+                                         ^^^^^^^^^^^^
+lib/features/wallet/withdrawal_screen.dart:219:36: Error: The getter 'ref' isn't defined for the type '_WithdrawalScreenState'.
+ - '_WithdrawalScreenState' is from 'package:flota_mobile/features/wallet/withdrawal_screen.dart' ('lib/features/wallet/withdrawal_screen.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'ref'.
+                    prefixText: '${ref.watch(authProvider).currencySymbol} ',
+                                   ^^^
+lib/features/wallet/withdrawal_screen.dart:219:46: Error: The getter 'authProvider' isn't defined for the type '_WithdrawalScreenState'.
+ - '_WithdrawalScreenState' is from 'package:flota_mobile/features/wallet/withdrawal_screen.dart' ('lib/features/wallet/withdrawal_screen.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'authProvider'.
+                    prefixText: '${ref.watch(authProvider).currencySymbol} ',
+                                             ^^^^^^^^^^^^
+lib/features/wallet/withdrawal_screen.dart:232:70: Error: The getter 'ref' isn't defined for the type '_WithdrawalScreenState'.
+ - '_WithdrawalScreenState' is from 'package:flota_mobile/features/wallet/withdrawal_screen.dart' ('lib/features/wallet/withdrawal_screen.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'ref'.
+                    if (amount < 10) return 'Minimum withdrawal is ${ref.read(authProvider).currencySymbol}10';
+                                                                     ^^^
+lib/features/wallet/withdrawal_screen.dart:232:79: Error: The getter 'authProvider' isn't defined for the type '_WithdrawalScreenState'.
+ - '_WithdrawalScreenState' is from 'package:flota_mobile/features/wallet/withdrawal_screen.dart' ('lib/features/wallet/withdrawal_screen.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'authProvider'.
+                    if (amount < 10) return 'Minimum withdrawal is ${ref.read(authProvider).currencySymbol}10';
+                                                                              ^^^^^^^^^^^^
+lib/features/wallet/withdrawal_screen.dart:240:40: Error: The getter 'ref' isn't defined for the type '_WithdrawalScreenState'.
+ - '_WithdrawalScreenState' is from 'package:flota_mobile/features/wallet/withdrawal_screen.dart' ('lib/features/wallet/withdrawal_screen.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'ref'.
+                'Minimum withdrawal: ${ref.watch(authProvider).currencySymbol}10',
+                                       ^^^
+lib/features/wallet/withdrawal_screen.dart:240:50: Error: The getter 'authProvider' isn't defined for the type '_WithdrawalScreenState'.
+ - '_WithdrawalScreenState' is from 'package:flota_mobile/features/wallet/withdrawal_screen.dart' ('lib/features/wallet/withdrawal_screen.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'authProvider'.
+                'Minimum withdrawal: ${ref.watch(authProvider).currencySymbol}10',
+                                                 ^^^^^^^^^^^^
+lib/features/delivery/multi_stop_screen.dart:22:3: Error: 'GoogleMapController' isn't a type.
+  GoogleMapController? _mapController;
+  ^^^^^^^^^^^^^^^^^^^
+lib/features/delivery/multi_stop_screen.dart:26:10: Error: 'LatLng' isn't a type.
+    List<LatLng> positions = [];
+         ^^^^^^
+lib/features/delivery/multi_stop_screen.dart:29:43: Error: 'LatLng' isn't a type.
+        positions.add(stop['position'] as LatLng);
+                                          ^^^^^^
+lib/features/delivery/multi_stop_screen.dart:35:21: Error: The getter 'LocationService' isn't defined for the type '_MultiStopScreenState'.
+ - '_MultiStopScreenState' is from 'package:flota_mobile/features/delivery/multi_stop_screen.dart' ('lib/features/delivery/multi_stop_screen.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'LocationService'.
+        distance += LocationService.calculateDistance(
+                    ^^^^^^^^^^^^^^^
+lib/features/delivery/multi_stop_screen.dart:73:11: Error: The getter 'ScaffoldMessenger' isn't defined for the type '_MultiStopScreenState'.
+ - '_MultiStopScreenState' is from 'package:flota_mobile/features/delivery/multi_stop_screen.dart' ('lib/features/delivery/multi_stop_screen.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'ScaffoldMessenger'.
+          ScaffoldMessenger.of(context).showSnackBar(
+          ^^^^^^^^^^^^^^^^^
+lib/features/delivery/multi_stop_screen.dart:74:13: Error: The method 'SnackBar' isn't defined for the type '_MultiStopScreenState'.
+ - '_MultiStopScreenState' is from 'package:flota_mobile/features/delivery/multi_stop_screen.dart' ('lib/features/delivery/multi_stop_screen.dart').
+Try correcting the name to the name of an existing method, or defining a method named 'SnackBar'.
+            SnackBar(content: Text('Estimation failed: $e')),
+            ^^^^^^^^
+lib/features/delivery/multi_stop_screen.dart:74:31: Error: The method 'Text' isn't defined for the type '_MultiStopScreenState'.
+ - '_MultiStopScreenState' is from 'package:flota_mobile/features/delivery/multi_stop_screen.dart' ('lib/features/delivery/multi_stop_screen.dart').
+Try correcting the name to the name of an existing method, or defining a method named 'Text'.
+            SnackBar(content: Text('Estimation failed: $e')),
+                              ^^^^
+lib/features/delivery/multi_stop_screen.dart:89:57: Error: 'LatLng' isn't a type.
+          initialPosition: _stops[index]['position'] as LatLng?,
+                                                        ^^^^^^
+lib/features/delivery/multi_stop_screen.dart:84:26: Error: The getter 'Navigator' isn't defined for the type '_MultiStopScreenState'.
+ - '_MultiStopScreenState' is from 'package:flota_mobile/features/delivery/multi_stop_screen.dart' ('lib/features/delivery/multi_stop_screen.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'Navigator'.
+    final result = await Navigator.push<Map<String, dynamic>>(
+                         ^^^^^^^^^
+lib/features/delivery/multi_stop_screen.dart:86:7: Error: The method 'MaterialPageRoute' isn't defined for the type '_MultiStopScreenState'.
+ - '_MultiStopScreenState' is from 'package:flota_mobile/features/delivery/multi_stop_screen.dart' ('lib/features/delivery/multi_stop_screen.dart').
+Try correcting the name to the name of an existing method, or defining a method named 'MaterialPageRoute'.
+      MaterialPageRoute(
+      ^^^^^^^^^^^^^^^^^
+lib/features/delivery/multi_stop_screen.dart:87:31: Error: The method 'MapPickerScreen' isn't defined for the type '_MultiStopScreenState'.
+ - '_MultiStopScreenState' is from 'package:flota_mobile/features/delivery/multi_stop_screen.dart' ('lib/features/delivery/multi_stop_screen.dart').
+Try correcting the name to the name of an existing method, or defining a method named 'MapPickerScreen'.
+        builder: (context) => MapPickerScreen(
+                              ^^^^^^^^^^^^^^^
+lib/features/delivery/multi_stop_screen.dart:119:33: Error: Not a constant expression.
+        const SnackBar(content: Text('Minimum 2 stops required')),
+                                ^^^^
+lib/features/delivery/multi_stop_screen.dart:119:15: Error: Not a constant expression.
+        const SnackBar(content: Text('Minimum 2 stops required')),
+              ^^^^^^^^
+lib/features/delivery/multi_stop_screen.dart:118:7: Error: The getter 'ScaffoldMessenger' isn't defined for the type '_MultiStopScreenState'.
+ - '_MultiStopScreenState' is from 'package:flota_mobile/features/delivery/multi_stop_screen.dart' ('lib/features/delivery/multi_stop_screen.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'ScaffoldMessenger'.
+      ScaffoldMessenger.of(context).showSnackBar(
+      ^^^^^^^^^^^^^^^^^
+lib/features/delivery/multi_stop_screen.dart:129:38: Error: 'LatLng' isn't a type.
+        .map((s) => s['position'] as LatLng)
+                                     ^^^^^^
+lib/features/delivery/multi_stop_screen.dart:135:37: Error: The getter 'CameraUpdate' isn't defined for the type '_MultiStopScreenState'.
+ - '_MultiStopScreenState' is from 'package:flota_mobile/features/delivery/multi_stop_screen.dart' ('lib/features/delivery/multi_stop_screen.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'CameraUpdate'.
+      _mapController!.animateCamera(CameraUpdate.newLatLngZoom(positions[0], 15));
+                                    ^^^^^^^^^^^^
+lib/features/delivery/multi_stop_screen.dart:152:7: Error: The getter 'CameraUpdate' isn't defined for the type '_MultiStopScreenState'.
+ - '_MultiStopScreenState' is from 'package:flota_mobile/features/delivery/multi_stop_screen.dart' ('lib/features/delivery/multi_stop_screen.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'CameraUpdate'.
+      CameraUpdate.newLatLngBounds(
+      ^^^^^^^^^^^^
+lib/features/delivery/multi_stop_screen.dart:153:9: Error: The method 'LatLngBounds' isn't defined for the type '_MultiStopScreenState'.
+ - '_MultiStopScreenState' is from 'package:flota_mobile/features/delivery/multi_stop_screen.dart' ('lib/features/delivery/multi_stop_screen.dart').
+Try correcting the name to the name of an existing method, or defining a method named 'LatLngBounds'.
+        LatLngBounds(
+        ^^^^^^^^^^^^
+lib/features/delivery/multi_stop_screen.dart:154:22: Error: The method 'LatLng' isn't defined for the type '_MultiStopScreenState'.
+ - '_MultiStopScreenState' is from 'package:flota_mobile/features/delivery/multi_stop_screen.dart' ('lib/features/delivery/multi_stop_screen.dart').
+Try correcting the name to the name of an existing method, or defining a method named 'LatLng'.
+          southwest: LatLng(minLat, minLng),
+                     ^^^^^^
+lib/features/delivery/multi_stop_screen.dart:155:22: Error: The method 'LatLng' isn't defined for the type '_MultiStopScreenState'.
+ - '_MultiStopScreenState' is from 'package:flota_mobile/features/delivery/multi_stop_screen.dart' ('lib/features/delivery/multi_stop_screen.dart').
+Try correcting the name to the name of an existing method, or defining a method named 'LatLng'.
+          northeast: LatLng(maxLat, maxLng),
+                     ^^^^^^
+lib/features/delivery/multi_stop_screen.dart:173:16: Error: 'BuildContext' isn't a type.
+  Widget build(BuildContext context) {
+               ^^^^^^^^^^^^
+lib/features/delivery/multi_stop_screen.dart:180:28: Error: Not a constant expression.
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+                           ^^^^^
+lib/features/delivery/multi_stop_screen.dart:180:53: Error: Not a constant expression.
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+                                                    ^^^^^^
+lib/features/delivery/multi_stop_screen.dart:180:23: Error: Not a constant expression.
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+                      ^^^^
+lib/features/delivery/multi_stop_screen.dart:187:26: Error: Not a constant expression.
+                padding: EdgeInsets.symmetric(horizontal: 16),
+                         ^^^^^^^^^^
+lib/features/delivery/multi_stop_screen.dart:187:37: Error: Method invocation is not a constant expression.
+                padding: EdgeInsets.symmetric(horizontal: 16),
+                                    ^^^^^^^^^
+lib/features/delivery/multi_stop_screen.dart:191:59: Error: Not a constant expression.
+                  child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                                                          ^^^^^^
+lib/features/delivery/multi_stop_screen.dart:191:26: Error: Not a constant expression.
+                  child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^
+lib/features/delivery/multi_stop_screen.dart:188:24: Error: Not a constant expression.
+                child: SizedBox(
+                       ^^^^^^^^
+lib/features/delivery/multi_stop_screen.dart:186:22: Error: Not a constant expression.
+              child: Padding(
+                     ^^^^^^^
+lib/features/delivery/multi_stop_screen.dart:185:19: Error: Not a constant expression.
+            const Center(
+                  ^^^^^^
+lib/features/delivery/multi_stop_screen.dart:213:29: Error: Not a constant expression.
+                    target: LatLng(51.5074, -0.1278), // London
+                            ^^^^^^
+lib/features/delivery/multi_stop_screen.dart:212:48: Error: Not a constant expression.
+                  initialCameraPosition: const CameraPosition(
+                                               ^^^^^^^^^^^^^^
+lib/features/delivery/multi_stop_screen.dart:222:62: Error: 'LatLng' isn't a type.
+                            position: e.value['position'] as LatLng,
+                                                             ^^^^^^
+lib/features/delivery/multi_stop_screen.dart:237:36: Error: Couldn't find constructor 'EdgeInsets.symmetric'.
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                   ^^^^^^^^^^
+lib/features/delivery/multi_stop_screen.dart:248:36: Error: Not a constant expression.
+                        const Icon(Icons.auto_awesome, color: AppTheme.successGreen, size: 16),
+                                   ^^^^^
+lib/features/delivery/multi_stop_screen.dart:248:63: Error: Not a constant expression.
+                        const Icon(Icons.auto_awesome, color: AppTheme.successGreen, size: 16),
+                                                              ^^^^^^^^
+lib/features/delivery/multi_stop_screen.dart:248:31: Error: Not a constant expression.
+                        const Icon(Icons.auto_awesome, color: AppTheme.successGreen, size: 16),
+                              ^^^^
+lib/features/delivery/multi_stop_screen.dart:249:31: Error: Not a constant expression.
+                        const SizedBox(width: 8),
+                              ^^^^^^^^
+lib/features/delivery/multi_stop_screen.dart:269:30: Error: Couldn't find constructor 'EdgeInsets.all'.
+              padding: const EdgeInsets.all(20),
+                             ^^^^^^^^^^
+lib/features/delivery/multi_stop_screen.dart:289:33: Error: Couldn't find constructor 'EdgeInsets.only'.
+                  margin: const EdgeInsets.only(bottom: 12),
+                                ^^^^^^^^^^
+lib/features/delivery/multi_stop_screen.dart:300:39: Error: Not a constant expression.
+                        offset: const Offset(0, 4),
+                                      ^^^^^^
+lib/features/delivery/multi_stop_screen.dart:306:41: Error: Not a constant expression.
+                    leading: const Icon(Icons.drag_handle, color: Colors.grey),
+                                        ^^^^^
+lib/features/delivery/multi_stop_screen.dart:306:67: Error: Not a constant expression.
+                    leading: const Icon(Icons.drag_handle, color: Colors.grey),
+                                                                  ^^^^^^
+lib/features/delivery/multi_stop_screen.dart:306:36: Error: Not a constant expression.
+                    leading: const Icon(Icons.drag_handle, color: Colors.grey),
+                                   ^^^^
+lib/features/delivery/multi_stop_screen.dart:325:46: Error: Not a constant expression.
+                            icon: const Icon(Icons.remove_circle_outline, color: AppTheme.primaryRed, size: 20),
+                                             ^^^^^
+lib/features/delivery/multi_stop_screen.dart:325:82: Error: Not a constant expression.
+                            icon: const Icon(Icons.remove_circle_outline, color: AppTheme.primaryRed, size: 20),
+                                                                                 ^^^^^^^^
+lib/features/delivery/multi_stop_screen.dart:325:41: Error: Not a constant expression.
+                            icon: const Icon(Icons.remove_circle_outline, color: AppTheme.primaryRed, size: 20),
+                                        ^^^^
+lib/features/delivery/multi_stop_screen.dart:328:36: Error: Not a constant expression.
+                        const Icon(Icons.chevron_right, color: Colors.grey),
+                                   ^^^^^
+lib/features/delivery/multi_stop_screen.dart:328:64: Error: Not a constant expression.
+                        const Icon(Icons.chevron_right, color: Colors.grey),
+                                                               ^^^^^^
+lib/features/delivery/multi_stop_screen.dart:328:31: Error: Not a constant expression.
+                        const Icon(Icons.chevron_right, color: Colors.grey),
+                              ^^^^
+lib/features/delivery/multi_stop_screen.dart:339:28: Error: Couldn't find constructor 'EdgeInsets.fromLTRB'.
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 10),
+                           ^^^^^^^^^^
+lib/features/delivery/multi_stop_screen.dart:345:38: Error: Not a constant expression.
+                    icon: const Icon(Icons.add_location_alt_outlined),
+                                     ^^^^^
+lib/features/delivery/multi_stop_screen.dart:345:33: Error: Not a constant expression.
+                    icon: const Icon(Icons.add_location_alt_outlined),
+                                ^^^^
+lib/features/delivery/multi_stop_screen.dart:346:34: Error: Not a constant expression.
+                    label: const Text('Add Stop'),
+                                 ^^^^
+lib/features/delivery/multi_stop_screen.dart:348:38: Error: Couldn't find constructor 'EdgeInsets.symmetric'.
+                      padding: const EdgeInsets.symmetric(vertical: 15),
+                                     ^^^^^^^^^^
+lib/features/delivery/multi_stop_screen.dart:349:53: Error: Not a constant expression.
+                      side: const BorderSide(color: AppTheme.primaryBlue),
+                                                    ^^^^^^^^
+lib/features/delivery/multi_stop_screen.dart:349:35: Error: Not a constant expression.
+                      side: const BorderSide(color: AppTheme.primaryBlue),
+                                  ^^^^^^^^^^
+lib/features/delivery/multi_stop_screen.dart:360:28: Error: Couldn't find constructor 'EdgeInsets.fromLTRB'.
+            padding: const EdgeInsets.fromLTRB(25, 20, 25, 30),
+                           ^^^^^^^^^^
+lib/features/delivery/multi_stop_screen.dart:363:62: Error: Not a constant expression.
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
+                                                             ^^^^^^
+lib/features/delivery/multi_stop_screen.dart:363:69: Error: Method invocation is not a constant expression.
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
+                                                                    ^^^^^^^^
+lib/features/delivery/multi_stop_screen.dart:363:35: Error: Couldn't find constructor 'BorderRadius.vertical'.
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
+                                  ^^^^^^^^^^^^
+lib/features/delivery/multi_stop_screen.dart:368:33: Error: Not a constant expression.
+                  offset: const Offset(0, -10),
+                                ^^^^^^
+lib/features/delivery/multi_stop_screen.dart:384:31: Error: Not a constant expression.
+                        const SizedBox(height: 5),
+                              ^^^^^^^^
+lib/features/delivery/multi_stop_screen.dart:441:40: Error: Couldn't find constructor 'EdgeInsets.symmetric'.
+                        padding: const EdgeInsets.symmetric(horizontal: 35, vertical: 18),
+                                       ^^^^^^^^^^
+lib/features/delivery/multi_stop_screen.dart:447:105: Error: Not a constant expression.
+                        ? const SizedBox(width: 25, height: 25, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                                                                                          ^^^^^^
+lib/features/delivery/multi_stop_screen.dart:447:72: Error: Not a constant expression.
+                        ? const SizedBox(width: 25, height: 25, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                                                                       ^^^^^^^^^^^^^^^^^^^^^^^^^
+lib/features/delivery/multi_stop_screen.dart:447:33: Error: Not a constant expression.
+                        ? const SizedBox(width: 25, height: 25, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                                ^^^^^^^^
+lib/features/delivery/multi_stop_screen.dart:174:12: Error: The method 'Scaffold' isn't defined for the type '_MultiStopScreenState'.
+ - '_MultiStopScreenState' is from 'package:flota_mobile/features/delivery/multi_stop_screen.dart' ('lib/features/delivery/multi_stop_screen.dart').
+Try correcting the name to the name of an existing method, or defining a method named 'Scaffold'.
+    return Scaffold(
+           ^^^^^^^^
+lib/features/delivery/multi_stop_screen.dart:175:24: Error: The getter 'Colors' isn't defined for the type '_MultiStopScreenState'.
+ - '_MultiStopScreenState' is from 'package:flota_mobile/features/delivery/multi_stop_screen.dart' ('lib/features/delivery/multi_stop_screen.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'Colors'.
+      backgroundColor: Colors.grey[50],
+                       ^^^^^^
+lib/features/delivery/multi_stop_screen.dart:176:15: Error: The method 'AppBar' isn't defined for the type '_MultiStopScreenState'.
+ - '_MultiStopScreenState' is from 'package:flota_mobile/features/delivery/multi_stop_screen.dart' ('lib/features/delivery/multi_stop_screen.dart').
+Try correcting the name to the name of an existing method, or defining a method named 'AppBar'.
+      appBar: AppBar(
+              ^^^^^^
+lib/features/delivery/multi_stop_screen.dart:177:26: Error: The getter 'AppTheme' isn't defined for the type '_MultiStopScreenState'.
+ - '_MultiStopScreenState' is from 'package:flota_mobile/features/delivery/multi_stop_screen.dart' ('lib/features/delivery/multi_stop_screen.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'AppTheme'.
+        backgroundColor: AppTheme.primaryBlue,
+                         ^^^^^^^^
+lib/features/delivery/multi_stop_screen.dart:178:16: Error: The method 'Text' isn't defined for the type '_MultiStopScreenState'.
+ - '_MultiStopScreenState' is from 'package:flota_mobile/features/delivery/multi_stop_screen.dart' ('lib/features/delivery/multi_stop_screen.dart').
+Try correcting the name to the name of an existing method, or defining a method named 'Text'.
+        title: Text('Multi-Stop Delivery', style: GoogleFonts.outfit(color: Colors.white)),
+               ^^^^
+lib/features/delivery/multi_stop_screen.dart:178:51: Error: The getter 'GoogleFonts' isn't defined for the type '_MultiStopScreenState'.
+ - '_MultiStopScreenState' is from 'package:flota_mobile/features/delivery/multi_stop_screen.dart' ('lib/features/delivery/multi_stop_screen.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'GoogleFonts'.
+        title: Text('Multi-Stop Delivery', style: GoogleFonts.outfit(color: Colors.white)),
+                                                  ^^^^^^^^^^^
+lib/features/delivery/multi_stop_screen.dart:178:77: Error: The getter 'Colors' isn't defined for the type '_MultiStopScreenState'.
+ - '_MultiStopScreenState' is from 'package:flota_mobile/features/delivery/multi_stop_screen.dart' ('lib/features/delivery/multi_stop_screen.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'Colors'.
+        title: Text('Multi-Stop Delivery', style: GoogleFonts.outfit(color: Colors.white)),
+                                                                            ^^^^^^
+lib/features/delivery/multi_stop_screen.dart:179:18: Error: The method 'IconButton' isn't defined for the type '_MultiStopScreenState'.
+ - '_MultiStopScreenState' is from 'package:flota_mobile/features/delivery/multi_stop_screen.dart' ('lib/features/delivery/multi_stop_screen.dart').
+Try correcting the name to the name of an existing method, or defining a method named 'IconButton'.
+        leading: IconButton(
+                 ^^^^^^^^^^
+lib/features/delivery/multi_stop_screen.dart:197:13: Error: The method 'Column' isn't defined for the type '_MultiStopScreenState'.
+ - '_MultiStopScreenState' is from 'package:flota_mobile/features/delivery/multi_stop_screen.dart' ('lib/features/delivery/multi_stop_screen.dart').
+Try correcting the name to the name of an existing method, or defining a method named 'Column'.
+      body: Column(
+            ^^^^^^
+lib/features/delivery/multi_stop_screen.dart:200:11: Error: The method 'Container' isn't defined for the type '_MultiStopScreenState'.
+ - '_MultiStopScreenState' is from 'package:flota_mobile/features/delivery/multi_stop_screen.dart' ('lib/features/delivery/multi_stop_screen.dart').
+Try correcting the name to the name of an existing method, or defining a method named 'Container'.
+          Container(
+          ^^^^^^^^^
+lib/features/delivery/multi_stop_screen.dart:203:25: Error: The method 'BoxDecoration' isn't defined for the type '_MultiStopScreenState'.
+ - '_MultiStopScreenState' is from 'package:flota_mobile/features/delivery/multi_stop_screen.dart' ('lib/features/delivery/multi_stop_screen.dart').
+Try correcting the name to the name of an existing method, or defining a method named 'BoxDecoration'.
+            decoration: BoxDecoration(
+                        ^^^^^^^^^^^^^
+lib/features/delivery/multi_stop_screen.dart:205:17: Error: The method 'BoxShadow' isn't defined for the type '_MultiStopScreenState'.
+ - '_MultiStopScreenState' is from 'package:flota_mobile/features/delivery/multi_stop_screen.dart' ('lib/features/delivery/multi_stop_screen.dart').
+Try correcting the name to the name of an existing method, or defining a method named 'BoxShadow'.
+                BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 10),
+                ^^^^^^^^^
+lib/features/delivery/multi_stop_screen.dart:205:34: Error: The getter 'Colors' isn't defined for the type '_MultiStopScreenState'.
+ - '_MultiStopScreenState' is from 'package:flota_mobile/features/delivery/multi_stop_screen.dart' ('lib/features/delivery/multi_stop_screen.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'Colors'.
+                BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 10),
+                                 ^^^^^^
+lib/features/delivery/multi_stop_screen.dart:208:20: Error: The method 'Stack' isn't defined for the type '_MultiStopScreenState'.
+ - '_MultiStopScreenState' is from 'package:flota_mobile/features/delivery/multi_stop_screen.dart' ('lib/features/delivery/multi_stop_screen.dart').
+Try correcting the name to the name of an existing method, or defining a method named 'Stack'.
+            child: Stack(
+                   ^^^^^
+lib/features/delivery/multi_stop_screen.dart:210:17: Error: The method 'GoogleMap' isn't defined for the type '_MultiStopScreenState'.
+ - '_MultiStopScreenState' is from 'package:flota_mobile/features/delivery/multi_stop_screen.dart' ('lib/features/delivery/multi_stop_screen.dart').
+Try correcting the name to the name of an existing method, or defining a method named 'GoogleMap'.
+                GoogleMap(
+                ^^^^^^^^^
+lib/features/delivery/multi_stop_screen.dart:220:35: Error: The method 'Marker' isn't defined for the type '_MultiStopScreenState'.
+ - '_MultiStopScreenState' is from 'package:flota_mobile/features/delivery/multi_stop_screen.dart' ('lib/features/delivery/multi_stop_screen.dart').
+Try correcting the name to the name of an existing method, or defining a method named 'Marker'.
+                      .map((e) => Marker(
+                                  ^^^^^^
+lib/features/delivery/multi_stop_screen.dart:221:39: Error: The method 'MarkerId' isn't defined for the type '_MultiStopScreenState'.
+ - '_MultiStopScreenState' is from 'package:flota_mobile/features/delivery/multi_stop_screen.dart' ('lib/features/delivery/multi_stop_screen.dart').
+Try correcting the name to the name of an existing method, or defining a method named 'MarkerId'.
+                            markerId: MarkerId('stop_${e.key}'),
+                                      ^^^^^^^^
+lib/features/delivery/multi_stop_screen.dart:223:41: Error: The method 'InfoWindow' isn't defined for the type '_MultiStopScreenState'.
+ - '_MultiStopScreenState' is from 'package:flota_mobile/features/delivery/multi_stop_screen.dart' ('lib/features/delivery/multi_stop_screen.dart').
+Try correcting the name to the name of an existing method, or defining a method named 'InfoWindow'.
+                            infoWindow: InfoWindow(title: e.key == 0 ? 'Pickup' : 'Stop ${e.key}'),
+                                        ^^^^^^^^^^
+lib/features/delivery/multi_stop_screen.dart:224:35: Error: The getter 'BitmapDescriptor' isn't defined for the type '_MultiStopScreenState'.
+ - '_MultiStopScreenState' is from 'package:flota_mobile/features/delivery/multi_stop_screen.dart' ('lib/features/delivery/multi_stop_screen.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'BitmapDescriptor'.
+                            icon: BitmapDescriptor.defaultMarkerWithHue(
+                                  ^^^^^^^^^^^^^^^^
+lib/features/delivery/multi_stop_screen.dart:225:44: Error: The getter 'BitmapDescriptor' isn't defined for the type '_MultiStopScreenState'.
+ - '_MultiStopScreenState' is from 'package:flota_mobile/features/delivery/multi_stop_screen.dart' ('lib/features/delivery/multi_stop_screen.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'BitmapDescriptor'.
+                              e.key == 0 ? BitmapDescriptor.hueAzure : BitmapDescriptor.hueRed,
+                                           ^^^^^^^^^^^^^^^^
+lib/features/delivery/multi_stop_screen.dart:225:72: Error: The getter 'BitmapDescriptor' isn't defined for the type '_MultiStopScreenState'.
+ - '_MultiStopScreenState' is from 'package:flota_mobile/features/delivery/multi_stop_screen.dart' ('lib/features/delivery/multi_stop_screen.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'BitmapDescriptor'.
+                              e.key == 0 ? BitmapDescriptor.hueAzure : BitmapDescriptor.hueRed,
+                                                                       ^^^^^^^^^^^^^^^^
+lib/features/delivery/multi_stop_screen.dart:233:17: Error: The method 'Positioned' isn't defined for the type '_MultiStopScreenState'.
+ - '_MultiStopScreenState' is from 'package:flota_mobile/features/delivery/multi_stop_screen.dart' ('lib/features/delivery/multi_stop_screen.dart').
+Try correcting the name to the name of an existing method, or defining a method named 'Positioned'.
+                Positioned(
+                ^^^^^^^^^^
+lib/features/delivery/multi_stop_screen.dart:236:26: Error: The method 'Container' isn't defined for the type '_MultiStopScreenState'.
+ - '_MultiStopScreenState' is from 'package:flota_mobile/features/delivery/multi_stop_screen.dart' ('lib/features/delivery/multi_stop_screen.dart').
+Try correcting the name to the name of an existing method, or defining a method named 'Container'.
+                  child: Container(
+                         ^^^^^^^^^
+lib/features/delivery/multi_stop_screen.dart:238:33: Error: The method 'BoxDecoration' isn't defined for the type '_MultiStopScreenState'.
+ - '_MultiStopScreenState' is from 'package:flota_mobile/features/delivery/multi_stop_screen.dart' ('lib/features/delivery/multi_stop_screen.dart').
+Try correcting the name to the name of an existing method, or defining a method named 'BoxDecoration'.
+                    decoration: BoxDecoration(
+                                ^^^^^^^^^^^^^
+lib/features/delivery/multi_stop_screen.dart:239:30: Error: The getter 'Colors' isn't defined for the type '_MultiStopScreenState'.
+ - '_MultiStopScreenState' is from 'package:flota_mobile/features/delivery/multi_stop_screen.dart' ('lib/features/delivery/multi_stop_screen.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'Colors'.
+                      color: Colors.white,
+                             ^^^^^^
+lib/features/delivery/multi_stop_screen.dart:240:37: Error: The getter 'BorderRadius' isn't defined for the type '_MultiStopScreenState'.
+ - '_MultiStopScreenState' is from 'package:flota_mobile/features/delivery/multi_stop_screen.dart' ('lib/features/delivery/multi_stop_screen.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'BorderRadius'.
+                      borderRadius: BorderRadius.circular(20),
+                                    ^^^^^^^^^^^^
+lib/features/delivery/multi_stop_screen.dart:242:25: Error: The method 'BoxShadow' isn't defined for the type '_MultiStopScreenState'.
+ - '_MultiStopScreenState' is from 'package:flota_mobile/features/delivery/multi_stop_screen.dart' ('lib/features/delivery/multi_stop_screen.dart').
+Try correcting the name to the name of an existing method, or defining a method named 'BoxShadow'.
+                        BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 4),
+                        ^^^^^^^^^
+lib/features/delivery/multi_stop_screen.dart:242:42: Error: The getter 'Colors' isn't defined for the type '_MultiStopScreenState'.
+ - '_MultiStopScreenState' is from 'package:flota_mobile/features/delivery/multi_stop_screen.dart' ('lib/features/delivery/multi_stop_screen.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'Colors'.
+                        BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 4),
+                                         ^^^^^^
+lib/features/delivery/multi_stop_screen.dart:245:28: Error: The method 'Row' isn't defined for the type '_MultiStopScreenState'.
+ - '_MultiStopScreenState' is from 'package:flota_mobile/features/delivery/multi_stop_screen.dart' ('lib/features/delivery/multi_stop_screen.dart').
+Try correcting the name to the name of an existing method, or defining a method named 'Row'.
+                    child: Row(
+                           ^^^
+lib/features/delivery/multi_stop_screen.dart:246:37: Error: The getter 'MainAxisSize' isn't defined for the type '_MultiStopScreenState'.
+ - '_MultiStopScreenState' is from 'package:flota_mobile/features/delivery/multi_stop_screen.dart' ('lib/features/delivery/multi_stop_screen.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'MainAxisSize'.
+                      mainAxisSize: MainAxisSize.min,
+                                    ^^^^^^^^^^^^
+lib/features/delivery/multi_stop_screen.dart:250:25: Error: The method 'Text' isn't defined for the type '_MultiStopScreenState'.
+ - '_MultiStopScreenState' is from 'package:flota_mobile/features/delivery/multi_stop_screen.dart' ('lib/features/delivery/multi_stop_screen.dart').
+Try correcting the name to the name of an existing method, or defining a method named 'Text'.
+                        Text(
+                        ^^^^
+lib/features/delivery/multi_stop_screen.dart:252:34: Error: The getter 'GoogleFonts' isn't defined for the type '_MultiStopScreenState'.
+ - '_MultiStopScreenState' is from 'package:flota_mobile/features/delivery/multi_stop_screen.dart' ('lib/features/delivery/multi_stop_screen.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'GoogleFonts'.
+                          style: GoogleFonts.outfit(
+                                 ^^^^^^^^^^^
+lib/features/delivery/multi_stop_screen.dart:253:41: Error: The getter 'FontWeight' isn't defined for the type '_MultiStopScreenState'.
+ - '_MultiStopScreenState' is from 'package:flota_mobile/features/delivery/multi_stop_screen.dart' ('lib/features/delivery/multi_stop_screen.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'FontWeight'.
+                            fontWeight: FontWeight.bold,
+                                        ^^^^^^^^^^
+lib/features/delivery/multi_stop_screen.dart:254:36: Error: The getter 'AppTheme' isn't defined for the type '_MultiStopScreenState'.
+ - '_MultiStopScreenState' is from 'package:flota_mobile/features/delivery/multi_stop_screen.dart' ('lib/features/delivery/multi_stop_screen.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'AppTheme'.
+                            color: AppTheme.successGreen,
+                                   ^^^^^^^^
+lib/features/delivery/multi_stop_screen.dart:267:11: Error: The method 'Expanded' isn't defined for the type '_MultiStopScreenState'.
+ - '_MultiStopScreenState' is from 'package:flota_mobile/features/delivery/multi_stop_screen.dart' ('lib/features/delivery/multi_stop_screen.dart').
+Try correcting the name to the name of an existing method, or defining a method named 'Expanded'.
+          Expanded(
+          ^^^^^^^^
+lib/features/delivery/multi_stop_screen.dart:268:20: Error: The getter 'ReorderableListView' isn't defined for the type '_MultiStopScreenState'.
+ - '_MultiStopScreenState' is from 'package:flota_mobile/features/delivery/multi_stop_screen.dart' ('lib/features/delivery/multi_stop_screen.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'ReorderableListView'.
+            child: ReorderableListView.builder(
+                   ^^^^^^^^^^^^^^^^^^^
+lib/features/delivery/multi_stop_screen.dart:287:24: Error: The method 'Container' isn't defined for the type '_MultiStopScreenState'.
+ - '_MultiStopScreenState' is from 'package:flota_mobile/features/delivery/multi_stop_screen.dart' ('lib/features/delivery/multi_stop_screen.dart').
+Try correcting the name to the name of an existing method, or defining a method named 'Container'.
+                return Container(
+                       ^^^^^^^^^
+lib/features/delivery/multi_stop_screen.dart:288:24: Error: The method 'ValueKey' isn't defined for the type '_MultiStopScreenState'.
+ - '_MultiStopScreenState' is from 'package:flota_mobile/features/delivery/multi_stop_screen.dart' ('lib/features/delivery/multi_stop_screen.dart').
+Try correcting the name to the name of an existing method, or defining a method named 'ValueKey'.
+                  key: ValueKey(stop),
+                       ^^^^^^^^
+lib/features/delivery/multi_stop_screen.dart:290:31: Error: The method 'BoxDecoration' isn't defined for the type '_MultiStopScreenState'.
+ - '_MultiStopScreenState' is from 'package:flota_mobile/features/delivery/multi_stop_screen.dart' ('lib/features/delivery/multi_stop_screen.dart').
+Try correcting the name to the name of an existing method, or defining a method named 'BoxDecoration'.
+                  decoration: BoxDecoration(
+                              ^^^^^^^^^^^^^
+lib/features/delivery/multi_stop_screen.dart:291:28: Error: The getter 'Colors' isn't defined for the type '_MultiStopScreenState'.
+ - '_MultiStopScreenState' is from 'package:flota_mobile/features/delivery/multi_stop_screen.dart' ('lib/features/delivery/multi_stop_screen.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'Colors'.
+                    color: Colors.white,
+                           ^^^^^^
+lib/features/delivery/multi_stop_screen.dart:292:35: Error: The getter 'BorderRadius' isn't defined for the type '_MultiStopScreenState'.
+ - '_MultiStopScreenState' is from 'package:flota_mobile/features/delivery/multi_stop_screen.dart' ('lib/features/delivery/multi_stop_screen.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'BorderRadius'.
+                    borderRadius: BorderRadius.circular(16),
+                                  ^^^^^^^^^^^^
+lib/features/delivery/multi_stop_screen.dart:293:29: Error: The getter 'Border' isn't defined for the type '_MultiStopScreenState'.
+ - '_MultiStopScreenState' is from 'package:flota_mobile/features/delivery/multi_stop_screen.dart' ('lib/features/delivery/multi_stop_screen.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'Border'.
+                    border: Border.all(
+                            ^^^^^^
+lib/features/delivery/multi_stop_screen.dart:294:41: Error: The getter 'AppTheme' isn't defined for the type '_MultiStopScreenState'.
+ - '_MultiStopScreenState' is from 'package:flota_mobile/features/delivery/multi_stop_screen.dart' ('lib/features/delivery/multi_stop_screen.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'AppTheme'.
+                      color: isFilled ? AppTheme.primaryBlue.withOpacity(0.1) : Colors.transparent,
+                                        ^^^^^^^^
+lib/features/delivery/multi_stop_screen.dart:294:81: Error: The getter 'Colors' isn't defined for the type '_MultiStopScreenState'.
+ - '_MultiStopScreenState' is from 'package:flota_mobile/features/delivery/multi_stop_screen.dart' ('lib/features/delivery/multi_stop_screen.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'Colors'.
+                      color: isFilled ? AppTheme.primaryBlue.withOpacity(0.1) : Colors.transparent,
+                                                                                ^^^^^^
+lib/features/delivery/multi_stop_screen.dart:297:23: Error: The method 'BoxShadow' isn't defined for the type '_MultiStopScreenState'.
+ - '_MultiStopScreenState' is from 'package:flota_mobile/features/delivery/multi_stop_screen.dart' ('lib/features/delivery/multi_stop_screen.dart').
+Try correcting the name to the name of an existing method, or defining a method named 'BoxShadow'.
+                      BoxShadow(
+                      ^^^^^^^^^
+lib/features/delivery/multi_stop_screen.dart:298:32: Error: The getter 'Colors' isn't defined for the type '_MultiStopScreenState'.
+ - '_MultiStopScreenState' is from 'package:flota_mobile/features/delivery/multi_stop_screen.dart' ('lib/features/delivery/multi_stop_screen.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'Colors'.
+                        color: Colors.black.withOpacity(0.03),
+                               ^^^^^^
+lib/features/delivery/multi_stop_screen.dart:304:26: Error: The method 'ListTile' isn't defined for the type '_MultiStopScreenState'.
+ - '_MultiStopScreenState' is from 'package:flota_mobile/features/delivery/multi_stop_screen.dart' ('lib/features/delivery/multi_stop_screen.dart').
+Try correcting the name to the name of an existing method, or defining a method named 'ListTile'.
+                  child: ListTile(
+                         ^^^^^^^^
+lib/features/delivery/multi_stop_screen.dart:307:28: Error: The method 'Text' isn't defined for the type '_MultiStopScreenState'.
+ - '_MultiStopScreenState' is from 'package:flota_mobile/features/delivery/multi_stop_screen.dart' ('lib/features/delivery/multi_stop_screen.dart').
+Try correcting the name to the name of an existing method, or defining a method named 'Text'.
+                    title: Text(
+                           ^^^^
+lib/features/delivery/multi_stop_screen.dart:309:30: Error: The getter 'GoogleFonts' isn't defined for the type '_MultiStopScreenState'.
+ - '_MultiStopScreenState' is from 'package:flota_mobile/features/delivery/multi_stop_screen.dart' ('lib/features/delivery/multi_stop_screen.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'GoogleFonts'.
+                      style: GoogleFonts.outfit(
+                             ^^^^^^^^^^^
+lib/features/delivery/multi_stop_screen.dart:310:48: Error: The getter 'FontWeight' isn't defined for the type '_MultiStopScreenState'.
+ - '_MultiStopScreenState' is from 'package:flota_mobile/features/delivery/multi_stop_screen.dart' ('lib/features/delivery/multi_stop_screen.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'FontWeight'.
+                        fontWeight: isFilled ? FontWeight.w600 : FontWeight.w400,
+                                               ^^^^^^^^^^
+lib/features/delivery/multi_stop_screen.dart:310:66: Error: The getter 'FontWeight' isn't defined for the type '_MultiStopScreenState'.
+ - '_MultiStopScreenState' is from 'package:flota_mobile/features/delivery/multi_stop_screen.dart' ('lib/features/delivery/multi_stop_screen.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'FontWeight'.
+                        fontWeight: isFilled ? FontWeight.w600 : FontWeight.w400,
+                                                                 ^^^^^^^^^^
+lib/features/delivery/multi_stop_screen.dart:311:43: Error: The getter 'AppTheme' isn't defined for the type '_MultiStopScreenState'.
+ - '_MultiStopScreenState' is from 'package:flota_mobile/features/delivery/multi_stop_screen.dart' ('lib/features/delivery/multi_stop_screen.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'AppTheme'.
+                        color: isFilled ? AppTheme.textPrimary : Colors.grey[400],
+                                          ^^^^^^^^
+lib/features/delivery/multi_stop_screen.dart:311:66: Error: The getter 'Colors' isn't defined for the type '_MultiStopScreenState'.
+ - '_MultiStopScreenState' is from 'package:flota_mobile/features/delivery/multi_stop_screen.dart' ('lib/features/delivery/multi_stop_screen.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'Colors'.
+                        color: isFilled ? AppTheme.textPrimary : Colors.grey[400],
+                                                                 ^^^^^^
+lib/features/delivery/multi_stop_screen.dart:314:33: Error: The getter 'TextOverflow' isn't defined for the type '_MultiStopScreenState'.
+ - '_MultiStopScreenState' is from 'package:flota_mobile/features/delivery/multi_stop_screen.dart' ('lib/features/delivery/multi_stop_screen.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'TextOverflow'.
+                      overflow: TextOverflow.ellipsis,
+                                ^^^^^^^^^^^^
+lib/features/delivery/multi_stop_screen.dart:316:31: Error: The method 'Text' isn't defined for the type '_MultiStopScreenState'.
+ - '_MultiStopScreenState' is from 'package:flota_mobile/features/delivery/multi_stop_screen.dart' ('lib/features/delivery/multi_stop_screen.dart').
+Try correcting the name to the name of an existing method, or defining a method named 'Text'.
+                    subtitle: Text(
+                              ^^^^
+lib/features/delivery/multi_stop_screen.dart:318:30: Error: The method 'TextStyle' isn't defined for the type '_MultiStopScreenState'.
+ - '_MultiStopScreenState' is from 'package:flota_mobile/features/delivery/multi_stop_screen.dart' ('lib/features/delivery/multi_stop_screen.dart').
+Try correcting the name to the name of an existing method, or defining a method named 'TextStyle'.
+                      style: TextStyle(color: isPickup ? AppTheme.primaryBlue : Colors.grey[500], fontSize: 11),
+                             ^^^^^^^^^
+lib/features/delivery/multi_stop_screen.dart:318:58: Error: The getter 'AppTheme' isn't defined for the type '_MultiStopScreenState'.
+ - '_MultiStopScreenState' is from 'package:flota_mobile/features/delivery/multi_stop_screen.dart' ('lib/features/delivery/multi_stop_screen.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'AppTheme'.
+                      style: TextStyle(color: isPickup ? AppTheme.primaryBlue : Colors.grey[500], fontSize: 11),
+                                                         ^^^^^^^^
+lib/features/delivery/multi_stop_screen.dart:318:81: Error: The getter 'Colors' isn't defined for the type '_MultiStopScreenState'.
+ - '_MultiStopScreenState' is from 'package:flota_mobile/features/delivery/multi_stop_screen.dart' ('lib/features/delivery/multi_stop_screen.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'Colors'.
+                      style: TextStyle(color: isPickup ? AppTheme.primaryBlue : Colors.grey[500], fontSize: 11),
+                                                                                ^^^^^^
+lib/features/delivery/multi_stop_screen.dart:320:31: Error: The method 'Row' isn't defined for the type '_MultiStopScreenState'.
+ - '_MultiStopScreenState' is from 'package:flota_mobile/features/delivery/multi_stop_screen.dart' ('lib/features/delivery/multi_stop_screen.dart').
+Try correcting the name to the name of an existing method, or defining a method named 'Row'.
+                    trailing: Row(
+                              ^^^
+lib/features/delivery/multi_stop_screen.dart:321:37: Error: The getter 'MainAxisSize' isn't defined for the type '_MultiStopScreenState'.
+ - '_MultiStopScreenState' is from 'package:flota_mobile/features/delivery/multi_stop_screen.dart' ('lib/features/delivery/multi_stop_screen.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'MainAxisSize'.
+                      mainAxisSize: MainAxisSize.min,
+                                    ^^^^^^^^^^^^
+lib/features/delivery/multi_stop_screen.dart:324:27: Error: The method 'IconButton' isn't defined for the type '_MultiStopScreenState'.
+ - '_MultiStopScreenState' is from 'package:flota_mobile/features/delivery/multi_stop_screen.dart' ('lib/features/delivery/multi_stop_screen.dart').
+Try correcting the name to the name of an existing method, or defining a method named 'IconButton'.
+                          IconButton(
+                          ^^^^^^^^^^
+lib/features/delivery/multi_stop_screen.dart:338:11: Error: The method 'Padding' isn't defined for the type '_MultiStopScreenState'.
+ - '_MultiStopScreenState' is from 'package:flota_mobile/features/delivery/multi_stop_screen.dart' ('lib/features/delivery/multi_stop_screen.dart').
+Try correcting the name to the name of an existing method, or defining a method named 'Padding'.
+          Padding(
+          ^^^^^^^
+lib/features/delivery/multi_stop_screen.dart:340:20: Error: The method 'Row' isn't defined for the type '_MultiStopScreenState'.
+ - '_MultiStopScreenState' is from 'package:flota_mobile/features/delivery/multi_stop_screen.dart' ('lib/features/delivery/multi_stop_screen.dart').
+Try correcting the name to the name of an existing method, or defining a method named 'Row'.
+            child: Row(
+                   ^^^
+lib/features/delivery/multi_stop_screen.dart:342:17: Error: The method 'Expanded' isn't defined for the type '_MultiStopScreenState'.
+ - '_MultiStopScreenState' is from 'package:flota_mobile/features/delivery/multi_stop_screen.dart' ('lib/features/delivery/multi_stop_screen.dart').
+Try correcting the name to the name of an existing method, or defining a method named 'Expanded'.
+                Expanded(
+                ^^^^^^^^
+lib/features/delivery/multi_stop_screen.dart:343:26: Error: The getter 'OutlinedButton' isn't defined for the type '_MultiStopScreenState'.
+ - '_MultiStopScreenState' is from 'package:flota_mobile/features/delivery/multi_stop_screen.dart' ('lib/features/delivery/multi_stop_screen.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'OutlinedButton'.
+                  child: OutlinedButton.icon(
+                         ^^^^^^^^^^^^^^
+lib/features/delivery/multi_stop_screen.dart:347:28: Error: The getter 'OutlinedButton' isn't defined for the type '_MultiStopScreenState'.
+ - '_MultiStopScreenState' is from 'package:flota_mobile/features/delivery/multi_stop_screen.dart' ('lib/features/delivery/multi_stop_screen.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'OutlinedButton'.
+                    style: OutlinedButton.styleFrom(
+                           ^^^^^^^^^^^^^^
+lib/features/delivery/multi_stop_screen.dart:350:30: Error: The method 'RoundedRectangleBorder' isn't defined for the type '_MultiStopScreenState'.
+ - '_MultiStopScreenState' is from 'package:flota_mobile/features/delivery/multi_stop_screen.dart' ('lib/features/delivery/multi_stop_screen.dart').
+Try correcting the name to the name of an existing method, or defining a method named 'RoundedRectangleBorder'.
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                             ^^^^^^^^^^^^^^^^^^^^^^
+lib/features/delivery/multi_stop_screen.dart:350:67: Error: The getter 'BorderRadius' isn't defined for the type '_MultiStopScreenState'.
+ - '_MultiStopScreenState' is from 'package:flota_mobile/features/delivery/multi_stop_screen.dart' ('lib/features/delivery/multi_stop_screen.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'BorderRadius'.
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                                                  ^^^^^^^^^^^^
+lib/features/delivery/multi_stop_screen.dart:359:11: Error: The method 'Container' isn't defined for the type '_MultiStopScreenState'.
+ - '_MultiStopScreenState' is from 'package:flota_mobile/features/delivery/multi_stop_screen.dart' ('lib/features/delivery/multi_stop_screen.dart').
+Try correcting the name to the name of an existing method, or defining a method named 'Container'.
+          Container(
+          ^^^^^^^^^
+lib/features/delivery/multi_stop_screen.dart:361:25: Error: The method 'BoxDecoration' isn't defined for the type '_MultiStopScreenState'.
+ - '_MultiStopScreenState' is from 'package:flota_mobile/features/delivery/multi_stop_screen.dart' ('lib/features/delivery/multi_stop_screen.dart').
+Try correcting the name to the name of an existing method, or defining a method named 'BoxDecoration'.
+            decoration: BoxDecoration(
+                        ^^^^^^^^^^^^^
+lib/features/delivery/multi_stop_screen.dart:362:22: Error: The getter 'Colors' isn't defined for the type '_MultiStopScreenState'.
+ - '_MultiStopScreenState' is from 'package:flota_mobile/features/delivery/multi_stop_screen.dart' ('lib/features/delivery/multi_stop_screen.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'Colors'.
+              color: Colors.white,
+                     ^^^^^^
+lib/features/delivery/multi_stop_screen.dart:365:17: Error: The method 'BoxShadow' isn't defined for the type '_MultiStopScreenState'.
+ - '_MultiStopScreenState' is from 'package:flota_mobile/features/delivery/multi_stop_screen.dart' ('lib/features/delivery/multi_stop_screen.dart').
+Try correcting the name to the name of an existing method, or defining a method named 'BoxShadow'.
+                BoxShadow(
+                ^^^^^^^^^
+lib/features/delivery/multi_stop_screen.dart:366:26: Error: The getter 'Colors' isn't defined for the type '_MultiStopScreenState'.
+ - '_MultiStopScreenState' is from 'package:flota_mobile/features/delivery/multi_stop_screen.dart' ('lib/features/delivery/multi_stop_screen.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'Colors'.
+                  color: Colors.black.withOpacity(0.05),
+                         ^^^^^^
+lib/features/delivery/multi_stop_screen.dart:372:20: Error: The method 'Column' isn't defined for the type '_MultiStopScreenState'.
+ - '_MultiStopScreenState' is from 'package:flota_mobile/features/delivery/multi_stop_screen.dart' ('lib/features/delivery/multi_stop_screen.dart').
+Try correcting the name to the name of an existing method, or defining a method named 'Column'.
+            child: Column(
+                   ^^^^^^
+lib/features/delivery/multi_stop_screen.dart:374:17: Error: The method 'Row' isn't defined for the type '_MultiStopScreenState'.
+ - '_MultiStopScreenState' is from 'package:flota_mobile/features/delivery/multi_stop_screen.dart' ('lib/features/delivery/multi_stop_screen.dart').
+Try correcting the name to the name of an existing method, or defining a method named 'Row'.
+                Row(
+                ^^^
+lib/features/delivery/multi_stop_screen.dart:375:38: Error: The getter 'MainAxisAlignment' isn't defined for the type '_MultiStopScreenState'.
+ - '_MultiStopScreenState' is from 'package:flota_mobile/features/delivery/multi_stop_screen.dart' ('lib/features/delivery/multi_stop_screen.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'MainAxisAlignment'.
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                     ^^^^^^^^^^^^^^^^^
+lib/features/delivery/multi_stop_screen.dart:377:21: Error: The method 'Column' isn't defined for the type '_MultiStopScreenState'.
+ - '_MultiStopScreenState' is from 'package:flota_mobile/features/delivery/multi_stop_screen.dart' ('lib/features/delivery/multi_stop_screen.dart').
+Try correcting the name to the name of an existing method, or defining a method named 'Column'.
+                    Column(
+                    ^^^^^^
+lib/features/delivery/multi_stop_screen.dart:378:43: Error: The getter 'CrossAxisAlignment' isn't defined for the type '_MultiStopScreenState'.
+ - '_MultiStopScreenState' is from 'package:flota_mobile/features/delivery/multi_stop_screen.dart' ('lib/features/delivery/multi_stop_screen.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'CrossAxisAlignment'.
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                                          ^^^^^^^^^^^^^^^^^^
+lib/features/delivery/multi_stop_screen.dart:380:25: Error: The method 'Text' isn't defined for the type '_MultiStopScreenState'.
+ - '_MultiStopScreenState' is from 'package:flota_mobile/features/delivery/multi_stop_screen.dart' ('lib/features/delivery/multi_stop_screen.dart').
+Try correcting the name to the name of an existing method, or defining a method named 'Text'.
+                        Text(
+                        ^^^^
+lib/features/delivery/multi_stop_screen.dart:382:34: Error: The getter 'GoogleFonts' isn't defined for the type '_MultiStopScreenState'.
+ - '_MultiStopScreenState' is from 'package:flota_mobile/features/delivery/multi_stop_screen.dart' ('lib/features/delivery/multi_stop_screen.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'GoogleFonts'.
+                          style: GoogleFonts.outfit(color: Colors.grey[600], fontSize: 14),
+                                 ^^^^^^^^^^^
+lib/features/delivery/multi_stop_screen.dart:382:60: Error: The getter 'Colors' isn't defined for the type '_MultiStopScreenState'.
+ - '_MultiStopScreenState' is from 'package:flota_mobile/features/delivery/multi_stop_screen.dart' ('lib/features/delivery/multi_stop_screen.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'Colors'.
+                          style: GoogleFonts.outfit(color: Colors.grey[600], fontSize: 14),
+                                                           ^^^^^^
+lib/features/delivery/multi_stop_screen.dart:385:25: Error: The method 'Text' isn't defined for the type '_MultiStopScreenState'.
+ - '_MultiStopScreenState' is from 'package:flota_mobile/features/delivery/multi_stop_screen.dart' ('lib/features/delivery/multi_stop_screen.dart').
+Try correcting the name to the name of an existing method, or defining a method named 'Text'.
+                        Text(
+                        ^^^^
+lib/features/delivery/multi_stop_screen.dart:387:34: Error: The getter 'GoogleFonts' isn't defined for the type '_MultiStopScreenState'.
+ - '_MultiStopScreenState' is from 'package:flota_mobile/features/delivery/multi_stop_screen.dart' ('lib/features/delivery/multi_stop_screen.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'GoogleFonts'.
+                          style: GoogleFonts.outfit(
+                                 ^^^^^^^^^^^
+lib/features/delivery/multi_stop_screen.dart:389:41: Error: The getter 'FontWeight' isn't defined for the type '_MultiStopScreenState'.
+ - '_MultiStopScreenState' is from 'package:flota_mobile/features/delivery/multi_stop_screen.dart' ('lib/features/delivery/multi_stop_screen.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'FontWeight'.
+                            fontWeight: FontWeight.bold,
+                                        ^^^^^^^^^^
+lib/features/delivery/multi_stop_screen.dart:390:36: Error: The getter 'AppTheme' isn't defined for the type '_MultiStopScreenState'.
+ - '_MultiStopScreenState' is from 'package:flota_mobile/features/delivery/multi_stop_screen.dart' ('lib/features/delivery/multi_stop_screen.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'AppTheme'.
+                            color: AppTheme.primaryBlue,
+                                   ^^^^^^^^
+lib/features/delivery/multi_stop_screen.dart:395:21: Error: The method 'ElevatedButton' isn't defined for the type '_MultiStopScreenState'.
+ - '_MultiStopScreenState' is from 'package:flota_mobile/features/delivery/multi_stop_screen.dart' ('lib/features/delivery/multi_stop_screen.dart').
+Try correcting the name to the name of an existing method, or defining a method named 'ElevatedButton'.
+                    ElevatedButton(
+                    ^^^^^^^^^^^^^^
+lib/features/delivery/multi_stop_screen.dart:431:35: Error: The getter 'ScaffoldMessenger' isn't defined for the type '_MultiStopScreenState'.
+ - '_MultiStopScreenState' is from 'package:flota_mobile/features/delivery/multi_stop_screen.dart' ('lib/features/delivery/multi_stop_screen.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'ScaffoldMessenger'.
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                  ^^^^^^^^^^^^^^^^^
+lib/features/delivery/multi_stop_screen.dart:432:37: Error: The method 'SnackBar' isn't defined for the type '_MultiStopScreenState'.
+ - '_MultiStopScreenState' is from 'package:flota_mobile/features/delivery/multi_stop_screen.dart' ('lib/features/delivery/multi_stop_screen.dart').
+Try correcting the name to the name of an existing method, or defining a method named 'SnackBar'.
+                                    SnackBar(content: Text('Order failed: $e')),
+                                    ^^^^^^^^
+lib/features/delivery/multi_stop_screen.dart:432:55: Error: The method 'Text' isn't defined for the type '_MultiStopScreenState'.
+ - '_MultiStopScreenState' is from 'package:flota_mobile/features/delivery/multi_stop_screen.dart' ('lib/features/delivery/multi_stop_screen.dart').
+Try correcting the name to the name of an existing method, or defining a method named 'Text'.
+                                    SnackBar(content: Text('Order failed: $e')),
+                                                      ^^^^
+lib/features/delivery/multi_stop_screen.dart:438:30: Error: The getter 'ElevatedButton' isn't defined for the type '_MultiStopScreenState'.
+ - '_MultiStopScreenState' is from 'package:flota_mobile/features/delivery/multi_stop_screen.dart' ('lib/features/delivery/multi_stop_screen.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'ElevatedButton'.
+                      style: ElevatedButton.styleFrom(
+                             ^^^^^^^^^^^^^^
+lib/features/delivery/multi_stop_screen.dart:439:42: Error: The getter 'AppTheme' isn't defined for the type '_MultiStopScreenState'.
+ - '_MultiStopScreenState' is from 'package:flota_mobile/features/delivery/multi_stop_screen.dart' ('lib/features/delivery/multi_stop_screen.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'AppTheme'.
+                        backgroundColor: AppTheme.primaryBlue,
+                                         ^^^^^^^^
+lib/features/delivery/multi_stop_screen.dart:440:42: Error: The getter 'Colors' isn't defined for the type '_MultiStopScreenState'.
+ - '_MultiStopScreenState' is from 'package:flota_mobile/features/delivery/multi_stop_screen.dart' ('lib/features/delivery/multi_stop_screen.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'Colors'.
+                        foregroundColor: Colors.white,
+                                         ^^^^^^
+lib/features/delivery/multi_stop_screen.dart:442:32: Error: The method 'RoundedRectangleBorder' isn't defined for the type '_MultiStopScreenState'.
+ - '_MultiStopScreenState' is from 'package:flota_mobile/features/delivery/multi_stop_screen.dart' ('lib/features/delivery/multi_stop_screen.dart').
+Try correcting the name to the name of an existing method, or defining a method named 'RoundedRectangleBorder'.
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                               ^^^^^^^^^^^^^^^^^^^^^^
+lib/features/delivery/multi_stop_screen.dart:442:69: Error: The getter 'BorderRadius' isn't defined for the type '_MultiStopScreenState'.
+ - '_MultiStopScreenState' is from 'package:flota_mobile/features/delivery/multi_stop_screen.dart' ('lib/features/delivery/multi_stop_screen.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'BorderRadius'.
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                                                                    ^^^^^^^^^^^^
+lib/features/delivery/multi_stop_screen.dart:444:38: Error: The getter 'AppTheme' isn't defined for the type '_MultiStopScreenState'.
+ - '_MultiStopScreenState' is from 'package:flota_mobile/features/delivery/multi_stop_screen.dart' ('lib/features/delivery/multi_stop_screen.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'AppTheme'.
+                        shadowColor: AppTheme.primaryBlue.withOpacity(0.4),
+                                     ^^^^^^^^
+lib/features/delivery/multi_stop_screen.dart:448:27: Error: The method 'Text' isn't defined for the type '_MultiStopScreenState'.
+ - '_MultiStopScreenState' is from 'package:flota_mobile/features/delivery/multi_stop_screen.dart' ('lib/features/delivery/multi_stop_screen.dart').
+Try correcting the name to the name of an existing method, or defining a method named 'Text'.
+                        : Text(
+                          ^^^^
+lib/features/delivery/multi_stop_screen.dart:450:36: Error: The getter 'GoogleFonts' isn't defined for the type '_MultiStopScreenState'.
+ - '_MultiStopScreenState' is from 'package:flota_mobile/features/delivery/multi_stop_screen.dart' ('lib/features/delivery/multi_stop_screen.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'GoogleFonts'.
+                            style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold),
+                                   ^^^^^^^^^^^
+lib/features/delivery/multi_stop_screen.dart:450:81: Error: The getter 'FontWeight' isn't defined for the type '_MultiStopScreenState'.
+ - '_MultiStopScreenState' is from 'package:flota_mobile/features/delivery/multi_stop_screen.dart' ('lib/features/delivery/multi_stop_screen.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'FontWeight'.
+                            style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold),
+                                                                                ^^^^^^^^^^
+lib/features/profile/profile_screen.dart:570:49: Error: Not a constant expression.
+                      'Refer & Earn ${ref.watch(authProvider).currencySymbol}10',
+                                                ^^^^^^^^^^^^
+lib/features/profile/profile_screen.dart:570:39: Error: Not a constant expression.
+                      'Refer & Earn ${ref.watch(authProvider).currencySymbol}10',
+                                      ^^^
+lib/features/profile/profile_screen.dart:570:43: Error: Method invocation is not a constant expression.
+                      'Refer & Earn ${ref.watch(authProvider).currencySymbol}10',
+                                          ^^^^^
+lib/features/wallet/wallet_screen.dart:270:49: Error: Not a constant expression.
+                labelText: "Amount (${ref.watch(authProvider).currencySymbol})",
+                                                ^^^^^^^^^^^^
+lib/features/wallet/wallet_screen.dart:270:39: Error: Not a constant expression.
+                labelText: "Amount (${ref.watch(authProvider).currencySymbol})",
+                                      ^^^
+lib/features/wallet/wallet_screen.dart:270:43: Error: Method invocation is not a constant expression.
+                labelText: "Amount (${ref.watch(authProvider).currencySymbol})",
+                                          ^^^^^
+lib/features/wallet/wallet_screen.dart:766:7: Error: Expected ';' after this.
+      ),
+      ^
+lib/features/wallet/wallet_screen.dart:766:8: Error: Expected an identifier, but got ','.
+Try inserting an identifier before ','.
+      ),
+       ^
+lib/features/wallet/wallet_screen.dart:766:8: Error: Unexpected token ';'.
+      ),
+       ^
+lib/features/wallet/wallet_screen.dart:767:83: Error: Expected ';' after this.
+      title: Text(description, style: const TextStyle(fontWeight: FontWeight.w600)),
+                                                                                  ^
+lib/features/wallet/wallet_screen.dart:767:84: Error: Expected an identifier, but got ','.
+Try inserting an identifier before ','.
+      title: Text(description, style: const TextStyle(fontWeight: FontWeight.w600)),
+                                                                                   ^
+lib/features/wallet/wallet_screen.dart:767:84: Error: Unexpected token ';'.
+      title: Text(description, style: const TextStyle(fontWeight: FontWeight.w600)),
+                                                                                   ^
+lib/features/wallet/wallet_screen.dart:768:92: Error: Expected ';' after this.
+      subtitle: Text(formattedDate, style: TextStyle(color: Colors.grey[400], fontSize: 12)),
+                                                                                          ^
+lib/features/wallet/wallet_screen.dart:768:93: Error: Expected an identifier, but got ','.
+Try inserting an identifier before ','.
+      subtitle: Text(formattedDate, style: TextStyle(color: Colors.grey[400], fontSize: 12)),
+                                                                                          ^
+lib/features/wallet/wallet_screen.dart:768:93: Error: Unexpected token ';'.
+      subtitle: Text(formattedDate, style: TextStyle(color: Colors.grey[400], fontSize: 12)),
+                                                                                          ^
+lib/features/wallet/wallet_screen.dart:780:7: Error: Expected ';' after this.
+      ),
+      ^
+lib/features/wallet/wallet_screen.dart:780:8: Error: Expected an identifier, but got ','.
+Try inserting an identifier before ','.
+      ),
+       ^
+lib/features/wallet/wallet_screen.dart:780:8: Error: Unexpected token ';'.
+      ),
+       ^
+lib/features/wallet/wallet_screen.dart:781:5: Error: Expected an identifier, but got ')'.
+Try inserting an identifier before ')'.
+    );
+    ^
+lib/features/wallet/wallet_screen.dart:780:8: Error: Expected ';' after this.
+      ),
+       ^
+lib/features/wallet/wallet_screen.dart:781:5: Error: Unexpected token ';'.
+    );
+    ^
+lib/features/business/presentation/screens/business_dashboard_screen.dart:113:23: Error: The getter 'ref' isn't defined for the type 'BusinessDashboardScreen'.
+ - 'BusinessDashboardScreen' is from 'package:flota_mobile/features/business/presentation/screens/business_dashboard_screen.dart' ('lib/features/business/presentation/screens/business_dashboard_screen.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'ref'.
+            value: '${ref.watch(authProvider).currencySymbol}450.00',
+                      ^^^
+lib/features/business/presentation/screens/billing_screen.dart:96:26: Error: The getter 'authProvider' isn't defined for the type '_BillingScreenState'.
+ - '_BillingScreenState' is from 'package:flota_mobile/features/business/presentation/screens/billing_screen.dart' ('lib/features/business/presentation/screens/billing_screen.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'authProvider'.
+            '${ref.watch(authProvider).currencySymbol}${available.toStringAsFixed(2)}',
+                         ^^^^^^^^^^^^
+lib/features/business/presentation/screens/billing_screen.dart:102:55: Error: The getter 'authProvider' isn't defined for the type '_BillingScreenState'.
+ - '_BillingScreenState' is from 'package:flota_mobile/features/business/presentation/screens/billing_screen.dart' ('lib/features/business/presentation/screens/billing_screen.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'authProvider'.
+              _subMetric('CREDIT LIMIT', '${ref.watch(authProvider).currencySymbol}${limit.toStringAsFixed(2)}'),
+                                                      ^^^^^^^^^^^^
+lib/features/business/presentation/screens/billing_screen.dart:104:54: Error: The getter 'authProvider' isn't defined for the type '_BillingScreenState'.
+ - '_BillingScreenState' is from 'package:flota_mobile/features/business/presentation/screens/billing_screen.dart' ('lib/features/business/presentation/screens/billing_screen.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'authProvider'.
+              _subMetric('OUTSTANDING', '${ref.watch(authProvider).currencySymbol}${balance.toStringAsFixed(2)}'),
+                                                     ^^^^^^^^^^^^
+lib/features/business/presentation/screens/billing_screen.dart:154:23: Error: The getter 'ref' isn't defined for the type '_InvoiceItem'.
+ - '_InvoiceItem' is from 'package:flota_mobile/features/business/presentation/screens/billing_screen.dart' ('lib/features/business/presentation/screens/billing_screen.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'ref'.
+              Text('${ref.watch(authProvider).currencySymbol}${invoice['amount'].toStringAsFixed(2)}', style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 16)),
+                      ^^^
+lib/features/business/presentation/screens/billing_screen.dart:154:33: Error: The getter 'authProvider' isn't defined for the type '_InvoiceItem'.
+ - '_InvoiceItem' is from 'package:flota_mobile/features/business/presentation/screens/billing_screen.dart' ('lib/features/business/presentation/screens/billing_screen.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'authProvider'.
+              Text('${ref.watch(authProvider).currencySymbol}${invoice['amount'].toStringAsFixed(2)}', style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 16)),
+                                ^^^^^^^^^^^^
+lib/features/wallet/transaction_list_screen.dart:118:39: Error: The getter 'ref' isn't defined for the type '_TransactionTile'.
+ - '_TransactionTile' is from 'package:flota_mobile/features/wallet/transaction_list_screen.dart' ('lib/features/wallet/transaction_list_screen.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'ref'.
+            '${isCredit ? '+' : '-'}${ref.read(authProvider).currencySymbol}${amount.abs().toStringAsFixed(2)}',
+                                      ^^^
+lib/features/wallet/transaction_list_screen.dart:118:48: Error: The getter 'authProvider' isn't defined for the type '_TransactionTile'.
+ - '_TransactionTile' is from 'package:flota_mobile/features/wallet/transaction_list_screen.dart' ('lib/features/wallet/transaction_list_screen.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'authProvider'.
+            '${isCredit ? '+' : '-'}${ref.read(authProvider).currencySymbol}${amount.abs().toStringAsFixed(2)}',
+                                               ^^^^^^^^^^^^
+Target kernel_snapshot_program failed: Exception
+
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':app:compileFlutterBuildRelease'.
+> Process 'command 'C:\FlutterVersions\flutter\bin\flutter.bat'' finished with non-zero exit value 1
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.
+
+BUILD FAILED in 32s
+Running Gradle task 'assembleRelease'...                           33.3s
+Gradle task assembleRelease failed with exit code 1
