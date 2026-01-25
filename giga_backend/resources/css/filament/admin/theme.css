@@ -18,15 +18,16 @@
     --color-primary-950: 30 27 75;
 }
 
-/* Giga Command Center - High Visibility Branding Overhaul */
+/* Giga Command Center - The "Wow" Branding Overhaul */
 
 :root {
     --giga-blue: #0047C1;
     --giga-red: #D32F2F;
-    --giga-bg: #F8FAFC;
-    --giga-border: #94A3B8; /* Stronger border color */
+    --giga-bg: #F0F4F8;
+    --giga-border: #94A3B8;
     --giga-text: #0F172A;
     --giga-sidebar-bg: #FFFFFF;
+    --giga-glow: rgba(0, 71, 193, 0.4);
 }
 
 /* Main background - Clean & Solid */
@@ -35,39 +36,43 @@
     background-image: none !important;
 }
 
-/* Sidebar Styling - Sharp & Clear */
+/* Sidebar Styling - Command Station Feel */
 .fi-sidebar {
     background: var(--giga-sidebar-bg) !important;
-    border-right: 2px solid var(--giga-blue) !important;
+    border-right: 3px solid var(--giga-blue) !important;
 }
 
-/* Navigation - Team Branding */
+/* Navigation - High Contrast Branding */
 .fi-sidebar-nav .fi-sidebar-item {
-    margin: 6px 12px !important;
-    border-radius: 8px !important;
+    margin: 8px 14px !important;
+    border-radius: 10px !important;
+    transition: all 0.3s ease !important;
 }
 
 .fi-sidebar-nav .fi-sidebar-item-active {
-    background: rgba(0, 71, 193, 0.1) !important;
-    border-left: 4px solid var(--giga-blue) !important;
+    background: var(--giga-blue) !important;
 }
 
 .fi-sidebar-nav .fi-sidebar-item-active span {
-    color: var(--giga-blue) !important;
-    font-weight: 700 !important;
+    color: #FFFFFF !important;
+    font-weight: 800 !important;
 }
 
-/* ALL BUTTONS - GIGA BLUE (AS REQUESTED) */
+.fi-sidebar-nav .fi-sidebar-item-active .fi-sidebar-item-icon {
+    color: #FFFFFF !important;
+}
+
+/* ALL BUTTONS - SOLID GIGA BLUE */
 .fi-btn {
-    border-radius: 8px !important;
-    font-weight: 800 !important;
+    border-radius: 10px !important;
+    font-weight: 900 !important;
     text-transform: uppercase !important;
-    letter-spacing: 0.5px !important;
+    letter-spacing: 0.8px !important;
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
     border: 2px solid transparent !important;
 }
 
-/* Force ALL primary, secondary, and standard buttons to Giga Blue */
+/* Force primary and gray buttons to Giga Blue */
 .fi-btn-primary,
 .fi-btn-color-primary,
 .fi-btn-color-gray,
@@ -75,92 +80,118 @@
 .fi-ac-action[data-color="gray"] {
     background: var(--giga-blue) !important;
     color: #FFFFFF !important;
-    box-shadow: 0 4px 6px -1px rgba(0, 71, 193, 0.2), 0 2px 4px -2px rgba(0, 71, 193, 0.1) !important;
+    box-shadow: 0 4px 12px var(--giga-glow) !important;
 }
 
 .fi-btn:hover {
-    transform: translateY(-2px) !important;
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1) !important;
+    transform: translateY(-3px) scale(1.02) !important;
+    box-shadow: 0 8px 20px var(--giga-glow) !important;
 }
 
-/* Special case for Cancel/Gray buttons - subtly different but still visible */
-.fi-btn-color-gray:hover {
-    background: #003796 !important;
-}
-
-/* Danger buttons still keep Giga Red for warning */
+/* DANGER BUTTONS - GIGA RED */
 .fi-btn-color-danger,
 .fi-ac-action[data-color="danger"] {
     background: var(--giga-red) !important;
     color: #FFFFFF !important;
+    box-shadow: 0 4px 12px rgba(211, 47, 47, 0.4) !important;
 }
 
-/* INPUT FIELDS - SUPER VISIBLE & CLICKABLE */
+.fi-btn-color-danger:hover {
+    box-shadow: 0 8px 20px rgba(211, 47, 47, 0.5) !important;
+}
+
+/* FORMS - ULTRA VISIBLE & ACCURATE */
 .fi-input {
-    border: 2px solid var(--giga-border) !important;
-    border-radius: 8px !important;
-    padding: 12px !important;
+    border: 2.5px solid var(--giga-border) !important;
+    border-radius: 10px !important;
+    padding: 14px !important;
     color: var(--giga-text) !important;
     font-weight: 600 !important;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05) !important;
+    font-size: 1rem !important;
+    background: #FFFFFF !important;
 }
 
 .fi-input:focus {
     border-color: var(--giga-blue) !important;
-    box-shadow: 0 0 0 4px rgba(0, 71, 193, 0.15) !important;
+    box-shadow: 0 0 0 6px rgba(0, 71, 193, 0.1) !important;
     outline: none !important;
 }
 
-/* TEXT VISIBILITY OVERHAUL */
+/* TEXT VISIBILITY - NO MORE GUESSING */
 .fi-header-heading {
     color: var(--giga-text) !important;
     font-weight: 900 !important;
-    letter-spacing: -0.5px !important;
+    font-size: 2.5rem !important;
+    letter-spacing: -1px !important;
 }
 
 .fi-fo-field-wrp-label label {
     color: var(--giga-text) !important;
-    font-weight: 800 !important;
-    font-size: 0.95rem !important;
-    margin-bottom: 8px !important;
+    font-weight: 900 !important;
+    font-size: 1.05rem !important;
+    margin-bottom: 10px !important;
     display: block !important;
 }
 
-/* CARDS & SECTIONS */
+/* CARDS & SECTIONS - SHARP & CLEAN */
 .fi-section {
     background: #FFFFFF !important;
-    border: 2px solid rgba(0, 0, 0, 0.05) !important;
-    border-radius: 16px !important;
-    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05) !important;
+    border: 1px solid var(--giga-border) !important;
+    border-radius: 20px !important;
+    box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.05) !important;
+    padding: 24px !important;
 }
 
-/* TABLE HEADER */
+/* TABLE STYLING - HIGH CONTRAST */
 .fi-ta-header-cell {
-    background: #F1F5F9 !important;
-    color: var(--giga-text) !important;
+    background: var(--giga-text) !important;
+    color: #FFFFFF !important;
     font-weight: 800 !important;
-    border-bottom: 2px solid var(--giga-blue) !important;
+    padding: 16px !important;
 }
 
-/* CUSTOM WOW FACTOR - MICRO-INTERACTIONS */
-/* Pulse effect on primary buttons */
-@keyframes button-hover-pulse {
-    0% { box-shadow: 0 0 0 0 rgba(0, 71, 193, 0.4); }
-    70% { box-shadow: 0 0 0 10px rgba(0, 71, 193, 0); }
-    100% { box-shadow: 0 0 0 0 rgba(0, 71, 193, 0); }
+.fi-ta-record {
+    transition: background 0.2s ease !important;
 }
 
-.fi-btn-primary:active {
-    transform: scale(0.95) !important;
+.fi-ta-record:hover {
+    background: rgba(0, 71, 193, 0.03) !important;
 }
 
-/* Checkbox & Toggles */
-.fi-fo-checkbox {
-    border: 2px solid var(--giga-blue) !important;
-    width: 22px !important;
-    height: 22px !important;
+/* STATUS BADGES - VIBRANT & GLOWING */
+.fi-badge {
+    font-weight: 800 !important;
+    text-transform: uppercase !important;
+    padding: 6px 12px !important;
+    border-radius: 6px !important;
 }
 
-.fi-toggle-on {
-    background: var(--giga-blue) !important;
+.fi-badge-color-success {
+    background: #2E7D32 !important;
+    color: #FFFFFF !important;
+}
+
+.fi-badge-color-danger {
+    background: var(--giga-red) !important;
+    color: #FFFFFF !important;
+}
+
+.fi-badge-color-warning {
+    background: #F9A825 !important;
+    color: #FFFFFF !important;
+}
+
+/* CUSTOM WOW FACTOR - GLOWING ASSETS */
+.fi-logo {
+    filter: drop-shadow(0 0 8px var(--giga-glow)) !important;
+}
+
+@keyframes pulse-glow {
+    0% { filter: drop-shadow(0 0 5px var(--giga-glow)); }
+    50% { filter: drop-shadow(0 0 15px var(--giga-glow)); }
+    100% { filter: drop-shadow(0 0 5px var(--giga-glow)); }
+}
+
+.fi-btn-primary {
+    animation: pulse-glow 3s infinite ease-in-out;
 }
