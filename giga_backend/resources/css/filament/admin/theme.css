@@ -213,7 +213,7 @@ input[type="radio"]:checked {
 }
 
 .fi-sidebar-nav::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.1);
+    background: #FFFFFF !important;
     border-radius: 10px;
 }
 

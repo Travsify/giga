@@ -28,25 +28,43 @@
                     </svg>
                 </div>
 
-                {{-- Driver Markers --}}
-                <div class="absolute top-[30%] left-[20%] transform -translate-x-1/2 -translate-y-1/2">
-                    <div class="w-10 h-10 rounded-full bg-primary-500 flex items-center justify-center text-white font-bold text-sm shadow-lg shadow-primary-500/50 animate-pulse">
-                        {{ $this->getActiveRiderCount() > 0 ? min($this->getActiveRiderCount(), 15) : 15 }}
+                {{-- Driver Markers - Visibile Icons --}}
+                <div class="absolute top-[30%] left-[20%] transform -translate-x-1/2 -translate-y-1/2 group">
+                    <div class="flex flex-col items-center">
+                        <div class="w-10 h-10 rounded-full bg-primary-500 flex items-center justify-center text-white shadow-lg shadow-primary-500/50 animate-bounce">
+                            <x-heroicon-m-truck class="w-6 h-6" />
+                        </div>
+                        <span class="bg-white px-2 py-0.5 rounded text-[10px] font-bold text-primary-700 mt-1 shadow-sm border border-primary-200">
+                             VH-{{ rand(1000, 9999) }}
+                        </span>
                     </div>
                 </div>
+
                 <div class="absolute top-[50%] left-[60%] transform -translate-x-1/2 -translate-y-1/2">
-                    <div class="w-12 h-12 rounded-full bg-danger-500 flex items-center justify-center text-white font-bold text-base shadow-lg shadow-danger-500/50">
-                        {{ $this->getInTransitDeliveries() > 0 ? min($this->getInTransitDeliveries(), 82) : 82 }}
+                    <div class="flex flex-col items-center">
+                        <div class="w-10 h-10 rounded-full bg-danger-500 flex items-center justify-center text-white shadow-lg shadow-danger-500/50">
+                            <x-heroicon-m-shopping-cart class="w-6 h-6" />
+                        </div>
+                        <span class="bg-white px-2 py-0.5 rounded text-[10px] font-bold text-danger-700 mt-1 shadow-sm border border-danger-200">
+                             In Transit
+                        </span>
                     </div>
                 </div>
+
                 <div class="absolute top-[25%] left-[75%] transform -translate-x-1/2 -translate-y-1/2">
-                    <div class="w-9 h-9 rounded-full bg-success-500 flex items-center justify-center text-white font-bold text-sm shadow-lg shadow-success-500/50">
-                        {{ $this->getTodayDelivered() > 0 ? min($this->getTodayDelivered(), 12) : 12 }}
+                    <div class="w-8 h-8 rounded-full bg-success-500 flex items-center justify-center text-white shadow-lg shadow-success-500/50">
+                        <x-heroicon-m-check-circle class="w-5 h-5" />
                     </div>
                 </div>
+
                 <div class="absolute top-[65%] left-[35%] transform -translate-x-1/2 -translate-y-1/2">
-                    <div class="w-10 h-10 rounded-full bg-warning-500 flex items-center justify-center text-white font-bold text-sm shadow-lg shadow-warning-500/50">
-                        {{ $this->getPendingDeliveries() > 0 ? min($this->getPendingDeliveries(), 18) : 18 }}
+                    <div class="flex flex-col items-center">
+                        <div class="w-10 h-10 rounded-full bg-warning-500 flex items-center justify-center text-white shadow-lg shadow-warning-500/50">
+                            <x-heroicon-m-map-pin class="w-6 h-6" />
+                        </div>
+                        <span class="bg-white px-2 py-0.5 rounded text-[10px] font-bold text-warning-700 mt-1 shadow-sm border border-warning-200">
+                             Waiting
+                        </span>
                     </div>
                 </div>
             </div>
