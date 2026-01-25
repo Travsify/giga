@@ -33,6 +33,7 @@ class AdminPanelProvider extends PanelProvider
                 'primary' => Color::hex('#2563EB'), // Deep Blue for primary actions
                 'gray' => Color::Slate,
                 'orange' => Color::hex('#F97316'), // Brand orange accent
+                'gold' => Color::hex('#FFB800'), // Gold for toggles/radios
             ])
             ->font('Outfit')
             ->viteTheme('resources/css/filament/admin/theme.css')

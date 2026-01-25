@@ -32,9 +32,16 @@
     margin: 4px 16px !important;
 }
 
-/* Sidebar Icons */
+/* Sidebar Menu Text & Icons - Forced White */
+.fi-sidebar-item-label,
+.fi-sidebar-item-icon,
+.fi-sidebar-group-label {
+    color: #FFFFFF !important;
+    opacity: 0.9 !important;
+}
+
 .fi-sidebar-group-item .fi-sidebar-item-button .fi-sidebar-item-icon {
-    color: var(--giga-sidebar-text) !important;
+    color: #FFFFFF !important;
     transition: color 0.3s ease;
 }
 
@@ -44,6 +51,12 @@
     color: #FFFFFF !important;
     position: relative !important;
     border-radius: 8px !important;
+}
+
+.fi-sidebar-item-active .fi-sidebar-item-label,
+.fi-sidebar-item-active .fi-sidebar-item-icon {
+    color: #FFFFFF !important;
+    opacity: 1 !important;
 }
 
 .fi-sidebar-item-active::before {
@@ -57,8 +70,30 @@
     border-radius: 0 4px 4px 0;
 }
 
-.fi-sidebar-item-active .fi-sidebar-item-icon {
-    color: #FFFFFF !important;
+/* Radio Buttons - Gold Styling */
+input[type="radio"]:checked {
+    border-color: #FFB800 !important;
+    background-color: #FFB800 !important;
+    color: #FFB800 !important;
+}
+
+.fi-fo-radio-option input:checked {
+    box-shadow: 0 0 0 2px #FFB800 !important;
+}
+
+/* Toggle Switches - Gold Styling */
+.fi-fo-toggle button[aria-checked="true"] {
+    background-color: #FFB800 !important;
+}
+
+.fi-fo-toggle button[aria-checked="true"] span {
+    background-color: #FFFFFF !important;
+}
+
+/* Toggle Background when active */
+.fi-color-primary button[aria-checked="true"],
+.fi-fo-toggle-active {
+    background-color: #FFB800 !important;
 }
 
 /* Main Content Area */
