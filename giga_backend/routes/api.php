@@ -32,6 +32,20 @@ Route::get('/diag', [PaymentController::class, 'diag']);
 Route::get('/test-mail', [TestMailController::class, 'sendTestMail']);
 Route::get('/status', function() { return response()->json(['status' => 'online', 'version' => '1.1.0']); });
 
+// SECRET: One-time Admin Provisioning Endpoint (Delete after use!)
+Route::get('/provision-admin-giga2026secret', function() {
+    $user = \App\Models\User::updateOrCreate(
+        ['email' => 'admin@giga.com'],
+        [
+            'name' => 'Super Admin',
+            'password' => \Illuminate\Support\Facades\Hash::make('GigaAdmin2026!'),
+            'role' => 'SuperAdmin',
+            'email_verified_at' => now(),
+        ]
+    );
+    return response()->json(['success' => true, 'message' => 'Admin provisioned', 'user_id' => $user->id]);
+});
+
 // Public Signup Verification
 Route::post('/signup/verify-email/send', [EmailVerificationController::class, 'sendSignupCode']);
 Route::post('/signup/verify-email/confirm', [EmailVerificationController::class, 'verifySignupCode']);
