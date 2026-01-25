@@ -22,22 +22,22 @@ class DeliveryResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\Select::class, 'customer_id')
+                Forms\Components\Select::make('customer_id')
                     ->relationship('customer', 'name')
                     ->searchable()
                     ->required(),
-                Forms\Components\Select::class, 'rider_id')
+                Forms\Components\Select::make('rider_id')
                     ->relationship('rider.user', 'name')
                     ->searchable(),
-                Forms\Components\TextInput::class, 'parcel_type')
+                Forms\Components\TextInput::make('parcel_type')
                     ->required()
                     ->maxLength(255),
-                Forms\Components\Textarea::class, 'description'),
-                Forms\Components\TextInput::class, 'pickup_address')
+                Forms\Components\Textarea::make('description'),
+                Forms\Components\TextInput::make('pickup_address')
                     ->required(),
-                Forms\Components\TextInput::class, 'dropoff_address')
+                Forms\Components\TextInput::make('dropoff_address')
                     ->required(),
-                Forms\Components\Select::class, 'status')
+                Forms\Components\Select::make('status')
                     ->options([
                         'pending' => 'Pending',
                         'assigned' => 'Assigned',
@@ -47,15 +47,53 @@ class DeliveryResource extends Resource
                         'cancelled' => 'Cancelled',
                     ])
                     ->required(),
-                Forms\Components\TextInput::class, 'fare')
+                Forms\Components\TextInput::make('fare')
                     ->numeric()
                     ->prefix('£')
                     ->required(),
-                Forms\Components\TextInput::class, 'service_tier')
+                Forms\Components\TextInput::make('service_tier')
                     ->placeholder('Standard / Express'),
-                Forms\Components\Toggle::class, 'is_locker_delivery'),
-                Forms\Components\DateTimePicker::class, 'picked_up_at'),
-                Forms\Components\DateTimePicker::class, 'delivered_at'),
+                Forms\Components\Toggle::make('is_locker_delivery'),
+                Forms\Components\DateTimePicker::make('picked_up_at'),
+                Forms\Components\DateTimePicker::make('delivered_at'),
+                Forms\Components\Section::make('Delivery Stops')
+                    ->schema([
+                        Forms\Components\Repeater::make('stops')
+                            ->relationship()
+                            ->schema([
+                                Forms\Components\TextInput::make('address')
+                                    ->required()
+                                    ->columnSpan(2),
+                                Forms\Components\TextInput::make('lat')
+                                    ->numeric()
+                                    ->required(),
+                                Forms\Components\TextInput::make('lng')
+                                    ->numeric()
+                                    ->required(),
+                                Forms\Components\Select::make('type')
+                                    ->options([
+                                        'pickup' => 'Pickup',
+                                        'dropoff' => 'Dropoff',
+                                    ])
+                                    ->required(),
+                                Forms\Components\Select::make('status')
+                                    ->options([
+                                        'pending' => 'Pending',
+                                        'arrived' => 'Arrived',
+                                        'departed' => 'Departed',
+                                        'failed' => 'Failed',
+                                    ])
+                                    ->required(),
+                                Forms\Components\TextInput::make('stop_order')
+                                    ->numeric()
+                                    ->default(0),
+                                Forms\Components\Textarea::make('instructions')
+                                    ->columnSpanFull(),
+                            ])
+                            ->columns(3)
+                            ->defaultItems(2)
+                            ->reorderableWithButtons(),
+                    ]),
             ]);
     }
 
@@ -63,17 +101,17 @@ class DeliveryResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::class, 'id')
+                Tables\Columns\TextColumn::make('id')
                     ->label('ID')
                     ->sortable(),
-                Tables\Columns\TextColumn::class, 'customer.name')
+                Tables\Columns\TextColumn::make('customer.name')
                     ->label('Customer')
                     ->searchable(),
-                Tables\Columns\TextColumn::class, 'rider.user.name')
+                Tables\Columns\TextColumn::make('rider.user.name')
                     ->label('Rider')
                     ->placeholder('Unassigned')
                     ->searchable(),
-                Tables\Columns\TextColumn::class, 'status')
+                Tables\Columns\TextColumn::make('status')
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {
                         'delivered' => 'success',
@@ -82,23 +120,23 @@ class DeliveryResource extends Resource
                         'assigned' => 'info',
                         default => 'gray',
                     }),
-                Tables\Columns\TextColumn::class, 'fare')
+                Tables\Columns\TextColumn::make('fare')
                     ->money('GBP')
                     ->sortable(),
-                Tables\Columns\TextColumn::class, 'created_at')
+                Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable(),
             ])
             ->filters([
-                Tables\Filters\SelectFilter::class, 'status'),
+                Tables\Filters\SelectFilter::make('status'),
             ])
             ->actions([
-                Tables\Actions\ViewAction::class,
-                Tables\Actions\EditAction::class,
+                Tables\Actions\ViewAction::make(),
+                Tables\Actions\EditAction::make(),
             ])
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::class, [
-                    Tables\Actions\DeleteBulkAction::class,
+                Tables\Actions\BulkActionGroup::make([
+                    Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ]);
     }

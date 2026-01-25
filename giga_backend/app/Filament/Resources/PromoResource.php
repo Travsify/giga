@@ -22,23 +22,23 @@ class PromoResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::class, 'code')
+                Forms\Components\TextInput::make('code')
                     ->required()
                     ->unique(ignoreRecord: true)
                     ->maxLength(255),
-                Forms\Components\Select::class, 'discount_type')
+                Forms\Components\Select::make('discount_type')
                     ->options([
                         'percentage' => 'Percentage',
                         'fixed' => 'Fixed Amount',
                     ])
                     ->required(),
-                Forms\Components\TextInput::class, 'discount_value')
+                Forms\Components\TextInput::make('discount_value')
                     ->numeric()
                     ->required(),
-                Forms\Components\TextInput::class, 'max_uses')
+                Forms\Components\TextInput::make('max_uses')
                     ->numeric(),
-                Forms\Components\DateTimePicker::class, 'expires_at'),
-                Forms\Components\Toggle::class, 'is_active')
+                Forms\Components\DateTimePicker::make('expires_at'),
+                Forms\Components\Toggle::make('is_active')
                     ->required(),
             ]);
     }
@@ -47,30 +47,30 @@ class PromoResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::class, 'code')
+                Tables\Columns\TextColumn::make('code')
                     ->searchable(),
-                Tables\Columns\TextColumn::class, 'discount_type')
+                Tables\Columns\TextColumn::make('discount_type')
                     ->badge(),
-                Tables\Columns\TextColumn::class, 'discount_value'),
-                Tables\Columns\TextColumn::class, 'uses_count')
+                Tables\Columns\TextColumn::make('discount_value'),
+                Tables\Columns\TextColumn::make('uses_count')
                     ->label('Uses'),
-                Tables\Columns\TextColumn::class, 'max_uses')
+                Tables\Columns\TextColumn::make('max_uses')
                     ->placeholder('Unlimited'),
-                Tables\Columns\TextColumn::class, 'expires_at')
+                Tables\Columns\TextColumn::make('expires_at')
                     ->dateTime()
                     ->sortable(),
-                Tables\Columns\IconColumn::class, 'is_active')
+                Tables\Columns\IconColumn::make('is_active')
                     ->boolean(),
             ])
             ->filters([
-                Tables\Filters\TernaryFilter::class, 'is_active'),
+                Tables\Filters\TernaryFilter::make('is_active'),
             ])
             ->actions([
-                Tables\Actions\EditAction::class,
+                Tables\Actions\EditAction::make(),
             ])
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::class, [
-                    Tables\Actions\DeleteBulkAction::class,
+                Tables\Actions\BulkActionGroup::make([
+                    Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ]);
     }

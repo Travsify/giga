@@ -22,15 +22,15 @@ class WalletResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\Select::class, 'user_id')
+                Forms\Components\Select::make('user_id')
                     ->relationship('user', 'name')
                     ->required()
                     ->searchable(),
-                Forms\Components\TextInput::class, 'balance')
+                Forms\Components\TextInput::make('balance')
                     ->numeric()
                     ->prefix('£')
                     ->required(),
-                Forms\Components\TextInput::class, 'currency')
+                Forms\Components\TextInput::make('currency')
                     ->default('GBP')
                     ->required(),
             ]);
@@ -40,14 +40,14 @@ class WalletResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::class, 'user.name')
+                Tables\Columns\TextColumn::make('user.name')
                     ->searchable(),
-                Tables\Columns\TextColumn::class, 'balance')
+                Tables\Columns\TextColumn::make('balance')
                     ->money(fn ($record) => $record->currency)
                     ->sortable(),
-                Tables\Columns\TextColumn::class, 'currency')
+                Tables\Columns\TextColumn::make('currency')
                     ->sortable(),
-                Tables\Columns\TextColumn::class, 'updated_at')
+                Tables\Columns\TextColumn::make('updated_at')
                     ->dateTime()
                     ->sortable(),
             ])
@@ -55,11 +55,11 @@ class WalletResource extends Resource
                 //
             ])
             ->actions([
-                Tables\Actions\EditAction::class,
+                Tables\Actions\EditAction::make(),
             ])
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::class, [
-                    Tables\Actions\DeleteBulkAction::class,
+                Tables\Actions\BulkActionGroup::make([
+                    Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ]);
     }

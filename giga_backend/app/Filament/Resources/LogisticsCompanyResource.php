@@ -22,37 +22,37 @@ class LogisticsCompanyResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\Select::class, 'user_id')
+                Forms\Components\Select::make('user_id')
                     ->relationship('owner', 'name')
                     ->required()
                     ->searchable(),
-                Forms\Components\TextInput::class, 'name')
+                Forms\Components\TextInput::make('name')
                     ->required()
                     ->maxLength(255),
-                Forms\Components\TextInput::class, 'company_type')
+                Forms\Components\TextInput::make('company_type')
                     ->required(),
-                Forms\Components\TextInput::class, 'registration_number')
+                Forms\Components\TextInput::make('registration_number')
                     ->unique(ignoreRecord: true)
                     ->required(),
-                Forms\Components\TextInput::class, 'vat_number'),
-                Forms\Components\TextInput::class, 'business_email')
+                Forms\Components\TextInput::make('vat_number'),
+                Forms\Components\TextInput::make('business_email')
                     ->email()
                     ->required(),
-                Forms\Components\TextInput::class, 'contact_phone')
+                Forms\Components\TextInput::make('contact_phone')
                     ->tel()
                     ->required(),
-                Forms\Components\Textarea::class, 'address')
+                Forms\Components\Textarea::make('address')
                     ->required(),
-                Forms\Components\TextInput::class, 'website')
+                Forms\Components\TextInput::make('website')
                     ->url(),
-                Forms\Components\Toggle::class, 'is_verified')
+                Forms\Components\Toggle::make('is_verified')
                     ->label('Verified Business')
                     ->required(),
-                Forms\Components\TextInput::class, 'credit_limit')
+                Forms\Components\TextInput::make('credit_limit')
                     ->numeric()
                     ->prefix('£')
                     ->default(500),
-                Forms\Components\TextInput::class, 'outstanding_balance')
+                Forms\Components\TextInput::make('outstanding_balance')
                     ->numeric()
                     ->prefix('£')
                     ->default(0),
@@ -63,32 +63,32 @@ class LogisticsCompanyResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::class, 'name')
+                Tables\Columns\TextColumn::make('name')
                     ->searchable(),
-                Tables\Columns\TextColumn::class, 'owner.name')
+                Tables\Columns\TextColumn::make('owner.name')
                     ->label('Owner')
                     ->searchable(),
-                Tables\Columns\IconColumn::class, 'is_verified')
+                Tables\Columns\IconColumn::make('is_verified')
                     ->boolean()
                     ->label('Verified'),
-                Tables\Columns\TextColumn::class, 'registration_number')
+                Tables\Columns\TextColumn::make('registration_number')
                     ->searchable(),
-                Tables\Columns\TextColumn::class, 'credit_limit')
+                Tables\Columns\TextColumn::make('credit_limit')
                     ->money('GBP'),
-                Tables\Columns\TextColumn::class, 'created_at')
+                Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                Tables\Filters\TernaryFilter::class, 'is_verified'),
+                Tables\Filters\TernaryFilter::make('is_verified'),
             ])
             ->actions([
-                Tables\Actions\EditAction::class,
+                Tables\Actions\EditAction::make(),
             ])
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::class, [
-                    Tables\Actions\DeleteBulkAction::class,
+                Tables\Actions\BulkActionGroup::make([
+                    Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ]);
     }

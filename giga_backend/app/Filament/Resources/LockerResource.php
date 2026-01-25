@@ -22,28 +22,28 @@ class LockerResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::class, 'code')
+                Forms\Components\TextInput::make('code')
                     ->required()
                     ->unique(ignoreRecord: true)
                     ->maxLength(255),
-                Forms\Components\TextInput::class, 'name')
+                Forms\Components\TextInput::make('name')
                     ->required()
                     ->maxLength(255),
-                Forms\Components\TextInput::class, 'location_address')
+                Forms\Components\TextInput::make('location_address')
                     ->required(),
-                Forms\Components\TextInput::class, 'lat')
+                Forms\Components\TextInput::make('lat')
                     ->numeric()
                     ->required(),
-                Forms\Components\TextInput::class, 'lng')
+                Forms\Components\TextInput::make('lng')
                     ->numeric()
                     ->required(),
-                Forms\Components\TextInput::class, 'total_slots')
+                Forms\Components\TextInput::make('total_slots')
                     ->numeric()
                     ->required(),
-                Forms\Components\TextInput::class, 'available_slots')
+                Forms\Components\TextInput::make('available_slots')
                     ->numeric()
                     ->required(),
-                Forms\Components\Toggle::class, 'is_active')
+                Forms\Components\Toggle::make('is_active')
                     ->required(),
             ]);
     }
@@ -52,28 +52,28 @@ class LockerResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::class, 'code')
+                Tables\Columns\TextColumn::make('code')
                     ->searchable(),
-                Tables\Columns\TextColumn::class, 'name')
+                Tables\Columns\TextColumn::make('name')
                     ->searchable(),
-                Tables\Columns\TextColumn::class, 'location_address')
+                Tables\Columns\TextColumn::make('location_address')
                     ->limit(30),
-                Tables\Columns\TextColumn::class, 'available_slots')
+                Tables\Columns\TextColumn::make('available_slots')
                     ->label('Available')
                     ->badge()
                     ->color(fn ($state, $record) => $state < 5 ? 'danger' : 'success'),
-                Tables\Columns\IconColumn::class, 'is_active')
+                Tables\Columns\IconColumn::make('is_active')
                     ->boolean(),
             ])
             ->filters([
-                Tables\Filters\TernaryFilter::class, 'is_active'),
+                Tables\Filters\TernaryFilter::make('is_active'),
             ])
             ->actions([
-                Tables\Actions\EditAction::class,
+                Tables\Actions\EditAction::make(),
             ])
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::class, [
-                    Tables\Actions\DeleteBulkAction::class,
+                Tables\Actions\BulkActionGroup::make([
+                    Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ]);
     }

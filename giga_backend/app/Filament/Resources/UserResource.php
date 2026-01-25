@@ -23,17 +23,17 @@ class UserResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::class, 'name')
+                Forms\Components\TextInput::make('name')
                     ->required()
                     ->maxLength(255),
-                Forms\Components\TextInput::class, 'email')
+                Forms\Components\TextInput::make('email')
                     ->email()
                     ->required()
                     ->maxLength(255),
-                Forms\Components\TextInput::class, 'uk_phone')
+                Forms\Components\TextInput::make('uk_phone')
                     ->tel()
                     ->maxLength(255),
-                Forms\Components\Select::class, 'role')
+                Forms\Components\Select::make('role')
                     ->options([
                         'Customer' => 'Customer',
                         'Rider' => 'Rider',
@@ -42,15 +42,15 @@ class UserResource extends Resource
                         'SuperAdmin' => 'Super Admin',
                     ])
                     ->required(),
-                Forms\Components\Toggle::class, 'is_giga_plus')
+                Forms\Components\Toggle::make('is_giga_plus')
                     ->label('Giga Plus Member'),
-                Forms\Components\DateTimePicker::class, 'giga_plus_expiry'),
-                Forms\Components\TextInput::class, 'password')
+                Forms\Components\DateTimePicker::make('giga_plus_expiry'),
+                Forms\Components\TextInput::make('password')
                     ->password()
                     ->dehydrateStateUsing(fn ($state) => Hash::make($state))
                     ->dehydrated(fn ($state) => filled($state))
                     ->required(fn (string $context): bool => $context === 'create'),
-                Forms\Components\Select::class, 'business_id')
+                Forms\Components\Select::make('business_id')
                     ->relationship('business', 'name')
                     ->searchable(),
             ]);
@@ -60,11 +60,11 @@ class UserResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::class, 'name')
+                Tables\Columns\TextColumn::make('name')
                     ->searchable(),
-                Tables\Columns\TextColumn::class, 'email')
+                Tables\Columns\TextColumn::make('email')
                     ->searchable(),
-                Tables\Columns\TextColumn::class, 'role')
+                Tables\Columns\TextColumn::make('role')
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {
                         'SuperAdmin' => 'danger',
@@ -72,25 +72,25 @@ class UserResource extends Resource
                         'Rider' => 'success',
                         default => 'gray',
                     }),
-                Tables\Columns\IconColumn::class, 'is_giga_plus')
+                Tables\Columns\IconColumn::make('is_giga_plus')
                     ->boolean()
                     ->label('Giga+'),
-                Tables\Columns\TextColumn::class, 'uk_phone')
+                Tables\Columns\TextColumn::make('uk_phone')
                     ->searchable(),
-                Tables\Columns\TextColumn::class, 'created_at')
+                Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                Tables\Filters\SelectFilter::class, 'role'),
+                Tables\Filters\SelectFilter::make('role'),
             ])
             ->actions([
-                Tables\Actions\EditAction::class,
+                Tables\Actions\EditAction::make(),
             ])
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::class, [
-                    Tables\Actions\DeleteBulkAction::class,
+                Tables\Actions\BulkActionGroup::make([
+                    Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ]);
     }

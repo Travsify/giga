@@ -42,12 +42,22 @@ class DeliveryController extends Controller
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        $distance = $this->calculateDistance(
-            $request->pickup_lat,
-            $request->pickup_lng,
-            $request->dropoff_lat,
-            $request->dropoff_lng
-        );
+        $stops = $request->stops;
+        if (empty($stops) || count($stops) < 2) {
+            return response()->json(['error' => 'At least two stops (pickup and dropoff) are required.'], 422);
+        }
+
+        $totalDistance = 0;
+        for ($i = 0; $i < count($stops) - 1; $i++) {
+            $totalDistance += $this->calculateDistance(
+                $stops[$i]['lat'],
+                $stops[$i]['lng'],
+                $stops[$i+1]['lat'],
+                $stops[$i+1]['lng']
+            );
+        }
+
+        $distance = $totalDistance;
 
         // UK Pricing in £
         $baseFare = match($request->vehicle_type) {
@@ -88,7 +98,10 @@ class DeliveryController extends Controller
             'Saver' => 0.85,
         };
 
-        $totalFare = (($baseFare + $distanceFare) * $sizeMultiplier * $tierMultiplier) + $categorySurcharge;
+        // Multi-stop surcharge: £3.00 per extra stop (after the first two)
+        $stopCharge = max(0, (count($stops) - 2) * 3.00);
+
+        $totalFare = (($baseFare + $distanceFare) * $sizeMultiplier * $tierMultiplier) + $categorySurcharge + $stopCharge;
 
         // Giga+ Benefit: Wave base fee or percentage discount
         $user = $request->user();
@@ -149,7 +162,20 @@ class DeliveryController extends Controller
             'contactless_delivery' => $request->contactless_delivery ?? false,
         ]);
 
-        return response()->json($delivery, 201);
+        if ($request->has('stops')) {
+            foreach ($request->stops as $index => $stop) {
+                $delivery->stops()->create([
+                    'address' => $stop['address'],
+                    'lat' => $stop['lat'],
+                    'lng' => $stop['lng'],
+                    'stop_order' => $index,
+                    'type' => $stop['type'] ?? ($index === 0 ? 'pickup' : 'dropoff'),
+                    'instructions' => $stop['instructions'] ?? null,
+                ]);
+            }
+        }
+
+        return response()->json($delivery->load('stops'), 201);
     }
 
     public function getNearbyRiders(Request $request)

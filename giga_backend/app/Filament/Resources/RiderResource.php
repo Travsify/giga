@@ -22,24 +22,24 @@ class RiderResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\Select::class, 'user_id')
+                Forms\Components\Select::make('user_id')
                     ->relationship('user', 'name')
                     ->required()
                     ->searchable(),
-                Forms\Components\Select::class, 'vehicle_type')
+                Forms\Components\Select::make('vehicle_type')
                     ->options([
                         'bike' => 'Bike',
                         'van' => 'Van',
                         'truck' => 'Truck',
                     ])
                     ->required(),
-                Forms\Components\Toggle::class, 'is_online')
+                Forms\Components\Toggle::make('is_online')
                     ->required(),
-                Forms\Components\Toggle::class, 'is_verified')
+                Forms\Components\Toggle::make('is_verified')
                     ->required(),
-                Forms\Components\TextInput::class, 'current_lat')
+                Forms\Components\TextInput::make('current_lat')
                     ->numeric(),
-                Forms\Components\TextInput::class, 'current_lng')
+                Forms\Components\TextInput::make('current_lng')
                     ->numeric(),
             ]);
     }
@@ -48,27 +48,27 @@ class RiderResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::class, 'user.name')
+                Tables\Columns\TextColumn::make('user.name')
                     ->searchable(),
-                Tables\Columns\TextColumn::class, 'vehicle_type')
+                Tables\Columns\TextColumn::make('vehicle_type')
                     ->sortable(),
-                Tables\Columns\IconColumn::class, 'is_online')
+                Tables\Columns\IconColumn::make('is_online')
                     ->boolean(),
-                Tables\Columns\IconColumn::class, 'is_verified')
+                Tables\Columns\IconColumn::make('is_verified')
                     ->boolean(),
-                Tables\Columns\TextColumn::class, 'current_lat'),
-                Tables\Columns\TextColumn::class, 'current_lng'),
+                Tables\Columns\TextColumn::make('current_lat'),
+                Tables\Columns\TextColumn::make('current_lng'),
             ])
             ->filters([
-                Tables\Filters\TernaryFilter::class, 'is_online'),
-                Tables\Filters\TernaryFilter::class, 'is_verified'),
+                Tables\Filters\TernaryFilter::make('is_online'),
+                Tables\Filters\TernaryFilter::make('is_verified'),
             ])
             ->actions([
-                Tables\Actions\EditAction::class,
+                Tables\Actions\EditAction::make(),
             ])
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::class, [
-                    Tables\Actions\DeleteBulkAction::class,
+                Tables\Actions\BulkActionGroup::make([
+                    Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ]);
     }

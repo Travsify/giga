@@ -50,4 +50,9 @@ class Delivery extends Model
     {
         return $this->belongsTo(Rider::class);
     }
+
+    public function stops()
+    {
+        return $this->hasMany(DeliveryStop::class)->orderBy('stop_order');
+    }
 }

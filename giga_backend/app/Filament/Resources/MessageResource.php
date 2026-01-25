@@ -22,18 +22,18 @@ class MessageResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\Select::class, 'delivery_id')
+                Forms\Components\Select::make('delivery_id')
                     ->relationship('delivery', 'id')
                     ->required()
                     ->searchable(),
-                Forms\Components\Select::class, 'sender_id')
+                Forms\Components\Select::make('sender_id')
                     ->relationship('sender', 'name')
                     ->required()
                     ->searchable(),
-                Forms\Components\Textarea::class, 'content')
+                Forms\Components\Textarea::make('content')
                     ->required()
                     ->columnSpanFull(),
-                Forms\Components\Toggle::class, 'is_read')
+                Forms\Components\Toggle::make('is_read')
                     ->required(),
             ]);
     }
@@ -42,16 +42,16 @@ class MessageResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::class, 'delivery.id')
+                Tables\Columns\TextColumn::make('delivery.id')
                     ->label('Delivery ID')
                     ->sortable(),
-                Tables\Columns\TextColumn::class, 'sender.name')
+                Tables\Columns\TextColumn::make('sender.name')
                     ->searchable(),
-                Tables\Columns\TextColumn::class, 'content')
+                Tables\Columns\TextColumn::make('content')
                     ->limit(50),
-                Tables\Columns\IconColumn::class, 'is_read')
+                Tables\Columns\IconColumn::make('is_read')
                     ->boolean(),
-                Tables\Columns\TextColumn::class, 'created_at')
+                Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable(),
             ])
@@ -59,12 +59,12 @@ class MessageResource extends Resource
                 //
             ])
             ->actions([
-                Tables\Actions\EditAction::class,
-                Tables\Actions\DeleteAction::class,
+                Tables\Actions\EditAction::make(),
+                Tables\Actions\DeleteAction::make(),
             ])
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::class, [
-                    Tables\Actions\DeleteBulkAction::class,
+                Tables\Actions\BulkActionGroup::make([
+                    Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ]);
     }
