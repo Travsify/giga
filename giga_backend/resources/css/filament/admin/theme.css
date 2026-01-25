@@ -108,6 +108,40 @@ input[type="radio"]:checked {
     background-color: #FFB800 !important;
 }
 
+/* Stat Cards Color Overrides */
+.stat-card-blue { background-color: #2563EB !important; color: #FFFFFF !important; border: none !important; }
+.stat-card-red { background-color: #EF4444 !important; color: #FFFFFF !important; border: none !important; }
+.stat-card-purple { background-color: #8B5CF6 !important; color: #FFFFFF !important; border: none !important; }
+.stat-card-navy { background-color: #1E293B !important; color: #FFFFFF !important; border: none !important; }
+.stat-card-green { background-color: #10B981 !important; color: #FFFFFF !important; border: none !important; }
+.stat-card-orange { background-color: #F59E0B !important; color: #FFFFFF !important; border: none !important; }
+
+.stat-card-blue *, .stat-card-red *, .stat-card-purple *, .stat-card-navy *, .stat-card-green *, .stat-card-orange * {
+    color: #FFFFFF !important;
+}
+
+.stat-card-blue .fi-wi-stats-overview-stat-label,
+.stat-card-red .fi-wi-stats-overview-stat-label,
+.stat-card-purple .fi-wi-stats-overview-stat-label,
+.stat-card-navy .fi-wi-stats-overview-stat-label,
+.stat-card-green .fi-wi-stats-overview-stat-label,
+.stat-card-orange .fi-wi-stats-overview-stat-label {
+    opacity: 0.8 !important;
+    text-transform: uppercase !important;
+    font-size: 0.7rem !important;
+    letter-spacing: 0.05em !important;
+}
+
+/* Dashboard Spacing & Layout */
+.fi-wi-stats-overview {
+    gap: 12px !important;
+}
+
+.fi-wi-stats-overview-stat {
+    padding: 16px !important;
+    min-height: 100px !important;
+}
+
 /* Main Content Area */
 .fi-body {
     background-color: var(--giga-main-bg) !important;
