@@ -28,8 +28,7 @@ class CurrencyResource extends Resource
                     ->placeholder('USD')
                     ->required()
                     ->unique(ignoreRecord: true)
-                    ->maxLength(3)
-                    ->colors(['primary']),
+                    ->maxLength(3),
                 Forms\Components\TextInput::make('symbol')
                     ->label('Symbol')
                     ->placeholder('$')
