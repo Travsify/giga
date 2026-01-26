@@ -130,9 +130,9 @@ class PaymentService {
           ..currency = currency
           ..reference = 'PAY_${DateTime.now().millisecondsSinceEpoch}';
 
-        CheckoutResponse response = await _paystackPlugin.checkout(
+        var response = await _paystackPlugin.checkout(
           context,
-          method: CheckoutMethod.card, 
+ 
           charge: charge,
           logo: const Icon(Icons.wallet, size: 24),
         );
