@@ -121,6 +121,7 @@ class PaymentService {
          await _paystackPlugin.initialize(publicKey: config.paystackPublicKey!);
       }
 
+      try {
         // PAYSTACK PLUGIN ISSUE - Mocking success for testing
         // PaystackCharge charge = PaystackCharge() ...
         debugPrint('Bypassing Paystack Plugin due to build issues');
