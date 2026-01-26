@@ -124,7 +124,7 @@ class PaymentService {
       try {
         final int amountInSubunits = (amount * 100).ceil();
         
-        Charge charge = Charge()
+        PaystackCharge charge = PaystackCharge()
           ..amount = amountInSubunits
           ..email = email
           ..currency = currency
