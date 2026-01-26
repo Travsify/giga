@@ -60,4 +60,17 @@ class SettingsController extends Controller
             'data' => $countries
         ]);
     }
+
+    /**
+     * Get list of active currency rates
+     */
+    public function getCurrencyRates(): JsonResponse
+    {
+        // Cache for performance if needed, but for now direct DB
+        $rates = \App\Models\CurrencyRate::where('is_active', true)->get();
+        return response()->json([
+            'success' => true,
+            'data' => $rates
+        ]);
+    }
 }

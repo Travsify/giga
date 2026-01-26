@@ -31,6 +31,8 @@ Route::middleware('throttle:5,1')->group(function () {
 Route::get('/settings', [SettingsController::class, 'index']);
 Route::get('/settings/check-version/{version}', [SettingsController::class, 'checkVersion']);
 Route::get('/countries', [App\Http\Controllers\Api\SettingsController::class, 'getCountries']);
+Route::get('/currency-rates', [App\Http\Controllers\Api\SettingsController::class, 'getCurrencyRates']);
+Route::get('/settings/payment', [App\Http\Controllers\Api\SettingsController::class, 'getPaymentConfig']);
 
 // Payment (Public for Demo)
 Route::post('/create-payment-intent-public', [PaymentController::class, 'createPaymentIntentPublic']);
@@ -105,6 +107,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/business/team', [BusinessController::class, 'getTeam']);
     Route::post('/business/invite', [BusinessController::class, 'inviteMember']);
     Route::get('/business/billing', [BusinessController::class, 'getBilling']);
+    Route::get('/business/stats', [BusinessController::class, 'getStats']);
+    Route::get('/business/activity', [BusinessController::class, 'getRecentActivity']);
     Route::post('/business/bulk-book', [BulkBookingController::class, 'processBatch']);
     
     // Placeholder for API Keys

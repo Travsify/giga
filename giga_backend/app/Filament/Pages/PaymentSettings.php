@@ -27,6 +27,13 @@ class PaymentSettings extends Page
             'stripe_public_key' => AppSetting::get('stripe_public_key', ''),
             'stripe_secret_key' => AppSetting::get('stripe_secret_key', ''),
             'stripe_webhook_secret' => AppSetting::get('stripe_webhook_secret', ''),
+            'paystack_enabled' => AppSetting::get('paystack_enabled', false),
+            'paystack_public_key' => AppSetting::get('paystack_public_key', ''),
+            'paystack_secret_key' => AppSetting::get('paystack_secret_key', ''),
+            'flutterwave_enabled' => AppSetting::get('flutterwave_enabled', false),
+            'flutterwave_public_key' => AppSetting::get('flutterwave_public_key', ''),
+            'flutterwave_secret_key' => AppSetting::get('flutterwave_secret_key', ''),
+            'flutterwave_encryption_key' => AppSetting::get('flutterwave_encryption_key', ''),
             'paypal_enabled' => AppSetting::get('paypal_enabled', false),
             'paypal_client_id' => AppSetting::get('paypal_client_id', ''),
             'paypal_secret' => AppSetting::get('paypal_secret', ''),
@@ -76,6 +83,45 @@ class PaymentSettings extends Page
                             ->password()
                             ->revealable()
                             ->placeholder('whsec_...'),
+                    ])->columns(2),
+
+                Forms\Components\Section::make('Paystack')
+                    ->description('Paystack payment gateway configuration')
+                    ->schema([
+                        Forms\Components\Toggle::make('paystack_enabled')
+                            ->label('Enable Paystack Payments')
+                            ->live(),
+                        Forms\Components\TextInput::make('paystack_public_key')
+                            ->label('Public Key')
+                            ->placeholder('pk_test_...')
+                            ->columnSpan(2),
+                        Forms\Components\TextInput::make('paystack_secret_key')
+                            ->label('Secret Key')
+                            ->password()
+                            ->revealable()
+                            ->placeholder('sk_test_...'),
+                    ])->columns(2),
+
+                Forms\Components\Section::make('Flutterwave')
+                    ->description('Flutterwave payment gateway configuration')
+                    ->schema([
+                        Forms\Components\Toggle::make('flutterwave_enabled')
+                            ->label('Enable Flutterwave Payments')
+                            ->live(),
+                        Forms\Components\TextInput::make('flutterwave_public_key')
+                            ->label('Public Key')
+                            ->placeholder('FLWPUBK_TEST-...')
+                            ->columnSpan(2),
+                        Forms\Components\TextInput::make('flutterwave_secret_key')
+                            ->label('Secret Key')
+                            ->password()
+                            ->revealable()
+                            ->placeholder('FLWSECK_TEST-...'),
+                        Forms\Components\TextInput::make('flutterwave_encryption_key')
+                            ->label('Encryption Key')
+                            ->password()
+                            ->revealable()
+                            ->placeholder('FLWSECK_TEST-...'),
                     ])->columns(2),
 
                 Forms\Components\Section::make('PayPal')

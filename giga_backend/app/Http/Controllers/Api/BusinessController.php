@@ -122,4 +122,64 @@ class BusinessController extends Controller
             ]
         ]);
     }
+
+    public function getStats(Request $request)
+    {
+        $user = $request->user();
+        $business = $user->logisticsCompany ?? $user->business;
+
+        if (!$business) {
+            return response()->json(['message' => 'Not a business account.'], 403);
+        }
+
+        $memberCount = $business->members()->count();
+        $activeDeliveries = \App\Models\Delivery::whereHas('customer', function($q) use ($business) {
+            $q->where('business_id', $business->id);
+        })->whereIn('status', ['pending', 'assigned', 'picked_up', 'in_transit'])->count();
+
+        return response()->json([
+            'member_count' => $memberCount,
+            'active_deliveries' => $activeDeliveries,
+            'credit_limit' => (float) $business->credit_limit,
+            'outstanding_balance' => (float) $business->outstanding_balance,
+            'currency' => $user->currency_code ?? 'GBP',
+        ]);
+    }
+
+    public function getRecentActivity(Request $request)
+    {
+        $user = $request->user();
+        $business = $user->logisticsCompany ?? $user->business;
+
+        if (!$business) {
+            return response()->json(['message' => 'Not a business account.'], 403);
+        }
+
+        // Combine recent shipments and recent invitations
+        $deliveries = \App\Models\Delivery::whereHas('customer', function($q) use ($business) {
+            $q->where('business_id', $business->id);
+        })->orderBy('created_at', 'desc')->limit(5)->get()->map(function($d) {
+            return [
+                'type' => 'delivery',
+                'title' => 'Bulk Order Created',
+                'subtitle' => $d->parcel_type . ' to ' . $d->dropoff_address,
+                'time' => $d->created_at->diffForHumans(),
+                'status' => $d->status,
+            ];
+        });
+
+        $invites = $business->invitations()->orderBy('created_at', 'desc')->limit(3)->get()->map(function($i) {
+            return [
+                'type' => 'invite',
+                'title' => 'Member Invited',
+                'subtitle' => $i->email,
+                'time' => $i->created_at->diffForHumans(),
+                'status' => 'pending',
+            ];
+        });
+
+        $activity = $deliveries->concat($invites)->sortByDesc('time')->values();
+
+        return response()->json($activity);
+    }
 }

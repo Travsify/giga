@@ -15,19 +15,18 @@ class BulkBookingController extends Controller
     {
         $user = $request->user();
         $request->validate([
-            'deliveries' => 'required|array|min:1|max:10',
+            'deliveries' => 'required|array|min:1|max:20',
             'deliveries.*.pickup_address' => 'required|string',
-            'deliveries.*.delivery_address' => 'required|string',
-            'deliveries.*.package_type' => 'required|string',
-            'deliveries.*.weight' => 'required|numeric',
-            'deliveries.*.estimated_fare' => 'required|numeric',
+            'deliveries.*.dropoff_address' => 'required|string',
+            'deliveries.*.parcel_type' => 'required|string',
+            'deliveries.*.fare' => 'required|numeric',
         ]);
 
         $batch = [];
         $totalFare = 0;
 
         foreach ($request->deliveries as $data) {
-            $totalFare += $data['estimated_fare'];
+            $totalFare += $data['fare'];
         }
 
         // Check credit/balance
@@ -50,10 +49,9 @@ class BulkBookingController extends Controller
                 $delivery = Delivery::create([
                     'customer_id' => $user->id,
                     'pickup_address' => $data['pickup_address'],
-                    'delivery_address' => $data['delivery_address'],
-                    'package_type' => $data['package_type'],
-                    'weight' => $data['weight'],
-                    'estimated_fare' => $data['estimated_fare'],
+                    'dropoff_address' => $data['dropoff_address'],
+                    'parcel_type' => $data['parcel_type'],
+                    'fare' => $data['fare'],
                     'status' => 'pending',
                 ]);
                 $batch[] = $delivery;
