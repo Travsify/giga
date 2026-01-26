@@ -6,6 +6,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flota_mobile/theme/app_theme.dart';
 import 'package:flota_mobile/shared/map_picker_screen.dart';
 import 'package:flota_mobile/core/error_handler.dart';
+import 'package:flota_mobile/features/auth/auth_provider.dart';
 
 class MarketplaceScreen extends ConsumerStatefulWidget {
   const MarketplaceScreen({super.key});

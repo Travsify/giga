@@ -297,7 +297,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     ),
                   ),
                   const SizedBox(height: 12),
-                  // NHS Discount Banner (Social Impact)
+                  // NHS Discount Banner (Social Impact) - UK Only
+                  if (authState.countryCode == 'GB')
                   FadeInUp(
                     delay: const Duration(milliseconds: 500),
                     child: buildDiscountBanner(
@@ -440,6 +441,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         ),
                       ),
                       const SizedBox(width: 15),
+                      if (authState.countryCode == 'GB')
                       Expanded(
                         child: FadeInUp(
                           delay: const Duration(milliseconds: 600),
@@ -451,7 +453,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             onTap: () => context.push('/ulez'),
                           ),
                         ),
-                      ),
+                      )
+                      else
+                        const Spacer(),
                     ],
                   ),
                 ],
@@ -459,7 +463,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ),
           ),
           
-          // Sustainability Impact (No dummy data)
+          // Sustainability Impact (No dummy data) - UK Only
+          if (authState.countryCode == 'GB')
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),

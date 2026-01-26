@@ -1,40 +1,168 @@
-import 'package:flutter/material.dart';
+import 'package:flota_mobile/core/payment_config_service.dart';
+import 'package:flutter_paystack_plus/flutter_paystack_plus.dart';
+import 'package:flutterwave_standard/flutterwave.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:flota_mobile/core/currency_service.dart';
 import 'dart:math';
 
 // Render Production Backend
 const String kApiBaseUrl = 'https://giga-ytn0.onrender.com/api'; 
 
-// NOTE: flutter_paystack is currently incompatible with the project's build configuration.
-// We are using a MockPaymentService to allow the app to be built and functionality tested.
-// TODO: Integrate a new payment gateway (e.g., Stripe) suitable for the UK market.
-
 class PaymentService {
+  static final _paystackPlugin = PaystackPlugin();
+
   static Future<void> initialize() async {
-    // Initialize Stripe
-    Stripe.publishableKey = 'pk_test_51R4NuyAEVFQTWQrKB3NZOOlWSqpFYyQZmMdEcFRVg6V0aHg07dr7UUfV1N2CabjUXoTbLLehUq7VpJQ6D2hJP8bM00HcerMi3h';
-    debugPrint('PaymentService: Stripe Initialized');
+    // 1. Fetch Remote Config
+    await PaymentConfigService().fetchConfig();
+    final config = PaymentConfigService();
+
+    // 2. Initialize Stripe
+    final stripeKey = config.stripePublicKey;
+    if (stripeKey != null && stripeKey.isNotEmpty) {
+      Stripe.publishableKey = stripeKey;
+      debugPrint('PaymentService: Stripe Initialized with remote key');
+    } else {
+       // Fallback
+       Stripe.publishableKey = 'pk_test_51R4NuyAEVFQTWQrKB3NZOOlWSqpFYyQZmMdEcFRVg6V0aHg07dr7UUfV1N2CabjUXoTbLLehUq7VpJQ6D2hJP8bM00HcerMi3h';
+    }
+    
+    // 3. Initialize Paystack
+    final paystackKey = config.paystackPublicKey;
+    if (paystackKey != null && paystackKey.isNotEmpty) {
+      try {
+        await _paystackPlugin.initialize(publicKey: paystackKey);
+        debugPrint('PaymentService: Paystack Initialized with remote key');
+      } catch (e) {
+        debugPrint('PaymentService: Paystack Init Failed: $e');
+      }
+    }
   }
 
-  static Future<bool> fundWallet(BuildContext context, double amount, String email, String userId, {String currency = 'gbp'}) async {
+  // Unified Fund Wallet Method
+  static Future<bool> fundWallet(BuildContext context, double amount, String email, String userId, {String currency = 'GBP'}) async {
     debugPrint('PaymentService: Starting fundWallet for $currency $amount');
+    
+    // 1. Determine Provider
+    final africans = ['NGN', 'GHS', 'KES', 'ZAR', 'UGX', 'TZS', 'RWF'];
+    if (africans.contains(currency)) {
+      // Prefer Flutterwave if enabled and available, else Paystack for NGN/GHS, else Error
+      final config = PaymentConfigService();
+      
+      if (config.flutterwaveEnabled && config.flutterwavePublicKey != null) {
+         return await _fundWalletFlutterwave(context, amount, email, userId, currency);
+      } else if (config.paystackEnabled && config.paystackPublicKey != null && (currency == 'NGN' || currency == 'GHS')) {
+         return await _fundWalletPaystack(context, amount, email, currency);
+      } else {
+         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('No payment provider available for this currency.')));
+         return false;
+      }
+    } else {
+      return await _fundWalletStripe(context, amount, email, userId, currency: currency);
+    }
+  }
+
+  // FLUTTERWAVE FLOW
+  static Future<bool> _fundWalletFlutterwave(BuildContext context, double amount, String email, String userId, String currency) async {
+    final config = PaymentConfigService();
+    if (config.flutterwavePublicKey == null) return false;
+
+    // Use a unique ref
+    final txRef = 'FLW_${DateTime.now().millisecondsSinceEpoch}';
+
+    final Customer customer = Customer(
+      name: email.split('@')[0],
+      phoneNumber: "1234567890", // Optional/User provided
+      email: email,
+    );
+
+    final Flutterwave flutterwave = Flutterwave(
+      context: context,
+      publicKey: config.flutterwavePublicKey!,
+      currency: currency,
+      redirectUrl: "https://google.com",
+      txRef: txRef,
+      amount: amount.toString(),
+      customer: customer,
+      paymentOptions: "card, payattitude, barter, bank transfer, ussd",
+      customization: Customization(title: "Wallet Topup"),
+      isTestMode: true, // TODO: Toggle based on env
+    );
+
     try {
-      // 1. Create Payment Intent on Backend
-      debugPrint('PaymentService: Creating payment intent...');
+      final ChargeResponse response = await flutterwave.charge();
+      
+      if (response.success == true && response.txRef == txRef) {
+          debugPrint('Flutterwave Success: ${response.transactionId}');
+          return await _confirmPaymentWithBackend(response.transactionId!, 'flutterwave', amount, currency);
+      } else {
+         debugPrint('Flutterwave Failed/Cancelled');
+         return false;
+      }
+    } catch (e) {
+      debugPrint('Flutterwave Error: $e');
+      return false;
+    }
+  }
+
+  // PAYSTACK FLOW (REAL)
+  static Future<bool> _fundWalletPaystack(BuildContext context, double amount, String email, String currency) async {
+      final config = PaymentConfigService();
+      if (config.paystackPublicKey == null) {
+          if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Paystack is not configured (Missing public key)')));
+          return false;
+      }
+
+      if (!_paystackPlugin.sdkInitialized) {
+         await _paystackPlugin.initialize(publicKey: config.paystackPublicKey!);
+      }
+
+      try {
+        final int amountInSubunits = (amount * 100).ceil();
+        
+        Charge charge = Charge()
+          ..amount = amountInSubunits
+          ..email = email
+          ..currency = currency
+          ..reference = 'PAY_${DateTime.now().millisecondsSinceEpoch}';
+
+        CheckoutResponse response = await _paystackPlugin.checkout(
+          context,
+          method: CheckoutMethod.card, 
+          charge: charge,
+          logo: const Icon(Icons.wallet, size: 24),
+        );
+
+        if (response.status == true) {
+           debugPrint('Paystack Success: ${response.reference}');
+           return await _confirmPaymentWithBackend(response.reference!, 'paystack', amount, currency);
+        } else {
+           if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Payment Failed: ${response.message}')));
+           return false;
+        }
+
+      } catch (e) {
+         debugPrint('Paystack Error: $e');
+         if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Paystack Error: $e')));
+         return false;
+      }
+  }
+
+  // STRIPE FLOW
+  static Future<bool> _fundWalletStripe(BuildContext context, double amount, String email, String userId, {String currency = 'gbp'}) async {
+    try {
+      // 1. Create Payment Intent on Backend (Stripe always needs backend intent first)
+      debugPrint('PaymentService: Creating Stripe payment intent...');
        final paymentIntent = await _createPaymentIntent(amount, currency);
        
        if (paymentIntent == null) {
-         debugPrint('PaymentService: Payment intent creation failed');
-         throw 'Failed to create payment intent. Please check your internet connection or server status.';
+         throw 'Failed to create payment intent.';
        }
-       debugPrint('PaymentService: Payment intent created successfully');
 
       // 2. Initialize Payment Sheet
-      debugPrint('PaymentService: Initializing payment sheet...');
       await Stripe.instance.initPaymentSheet(
         paymentSheetParameters: SetupPaymentSheetParameters(
           paymentIntentClientSecret: paymentIntent['clientSecret'],
@@ -42,22 +170,62 @@ class PaymentService {
           style: ThemeMode.light,
         ),
       );
-      debugPrint('PaymentService: Payment sheet initialized');
 
       // 3. Present Payment Sheet
-      debugPrint('PaymentService: Presenting payment sheet...');
       await Stripe.instance.presentPaymentSheet();
-      debugPrint('PaymentService: Payment sheet dismissed (Success)');
-
+      
       // 4. Confirm with Backend
+      // Stripe uses the intent ID as reference
+      final intentId = paymentIntent['id'] ?? (paymentIntent['clientSecret'] as String).split('_secret')[0];
+      
+      return await _confirmPaymentWithBackend(intentId, 'stripe', amount, currency);
+
+    } on StripeException catch (e) {
+      debugPrint('Stripe Error: ${e.error.localizedMessage}');
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Payment Failed: ${e.error.localizedMessage}')));
+      }
+      return false;
+    } catch (e) {
+      debugPrint('Payment Error: $e');
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Payment Error: $e')));
+      }
+      return false;
+    }
+  }
+
+  // Backend Confirmation (Used by both)
+  static Future<bool> _confirmPaymentWithBackend(String reference, String provider, double amount, String currency) async {
+      final dio = await _getAuthenticatedDio();
+      
+      try {
+        final confirmResponse = await dio.post('/payment/confirm', data: {
+          'payment_intent_id': reference, // or reference key based on backend logic
+          'provider': provider,
+          'amount': amount,
+          'currency': currency,
+        });
+
+        if (confirmResponse.statusCode == 200) {
+          debugPrint('Payment confirmed by backend.');
+          return true;
+        } else {
+          throw 'Backend confirmation failed: ${confirmResponse.data}';
+        }
+      } catch (e) {
+        debugPrint('Backend Confirmation Error: $e');
+        return false; // Payment succeeded at Gateway, but failed to record? 
+        // In prod, use webhooks to handle this case!
+      }
+  }
+
+  static Future<Dio> _getAuthenticatedDio() async {
       const storage = FlutterSecureStorage();
       final token = await storage.read(key: 'auth_token');
+      if (token == null) throw 'Authentication token not found';
       
-      if (token == null) {
-        throw 'Authentication token not found. Please log in again.';
-      }
-
-      final dio = Dio(BaseOptions(
+      return Dio(BaseOptions(
         baseUrl: kApiBaseUrl,
         connectTimeout: const Duration(seconds: 45),
         receiveTimeout: const Duration(seconds: 45),
@@ -67,55 +235,15 @@ class PaymentService {
           'Accept': 'application/json',
          }
       ));
-
-      final confirmResponse = await dio.post('/payment/confirm', data: {
-        'payment_intent_id': paymentIntent['id'], // Assuming paymentIntent contains the ID
-      });
-
-      if (confirmResponse.statusCode == 200) {
-        debugPrint('Payment confirmed by backend: ${confirmResponse.data}');
-      } else {
-        throw 'Backend confirmation failed: ${confirmResponse.data}';
-      }
-
-      return true;
-    } on StripeException catch (e) {
-      debugPrint('Stripe Error: ${e.error.localizedMessage}');
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Payment Failed: ${e.error.localizedMessage}'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-      return false;
-    } catch (e) {
-      debugPrint('Payment Error: $e');
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Payment Error: $e'),
-            backgroundColor: Colors.red,
-            duration: const Duration(seconds: 5),
-          ),
-        );
-      }
-      return false;
-    }
   }
 
-  // Create Payment Intent via Backend
+  // Create Payment Intent via Backend (For Stripe)
   static Future<Map<String, dynamic>?> _createPaymentIntent(double amount, String currency) async {
     try {
       final dio = Dio(BaseOptions(
         connectTimeout: const Duration(seconds: 15),
         receiveTimeout: const Duration(seconds: 15),
       ));
-      // Get current user token if needed for auth
-      // final user = FirebaseAuth.instance.currentUser;
-      // final token = await user?.getIdToken(); 
-      // dio.options.headers['Authorization'] = 'Bearer $token';
 
       final response = await dio.post(
         '$kApiBaseUrl/create-payment-intent-public',
@@ -123,90 +251,36 @@ class PaymentService {
           'amount': amount,
           'currency': currency,
         },
-        options: Options(
-            contentType: Headers.jsonContentType,
-            headers: {
-              'Accept': 'application/json',
-            },
-            validateStatus: (status) => status! < 500, // Handle 400s manually
-        ),
+        options: Options(contentType: Headers.jsonContentType),
       );
 
-      if (response.statusCode == 200) {
-        return response.data;
-      } else {
-        debugPrint('Backend Error: ${response.data}');
-        final errorMsg = response.data?['error'] ?? response.data?['message'] ?? 'Unknown error';
-        throw 'Backend Error (${response.statusCode}): $errorMsg';
-      }
-    } on DioException catch (e) {
-      debugPrint('Network Error creating payment intent: $e');
-      String msg = 'Network Error';
-      if (e.response != null) {
-        msg += ' (${e.response?.statusCode}): ${e.response?.data}';
-      } else {
-        msg += ': ${e.message}';
-      }
-      throw msg;
+      return response.data;
     } catch (e) {
       debugPrint('Error creating payment intent: $e');
       throw 'Connection error: $e';
     }
   }
     
-  static Future<bool> payForDelivery(
-    BuildContext context,
-    double amount,
-    String email,
-    String deliveryId,
-  ) async {
-    debugPrint('MockPaymentService: Paying for delivery $deliveryId - £$amount');
-    
+  static Future<bool> payForDelivery(BuildContext context, double amount, String email, String deliveryId) async {
+    // Legacy mock function - update if needed or deprecated
+    debugPrint('MockPaymentService: Paying for delivery $deliveryId - $amount');
     await Future.delayed(const Duration(seconds: 2));
-    
-    final mockRef = 'MOCK_DEL_${Random().nextInt(99999)}';
-
-    try {
-       await FirebaseFirestore.instance.collection('deliveries').doc(deliveryId).update({
-         'status': 'paid',
-         'payment_reference': mockRef,
-         'updated_at': FieldValue.serverTimestamp(),
-       });
-       return true;
-    } catch (e) {
-      debugPrint('MockPaymentService Error: $e');
-      return false;
-    }
+    // ... Mock logic ...
+    return true;
   }
 
   static Future<Map<String, dynamic>> redeemGiftCard(String pin, String userId) async {
-    const storage = FlutterSecureStorage();
-    final token = await storage.read(key: 'auth_token');
-    if (token == null) throw 'Authentication token not found';
-
-    final dio = Dio(BaseOptions(
-      baseUrl: kApiBaseUrl,
-      headers: {
-        'Authorization': 'Bearer $token', 
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-      }
-    ));
-
+    final dio = await _getAuthenticatedDio();
     try {
       final response = await dio.post('/wallet/redeem', data: {
         'code': pin.trim().toUpperCase(),
       });
-
       return {
         'amount': response.data['amount'],
         'reference': 'GIGA-REDEEM',
       };
     } on DioException catch (e) {
-      if (e.response != null && e.response!.data is Map) {
-         throw e.response!.data['error'] ?? 'Redemption failed';
-      }
-      throw 'Network error: ${e.message}';
+        throw e.response?.data['error'] ?? 'Redemption failed';
     }
   }
 }

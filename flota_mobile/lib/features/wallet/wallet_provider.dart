@@ -7,12 +7,14 @@ class WalletState {
   final double balance;
   final List<Map<String, dynamic>> transactions;
   final String? error;
+  final String currencyCode;
 
   WalletState({
     this.isLoading = false,
     this.balance = 0.0,
     this.transactions = const [],
     this.error,
+    this.currencyCode = 'GBP',
   });
 
   WalletState copyWith({
@@ -20,12 +22,14 @@ class WalletState {
     double? balance,
     List<Map<String, dynamic>>? transactions,
     String? error,
+    String? currencyCode,
   }) {
     return WalletState(
       isLoading: isLoading ?? this.isLoading,
       balance: balance ?? this.balance,
       transactions: transactions ?? this.transactions,
       error: error ?? this.error,
+      currencyCode: currencyCode ?? this.currencyCode,
     );
   }
 }
@@ -64,13 +68,14 @@ class WalletNotifier extends StateNotifier<WalletState> {
       // Parse balance
       final wallet = data['wallet'] ?? {};
       final balance = (wallet['balance'] ?? 0.0).toDouble();
+      final currency = wallet['currency'] ?? 'GBP';
 
       // Fetch Transactions
       final txResponse = await _dio.get('/wallet/transactions');
       final List<Map<String, dynamic>> transactions = 
           List<Map<String, dynamic>>.from(txResponse.data['transactions']);
       
-      state = state.copyWith(isLoading: false, balance: balance, transactions: transactions);
+      state = state.copyWith(isLoading: false, balance: balance, transactions: transactions, currencyCode: currency);
     } catch (e) {
       state = state.copyWith(isLoading: false, error: e.toString());
     }

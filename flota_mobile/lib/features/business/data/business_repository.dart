@@ -27,7 +27,7 @@ class BusinessRepository {
 
   Future<Map<String, dynamic>> bulkBook(List<Map<String, dynamic>> batch) async {
     try {
-      final response = await _dio.post('/business/bulk-book', data: {'batch': batch});
+      final response = await _dio.post('/business/bulk-book', data: {'deliveries': batch});
       return response.data;
     } on DioException catch (e) {
       throw _handleError(e);
@@ -47,6 +47,24 @@ class BusinessRepository {
     try {
       final response = await _dio.get('/business/billing');
       return response.data;
+    } on DioException catch (e) {
+      throw _handleError(e);
+    }
+  }
+
+  Future<Map<String, dynamic>> getStats() async {
+    try {
+      final response = await _dio.get('/business/stats');
+      return response.data;
+    } on DioException catch (e) {
+      throw _handleError(e);
+    }
+  }
+
+  Future<List<dynamic>> getActivity() async {
+    try {
+      final response = await _dio.get('/business/activity');
+      return response.data as List<dynamic>;
     } on DioException catch (e) {
       throw _handleError(e);
     }

@@ -20,17 +20,10 @@ class _BulkBookingScreenState extends ConsumerState<BulkBookingScreen> {
   void _addMockItem() {
     setState(() {
       _draftBatch.add({
-        'pickup_lat': 51.5074,
-        'pickup_lng': -0.1278,
         'pickup_address': 'Central London Warehouse',
-        'dropoff_lat': 51.5007,
-        'dropoff_lng': -0.1246,
         'dropoff_address': 'Downing Street, London',
-        'parcel_size': 'Box',
-        'parcel_category': 'General',
-        'vehicle_type': 'Van',
-        'service_tier': 'Standard',
-        'total_fare': 12.50,
+        'parcel_type': 'Box',
+        'fare': 12.50,
       });
     });
   }
@@ -162,7 +155,7 @@ class _BulkBookingScreenState extends ConsumerState<BulkBookingScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text('Delivery #${index + 1}', style: const TextStyle(fontWeight: FontWeight.bold)),
-                Text('£${item['total_fare']}', style: const TextStyle(fontWeight: FontWeight.bold, color: AppTheme.primaryBlue)),
+                Text('£${item['fare']}', style: const TextStyle(fontWeight: FontWeight.bold, color: AppTheme.primaryBlue)),
               ],
             ),
             const Divider(height: 24),
@@ -172,9 +165,7 @@ class _BulkBookingScreenState extends ConsumerState<BulkBookingScreen> {
             const SizedBox(height: 8),
             Row(
               children: [
-                _chip(item['parcel_size']),
-                const SizedBox(width: 8),
-                _chip(item['vehicle_type']),
+                _chip(item['parcel_type']),
                 const Spacer(),
                 IconButton(
                   icon: const Icon(Icons.delete_outline, color: Colors.red, size: 20),
@@ -219,7 +210,7 @@ class _BulkBookingScreenState extends ConsumerState<BulkBookingScreen> {
   Widget _buildBottomBar() {
     if (_draftBatch.isEmpty) return const SizedBox.shrink();
 
-    final total = _draftBatch.fold<double>(0, (sum, item) => sum + (item['total_fare'] as double));
+    final total = _draftBatch.fold<double>(0, (sum, item) => sum + (double.tryParse(item['fare'].toString()) ?? 0.0));
 
     return Container(
       padding: const EdgeInsets.all(24),

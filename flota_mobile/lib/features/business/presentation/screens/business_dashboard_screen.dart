@@ -5,14 +5,32 @@ import 'package:animate_do/animate_do.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flota_mobile/theme/app_theme.dart';
 import 'package:flota_mobile/features/auth/auth_provider.dart';
+import 'package:flota_mobile/features/business/business_provider.dart';
 
-class BusinessDashboardScreen extends ConsumerWidget {
+class BusinessDashboardScreen extends ConsumerStatefulWidget {
   const BusinessDashboardScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<BusinessDashboardScreen> createState() => _BusinessDashboardScreenState();
+}
+
+class _BusinessDashboardScreenState extends ConsumerState<BusinessDashboardScreen> {
+  @override
+  void initState() {
+    super.initState();
+    Future.microtask(() => ref.read(businessProvider.notifier).refreshDashboard());
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final authState = ref.watch(authProvider);
+    final businessState = ref.watch(businessProvider);
     
+    if (businessState.isLoading && businessState.stats == null) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
       body: Stack(
@@ -39,11 +57,11 @@ class BusinessDashboardScreen extends ConsumerWidget {
                 children: [
                   _buildHeader(authState),
                   const SizedBox(height: 32),
-                  _buildMetricsRow(ref),
+                  _buildMetricsRow(businessState),
                   const SizedBox(height: 32),
                   _buildQuickActions(context),
                   const SizedBox(height: 32),
-                  _buildRecentActivity(),
+                  _buildRecentActivity(businessState),
                 ],
               ),
             ),
@@ -95,13 +113,14 @@ class BusinessDashboardScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildMetricsRow(WidgetRef ref) {
+  Widget _buildMetricsRow(BusinessState state) {
+    final stats = state.stats;
     return Row(
       children: [
         Expanded(
           child: _MetricCard(
             title: 'Team Active',
-            value: '12',
+            value: stats?['member_count']?.toString() ?? '0',
             icon: Icons.people_alt_rounded,
             color: AppTheme.primaryBlue,
           ),
@@ -109,10 +128,10 @@ class BusinessDashboardScreen extends ConsumerWidget {
         const SizedBox(width: 16),
         Expanded(
           child: _MetricCard(
-            title: 'Credit Used',
-            value: '${ref.watch(authProvider).currencySymbol}450.00',
+            title: 'Outstanding',
+            value: '${ref.watch(authProvider).currencySymbol}${stats?['outstanding_balance'] ?? '0.00'}',
             icon: Icons.account_balance_wallet_rounded,
-            color: Colors.green,
+            color: Colors.redAccent,
           ),
         ),
       ],
@@ -174,17 +193,28 @@ class BusinessDashboardScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildRecentActivity() {
+  Widget _buildRecentActivity(BusinessState state) {
+    final activity = state.activity;
+    
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Recent Activity',
-          style: GoogleFonts.outfit(
-            fontSize: 20,
-            fontWeight: FontWeight.w800,
-            color: Colors.black87,
-          ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'Recent Activity',
+              style: GoogleFonts.outfit(
+                fontSize: 20,
+                fontWeight: FontWeight.w800,
+                color: Colors.black87,
+              ),
+            ),
+            TextButton(
+              onPressed: () => ref.read(businessProvider.notifier).refreshDashboard(),
+              child: const Text('Refresh'),
+            ),
+          ],
         ),
         const SizedBox(height: 16),
         Container(
@@ -194,21 +224,29 @@ class BusinessDashboardScreen extends ConsumerWidget {
             borderRadius: BorderRadius.circular(24),
             border: Border.all(color: const Color(0xFFE2E8F0)),
           ),
-          child: Column(
+          child: activity.isEmpty 
+          ? Center(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 20),
+                child: Text(
+                  'No recent activity',
+                  style: GoogleFonts.outfit(color: Colors.black38),
+                ),
+              ),
+            )
+          : Column(
             children: [
-              _ActivityItem(
-                title: 'Bulk Order Created',
-                subtitle: '5 shipments to London SE1',
-                time: '2h ago',
-                icon: Icons.local_shipping_rounded,
-              ),
-              const Divider(height: 32),
-              _ActivityItem(
-                title: 'Member Invited',
-                subtitle: 'sarah@business.com',
-                time: '1d ago',
-                icon: Icons.person_add_alt_1_rounded,
-              ),
+              for (var i = 0; i < activity.length; i++) ...[
+                _ActivityItem(
+                  title: activity[i]['title'],
+                  subtitle: activity[i]['subtitle'],
+                  time: activity[i]['time'],
+                  icon: activity[i]['type'] == 'delivery' 
+                    ? Icons.local_shipping_rounded 
+                    : Icons.person_add_alt_1_rounded,
+                ),
+                if (i < activity.length - 1) const Divider(height: 32),
+              ],
             ],
           ),
         ),

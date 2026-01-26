@@ -8,6 +8,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:flota_mobile/theme/app_theme.dart';
 import 'package:flota_mobile/core/payment_service.dart';
+import 'package:flota_mobile/core/currency_service.dart';
 import 'package:flota_mobile/core/error_handler.dart';
 import 'package:intl/intl.dart';
 import 'wallet_provider.dart';
@@ -25,15 +26,24 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
   @override
   void initState() {
     super.initState();
+    final country = ref.read(authProvider).countryCode;
+    _selectedMethod = ['NG', 'GH'].contains(country) ? 'paystack' : 'stripe';
     Future.microtask(() => ref.read(walletProvider.notifier).fetchWalletData());
   }
 
   bool _isLoading = false;
-  String _selectedMethod = 'stripe'; // Default to stripe
+  late String _selectedMethod;
 
   List<Map<String, dynamic>> _getPaymentMethods() {
+    final country = ref.read(authProvider).countryCode;
+    final isAfricanMarket = ['NG', 'GH'].contains(country);
+    
     final methods = [
-      {'id': 'stripe', 'label': 'Stripe', 'icon': Icons.credit_card},
+      if (isAfricanMarket)
+        {'id': 'paystack', 'label': 'Paystack', 'icon': Icons.credit_card}
+      else
+        {'id': 'stripe', 'label': 'Stripe', 'icon': Icons.credit_card},
+        
       {'id': 'gift_card', 'label': 'Giga Gift Card', 'icon': Icons.card_giftcard},
       {'id': 'giga_card', 'label': 'Giga Card', 'icon': Icons.account_balance_wallet},
     ];
@@ -144,7 +154,14 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
         await PaymentService.initialize();
         // The backend requires the user to be logged in and the token to be valid.
         // We pass the amount, and internally PaymentService confirms with backend.
-        final success = await PaymentService.fundWallet(context, amount, authState.userEmail!, authState.userId!);
+        final currencyCode = authState.currencyCode ?? 'GBP';
+        final success = await PaymentService.fundWallet(
+          context, 
+          amount, 
+          authState.userEmail!, 
+          authState.userId!,
+          currency: currencyCode
+        );
         
         if (success) {
           // Refresh Wallet Provider
@@ -455,10 +472,16 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
                   child: Consumer(
                     builder: (context, ref, child) {
                       final walletState = ref.watch(walletProvider);
-                      final balance = walletState.balance; // Provided by WalletProvider
-                      
-                      // Trigger fetch on initial load if not loading and balance is 0?
-                      // Better done in initState, but let's ensure it's fetched.
+                      final rawBalance = walletState.balance;
+                      final walletCurrency = walletState.currencyCode;
+                      final userCurrency = ref.watch(authProvider).currencyCode ?? 'GBP';
+                      final userSymbol = ref.watch(authProvider).currencySymbol;
+
+                      double displayBalance = rawBalance;
+                      if (walletCurrency != userCurrency) {
+                          final inGbp = CurrencyService().convertToGbp(rawBalance, walletCurrency);
+                          displayBalance = CurrencyService().convertFromGbp(inGbp, userCurrency);
+                      }
                       
                       return Container(
                         width: double.infinity,
@@ -481,7 +504,7 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
                             walletState.isLoading 
                               ? const SizedBox(height: 50, child: Center(child: CircularProgressIndicator()))
                               : Text(
-                                  '${ref.watch(authProvider).currencySymbol}${balance.toStringAsFixed(2)}',
+                                  '$userSymbol${displayBalance.toStringAsFixed(2)}',
                                   style: GoogleFonts.outfit(
                                     fontSize: 42,
                                     fontWeight: FontWeight.bold,

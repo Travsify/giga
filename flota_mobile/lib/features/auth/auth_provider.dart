@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flota_mobile/features/auth/data/auth_repository.dart';
+import 'package:flota_mobile/core/currency_service.dart';
 
 enum AuthStatus { authenticated, unauthenticated, loading }
 
@@ -32,12 +33,8 @@ class AuthState {
   });
 
   String get currencySymbol {
-    switch(currencyCode) {
-      case 'NGN': return '₦';
-      case 'GHS': return '₵';
-      case 'USD': return '\$';
-      case 'GBP': default: return '£';
-    }
+    if (currencyCode == null) return '£';
+    return CurrencyService().getSymbol(currencyCode!);
   }
 
   AuthState copyWith({
@@ -79,6 +76,9 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
   Future<void> _init() async {
     state = state.copyWith(status: AuthStatus.loading);
+    // Fetch latest currency rates
+    CurrencyService().fetchRates(); // Fire and forget or await if critical
+
     try {
       final token = await _storage.read(key: 'auth_token');
       if (token != null) {

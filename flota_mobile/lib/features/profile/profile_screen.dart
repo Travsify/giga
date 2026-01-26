@@ -210,7 +210,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text('Enter a friend\'s code to get ${ref.watch(authProvider).currencySymbol}10 credit instantly.'),
+            Builder(
+              builder: (context) {
+                final country = ref.read(authProvider).countryCode;
+                final amount = (country == 'NG') ? 5000 : (country == 'GH' ? 500 : 10);
+                return Text('Enter a friend\'s code to get ${ref.read(authProvider).currencySymbol}$amount credit instantly.');
+              }
+            ),
             const SizedBox(height: 16),
             TextField(
               decoration: InputDecoration(
@@ -246,6 +252,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final profileState = ref.watch(profileProvider);
     final user = profileState.user;
     final loyalty = profileState.loyalty;
+    final authState = ref.watch(authProvider);
+
 
     if (profileState.isLoading && user == null) {
       return const Scaffold(
@@ -567,18 +575,24 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               ),
               const SizedBox(width: 16),
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Refer & Earn ${ref.watch(authProvider).currencySymbol}10',
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                    ),
-                    Text(
-                      'Share your code with friends',
-                      style: TextStyle(color: AppTheme.textSecondary, fontSize: 13),
-                    ),
-                  ],
+                child: Builder(
+                  builder: (context) {
+                    final country = ref.watch(authProvider).countryCode;
+                    final amount = (country == 'NG') ? 5000 : (country == 'GH' ? 500 : 10);
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Refer & Earn ${ref.watch(authProvider).currencySymbol}$amount',
+                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                        ),
+                        const Text(
+                          'Share your code with friends',
+                          style: TextStyle(color: AppTheme.textSecondary, fontSize: 13),
+                        ),
+                      ],
+                    );
+                  }
                 ),
               ),
             ],

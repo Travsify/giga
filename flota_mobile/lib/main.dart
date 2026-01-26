@@ -45,11 +45,6 @@ import 'package:flota_mobile/features/business/presentation/screens/api_key_scre
 import 'package:flota_mobile/theme/app_theme.dart';
 
 
-import 'package:flota_mobile/features/business/presentation/screens/business_dashboard_screen.dart';
-import 'package:flota_mobile/features/business/presentation/screens/team_management_screen.dart';
-import 'package:flota_mobile/features/business/presentation/screens/billing_screen.dart';
-import 'package:flota_mobile/features/business/presentation/screens/bulk_shipping_screen.dart';
-
 import 'firebase_options.dart';
 
 import 'package:flota_mobile/core/settings_service.dart';
@@ -226,7 +221,7 @@ final routerProvider = Provider<GoRouter>((ref) {
         routes: [
           GoRoute(path: 'team', builder: (context, state) => const TeamManagementScreen()),
           GoRoute(path: 'billing', builder: (context, state) => const BillingScreen()),
-          GoRoute(path: 'bulk-shipping', builder: (context, state) => const BulkShippingScreen()),
+          GoRoute(path: 'bulk-shipping', builder: (context, state) => const BulkBookingScreen()),
         ],
       ),
       GoRoute(

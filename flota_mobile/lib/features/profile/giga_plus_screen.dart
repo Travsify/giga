@@ -15,7 +15,23 @@ class GigaPlusScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final profileState = ref.watch(profileProvider);
     final isGigaPlus = profileState.subscription?['is_giga_plus'] ?? false;
+    final authState = ref.watch(authProvider);
     final expiry = profileState.subscription?['expiry'];
+
+    // Dynamic Pricing Logic
+    String currency = '£';
+    double price = 39.99;
+    double freeDeliveryThreshold = 15.0;
+
+    if (authState.countryCode == 'NG') {
+      currency = '₦';
+      price = 5000.0;
+      freeDeliveryThreshold = 5000.0;
+    } else if (authState.countryCode == 'GH') {
+      currency = '₵';
+      price = 500.0;
+      freeDeliveryThreshold = 150.0;
+    }
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -83,10 +99,10 @@ class GigaPlusScreen extends ConsumerWidget {
                       style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                     ),
                   const SizedBox(height: 20),
-                  _buildBenefitItem(
+                    _buildBenefitItem(
                     Icons.delivery_dining_rounded,
-                    '£0 Delivery Fees',
-                    'Unlimited free delivery on all standard orders over £15.',
+                    '$currency${(0).toStringAsFixed(0)} Delivery Fees',
+                    'Unlimited free delivery on all standard orders over $currency${freeDeliveryThreshold.toStringAsFixed(0)}.',
                   ),
                   _buildBenefitItem(
                     Icons.bolt_rounded,
@@ -115,9 +131,9 @@ class GigaPlusScreen extends ConsumerWidget {
                         ),
                         child: Column(
                           children: [
-                            const Text(
-                              'Only £39.99 / month',
-                              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                            Text(
+                              'Only $currency${price.toStringAsFixed(2)} / month',
+                              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                             ),
                             const Text(
                               'Instant professional logistics access.',
@@ -140,10 +156,10 @@ class GigaPlusScreen extends ConsumerWidget {
                                     // 1. Initialize Stripe
                                     await PaymentService.initialize();
                                     
-                                    // 2. Charge £39.99
+                                    // 2. Charge Price
                                     final success = await PaymentService.fundWallet(
                                       context, 
-                                      39.99, 
+                                      price, 
                                       authState.userEmail!, 
                                       authState.userId!
                                     );
