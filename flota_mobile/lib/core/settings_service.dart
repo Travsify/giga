@@ -134,13 +134,19 @@ class SettingsService extends ChangeNotifier {
     if (path.startsWith('http://') || path.startsWith('https://')) return path;
     
     // Construct full URL assuming storage path
+    // Construct full URL assuming storage path
     // Remove leading slash if present
     final cleanPath = path.startsWith('/') ? path.substring(1) : path;
     
-    // Use the base URL from ApiClient but point to /storage/
-    // ApiClient uses /api/, so we need to go up one level
-    // Easier to just hardcode or reuse logic if we expose baseUrl in ApiClient
+    // Use the base URL or configured API URL
+    // ApiClient uses /api/, so we base it off that or use hardcoded if env variable not available
     const baseUrl = 'https://giga-ytn0.onrender.com';
+    
+    // If path already contains 'storage', don't add it again
+    if (cleanPath.startsWith('storage/')) {
+       return '$baseUrl/$cleanPath';
+    }
+    
     return '$baseUrl/storage/$cleanPath';
   }
 
@@ -243,8 +249,13 @@ final settingsServiceProvider = ChangeNotifierProvider<SettingsService>((ref) {
   return SettingsService(apiClient);
 });
 
-// FutureProvider for initialization
+// FutureProvider for initialization with timeout
 final settingsInitProvider = FutureProvider<void>((ref) async {
   final service = ref.read(settingsServiceProvider);
-  await service.init();
+  
+  // Race between init and a 5-second timeout
+  await Future.any([
+    service.init(),
+    Future.delayed(const Duration(seconds: 5)),
+  ]);
 });

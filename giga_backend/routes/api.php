@@ -18,6 +18,7 @@ use App\Http\Controllers\Api\PromoController;
 use App\Http\Controllers\Api\LockerController;
 use App\Http\Controllers\Api\SustainabilityController;
 use App\Http\Controllers\Api\SettingsController;
+use App\Http\Controllers\Api\CurrencyController;
 
 // Rate-limited auth routes (5 attempts per minute per IP)
 Route::middleware('throttle:5,1')->group(function () {
@@ -38,6 +39,7 @@ Route::get('/settings/payment', [App\Http\Controllers\Api\SettingsController::cl
 Route::post('/create-payment-intent-public', [PaymentController::class, 'createPaymentIntentPublic']);
 Route::get('/diag', [PaymentController::class, 'diag']);
 Route::get('/test-mail', [TestMailController::class, 'sendTestMail']);
+Route::get('/currency-rates', [CurrencyController::class, 'getRates']);
 Route::get('/status', function() { return response()->json(['status' => 'online', 'version' => '1.1.0']); });
 
 // SECRET: One-time Admin Provisioning Endpoint (Delete after use!)

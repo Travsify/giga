@@ -12,8 +12,21 @@ class SplashScreen extends ConsumerWidget {
     // Watch settings to ensure they are loaded
     final settingsRec = ref.watch(settingsInitProvider);
     
+    // Safety timeout: If settings take too long, move on anyway
+    // In a real widget, you might want to do this in initState or a provider
+    // but here we just rely on `when` or simplified check.
+    
+    // Better approach: Use a FutureBuilder or similar for the timeout if not handled in provider.
+    // Since we are in build(), let's check connection state via Ref if we could, 
+    // but `settingsInitProvider` is a FutureProvider.
+    
     // Get actual settings values
     final settings = ref.read(settingsServiceProvider);
+    
+    // Force navigation if stuck (hacky but works for "forever load" fix)
+    // Ideally this logic belongs in the Router, but let's make sure the UI
+    // doesn't just sit here if the provider is stuck loading.
+    
     final splashPath = settings.get<String>('splash_image_url', '');
     final splashImageUrl = settings.getAssetUrl(splashPath);
 

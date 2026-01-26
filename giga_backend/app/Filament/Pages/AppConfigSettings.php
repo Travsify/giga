@@ -79,7 +79,9 @@ class AppConfigSettings extends Page
                             ->image()
                             ->directory('splash')
                             ->visibility('public')
-                            ->helperText('Upload a custom splash screen image'),
+                            ->maxSize(5120) // 5MB
+                            ->imageEditor()
+                            ->helperText('Upload a custom splash screen image (Max 5MB)'),
                         Forms\Components\TextInput::make('splash_duration_ms')
                             ->label('Duration (ms)')
                             ->numeric()
@@ -99,6 +101,8 @@ class AppConfigSettings extends Page
                                     ->image()
                                     ->directory('onboarding')
                                     ->visibility('public')
+                                    ->maxSize(5120) // 5MB
+                                    ->imageEditor()
                                     ->required(),
                                 Forms\Components\TextInput::make('title')
                                     ->required(),
