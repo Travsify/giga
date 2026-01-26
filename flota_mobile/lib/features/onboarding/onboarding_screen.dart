@@ -27,11 +27,20 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
   void _loadSlides() {
     final settings = ref.read(settingsServiceProvider);
-    final slidesJson = settings.get<String>('onboarding_slides', '');
     
-    if (slidesJson.isNotEmpty) {
+    // settings.get can return the raw list if already parsed by dio/json_serializable
+    // or a string if hidden in a larger json blob.
+    final dynamic slidesRaw = settings.get<dynamic>('onboarding_slides', []);
+
+    if (slidesRaw is List && slidesRaw.isNotEmpty) {
+       _slides = slidesRaw.map((e) => {
+          'image': e['image']?.toString() ?? '',
+          'title': e['title']?.toString() ?? '',
+          'description': e['description']?.toString() ?? '',
+        }).toList();
+    } else if (slidesRaw is String && slidesRaw.isNotEmpty) {
       try {
-        final List<dynamic> parsed = json.decode(slidesJson);
+        final List<dynamic> parsed = json.decode(slidesRaw);
         _slides = parsed.map((e) => {
           'image': e['image']?.toString() ?? '',
           'title': e['title']?.toString() ?? '',
@@ -46,19 +55,29 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     if (_slides.isEmpty) {
       _slides = [
         {
-          'image': 'assets/images/onboarding_1.png',
-          'title': 'Fast Delivery',
-          'description': 'Description 1'
+          'image': 'assets/images/onboarding_welcome.png',
+          'title': 'Welcome to Giga',
+          'description': 'Your UK-wide logistics partner'
         },
         {
-          'image': 'assets/images/onboarding_2.png',
-          'title': 'Track Live',
-          'description': 'Description 2'
+          'image': 'assets/images/onboarding_fast.png',
+          'title': 'Fast & Reliable',
+          'description': 'From bikes to trucks, we deliver it all'
         },
         {
-          'image': 'assets/images/onboarding_3.png',
-          'title': 'Safe & Secure',
-          'description': 'Description 3'
+          'image': 'assets/images/onboarding_track.png',
+          'title': 'Track in Real-time',
+          'description': 'Monitor your parcels live'
+        },
+        {
+          'image': 'assets/images/onboarding_earn.png',
+          'title': 'Earn with Giga',
+          'description': 'Join our fleet and start earning'
+        },
+        {
+          'image': 'assets/images/onboarding_ready.png',
+          'title': 'Ready to move?',
+          'description': "Let's go!"
         },
       ];
     }
@@ -105,9 +124,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                             child: isNetworkImage
                                 ? Image.network(imageUrl, fit: BoxFit.contain,
                                     errorBuilder: (context, error, stackTrace) => 
-                                      Image.asset('assets/images/onboarding_1.png', fit: BoxFit.contain),
+                                      Image.asset('assets/images/onboarding_welcome.png', fit: BoxFit.contain),
                                   )
-                                : Image.asset(imageUrl.isNotEmpty ? imageUrl : 'assets/images/onboarding_1.png', fit: BoxFit.contain),
+                                : Image.asset(imageUrl.isNotEmpty ? imageUrl : 'assets/images/onboarding_welcome.png', fit: BoxFit.contain),
                           ),
                           const SizedBox(height: 30),
                           Text(

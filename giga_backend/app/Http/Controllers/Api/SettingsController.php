@@ -20,10 +20,24 @@ class SettingsController extends Controller
         $settings['server_time'] = now()->toIso8601String();
 
         // Convert storage paths to full URLs
-        $imageFields = ['logo_url', 'icon_url', 'splash_image', 'onboarding_image_1', 'onboarding_image_2', 'onboarding_image_3'];
+        $imageFields = ['logo_url', 'icon_url', 'splash_image_url'];
         foreach ($imageFields as $field) {
             if (!empty($settings[$field]) && !filter_var($settings[$field], FILTER_VALIDATE_URL)) {
                 $settings[$field] = url('storage/' . $settings[$field]);
+                
+                // Backwards compatibility for splash_image key
+                if ($field === 'splash_image_url') {
+                   $settings['splash_image'] = $settings[$field];
+                }
+            }
+        }
+
+        // Process Onboarding Slides (Repeater)
+        if (isset($settings['onboarding_slides']) && is_array($settings['onboarding_slides'])) {
+            foreach ($settings['onboarding_slides'] as $key => $slide) {
+                if (isset($slide['image']) && !empty($slide['image']) && !filter_var($slide['image'], FILTER_VALIDATE_URL)) {
+                    $settings['onboarding_slides'][$key]['image'] = url('storage/' . $slide['image']);
+                }
             }
         }
 
