@@ -263,3 +263,4 @@ class _LiveHeatmapWidgetState extends State<LiveHeatmapWidget> {
     );
   }
 }
+
