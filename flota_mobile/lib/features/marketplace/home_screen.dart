@@ -29,14 +29,38 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     'location': 'London',
   };
 
+  LatLng _mapCenter = const LatLng(51.5074, -0.1278); // Default London
+  String _locationName = 'London';
+
   @override
   void initState() {
     super.initState();
-    _loadWeather();
+    // Delay to allow provider to be ready
+    Future.microtask(() => _setupLocationAndWeather());
   }
 
-  Future<void> _loadWeather() async {
-    final data = await WeatherService.getCurrentWeather();
+  Future<void> _setupLocationAndWeather() async {
+    final country = ref.read(authProvider).countryCode;
+    
+    // Default Centers
+    if (country == 'NG') {
+      _mapCenter = const LatLng(6.5244, 3.3792); // Lagos
+      _locationName = 'Lagos';
+    } else if (country == 'GH') {
+      _mapCenter = const LatLng(5.6037, -0.1870); // Accra
+      _locationName = 'Accra';
+    } else {
+      _mapCenter = const LatLng(51.5074, -0.1278); // London
+      _locationName = 'London';
+    }
+
+    if (mounted) setState(() {});
+
+    final data = await WeatherService.getCurrentWeather(
+      latitude: _mapCenter.latitude,
+      longitude: _mapCenter.longitude,
+    );
+    
     if (mounted) setState(() => _weather = data);
   }
 
@@ -119,7 +143,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         ),
                         Row(
                           children: [
-                            _UlezStatusBubble(),
+                            if (authState.countryCode == 'GB') // Hide ULEZ (Woolies) for non-UK
+                              _UlezStatusBubble(),
                             const SizedBox(width: 8),
                             GestureDetector(
                               onTap: () => context.push('/profile'),
@@ -516,7 +541,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
               child: FadeInUp(
                 delay: const Duration(milliseconds: 700),
-                child: const LiveHeatmapWidget(),
+                child: LiveHeatmapWidget(
+                  center: _mapCenter,
+                  locationName: _locationName,
+                ),
               ),
             ),
           ),

@@ -118,14 +118,20 @@ Widget buildDiscountBanner({
 // Live Heatmap Widget for Home Screen
 
 class LiveHeatmapWidget extends StatefulWidget {
-  const LiveHeatmapWidget({super.key});
+  final LatLng center;
+  final String locationName;
+
+  const LiveHeatmapWidget({
+    super.key, 
+    this.center = const LatLng(51.5074, -0.1278), // Default London
+    this.locationName = 'Central London',
+  });
 
   @override
   State<LiveHeatmapWidget> createState() => _LiveHeatmapWidgetState();
 }
 
 class _LiveHeatmapWidgetState extends State<LiveHeatmapWidget> {
-  static const LatLng _london = LatLng(51.5074, -0.1278);
   Map<String, dynamic>? _trafficStatus;
 
   @override
@@ -135,6 +141,7 @@ class _LiveHeatmapWidgetState extends State<LiveHeatmapWidget> {
   }
 
   Future<void> _loadTraffic() async {
+    // In a real app, fetch traffic for widget.center
     final status = await TrafficService.getTFLStatus();
     if (mounted) setState(() => _trafficStatus = status);
   }
@@ -205,8 +212,8 @@ class _LiveHeatmapWidgetState extends State<LiveHeatmapWidget> {
                 ClipRRect(
                   borderRadius: BorderRadius.circular(16),
                   child: GoogleMap(
-                    initialCameraPosition: const CameraPosition(
-                      target: _london,
+                    initialCameraPosition: CameraPosition(
+                      target: widget.center,
                       zoom: 11,
                     ),
                     myLocationEnabled: false,
@@ -255,7 +262,7 @@ class _LiveHeatmapWidgetState extends State<LiveHeatmapWidget> {
           ),
           const SizedBox(height: 12),
           Text(
-            'High demand in Central London. Expected pickup: 5-8 mins.',
+            'High demand in ${widget.locationName}. Expected pickup: 5-8 mins.',
             style: TextStyle(color: Colors.grey[600], fontSize: 13),
           ),
         ],

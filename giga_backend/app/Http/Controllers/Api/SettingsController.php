@@ -19,6 +19,14 @@ class SettingsController extends Controller
         $settings['api_version'] = '1.0';
         $settings['server_time'] = now()->toIso8601String();
 
+        // Convert storage paths to full URLs
+        $imageFields = ['logo_url', 'icon_url', 'splash_image', 'onboarding_image_1', 'onboarding_image_2', 'onboarding_image_3'];
+        foreach ($imageFields as $field) {
+            if (!empty($settings[$field]) && !filter_var($settings[$field], FILTER_VALIDATE_URL)) {
+                $settings[$field] = url('storage/' . $settings[$field]);
+            }
+        }
+
         return response()->json([
             'success' => true,
             'data' => $settings,

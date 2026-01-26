@@ -9,13 +9,16 @@ class WeatherService {
   static const double lat = 51.5074;
   static const double lng = -0.1278;
 
-  static Future<Map<String, dynamic>> getCurrentWeather() async {
+  static Future<Map<String, dynamic>> getCurrentWeather({double? latitude, double? longitude}) async {
+    final useLat = latitude ?? lat;
+    final useLng = longitude ?? lng;
+    
     try {
       final response = await _dio.get(
         '$_baseUrl/forecast',
         queryParameters: {
-          'latitude': lat,
-          'longitude': lng,
+          'latitude': useLat,
+          'longitude': useLng,
           'current_weather': true,
         },
       );
@@ -29,7 +32,7 @@ class WeatherService {
           'temp': '${temp.round()}°C',
           'condition': _getConditionString(conditionCode),
           'icon': _getIcon(conditionCode),
-          'location': 'London',
+          'location': (latitude != null) ? 'Your Area' : 'London',
         };
       }
       throw 'Failed to fetch weather';
@@ -39,7 +42,7 @@ class WeatherService {
         'temp': '--°C',
         'condition': 'Unavailable',
         'icon': Icons.cloud_off,
-        'location': 'London',
+        'location': 'Unknown',
       };
     }
   }

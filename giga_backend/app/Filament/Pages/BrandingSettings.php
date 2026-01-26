@@ -25,6 +25,10 @@ class BrandingSettings extends Page
             'secondary_color' => AppSetting::get('secondary_color', '#C1272D'),
             'logo_url' => AppSetting::get('logo_url', ''),
             'icon_url' => AppSetting::get('icon_url', ''),
+            'splash_image' => AppSetting::get('splash_image', ''),
+            'onboarding_image_1' => AppSetting::get('onboarding_image_1', ''),
+            'onboarding_image_2' => AppSetting::get('onboarding_image_2', ''),
+            'onboarding_image_3' => AppSetting::get('onboarding_image_3', ''),
         ]);
     }
 
@@ -45,16 +49,44 @@ class BrandingSettings extends Page
 
                 Forms\Components\Section::make('Logo & Icons')
                     ->schema([
-                        Forms\Components\TextInput::make('logo_url')
-                            ->label('Logo URL')
-                            ->url()
-                            ->placeholder('https://example.com/logo.png')
-                            ->helperText('Full logo for light backgrounds'),
-                        Forms\Components\TextInput::make('icon_url')
-                            ->label('App Icon URL')
-                            ->url()
-                            ->placeholder('https://example.com/icon.png')
+                        Forms\Components\FileUpload::make('logo_url')
+                            ->label('Logo Image')
+                            ->image()
+                            ->directory('branding')
+                            ->visibility('public')
+                            ->helperText('Upload logo for light backgrounds'),
+                        Forms\Components\FileUpload::make('icon_url')
+                            ->label('App Icon')
+                            ->image()
+                            ->directory('branding')
+                            ->visibility('public')
                             ->helperText('Square app icon'),
+                    ])->columns(2),
+
+                Forms\Components\Section::make('Onboarding Screen')
+                    ->description('Customize the splash and startup experience')
+                    ->schema([
+                        Forms\Components\FileUpload::make('splash_image')
+                            ->label('Splash Screen Image')
+                            ->image()
+                            ->directory('branding')
+                            ->visibility('public')
+                            ->helperText('Full screen background image (Portrait)'),
+                        Forms\Components\FileUpload::make('onboarding_image_1')
+                            ->label('Onboarding Slide 1')
+                            ->image()
+                            ->directory('branding')
+                            ->visibility('public'),
+                        Forms\Components\FileUpload::make('onboarding_image_2')
+                            ->label('Onboarding Slide 2')
+                            ->image()
+                            ->directory('branding')
+                            ->visibility('public'),
+                        Forms\Components\FileUpload::make('onboarding_image_3')
+                            ->label('Onboarding Slide 3')
+                            ->image()
+                            ->directory('branding')
+                            ->visibility('public'),
                     ])->columns(2),
             ])
             ->statePath('data');

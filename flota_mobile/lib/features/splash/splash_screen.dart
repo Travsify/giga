@@ -27,8 +27,7 @@ class SplashScreen extends ConsumerWidget {
     // Ideally this logic belongs in the Router, but let's make sure the UI
     // doesn't just sit here if the provider is stuck loading.
     
-    final splashPath = settings.get<String>('splash_image_url', '');
-    final splashImageUrl = settings.getAssetUrl(splashPath);
+    final splashImageUrl = settings.get<String>('splash_image', ''); // Key from backend is splash_image
 
     return Scaffold(
       backgroundColor: Colors.white,

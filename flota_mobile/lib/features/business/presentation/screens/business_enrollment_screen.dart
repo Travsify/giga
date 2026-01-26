@@ -111,7 +111,7 @@ class _BusinessEnrollmentScreenState extends ConsumerState<BusinessEnrollmentScr
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'UK Business Setup',
+                      'Business Setup',
                       style: GoogleFonts.outfit(fontSize: 24, fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 8),
