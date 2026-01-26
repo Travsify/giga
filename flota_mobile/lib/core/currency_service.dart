@@ -20,6 +20,7 @@ class CurrencyService {
     'NGN': 2000.0,
   };
 
+  // Fetch active currencies from backend
   Future<void> fetchRates() async {
     try {
       final dio = Dio(BaseOptions(
@@ -28,15 +29,15 @@ class CurrencyService {
         receiveTimeout: const Duration(seconds: 10),
       ));
 
-      final response = await dio.get('/currency-rates');
+      final response = await dio.get('/currencies');
       
-      if (response.statusCode == 200 && response.data['success'] == true) {
-        final List<dynamic> data = response.data['data'];
+      if (response.statusCode == 200) {
+        final List<dynamic> data = response.data;
         _rates = List<Map<String, dynamic>>.from(data);
         
         // Cache locally
         await _storage.write(key: 'currency_rates', value: jsonEncode(_rates));
-        debugPrint('CurrencyService: Rates fetched and cached: ${_rates.length}');
+        debugPrint('CurrencyService: Currencies fetched: ${_rates.length}');
       }
     } catch (e) {
       debugPrint('CurrencyService: Failed to fetch rates: $e');
@@ -48,41 +49,49 @@ class CurrencyService {
     }
   }
 
-  double getRate(String currencyCode) {
+  // Returns how many Naira make 1 unit of this currency
+  double getRateToNaira(String currencyCode) {
+    if (currencyCode == 'NGN') return 1.0;
     if (_rates.isEmpty) return _fallbackRates[currencyCode] ?? 1.0;
-    
+
     final rateObj = _rates.firstWhere(
-      (r) => r['currency_code'] == currencyCode, 
-      orElse: () => {'rate_to_gbp': _fallbackRates[currencyCode] ?? 1.0}
+      (r) => r['code'] == currencyCode, 
+      orElse: () => {'rate_to_naira': _fallbackRates[currencyCode] ?? 1.0}
     );
     
-    // Ensure we return double
-    return double.tryParse(rateObj['rate_to_gbp'].toString()) ?? 1.0;
+    return double.tryParse(rateObj['rate_to_naira'].toString()) ?? 1.0;
   }
 
-  double convertFromGbp(double amountInGbp, String targetCurrency) {
-    final rate = getRate(targetCurrency);
-    return amountInGbp * rate;
+  // Convert NGN amount to Target Currency
+  double convertFromNaira(double amountInNaira, String targetCurrency) {
+    if (targetCurrency == 'NGN') return amountInNaira;
+    final rate = getRateToNaira(targetCurrency); 
+    if (rate == 0) return 0;
+    // Example: 1500 NGN / 1500 (Rate) = 1 USD
+    return amountInNaira / rate; 
   }
   
-  double convertToGbp(double amountInLocal, String localCurrency) {
-    final rate = getRate(localCurrency);
-    if (rate == 0) return 0;
-    return amountInLocal / rate;
+  // Convert Target Currency to NGN
+  double convertToNaira(double amountInLocal, String localCurrency) {
+    if (localCurrency == 'NGN') return amountInLocal;
+    final rate = getRateToNaira(localCurrency);
+    return amountInLocal * rate;
   }
   
   String getSymbol(String currencyCode) {
-    if (_rates.isEmpty) {
-       if (currencyCode == 'NGN') return '₦';
-       if (currencyCode == 'USD') return '\$';
-       if (currencyCode == 'EUR') return '€';
-       return '£';
-    }
+    if (currencyCode == 'NGN') return '₦';
     
     final rateObj = _rates.firstWhere(
-      (r) => r['currency_code'] == currencyCode, 
-      orElse: () => {'symbol': '£'}
+      (r) => r['code'] == currencyCode, 
+      orElse: () => {'symbol': getFallbackSymbol(currencyCode)}
     );
-    return rateObj['symbol'] ?? '£';
+    return rateObj['symbol'] ?? getFallbackSymbol(currencyCode);
+  }
+
+  String getFallbackSymbol(String code) {
+     if (code == 'USD') return '\$';
+     if (code == 'GBP') return '£';
+     if (code == 'EUR') return '€';
+     return code;
   }
 }

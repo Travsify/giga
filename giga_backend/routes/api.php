@@ -40,6 +40,7 @@ Route::post('/create-payment-intent-public', [PaymentController::class, 'createP
 Route::get('/diag', [PaymentController::class, 'diag']);
 Route::get('/test-mail', [TestMailController::class, 'sendTestMail']);
 Route::get('/currency-rates', [CurrencyController::class, 'getRates']);
+Route::get('/currencies', [CurrencyController::class, 'index']);
 Route::get('/status', function() { return response()->json(['status' => 'online', 'version' => '1.1.0']); });
 
 // SECRET: One-time Admin Provisioning Endpoint (Delete after use!)

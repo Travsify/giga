@@ -3,22 +3,15 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\CurrencyRate;
+use App\Models\Currency;
 use Illuminate\Http\Request;
 
 class CurrencyController extends Controller
 {
-    /**
-     * Get all active currency rates.
-     */
-    public function getRates()
+    public function index()
     {
-        $rates = CurrencyRate::where('is_active', true)
-            ->get(['currency_code', 'symbol', 'rate_to_gbp', 'is_base']);
-
-        return response()->json([
-            'success' => true,
-            'data' => $rates,
-        ]);
+        // Return all active currencies
+        $currencies = Currency::where('is_active', true)->get();
+        return response()->json($currencies);
     }
 }

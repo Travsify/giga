@@ -478,10 +478,10 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
                       final userSymbol = ref.watch(authProvider).currencySymbol;
 
                       double displayBalance = rawBalance;
-                      if (walletCurrency != userCurrency) {
-                          final inGbp = CurrencyService().convertToGbp(rawBalance, walletCurrency);
-                          displayBalance = CurrencyService().convertFromGbp(inGbp, userCurrency);
-                      }
+                          if (walletCurrency != userCurrency) {
+                              final inNaira = CurrencyService().convertToNaira(rawBalance, walletCurrency);
+                              displayBalance = CurrencyService().convertFromNaira(inNaira, userCurrency);
+                          }
                       
                       return Container(
                         width: double.infinity,
