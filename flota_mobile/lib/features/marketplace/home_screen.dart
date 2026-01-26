@@ -260,7 +260,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         const SizedBox(width: 15),
                         Expanded(
                           child: Text(
-                            'Enter postcode (e.g., SW1A 1AA)',
+                            'Enter delivery address',
                             style: TextStyle(color: Colors.grey[400], fontSize: 16),
                           ),
                         ),

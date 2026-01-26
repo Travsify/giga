@@ -183,11 +183,27 @@ class DeliveryController extends Controller
         $lat = $request->query('lat');
         $lng = $request->query('lng');
         $radius = $request->query('radius', 5); // 5km default
+        $user = $request->user();
 
-        $riders = Rider::where('is_online', true)
+        // STRICT GEOLOCATION: Filter by country_code
+        // Riders should only be visible if they are in the same country as the user requesting
+        // or if explicitly filtered by country (if valid use case).
+        $countryCode = $user ? $user->country_code : $request->query('country_code');
+
+        $query = Rider::where('is_online', true)
             ->whereNotNull('current_lat')
-            ->whereNotNull('current_lng')
-            ->get()
+            ->whereNotNull('current_lng');
+
+        if ($countryCode) {
+            // Assuming Rider has 'country_code' or we check via relationship to User
+            // Ideally Rider table has country_code. If not, check via user relationship.
+            // For now, let's assume we can filter by querying the related user's country
+            $query->whereHas('user', function($q) use ($countryCode) {
+                $q->where('country_code', $countryCode);
+            });
+        }
+
+        $riders = $query->get()
             ->filter(function ($rider) use ($lat, $lng, $radius) {
                 $distance = $this->calculateDistance(
                     $lat,

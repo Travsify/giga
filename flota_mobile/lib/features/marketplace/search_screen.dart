@@ -19,15 +19,13 @@ class _SearchScreenState extends State<SearchScreen> {
       return;
     }
 
-    // Regex for UK Postcode
-    final postcodeRegex = RegExp(r'^([A-Z]{1,2}[0-9][A-Z0-9]? [0-9][ABD-HJLNP-UW-Z]{2})$', caseSensitive: false);
-
-    if (postcodeRegex.hasMatch(query)) {
+    // Generic Address Search (Mock)
+    if (query.length > 3) {
         setState(() {
           _results = [
-            'Looking up ${query.toUpperCase()}...',
-            '📍 Camden High Street, London',
-            '📍 10 Downing Street',
+            '📍 123 Main St, Lagos',
+            '📍 Big Ben, London',
+            '📍 Previous: 55 Mole St',
           ];
         });
         return;
@@ -53,7 +51,7 @@ class _SearchScreenState extends State<SearchScreen> {
           controller: _searchController,
           autofocus: true,
           decoration: const InputDecoration(
-            hintText: 'Search for deliveries, locations...',
+            hintText: 'Search address or location...',
             border: InputBorder.none,
             hintStyle: TextStyle(color: Colors.white70),
           ),

@@ -209,9 +209,9 @@ class _DeliveryRequestScreenState extends ConsumerState<DeliveryRequestScreen> {
             ),
           ),
           const SizedBox(height: 32),
-          _buildPostcodeField('Pickup Postcode', _pickupPostcode, Icons.my_location, true),
+          _buildAddressField('Pickup Address', _pickupPostcode, Icons.my_location, true),
           const SizedBox(height: 16),
-          _buildPostcodeField('Drop-off Postcode', _dropoffPostcode, Icons.location_on, false),
+          _buildAddressField('Drop-off Address', _dropoffPostcode, Icons.location_on, false),
           const SizedBox(height: 32),
           TextButton.icon(
             onPressed: () => _pickLocation(true),
@@ -223,7 +223,7 @@ class _DeliveryRequestScreenState extends ConsumerState<DeliveryRequestScreen> {
     );
   }
 
-  Widget _buildPostcodeField(String label, TextEditingController controller, IconData icon, bool isPickup) {
+  Widget _buildAddressField(String label, TextEditingController controller, IconData icon, bool isPickup) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
@@ -232,22 +232,19 @@ class _DeliveryRequestScreenState extends ConsumerState<DeliveryRequestScreen> {
       ),
       child: TextField(
         controller: controller,
-        style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold, letterSpacing: 2),
+        style: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.bold),
         decoration: InputDecoration(
           border: InputBorder.none,
           labelText: label,
           labelStyle: GoogleFonts.outfit(fontSize: 14, letterSpacing: 0, fontWeight: FontWeight.normal),
           prefixIcon: Icon(icon, color: isPickup ? AppTheme.primaryBlue : AppTheme.primaryRed),
-          hintText: 'e.g. SW1A 1AA',
+          hintText: 'e.g. 123 Main Street',
         ),
         onChanged: (val) {
           if (val.length >= 5) {
-            // Mocking postcode lookup for LatLng
-            setState(() {
-              if (isPickup) pickupLatLng = const LatLng(51.5074, -0.1278);
-              else dropoffLatLng = const LatLng(51.5007, -0.1246);
-            });
-            _updateEstimation();
+            // NOTE: In a real app we'd use Google Places Autocomplete here
+            // Removing hardcoded UK LatLng for now to allow universal address entry
+            // Ideally, after typing, user should "Select on map" or we use Geocoding API
           }
         },
       ),
