@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flota_mobile/theme/app_theme.dart';
@@ -116,46 +117,20 @@ class _RiderDashboardState extends ConsumerState<RiderDashboard> {
             ),
           ),
 
-          // Map with Heatmap Placeholder
+          // Map with Live Location
           Expanded(
             flex: 2,
-            child: Stack(
-              children: [
-                 Image.asset(
-                  'assets/images/heatmap_placeholder.png', 
-                  fit: BoxFit.cover,
-                  width: double.infinity,
-                  errorBuilder: (context, error, stackTrace) => Container(
-                    color: Colors.blue[50],
-                    child: const Center(child: Icon(Icons.wb_sunny_outlined, size: 80, color: Colors.blueAccent)),
+            child: _currentPosition == null 
+              ? const Center(child: CircularProgressIndicator())
+              : GoogleMap(
+                  initialCameraPosition: CameraPosition(
+                    target: LatLng(_currentPosition!.latitude, _currentPosition!.longitude),
+                    zoom: 14,
                   ),
+                  myLocationEnabled: true,
+                  myLocationButtonEnabled: true,
+                  zoomControlsEnabled: false,
                 ),
-                // "You" marker overlay
-                Center(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                        decoration: BoxDecoration(
-                          color: AppTheme.primaryBlue,
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: const Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(Icons.person, color: Colors.white, size: 16),
-                            SizedBox(width: 4),
-                            Text('You', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                          ],
-                        ),
-                      ),
-                      const Icon(Icons.arrow_drop_down, color: AppTheme.primaryBlue, size: 30),
-                    ],
-                  ),
-                ),
-              ],
-            ),
           ),
 
           // Stats Cards
@@ -166,26 +141,49 @@ class _RiderDashboardState extends ConsumerState<RiderDashboard> {
               color: const Color(0xFFF1F4FA),
               child: Column(
                 children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _StatCard(
-                          title: 'Today\'s Earnings',
-                          value: '${ref.watch(authProvider).currencySymbol}128.50',
-                          actionLabel: 'View Details',
-                          color: AppTheme.primaryBlue,
-                        ),
-                      ),
-                      const SizedBox(width: 15),
-                      Expanded(
-                        child: _StatCard(
-                          title: 'Completed Jobs',
-                          value: '8',
-                          actionLabel: 'View History',
-                          color: AppTheme.primaryBlue,
-                        ),
-                      ),
-                    ],
+                  StreamBuilder<QuerySnapshot>(
+                    stream: FirebaseFirestore.instance
+                        .collection('deliveries')
+                        .where('rider_id', isEqualTo: ref.watch(authProvider).userId)
+                        .where('status', isEqualTo: 'delivered')
+                        .snapshots(),
+                    builder: (context, snapshot) {
+                      if (!snapshot.hasData) {
+                        return const Center(child: CircularProgressIndicator());
+                      }
+
+                      final docs = snapshot.data!.docs;
+                      // Calculate stats
+                      double earnings = 0;
+                      int completed = docs.length;
+                      
+                      for (var doc in docs) {
+                        final data = doc.data() as Map<String, dynamic>;
+                        earnings += (data['cost'] ?? 0.0);
+                      }
+
+                      return Row(
+                        children: [
+                          Expanded(
+                            child: _StatCard(
+                              title: 'Total Earnings',
+                              value: '${ref.watch(authProvider).currencySymbol}${earnings.toStringAsFixed(2)}',
+                              actionLabel: 'View Details',
+                              color: AppTheme.primaryBlue,
+                            ),
+                          ),
+                          const SizedBox(width: 15),
+                          Expanded(
+                            child: _StatCard(
+                              title: 'Completed Jobs',
+                              value: '$completed',
+                              actionLabel: 'View History',
+                              color: AppTheme.primaryBlue,
+                            ),
+                          ),
+                        ],
+                      );
+                    }
                   ),
                 ],
               ),

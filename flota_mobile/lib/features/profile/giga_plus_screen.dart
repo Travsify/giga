@@ -25,11 +25,11 @@ class GigaPlusScreen extends ConsumerWidget {
 
     if (authState.countryCode == 'NG') {
       currency = '₦';
-      price = 5000.0;
-      freeDeliveryThreshold = 5000.0;
+      price = 39.99 * 2025; // 1 GBP = 2025 NGN
+      freeDeliveryThreshold = 15.0 * 2025;
     } else if (authState.countryCode == 'GH') {
       currency = '₵';
-      price = 500.0;
+      price = 39.99 * 15; // Approximate rate, update if user provides
       freeDeliveryThreshold = 150.0;
     }
 

@@ -1,0 +1,20 @@
+﻿version of Kotlin. 
+The binary version 
+of its metadata is 
+2.2.0, expected 
+version is 2.0.0.
+e: file:///C:/Users/U
+SER/Desktop/giga/flot
+a_mobile/build/webvie
+w_flutter_android/tmp
+/kotlin-classes/relea
+se/META-INF/webview_f
+lutter_android_releas
+e.kotlin_module 
+Module was compiled 
+with an incompatible 
+version of Kotlin. 
+The binary version 
+of its metadata is 
+2.2.0, expected 
+version is 2.0.0.

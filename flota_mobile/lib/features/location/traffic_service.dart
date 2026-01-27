@@ -9,14 +9,12 @@ enum TrafficStatus {
 
 class TrafficService {
   static Future<Map<String, dynamic>> getTFLStatus() async {
-    await Future.delayed(const Duration(milliseconds: 800));
-    
-    // Mock Data
+    // Return empty/unavailable state as we don't have a real Traffic API connected yet
     return {
-      'status': TrafficStatus.moderate,
-      'description': 'Moderate congestion on A40 Westway due to roadworks.',
-      'tube_status': 'Circle Line: Minor Delays',
-      'color': Colors.orange,
+      'status': TrafficStatus.clear,
+      'description': 'Traffic data unavailable',
+      'tube_status': 'Status unavailable',
+      'color': Colors.grey,
     };
   }
 }

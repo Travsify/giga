@@ -218,45 +218,11 @@ class _LiveHeatmapWidgetState extends State<LiveHeatmapWidget> {
                     ),
                     myLocationEnabled: false,
                     zoomControlsEnabled: false,
-                    liteModeEnabled: true,
+                    liteModeEnabled: false, // Set to false to allow interaction/traffic
+                    trafficEnabled: true, // SHOW REAL TRAFFIC
                     mapType: MapType.normal,
                   ),
                 ),
-                if (_trafficStatus != null)
-                  Positioned(
-                    top: 10,
-                    left: 10,
-                    child: FadeInDown(
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF0F1219).withOpacity(0.95),
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: theme.primaryColor.withOpacity(0.2)),
-                          boxShadow: [
-                             BoxShadow(color: Colors.black.withOpacity(0.3), blurRadius: 4),
-                          ],
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(Icons.traffic_rounded, color: _trafficStatus!['color'], size: 16),
-                            const SizedBox(width: 8),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const Text('Traffic Status', style: TextStyle(fontSize: 10, color: Colors.grey)),
-                                Text(
-                                  _trafficStatus!['tube_status'],
-                                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
               ],
             ),
           ),

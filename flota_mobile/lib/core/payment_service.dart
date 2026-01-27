@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:async';
 import 'package:flota_mobile/core/payment_config_service.dart';
 import 'package:flutter_paystack_plus/flutter_paystack_plus.dart';
 import 'package:flutterwave_standard/flutterwave.dart';
@@ -14,7 +15,7 @@ import 'dart:math';
 const String kApiBaseUrl = 'https://giga-ytn0.onrender.com/api'; 
 
 class PaymentService {
-  // static final _paystackPlugin = PaystackPlugin();
+  // static final _paystackPlugin = PaystackPlugin(); // Removed
 
   static Future<void> initialize() async {
     // 1. Fetch Remote Config
@@ -30,19 +31,6 @@ class PaymentService {
        // Fallback
        Stripe.publishableKey = 'pk_test_51R4NuyAEVFQTWQrKB3NZOOlWSqpFYyQZmMdEcFRVg6V0aHg07dr7UUfV1N2CabjUXoTbLLehUq7VpJQ6D2hJP8bM00HcerMi3h';
     }
-    
-    // 3. Initialize Paystack
-    /*
-    final paystackKey = config.paystackPublicKey;
-    if (paystackKey != null && paystackKey.isNotEmpty) {
-      try {
-        await _paystackPlugin.initialize(publicKey: paystackKey);
-        debugPrint('PaymentService: Paystack Initialized with remote key');
-      } catch (e) {
-        debugPrint('PaymentService: Paystack Init Failed: $e');
-      }
-    }
-    */
   }
 
   // Unified Fund Wallet Method
@@ -70,42 +58,43 @@ class PaymentService {
 
   // FLUTTERWAVE FLOW
   static Future<bool> _fundWalletFlutterwave(BuildContext context, double amount, String email, String userId, String currency) async {
-    // MOCKING FLUTTERWAVE TO FIX BUILD ISSUE
-    debugPrint('Bypassing Flutterwave Plugin due to build issues');
-    await Future.delayed(const Duration(seconds: 1));
-    String mockRef = 'FLW_MOCK_${DateTime.now().millisecondsSinceEpoch}';
-    return await _confirmPaymentWithBackend(mockRef, 'flutterwave', amount, currency);
-  }
-
-  // PAYSTACK FLOW (REAL)
-  static Future<bool> _fundWalletPaystack(BuildContext context, double amount, String email, String currency) async {
-      final config = PaymentConfigService();
-      if (config.paystackPublicKey == null) {
-          if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Paystack is not configured (Missing public key)')));
-          return false;
-      }
-
-      /*
-      if (!_paystackPlugin.sdkInitialized) {
-         await _paystackPlugin.initialize(publicKey: config.paystackPublicKey!);
-      }
-      */
-
-      try {
-        // PAYSTACK PLUGIN ISSUE - Mocking success for testing
-        // PaystackCharge charge = PaystackCharge() ...
-        debugPrint('Bypassing Paystack Plugin due to build issues');
-        await Future.delayed(const Duration(seconds: 1));
-        
-        // Mock successful response reference
-        String mockRef = 'PAY_MOCK_${DateTime.now().millisecondsSinceEpoch}';
-        return await _confirmPaymentWithBackend(mockRef, 'paystack', amount, currency);
-
-      } catch (e) {
-         debugPrint('Paystack Error: $e');
-         if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Paystack Error: $e')));
+    final config = PaymentConfigService();
+    // Use standard Flutterwave checkout
+    final Customer customer = Customer(email: email, name: "Giga User", phoneNumber: "1234567890");
+    final Flutterwave flutterwave = Flutterwave(
+      publicKey: config.flutterwavePublicKey!, 
+      currency: currency, 
+      redirectUrl: "https://giga-ytn0.onrender.com", 
+      txRef: "FLW_${DateTime.now().millisecondsSinceEpoch}", 
+      amount: amount.toString(), 
+      customer: customer, 
+      paymentOptions: "card, mobilemoneyghana, ussd", 
+      customization: Customization(title: "Giga Logistics Wallet Topup"), 
+      isTestMode: true
+    );
+    
+    try {
+      final ChargeResponse response = await flutterwave.charge(context);
+      if (response.success == true) { // Updated check based on typical response
+         debugPrint('Flutterwave Success: ${response.transactionId}');
+         return await _confirmPaymentWithBackend(response.transactionId ?? 'UNKNOWN_REF', 'flutterwave', amount, currency);
+      } else {
+         debugPrint('Flutterwave Failed');
          return false;
       }
+    } catch (e) {
+      debugPrint('Flutterwave Error: $e');
+      return false;
+    }
+  }
+
+  static Future<bool> _fundWalletPaystack(BuildContext context, double amount, String email, String currency) async {
+       if (context.mounted) {
+         ScaffoldMessenger.of(context).showSnackBar(
+           const SnackBar(content: Text('Paystack is currently undergoing maintenance. Please use Flutterwave or Stripe.')),
+         );
+       }
+       return false;
   }
 
   // STRIPE FLOW
@@ -218,13 +207,7 @@ class PaymentService {
     }
   }
     
-  static Future<bool> payForDelivery(BuildContext context, double amount, String email, String deliveryId) async {
-    // Legacy mock function - update if needed or deprecated
-    debugPrint('MockPaymentService: Paying for delivery $deliveryId - $amount');
-    await Future.delayed(const Duration(seconds: 2));
-    // ... Mock logic ...
-    return true;
-  }
+
 
   static Future<Map<String, dynamic>> redeemGiftCard(String pin, String userId) async {
     final dio = await _getAuthenticatedDio();

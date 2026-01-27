@@ -1,0 +1,20 @@
+﻿3 warnings
+Note: Some input files 
+use or override a 
+deprecated API.
+Note: Recompile with 
+-Xlint:deprecation for 
+details.
+e: file:///C:/Users/USER/.
+gradle/caches/transforms-4
+/aec990aea05c4d2c30b8f6ef2
+34bb74b/transformed/androi
+d-maps-utils-4.0.0/jars/cl
+asses.jar!/META-INF/librar
+y_release.kotlin_module 
+Module was compiled with 
+an incompatible version 
+of Kotlin. The binary 
+version of its metadata 
+is 2.2.0, expected 
+version is 2.0.0.

@@ -3,43 +3,14 @@ import 'package:flota_mobile/theme/app_theme.dart';
 import 'package:go_router/go_router.dart';
 import 'package:animate_do/animate_do.dart';
 
-class NotificationScreen extends StatelessWidget {
+import 'package:flota_mobile/features/notifications/data/notification_repository.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+class NotificationScreen extends ConsumerWidget {
   const NotificationScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    // Mock Notifications
-    final notifications = [
-      {
-        'title': 'Rider Arriving Soon',
-        'body': 'Your eco-rider James is 5 mins away!',
-        'time': '2 mins ago',
-        'icon': Icons.pedal_bike_rounded,
-        'color': AppTheme.successGreen,
-      },
-      {
-        'title': 'Payment Successful',
-        'body': 'Top-up of £20.00 was successful.',
-        'time': '1 hour ago',
-        'icon': Icons.account_balance_wallet_rounded,
-        'color': AppTheme.primaryBlue,
-      },
-      {
-        'title': 'New Login',
-        'body': 'New login detected from London, UK.',
-        'time': '1 day ago',
-        'icon': Icons.security_rounded,
-        'color': Colors.orange,
-      },
-      {
-        'title': 'Welcome to Giga!',
-        'body': 'Get started by creating your first shipment.',
-        'time': '2 days ago',
-        'icon': Icons.waving_hand_rounded,
-        'color': Colors.purple,
-      },
-    ];
-
+  Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -55,53 +26,85 @@ class NotificationScreen extends StatelessWidget {
           ),
         ],
       ),
-      body: ListView.separated(
-        padding: const EdgeInsets.all(20),
-        itemCount: notifications.length,
-        separatorBuilder: (context, index) => const Divider(height: 30),
-        itemBuilder: (context, index) {
-          final item = notifications[index];
-          return FadeInUp(
-            delay: Duration(milliseconds: index * 100),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: (item['color'] as Color).withOpacity(0.1),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(item['icon'] as IconData, color: item['color'] as Color),
-                ),
-                const SizedBox(width: 15),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      body: FutureBuilder<List<Map<String, dynamic>>>(
+        future: ref.read(notificationRepositoryProvider).getNotifications(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          
+          if (snapshot.hasError) {
+             return Center(child: Text('Error loading notifications'));
+          }
+
+          final notifications = snapshot.data ?? [];
+
+          if (notifications.isEmpty) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.notifications_off_outlined, size: 60, color: Colors.grey[300]),
+                  const SizedBox(height: 16),
+                  Text('No notifications yet', style: TextStyle(color: Colors.grey[500])),
+                ],
+              ),
+            );
+          }
+
+          return ListView.separated(
+            padding: const EdgeInsets.all(20),
+            itemCount: notifications.length,
+            separatorBuilder: (context, index) => const Divider(height: 30),
+            itemBuilder: (context, index) {
+              final item = notifications[index];
+              // Default fallback for color/icon if not provided by backend
+              final color = AppTheme.primaryBlue; 
+              final icon = Icons.notifications;
+
+              return FadeInUp(
+                delay: Duration(milliseconds: index * 100),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: color.withOpacity(0.1),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(icon, color: color),
+                    ),
+                    const SizedBox(width: 15),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            item['title'] as String,
-                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                item['title'] ?? 'Notification',
+                                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                              ),
+                              Text(
+                                item['created_at_human'] ?? '', // Expecting human readable time from backend
+                                style: TextStyle(color: Colors.grey[400], fontSize: 12),
+                              ),
+                            ],
                           ),
+                          const SizedBox(height: 5),
                           Text(
-                            item['time'] as String,
-                            style: TextStyle(color: Colors.grey[400], fontSize: 12),
+                            item['body'] ?? '',
+                            style: TextStyle(color: Colors.grey[600], fontSize: 14),
                           ),
                         ],
                       ),
-                      const SizedBox(height: 5),
-                      Text(
-                        item['body'] as String,
-                        style: TextStyle(color: Colors.grey[600], fontSize: 14),
-                      ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              );
+            },
           );
         },
       ),

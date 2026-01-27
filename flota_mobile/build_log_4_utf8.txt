@@ -1,0 +1,20 @@
+﻿le Module was compiled 
+with an incompatible 
+version of Kotlin. The 
+binary version of its 
+metadata is 2.2.0, 
+expected version is 2.0.0.
+e: file:///C:/Users/USER/.
+gradle/caches/modules-2/fi
+les-2.1/org.jetbrains.kotl
+in/kotlin-stdlib/2.2.21/fa
+374a986e128314c3db00a20aae
+55f72a258511/kotlin-stdlib
+-2.2.21.jar!/META-INF/kotl
+in-stdlib.kotlin_module 
+Module was compiled with 
+an incompatible version 
+of Kotlin. The binary 
+version of its metadata 
+is 2.2.0, expected 
+version is 2.0.0.

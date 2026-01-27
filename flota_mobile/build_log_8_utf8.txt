@@ -1,0 +1,50 @@
+﻿version of Kotlin. The 
+binary version of its 
+metadata is 2.2.0, 
+expected version is 2.0.0.
+e: file:///C:/Users/USER/.
+gradle/caches/modules-2/fi
+les-2.1/org.jetbrains.kotl
+in/kotlin-stdlib/2.2.21/fa
+374a986e128314c3db00a20aae
+55f72a258511/kotlin-stdlib
+-2.2.21.jar!/META-INF/kotl
+in-stdlib.kotlin_module 
+Module was compiled with 
+an incompatible version 
+of Kotlin. The binary 
+version of its metadata 
+is 2.2.0, expected 
+version is 2.0.0.
+Info: Proguard configuration rule does not match anything: `-keepclassmembers class j$.util.concurrent.ConcurrentHashMap$TreeBin {
+  int lockState;
+}`
+Info: Proguard configuration rule does not match anything: `-keepclassmembers class j$.util.concurrent.ConcurrentHashMap {
+  int sizeCtl;
+  int transferIndex;
+  long baseCount;
+  int cellsBusy;
+}`
+Info: Proguard configuration rule does not match anything: `-keepclassmembers class j$.util.concurrent.ConcurrentHashMap$CounterCell {
+  long value;
+}`
+Info: Proguard configuration rule does not match anything: `-keepclassmembers class j$.util.IntSummaryStatistics {
+  long count;
+  long sum;
+  int min;
+  int max;
+}`
+Info: Proguard configuration rule does not match anything: `-keepclassmembers class j$.util.LongSummaryStatistics {
+  long count;
+  long sum;
+  long min;
+  long max;
+}`
+Info: Proguard configuration rule does not match anything: `-keepclassmembers class j$.util.DoubleSummaryStatistics {
+  long count;
+  double sum;
+  double min;
+  double max;
+}`
+Running Gradle task 'assembleRelease'...                          546.1s
+ΓêÜ Built build\app\outputs\flutter-apk\app-release.apk (68.7MB)
