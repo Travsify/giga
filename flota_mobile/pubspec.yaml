@@ -41,7 +41,8 @@ dependencies:
   geolocator: ^10.1.0
   geocoding: ^2.1.1
   flutter_stripe: ^10.0.0
-  flutter_paystack_plus: ^1.0.8
+  flutter_paystack:
+    path: ./packages/flutter_paystack
   flutterwave_standard: ^1.0.9
   flutter_secure_storage: ^9.0.0
   socket_io_client: ^2.0.3

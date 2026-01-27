@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:flota_mobile/core/payment_config_service.dart';
-import 'package:flutter_paystack_plus/flutter_paystack_plus.dart';
+import 'package:flutter_paystack/flutter_paystack.dart';
 import 'package:flutterwave_standard/flutterwave.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -89,12 +89,40 @@ class PaymentService {
   }
 
   static Future<bool> _fundWalletPaystack(BuildContext context, double amount, String email, String currency) async {
-       if (context.mounted) {
-         ScaffoldMessenger.of(context).showSnackBar(
-           const SnackBar(content: Text('Paystack is currently undergoing maintenance. Please use Flutterwave or Stripe.')),
+       final config = PaymentConfigService();
+       final plugin = PaystackPlugin();
+       
+       try {
+         await plugin.initialize(publicKey: config.paystackPublicKey!);
+         
+         final charge = Charge()
+           ..amount = (amount * 100).toInt() // In kobo
+           ..email = email
+           ..currency = currency
+           ..reference =  "PSTK_${DateTime.now().millisecondsSinceEpoch}";
+           
+         final response = await plugin.checkout(
+           context,
+           method: CheckoutMethod.card,
+           charge: charge,
          );
+         
+         if (response.status) {
+           debugPrint('Paystack Success: ${response.reference}');
+           return await _confirmPaymentWithBackend(response.reference!, 'paystack', amount, currency);
+         } else {
+           if (context.mounted) {
+             ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Paystack Failed: ${response.message}')));
+           }
+           return false;
+         }
+       } catch (e) {
+         debugPrint('Paystack Error: $e');
+         if (context.mounted) {
+           ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Paystack Error: $e')));
+         }
+         return false;
        }
-       return false;
   }
 
   // STRIPE FLOW
