@@ -14,6 +14,8 @@ class LiveMap extends Widget
     
     protected int | string | array $columnSpan = 1;
 
+    protected static ?string $pollingInterval = '10s';
+
     public function getActiveRiderCount(): int
     {
         return User::where('role', 'Rider')->count();
@@ -34,5 +36,23 @@ class LiveMap extends Widget
         return Delivery::where('status', 'delivered')
             ->whereDate('updated_at', today())
             ->count();
+    }
+
+    public function getDriverLocations(): array
+    {
+        return Delivery::whereIn('status', ['picked_up', 'in_transit'])
+            ->whereNotNull('rider_lat')
+            ->whereNotNull('rider_lng')
+            ->get()
+            ->map(function ($delivery) {
+                return [
+                    'id' => $delivery->id,
+                    'lat' => $delivery->rider_lat,
+                    'lng' => $delivery->rider_lng,
+                    'name' => $delivery->rider_name ?? 'Rider',
+                    'status' => $delivery->status,
+                ];
+            })
+            ->toArray();
     }
 }

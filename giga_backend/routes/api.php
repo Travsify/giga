@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\DeliveryController;
 use App\Http\Controllers\Api\ChatController;
 use App\Http\Controllers\Api\ProfileController;
+use App\Http\Controllers\Api\NotificationController;
 
 use App\Http\Controllers\Api\PasswordResetController;
 use App\Http\Controllers\Api\PaymentController;
@@ -74,6 +75,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/email/send-verification', [EmailVerificationController::class, 'sendVerificationCode']);
     Route::post('/email/verify', [EmailVerificationController::class, 'verifyCode']);
     Route::post('/email/resend', [EmailVerificationController::class, 'resendCode']);
+
+    // Notifications
+    Route::get('/notifications', [NotificationController::class, 'index']);
 
     // Deliveries
     Route::get('/deliveries', [DeliveryController::class, 'index']);

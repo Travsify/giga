@@ -12,60 +12,78 @@
 
         <div class="space-y-4">
             {{-- Map Container --}}
+            {{-- Map Container --}}
             <div 
-                id="driver-map" 
-                class="w-full h-[280px] rounded-xl overflow-hidden bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-slate-800 dark:to-slate-900 relative"
                 wire:ignore
+                x-data="{
+                    map: null,
+                    markers: [],
+                    locations: @js($this->getDriverLocations()),
+                    initMap() {
+                        if (!document.getElementById('google-maps-script')) {
+                            const script = document.createElement('script');
+                            script.id = 'google-maps-script';
+                            script.src = 'https://maps.googleapis.com/maps/api/js?key=AIzaSyDVqP4CjWp_fcFim7d_E0kAL35Ie2gWMzE&callback=initGoogleMap';
+                            script.async = true;
+                            script.defer = true;
+                            document.head.appendChild(script);
+                            
+                            window.initGoogleMap = () => {
+                                this.renderMap();
+                            };
+                        } else if (window.google && window.google.maps) {
+                            this.renderMap();
+                        }
+                    },
+                    renderMap() {
+                        const mapDiv = document.getElementById('driver-map');
+                        if (!mapDiv) return;
+
+                        this.map = new google.maps.Map(mapDiv, {
+                            center: { lat: 9.0820, lng: 8.6753 }, // Nigeria Center
+                            zoom: 6,
+                            disableDefaultUI: true, // Clean look
+                            styles: [
+                                { featureType: 'poi', elementType: 'labels', stylers: [{ visibility: 'off' }] }
+                            ]
+                        });
+
+                        this.updateMarkers();
+                    },
+                    updateMarkers() {
+                        // Clear existing
+                        this.markers.forEach(m => m.setMap(null));
+                        this.markers = [];
+
+                        this.locations.forEach(loc => {
+                            const marker = new google.maps.Marker({
+                                position: { lat: parseFloat(loc.lat), lng: parseFloat(loc.lng) },
+                                map: this.map,
+                                title: loc.name,
+                                icon: {
+                                    url: 'https://cdn-icons-png.flaticon.com/512/3063/3063822.png', // Truck icon or similar
+                                    scaledSize: new google.maps.Size(32, 32)
+                                }
+                            });
+                            
+                            const infoWindow = new google.maps.InfoWindow({
+                                content: `<div style='color:black;'><strong>${loc.name}</strong><br>${loc.status}</div>`
+                            });
+
+                            marker.addListener('click', () => {
+                                infoWindow.open(this.map, marker);
+                            });
+
+                            this.markers.push(marker);
+                        });
+                    }
+                }"
+                x-init="initMap(); $watch('locations', value => updateMarkers())"
+                id="driver-map" 
+                class="w-full h-[350px] rounded-xl overflow-hidden bg-gray-100 relative"
             >
-                {{-- Simulated Map Background --}}
-                <div class="absolute inset-0 opacity-30">
-                    <svg viewBox="0 0 400 280" class="w-full h-full" preserveAspectRatio="xMidYMid slice">
-                        <path d="M0 200 Q100 150 200 180 T400 160" fill="none" stroke="#0047C1" stroke-width="3" opacity="0.5"/>
-                        <path d="M0 100 Q150 80 250 120 T400 90" fill="none" stroke="#0047C1" stroke-width="2" opacity="0.3"/>
-                        <rect x="50" y="80" width="60" height="40" rx="4" fill="#0047C1" opacity="0.1"/>
-                        <rect x="200" y="120" width="80" height="50" rx="4" fill="#0047C1" opacity="0.1"/>
-                        <rect x="320" y="60" width="50" height="30" rx="4" fill="#0047C1" opacity="0.1"/>
-                    </svg>
-                </div>
-
-                {{-- Driver Markers - Visibile Icons --}}
-                <div class="absolute top-[30%] left-[20%] transform -translate-x-1/2 -translate-y-1/2 group">
-                    <div class="flex flex-col items-center">
-                        <div class="w-10 h-10 rounded-full bg-primary-500 flex items-center justify-center text-white shadow-lg shadow-primary-500/50 animate-bounce">
-                            <x-heroicon-m-truck class="w-6 h-6" />
-                        </div>
-                        <span class="bg-white px-2 py-0.5 rounded text-[10px] font-bold text-primary-700 mt-1 shadow-sm border border-primary-200">
-                             VH-{{ rand(1000, 9999) }}
-                        </span>
-                    </div>
-                </div>
-
-                <div class="absolute top-[50%] left-[60%] transform -translate-x-1/2 -translate-y-1/2">
-                    <div class="flex flex-col items-center">
-                        <div class="w-10 h-10 rounded-full bg-danger-500 flex items-center justify-center text-white shadow-lg shadow-danger-500/50">
-                            <x-heroicon-m-shopping-cart class="w-6 h-6" />
-                        </div>
-                        <span class="bg-white px-2 py-0.5 rounded text-[10px] font-bold text-danger-700 mt-1 shadow-sm border border-danger-200">
-                             In Transit
-                        </span>
-                    </div>
-                </div>
-
-                <div class="absolute top-[25%] left-[75%] transform -translate-x-1/2 -translate-y-1/2">
-                    <div class="w-8 h-8 rounded-full bg-success-500 flex items-center justify-center text-white shadow-lg shadow-success-500/50">
-                        <x-heroicon-m-check-circle class="w-5 h-5" />
-                    </div>
-                </div>
-
-                <div class="absolute top-[65%] left-[35%] transform -translate-x-1/2 -translate-y-1/2">
-                    <div class="flex flex-col items-center">
-                        <div class="w-10 h-10 rounded-full bg-warning-500 flex items-center justify-center text-white shadow-lg shadow-warning-500/50">
-                            <x-heroicon-m-map-pin class="w-6 h-6" />
-                        </div>
-                        <span class="bg-white px-2 py-0.5 rounded text-[10px] font-bold text-warning-700 mt-1 shadow-sm border border-warning-200">
-                             Waiting
-                        </span>
-                    </div>
+                <div class="absolute inset-0 flex items-center justify-center bg-gray-100" x-show="!map">
+                    <span class="animate-pulse text-gray-400">Loading Map...</span>
                 </div>
             </div>
 
