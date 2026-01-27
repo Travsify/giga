@@ -162,6 +162,10 @@ class PaymentController extends Controller
             elseif ($provider === 'flutterwave') {
                 $flwSecret = AppSetting::get('flutterwave_secret_key');
                  if (!$flwSecret) {
+                     $flwSecret = env('FLUTTERWAVE_SECRET_KEY') ?? env('FLW_SECRET_KEY');
+                 }
+                 
+                 if (!$flwSecret) {
                      return response()->json(['error' => 'Flutterwave is not configured.'], 500);
                 }
 
