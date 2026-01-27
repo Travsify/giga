@@ -1,45 +1,86 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:dio/dio.dart';
+import 'dart:async';
 import 'package:flota_mobile/theme/app_theme.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flota_mobile/features/auth/auth_provider.dart';
 
-class SearchScreen extends StatefulWidget {
+class SearchScreen extends ConsumerStatefulWidget {
   const SearchScreen({super.key});
 
   @override
-  State<SearchScreen> createState() => _SearchScreenState();
+  ConsumerState<SearchScreen> createState() => _SearchScreenState();
 }
 
-class _SearchScreenState extends State<SearchScreen> {
+class _SearchScreenState extends ConsumerState<SearchScreen> {
   final TextEditingController _searchController = TextEditingController();
-  List<String> _results = [];
+  List<Map<String, dynamic>> _results = [];
+  Timer? _debounce;
+  final String _googleApiKey = 'AIzaSyDVqP4CjWp_fcFim7d_E0kAL35Ie2gWMzE'; // From AndroidManifest
+  String? _sessionToken;
+
+  @override
+  void initState() {
+    super.initState();
+    _sessionToken = _generateUuid();
+  }
+
+  String _generateUuid() {
+    return DateTime.now().millisecondsSinceEpoch.toString();
+  }
 
   void _onSearch(String query) {
+    if (_debounce?.isActive ?? false) _debounce?.cancel();
+    
     if (query.isEmpty) {
       setState(() => _results = []);
       return;
     }
 
-    // Generic Address Search (Mock)
-    if (query.length > 3) {
-        setState(() {
-          _results = [
-            '📍 123 Main St, Lagos',
-            '📍 Big Ben, London',
-            '📍 Previous: 55 Mole St',
-          ];
-        });
-        return;
-    }
-    
-    // Normal Search Logic
-    setState(() {
-      _results = [
-        'Delivery to Camden',
-        'Pickup from Soho',
-        'Express Parcel #1234',
-        'Locker Dropoff',
-      ].where((element) => element.toLowerCase().contains(query.toLowerCase())).toList();
+    _debounce = Timer(const Duration(milliseconds: 500), () {
+      _fetchPlaces(query);
     });
+  }
+
+  Future<void> _fetchPlaces(String query) async {
+    final countryCode = ref.read(authProvider).countryCode?.toLowerCase() ?? 'gb';
+    
+    // Components filtering: country:uk|country:ng etc.
+    // Mapping our country codes to Google's ISO 3166-1 Alpha-2
+    // 'GB' -> 'uk' for Google Components (though 'gb' usually works, 'uk' is safer for google services sometimes, but standard is GB)
+    // Actually, Google Places uses ISO 3166-1 Alpha-2. 'GB' is correct. 'NG' is correct.
+    
+    final url = 'https://maps.googleapis.com/maps/api/place/autocomplete/json'
+        '?input=$query'
+        '&key=$_googleApiKey'
+        '&sessiontoken=$_sessionToken'
+        '&components=country:$countryCode'; 
+
+    try {
+      final response = await Dio().get(url);
+      if (response.statusCode == 200) {
+        if (response.data['status'] == 'OK') {
+             final predictions = response.data['predictions'] as List;
+             setState(() {
+               _results = predictions.map((p) => {
+                 'description': p['description'],
+                 'place_id': p['place_id'],
+                 'main_text': p['structured_formatting']['main_text'] ?? p['description'],
+                 'secondary_text': p['structured_formatting']['secondary_text'] ?? '',
+               }).toList();
+             });
+        } else {
+             // Handle ZERO_RESULTS or errors gracefully
+             debugPrint('Google Places Status: ${response.data['status']}');
+             if (response.data['status'] == 'ZERO_RESULTS') {
+                 setState(() => _results = []);
+             }
+        }
+      }
+    } catch (e) {
+      debugPrint('Google Places Error: $e');
+    }
   }
 
   @override
@@ -47,21 +88,20 @@ class _SearchScreenState extends State<SearchScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 1,
+        iconTheme: const IconThemeData(color: Colors.black),
         title: TextField(
           controller: _searchController,
           autofocus: true,
-          decoration: const InputDecoration(
+          cursorColor: AppTheme.primaryBlue,
+          decoration: InputDecoration(
             hintText: 'Search address or location...',
             border: InputBorder.none,
-            hintStyle: TextStyle(color: Colors.white70),
+            hintStyle: TextStyle(color: Colors.grey[400]),
           ),
-          style: const TextStyle(color: Colors.white, fontSize: 18),
+          style: const TextStyle(color: Colors.black, fontSize: 18), 
           onChanged: _onSearch,
-        ),
-        backgroundColor: AppTheme.primaryBlue,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.pop(),
         ),
       ),
       body: _results.isEmpty
@@ -69,24 +109,29 @@ class _SearchScreenState extends State<SearchScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                   Icon(Icons.search_off, size: 80, color: Colors.grey[300]),
-                   const SizedBox(height: 10),
-                   Text('Start typing to search', style: TextStyle(color: Colors.grey[500])),
+                   if (_searchController.text.isNotEmpty && _searchController.text.length > 2)
+                     const Padding(
+                       padding: EdgeInsets.all(20.0),
+                       child: CircularProgressIndicator(),
+                     )
+                   else ...[
+                     Icon(Icons.location_on_outlined, size: 80, color: Colors.grey[200]),
+                     const SizedBox(height: 10),
+                     Text('Start typing to find location', style: TextStyle(color: Colors.grey[500])),
+                   ]
                 ],
               ),
             )
           : ListView.builder(
               itemCount: _results.length,
               itemBuilder: (context, index) {
+                final place = _results[index];
                 return ListTile(
-                  leading: const Icon(Icons.history),
-                  title: Text(_results[index]),
+                  leading: const Icon(Icons.location_on_rounded, color: AppTheme.primaryBlue),
+                  title: Text(place['main_text'], style: const TextStyle(fontWeight: FontWeight.bold)),
+                  subtitle: Text(place['secondary_text']),
                   onTap: () {
-                    // Handle selection
-                    context.pop();
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Selected: ${_results[index]}')),
-                    );
+                    context.pop(place); 
                   },
                 );
               },

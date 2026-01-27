@@ -8,6 +8,7 @@ import 'package:flota_mobile/core/location_service.dart';
 import 'package:flota_mobile/features/marketplace/data/delivery_repository.dart';
 import 'package:flota_mobile/features/marketplace/data/models/delivery_models.dart';
 import 'package:flota_mobile/shared/map_picker_screen.dart';
+import 'package:flota_mobile/features/auth/auth_provider.dart';
 
 class MultiStopScreen extends ConsumerStatefulWidget {
   const MultiStopScreen({super.key});
@@ -390,7 +391,7 @@ class _MultiStopScreenState extends ConsumerState<MultiStopScreen> {
                         ),
                         const SizedBox(height: 5),
                         Text(
-                          _isEstimating ? 'Calculating...' : '£${_apiFare.toStringAsFixed(2)}',
+                          _isEstimating ? 'Calculating...' : '${ref.read(authProvider).currencySymbol}${_apiFare.toStringAsFixed(2)}',
                           style: GoogleFonts.outfit(
                             fontSize: 32,
                             fontWeight: FontWeight.bold,

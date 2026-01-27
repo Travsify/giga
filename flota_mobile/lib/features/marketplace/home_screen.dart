@@ -226,7 +226,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                     ),
                                     const SizedBox(height: 5),
                                     Text(
-                                      '${ref.watch(authProvider).currencySymbol}${balance.toStringAsFixed(2)}',
+                                      '${ref.read(authProvider).currencySymbol}${balance.toStringAsFixed(2)}',
                                       style: const TextStyle(
                                         color: Colors.white,
                                         fontSize: 28,
@@ -316,7 +316,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       context: context,
                       icon: Icons.business_center_rounded,
                       title: 'Giga for Business',
-                      subtitle: ref.watch(authProvider).role == 'Business' ? 'Manage your corporate account' : 'Bulk shipping for UK sellers',
+                      subtitle: ref.watch(authProvider).role == 'Business' 
+                          ? 'Manage your corporate account' 
+                          : (authState.countryCode == 'NG' ? 'Bulk shipping for All Sellers' : 'Bulk shipping for UK sellers'),
                       colors: [const Color(0xFF667EEA), const Color(0xFF764BA2)],
                       onTap: () => context.push(ref.watch(authProvider).role == 'Business' ? '/business-dashboard' : '/business-enrollment'),
                     ),
