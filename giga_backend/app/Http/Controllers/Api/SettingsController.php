@@ -95,4 +95,30 @@ class SettingsController extends Controller
             'data' => $rates
         ]);
     }
+    /**
+     * Get active payment configuration
+     */
+    public function getPaymentConfig(): JsonResponse
+    {
+        // Fetch settings directly or via AppSetting wrapper
+        $stripeKey = AppSetting::get('stripe_public_key');
+        $paystackKey = AppSetting::get('paystack_public_key'); // Ensure this key exists in DB
+        $flutterwaveKey = AppSetting::get('flutterwave_public_key');
+        $flutterwaveEncKey = AppSetting::get('flutterwave_encryption_key');
+        
+        $paystackEnabled = AppSetting::get('paystack_enabled', false);
+        $flutterwaveEnabled = AppSetting::get('flutterwave_enabled', false);
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'stripe_public_key' => $stripeKey,
+                'paystack_public_key' => $paystackKey,
+                'flutterwave_public_key' => $flutterwaveKey,
+                'flutterwave_encryption_key' => $flutterwaveEncKey,
+                'paystack_enabled' => $paystackEnabled,
+                'flutterwave_enabled' => $flutterwaveEnabled,
+            ]
+        ]);
+    }
 }
