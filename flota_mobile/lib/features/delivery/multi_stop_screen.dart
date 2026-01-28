@@ -7,7 +7,7 @@ import 'package:flota_mobile/theme/app_theme.dart';
 import 'package:flota_mobile/core/location_service.dart';
 import 'package:flota_mobile/features/marketplace/data/delivery_repository.dart';
 import 'package:flota_mobile/features/marketplace/data/models/delivery_models.dart';
-import 'package:flota_mobile/shared/map_picker_screen.dart';
+import 'package:flota_mobile/features/marketplace/data/delivery_models.dart';
 import 'package:flota_mobile/features/auth/auth_provider.dart';
 
 class MultiStopScreen extends ConsumerStatefulWidget {
@@ -28,6 +28,26 @@ class _MultiStopScreenState extends ConsumerState<MultiStopScreen> {
   bool _isEstimating = false;
   bool _isCreating = false;
   GoogleMapController? _mapController;
+
+  Future<void> _getUserLocation() async {
+    try {
+      final position = await LocationService.getCurrentLocation();
+      if (mounted && _mapController != null) {
+        // Only center on user if no stops have positions yet
+        bool hasPositions = _stops.any((s) => s['position'] != null);
+        if (!hasPositions) {
+          _mapController!.animateCamera(
+            CameraUpdate.newLatLngZoom(
+              LatLng(position.latitude, position.longitude),
+              15,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      debugPrint('Error getting location: $e');
+    }
+  }
 
   void _calculateTotalDistance() async {
     double distance = 0.0;
@@ -89,21 +109,17 @@ class _MultiStopScreenState extends ConsumerState<MultiStopScreen> {
   }
 
   Future<void> _pickLocation(int index) async {
-    final result = await Navigator.push<Map<String, dynamic>>(
-      context,
-      MaterialPageRoute(
-        builder: (context) => MapPickerScreen(
-          title: _stops[index]['type'] == 'pickup' ? 'Select Pickup' : 'Select Dropoff',
-          initialPosition: _stops[index]['position'] as LatLng?,
-        ),
-      ),
-    );
+    // 1. Launch Search Screen
+    final result = await context.push<Map<String, dynamic>>('/search');
 
+    // 2. Handle Result
     if (result != null) {
       setState(() {
         _stops[index]['address'] = result['address'];
-        _stops[index]['position'] = result['position'];
+        _stops[index]['position'] = LatLng(result['lat'], result['lng']);
       });
+      
+      // 3. Recalculate Logic
       _calculateTotalDistance();
       _updateMapCamera();
     }
@@ -144,6 +160,7 @@ class _MultiStopScreenState extends ConsumerState<MultiStopScreen> {
       return;
     }
 
+    // Calculate bounds with padding
     double minLat = positions[0].latitude;
     double maxLat = positions[0].latitude;
     double minLng = positions[0].longitude;
@@ -162,7 +179,7 @@ class _MultiStopScreenState extends ConsumerState<MultiStopScreen> {
           southwest: LatLng(minLat, minLng),
           northeast: LatLng(maxLat, maxLng),
         ),
-        50,
+        100, // Increased padding
       ),
     );
   }
@@ -216,10 +233,13 @@ class _MultiStopScreenState extends ConsumerState<MultiStopScreen> {
             child: Stack(
               children: [
                 GoogleMap(
-                  onMapCreated: (controller) => _mapController = controller,
+                  onMapCreated: (controller) {
+                    _mapController = controller;
+                    _getUserLocation(); // Center on user
+                  },
                   initialCameraPosition: const CameraPosition(
-                    target: LatLng(51.5074, -0.1278), // London
-                    zoom: 11,
+                    target: LatLng(51.5074, -0.1278), // Default London
+                    zoom: 13,
                   ),
                   markers: _stops
                       .asMap()
@@ -234,7 +254,8 @@ class _MultiStopScreenState extends ConsumerState<MultiStopScreen> {
                             ),
                           ))
                       .toSet(),
-                  myLocationEnabled: false,
+                  myLocationEnabled: true,
+                  myLocationButtonEnabled: false,
                   zoomControlsEnabled: false,
                   mapToolbarEnabled: false,
                 ),
@@ -295,11 +316,13 @@ class _MultiStopScreenState extends ConsumerState<MultiStopScreen> {
                 return Container(
                   key: ValueKey(stop),
                   margin: const EdgeInsets.only(bottom: 12),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                   decoration: BoxDecoration(
                     color: Colors.white,
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                      color: isFilled ? AppTheme.primaryBlue.withOpacity(0.1) : Colors.transparent,
+                      color: isFilled ? AppTheme.primaryBlue : Colors.grey[300]!,
+                      width: 1.5,
                     ),
                     boxShadow: [
                       BoxShadow(
@@ -310,30 +333,35 @@ class _MultiStopScreenState extends ConsumerState<MultiStopScreen> {
                     ],
                   ),
                   child: ListTile(
+                    contentPadding: EdgeInsets.zero,
                     onTap: () => _pickLocation(index),
-                    leading: const Icon(Icons.drag_handle, color: Colors.grey),
+                    leading: Icon(
+                      isPickup ? Icons.my_location_rounded : Icons.location_on_outlined, 
+                      color: isPickup ? AppTheme.primaryBlue : Colors.redAccent
+                    ),
                     title: Text(
-                      stop['address'] as String,
+                      isFilled ? (stop['address'] as String) : (isPickup ? 'Enter Pickup' : 'Enter Destination'),
                       style: GoogleFonts.outfit(
-                        fontWeight: isFilled ? FontWeight.w600 : FontWeight.w400,
-                        color: isFilled ? AppTheme.textPrimary : Colors.grey[400],
+                        fontWeight: isFilled ? FontWeight.bold : FontWeight.normal,
+                        color: isFilled ? AppTheme.textPrimary : Colors.grey[500],
+                        fontSize: 15,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    subtitle: Text(
-                      isPickup ? 'Primary Pickup' : 'Delivery Stop ${index}',
-                      style: TextStyle(color: isPickup ? AppTheme.primaryBlue : Colors.grey[500], fontSize: 11),
-                    ),
+                    subtitle: isFilled ? Text(
+                      isPickup ? 'Pickup Point' : 'Stop ${index}',
+                      style: TextStyle(color: Colors.grey[500], fontSize: 11),
+                    ) : null,
                     trailing: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         if (index > 0)
                           IconButton(
-                            icon: const Icon(Icons.remove_circle_outline, color: AppTheme.primaryRed, size: 20),
+                            icon: const Icon(Icons.close, color: Colors.grey, size: 20),
                             onPressed: () => _removeStop(index),
                           ),
-                        const Icon(Icons.chevron_right, color: Colors.grey),
+                        const Icon(Icons.drag_indicator, color: Colors.grey, size: 20),
                       ],
                     ),
                   ),
