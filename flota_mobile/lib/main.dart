@@ -44,6 +44,7 @@ import 'package:flota_mobile/features/business/presentation/screens/team_managem
 import 'package:flota_mobile/features/business/presentation/screens/api_key_screen.dart';
 import 'package:flota_mobile/theme/app_theme.dart';
 import 'package:flota_mobile/features/shared/main_scaffold.dart';
+import 'package:flota_mobile/features/delivery/inter_state_screen.dart';
 
 
 import 'firebase_options.dart';
@@ -300,6 +301,10 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => EnhancedTrackingScreen(
           deliveryId: state.pathParameters['id'] ?? 'unknown',
         ),
+      ),
+      GoRoute(
+        path: '/inter-state',
+        builder: (context, state) => const InterStateScreen(),
       ),
       GoRoute(
         path: '/multi-stop',

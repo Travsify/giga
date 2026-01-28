@@ -460,6 +460,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       const SizedBox(width: 15),
                       Expanded(
                         child: FadeInUp(
+                          delay: const Duration(milliseconds: 350),
+                          child: _ServiceTile(
+                            title: 'Waybill',
+                            subtitle: 'Inter-state',
+                            icon: Icons.map_rounded,
+                            color: Colors.purple,
+                            onTap: () => context.push('/inter-state'),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 15),
+                      Expanded(
+                        child: FadeInUp(
                           delay: const Duration(milliseconds: 400),
                           child: _ServiceTile(
                             title: 'Scheduled',
