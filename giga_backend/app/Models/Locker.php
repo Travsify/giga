@@ -11,6 +11,7 @@ class Locker extends Model
 
     protected $fillable = [
         'name',
+        'country_code',
         'address',
         'latitude',
         'longitude',

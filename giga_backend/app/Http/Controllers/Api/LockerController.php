@@ -8,9 +8,10 @@ use Illuminate\Http\Request;
 
 class LockerController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        return response()->json(Locker::all());
+        $country = $request->query('country', 'GB');
+        return response()->json(Locker::where('country_code', $country)->get());
     }
 
     public function show($id)
