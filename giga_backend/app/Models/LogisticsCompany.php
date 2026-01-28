@@ -21,6 +21,8 @@ class LogisticsCompany extends Model
         'billing_details',
         'contact_phone',
         'logo_url',
+        'incorporation_document',
+        'proof_of_address',
         'is_verified',
         'credit_limit',
         'outstanding_balance'

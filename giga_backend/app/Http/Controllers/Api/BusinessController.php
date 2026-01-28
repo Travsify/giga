@@ -22,10 +22,22 @@ class BusinessController extends Controller
             'address' => 'required|string',
             'contact_phone' => 'required|string',
             'website' => 'nullable|url',
+            'incorporation_document' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120', // 5MB max
+            'proof_of_address' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
         ]);
 
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        $incorpPath = null;
+        if ($request->hasFile('incorporation_document')) {
+            $incorpPath = $request->file('incorporation_document')->store('business_docs', 'public');
+        }
+
+        $poaPath = null;
+        if ($request->hasFile('proof_of_address')) {
+            $poaPath = $request->file('proof_of_address')->store('business_docs', 'public');
         }
 
         // Create the business profile
@@ -39,15 +51,17 @@ class BusinessController extends Controller
             'address' => $request->address,
             'website' => $request->website,
             'contact_phone' => $request->contact_phone,
-            'is_verified' => false, // Requires manual verification by Giga Admin
-            'credit_limit' => 500.00, // Starting credit for new businesses
+            'incorporation_document' => $incorpPath,
+            'proof_of_address' => $poaPath,
+            'is_verified' => false,
+            'credit_limit' => 500.00,
         ]);
 
         // Update user role
         $user->update(['role' => 'Business']);
 
         return response()->json([
-            'message' => 'Business enrollment submitted successfully. Your profile is pending verification.',
+            'message' => 'Business enrollment submitted successfully. Documents are pending review.',
             'business' => $business
         ], 201);
     }
