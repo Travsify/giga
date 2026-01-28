@@ -215,7 +215,10 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
             ),
             const SizedBox(height: 10),
             Row(
-              children: [10, 25, 50, 100].map((amt) => Expanded(
+              children: (ref.watch(authProvider).currencySymbol == '₦' 
+                  ? [2000, 5000, 10000, 20000] 
+                  : [10, 25, 50, 100]
+              ).map((amt) => Expanded(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 4),
                   child: OutlinedButton(
@@ -224,8 +227,9 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
                       foregroundColor: AppTheme.primaryBlue,
                       side: BorderSide(color: AppTheme.primaryBlue.withOpacity(0.3)),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                      padding: EdgeInsets.zero,
                     ),
-                    child: Text('${ref.read(authProvider).currencySymbol}$amt'),
+                    child: Text('${ref.read(authProvider).currencySymbol}$amt', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
                   ),
                 ),
               )).toList(),
@@ -543,62 +547,62 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
                 const SizedBox(height: 12),
                 FadeInUp(
                   delay: const Duration(milliseconds: 150),
-                  child: SizedBox(
-                    height: 90,
-                    child: ListView(
-                      scrollDirection: Axis.horizontal,
-                      children: _getPaymentMethods().map((method) {
-                        final bool isActive = _selectedMethod == method['id'];
-                        return Padding(
-                          padding: const EdgeInsets.only(right: 12, bottom: 8),
-                          child: GestureDetector(
-                            onTap: () => setState(() => _selectedMethod = method['id']!),
-                            child: AnimatedContainer(
-                              duration: const Duration(milliseconds: 200),
-                              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(16),
-                                border: Border.all(
-                                  color: isActive ? AppTheme.primaryBlue : Colors.transparent,
-                                  width: 2,
-                                ),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withOpacity(0.04),
-                                    blurRadius: 10,
-                                    offset: const Offset(0, 4),
-                                  ),
-                                ],
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(
-                                    method['icon'] as IconData,
-                                    color: isActive ? AppTheme.primaryBlue : Colors.grey[600],
-                                    size: 24,
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Text(
-                                    method['label'] as String,
-                                    style: GoogleFonts.outfit(
-                                      color: isActive ? AppTheme.primaryBlue : Colors.grey[600],
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 14,
-                                    ),
-                                  ),
-                                  if (isActive) ...[
-                                    const SizedBox(width: 8),
-                                    const Icon(Icons.check_circle, color: AppTheme.primaryBlue, size: 16),
-                                  ]
-                                ],
-                              ),
+                  child: GridView.count(
+                    crossAxisCount: 2,
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    mainAxisSpacing: 12,
+                    crossAxisSpacing: 12,
+                    childAspectRatio: 1.5,
+                    children: _getPaymentMethods().map((method) {
+                      final bool isActive = _selectedMethod == method['id'];
+                      return GestureDetector(
+                        onTap: () => setState(() => _selectedMethod = method['id']!),
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 200),
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(
+                              color: isActive ? AppTheme.primaryBlue : Colors.transparent,
+                              width: 2,
                             ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.04),
+                                blurRadius: 10,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
                           ),
-                        );
-                      }).toList(),
-                    ),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                method['icon'] as IconData,
+                                color: isActive ? AppTheme.primaryBlue : Colors.grey[600],
+                                size: 32,
+                              ),
+                              const SizedBox(height: 12),
+                              Text(
+                                method['label'] as String,
+                                textAlign: TextAlign.center,
+                                style: GoogleFonts.outfit(
+                                  color: isActive ? AppTheme.primaryBlue : Colors.grey[600],
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 14,
+                                ),
+                              ),
+                              if (isActive) ...[
+                                const SizedBox(height: 4),
+                                const Icon(Icons.check_circle, color: AppTheme.primaryBlue, size: 16),
+                              ]
+                            ],
+                          ),
+                        ),
+                      );
+                    }).toList(),
                   ),
                 ),
                 const SizedBox(height: 24),

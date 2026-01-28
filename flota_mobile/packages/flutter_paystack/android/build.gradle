@@ -1,18 +1,7 @@
 group 'co.paystack.flutterpaystack'
 version '1.0-SNAPSHOT'
 
-buildscript {
-    ext.kotlin_version = '2.2.21'
-    repositories {
-        mavenCentral()
-        google()
-    }
-
-    dependencies {
-        classpath 'com.android.tools.build:gradle:8.1.0'
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-    }
-}
+// buildscript removed to inherit from root project
 
 rootProject.allprojects {
     repositories {
