@@ -181,6 +181,9 @@ class _OffersScreenState extends ConsumerState<OffersScreen> with SingleTickerPr
   }
 
   Widget _buildReferralTab(String referralCode) {
+    final symbol = ref.watch(authProvider).currencySymbol;
+    final amount = symbol == '₦' ? '4,100' : '2';
+
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24),
       child: Column(
@@ -189,12 +192,12 @@ class _OffersScreenState extends ConsumerState<OffersScreen> with SingleTickerPr
           Image.asset('assets/images/user_location.png', height: 150), // Reusing existing asset
           const SizedBox(height: 24),
           Text(
-            'Give ${ref.watch(authProvider).currencySymbol}5, Get ${ref.watch(authProvider).currencySymbol}5',
+            'Give $symbol$amount, Get $symbol$amount',
             style: GoogleFonts.outfit(fontSize: 28, fontWeight: FontWeight.bold, color: AppTheme.primaryBlue),
           ),
           const SizedBox(height: 12),
           Text(
-            'Invite your friends to Giga. They get ${ref.watch(authProvider).currencySymbol}5 off their first delivery, and you get ${ref.watch(authProvider).currencySymbol}5 credit when they complete it.',
+            'Invite your friends to Giga. They get $symbol$amount off their first delivery, and you get $symbol$amount credit when they complete it.',
             textAlign: TextAlign.center,
             style: GoogleFonts.outfit(fontSize: 16, color: Colors.grey[600]),
           ),

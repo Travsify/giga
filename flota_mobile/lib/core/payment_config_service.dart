@@ -35,7 +35,7 @@ class PaymentConfigService {
         flutterwavePublicKey = data['flutterwave_public_key'];
         flutterwaveEncryptionKey = data['flutterwave_encryption_key']; // Optional if needed by SDK
         
-        paystackEnabled = data['paystack_enabled'] ?? false;
+        paystackEnabled = (data['paystack_enabled'] ?? false) || (paystackPublicKey != null && paystackPublicKey!.isNotEmpty);
         flutterwaveEnabled = data['flutterwave_enabled'] ?? false;
         
         await _storage.write(key: 'stripe_key', value: stripePublicKey);

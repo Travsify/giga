@@ -6,6 +6,8 @@ import 'package:flota_mobile/features/business/business_provider.dart';
 import 'package:flota_mobile/features/auth/auth_provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:animate_do/animate_do.dart';
+import 'package:file_picker/file_picker.dart';
+import 'dart:io';
 
 class BusinessEnrollmentScreen extends ConsumerStatefulWidget {
   const BusinessEnrollmentScreen({super.key});
@@ -24,6 +26,9 @@ class _BusinessEnrollmentScreenState extends ConsumerState<BusinessEnrollmentScr
   final TextEditingController _addressController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _websiteController = TextEditingController();
+  
+  PlatformFile? _incorpFile;
+  PlatformFile? _poaFile;
   
   String _selectedType = 'LTD';
 
@@ -50,6 +55,8 @@ class _BusinessEnrollmentScreenState extends ConsumerState<BusinessEnrollmentScr
         'address': _addressController.text,
         'contact_phone': _phoneController.text,
         'website': _websiteController.text,
+        if (_incorpFile != null) 'incorporation_document': _incorpFile!.path,
+        if (_poaFile != null) 'proof_of_address': _poaFile!.path,
       });
 
       if (success && mounted) {
@@ -136,6 +143,27 @@ class _BusinessEnrollmentScreenState extends ConsumerState<BusinessEnrollmentScr
               _buildTextField('Contact Phone', _phoneController, Icons.phone_outlined, 'e.g. 020 7946 0000'),
               _buildTextField('Website', _websiteController, Icons.language_outlined, 'e.g. https://company.co.uk'),
               
+              const SizedBox(height: 24),
+              _buildSectionTitle('Document Verification'),
+              Text(
+                'Please upload documents to verify your business.',
+                style: GoogleFonts.outfit(color: Colors.grey[600], fontSize: 13),
+              ),
+              const SizedBox(height: 16),
+              _buildFilePicker(
+                'Certificate of Incorporation',
+                'Upload PDF or Image',
+                _incorpFile,
+                () => _pickFile('incorp'),
+              ),
+              const SizedBox(height: 12),
+              _buildFilePicker(
+                'Proof of Trading Address',
+                'Utility Bill or Lease Agreement',
+                _poaFile,
+                () => _pickFile('poa'),
+              ),
+              
               const SizedBox(height: 40),
               SizedBox(
                 width: double.infinity,
@@ -221,6 +249,79 @@ class _BusinessEnrollmentScreenState extends ConsumerState<BusinessEnrollmentScr
             ),
           ),
         ],
+      ),
+    );
+  Future<void> _pickFile(String type) async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['pdf', 'jpg', 'jpeg', 'png'],
+    );
+
+    if (result != null) {
+      setState(() {
+        if (type == 'incorp') {
+          _incorpFile = result.files.first;
+        } else {
+          _poaFile = result.files.first;
+        }
+      });
+    }
+  }
+
+  Widget _buildFilePicker(String title, String subtitle, PlatformFile? file, VoidCallback onTap) {
+    return InkWell(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        decoration: BoxDecoration(
+          color: Colors.grey[50],
+          border: Border.all(color: Colors.grey[300]!),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: file != null ? AppTheme.successGreen.withOpacity(0.1) : AppTheme.primaryBlue.withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                file != null ? Icons.check_circle : Icons.cloud_upload_outlined,
+                color: file != null ? AppTheme.successGreen : AppTheme.primaryBlue,
+                size: 20,
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(title, style: GoogleFonts.outfit(fontWeight: FontWeight.w600, fontSize: 14)),
+                  Text(
+                    file != null ? file.name : subtitle,
+                    style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+            ),
+            if (file != null)
+              IconButton(
+                icon: const Icon(Icons.close, color: Colors.grey, size: 20),
+                onPressed: () {
+                  setState(() {
+                    if (title.contains('Incorporation')) {
+                      _incorpFile = null;
+                    } else {
+                      _poaFile = null;
+                    }
+                  });
+                },
+              ),
+          ],
+        ),
       ),
     );
   }

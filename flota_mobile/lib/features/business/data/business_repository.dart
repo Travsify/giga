@@ -9,8 +9,24 @@ class BusinessRepository {
 
   Future<Map<String, dynamic>> enrollBusiness(Map<String, dynamic> data) async {
     try {
-      final response = await _dio.post('/business/enroll', data: data);
-      return response.data;
+      // Check if data contains file paths and convert to FormData
+      bool hasFiles = data.containsKey('incorporation_document') || data.containsKey('proof_of_address');
+      
+      if (hasFiles) {
+        final formData = FormData.fromMap({
+          ...data,
+          if (data['incorporation_document'] != null)
+            'incorporation_document': await MultipartFile.fromFile(data['incorporation_document']),
+          if (data['proof_of_address'] != null)
+            'proof_of_address': await MultipartFile.fromFile(data['proof_of_address']),
+        });
+        
+        final response = await _dio.post('/business/enroll', data: formData);
+        return response.data;
+      } else {
+        final response = await _dio.post('/business/enroll', data: data);
+        return response.data;
+      }
     } on DioException catch (e) {
       throw _handleError(e);
     }

@@ -256,6 +256,7 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/delivery-request',
         builder: (context, state) => DeliveryRequestScreen(
           initiallyScheduled: state.uri.queryParameters['scheduled'] == 'true',
+          initialDropoff: state.extra as Map<String, dynamic>?,
         ),
       ),
       GoRoute(

@@ -264,7 +264,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               child: FadeInUp(
                 delay: const Duration(milliseconds: 200),
                 child: GestureDetector(
-                  onTap: () => context.push('/search'),
+                  onTap: () async {
+                    final result = await context.push<Map<String, dynamic>>('/search');
+                    if (result != null && context.mounted) {
+                      context.push('/delivery-request', extra: result);
+                    }
+                  },
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                     decoration: BoxDecoration(

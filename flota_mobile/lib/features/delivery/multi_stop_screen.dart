@@ -2,12 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flota_mobile/theme/app_theme.dart';
 import 'package:flota_mobile/core/location_service.dart';
 import 'package:flota_mobile/features/marketplace/data/delivery_repository.dart';
 import 'package:flota_mobile/features/marketplace/data/models/delivery_models.dart';
-import 'package:flota_mobile/features/marketplace/data/delivery_models.dart';
+
 import 'package:flota_mobile/features/auth/auth_provider.dart';
 
 class MultiStopScreen extends ConsumerStatefulWidget {

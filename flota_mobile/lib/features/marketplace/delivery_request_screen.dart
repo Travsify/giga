@@ -16,7 +16,13 @@ import 'package:intl/intl.dart';
 
 class DeliveryRequestScreen extends ConsumerStatefulWidget {
   final bool initiallyScheduled;
-  const DeliveryRequestScreen({super.key, this.initiallyScheduled = false});
+  final Map<String, dynamic>? initialDropoff;
+
+  const DeliveryRequestScreen({
+    super.key, 
+    this.initiallyScheduled = false,
+    this.initialDropoff,
+  });
 
   @override
   ConsumerState<DeliveryRequestScreen> createState() => _DeliveryRequestScreenState();
@@ -51,6 +57,16 @@ class _DeliveryRequestScreenState extends ConsumerState<DeliveryRequestScreen> {
     if (isScheduled) {
       scheduledDate = DateTime.now().add(const Duration(days: 1));
       scheduledTime = const TimeOfDay(hour: 10, minute: 0);
+    }
+
+    if (widget.initialDropoff != null) {
+      _dropoffController.text = widget.initialDropoff!['address'] ?? '';
+      if (widget.initialDropoff!['lat'] != null && widget.initialDropoff!['lng'] != null) {
+        dropoffLatLng = LatLng(
+          widget.initialDropoff!['lat'],
+          widget.initialDropoff!['lng'],
+        );
+      }
     }
   }
 
@@ -224,29 +240,43 @@ class _DeliveryRequestScreenState extends ConsumerState<DeliveryRequestScreen> {
   }
 
   Widget _buildAddressField(String label, TextEditingController controller, IconData icon, bool isPickup) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      decoration: BoxDecoration(
-        color: Colors.grey[100],
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: TextField(
-        controller: controller,
-        style: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.bold),
-        decoration: InputDecoration(
-          border: InputBorder.none,
-          labelText: label,
-          labelStyle: GoogleFonts.outfit(fontSize: 14, letterSpacing: 0, fontWeight: FontWeight.normal),
-          prefixIcon: Icon(icon, color: isPickup ? AppTheme.primaryBlue : AppTheme.primaryRed),
-          hintText: 'e.g. 123 Main Street',
+    return GestureDetector(
+      onTap: () async {
+        final result = await context.push<Map<String, dynamic>>('/search');
+        if (result != null && context.mounted) {
+          setState(() {
+            controller.text = result['address'];
+            if (isPickup) {
+              if (result['lat'] != null && result['lng'] != null) {
+                pickupLatLng = LatLng(result['lat'], result['lng']);
+              }
+            } else {
+               if (result['lat'] != null && result['lng'] != null) {
+                dropoffLatLng = LatLng(result['lat'], result['lng']);
+              }
+            }
+          });
+          _updateEstimation(); // Recalculate price if both set
+        }
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: BoxDecoration(
+          color: Colors.grey[100],
+          borderRadius: BorderRadius.circular(16),
         ),
-        onChanged: (val) {
-          if (val.length >= 5) {
-            // NOTE: In a real app we'd use Google Places Autocomplete here
-            // Removing hardcoded UK LatLng for now to allow universal address entry
-            // Ideally, after typing, user should "Select on map" or we use Geocoding API
-          }
-        },
+        child: TextField(
+          controller: controller,
+          enabled: false, // Make read-only
+          style: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black87),
+          decoration: InputDecoration(
+            border: InputBorder.none,
+            labelText: label,
+            labelStyle: GoogleFonts.outfit(fontSize: 14, letterSpacing: 0, fontWeight: FontWeight.normal),
+            prefixIcon: Icon(icon, color: isPickup ? AppTheme.primaryBlue : AppTheme.primaryRed),
+            hintText: 'Tap to search address',
+          ),
+        ),
       ),
     );
   }

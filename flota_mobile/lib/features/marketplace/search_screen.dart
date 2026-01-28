@@ -130,8 +130,38 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                   leading: const Icon(Icons.location_on_rounded, color: AppTheme.primaryBlue),
                   title: Text(place['main_text'], style: const TextStyle(fontWeight: FontWeight.bold)),
                   subtitle: Text(place['secondary_text']),
-                  onTap: () {
-                    context.pop(place); 
+                  onTap: () async {
+                    // Fetch Place Details (Lat/Lng)
+                    final placeId = place['place_id'];
+                    final detailsUrl = 'https://maps.googleapis.com/maps/api/place/details/json?place_id=$placeId&fields=geometry&key=$_googleApiKey&sessiontoken=$_sessionToken';
+                    
+                    try {
+                      final response = await Dio().get(detailsUrl);
+                      if (response.statusCode == 200 && response.data['status'] == 'OK') {
+                        final location = response.data['result']['geometry']['location'];
+                        final lat = location['lat'];
+                        final lng = location['lng'];
+                        
+                        // Return full result
+                        if (context.mounted) {
+                          context.pop({
+                            'address': place['description'],
+                            'place_id': placeId,
+                            'lat': lat,
+                            'lng': lng,
+                          });
+                        }
+                      }
+                    } catch (e) {
+                      debugPrint('Error fetching details: $e');
+                      // Fallback: return just address if details fail
+                      if (context.mounted) {
+                        context.pop({
+                          'address': place['description'],
+                          'place_id': placeId,
+                        });
+                      }
+                    }
                   },
                 );
               },
