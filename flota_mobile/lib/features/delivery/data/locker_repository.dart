@@ -41,8 +41,8 @@ class LockerRepository {
   final ApiClient _api;
   LockerRepository(this._api);
 
-  Future<List<Locker>> getLockers() async {
-    final response = await _api.dio.get('/lockers');
+  Future<List<Locker>> getLockers({String country = 'GB'}) async {
+    final response = await _api.dio.get('/lockers', queryParameters: {'country': country});
     final List<dynamic> data = response.data;
     return data.map((json) => Locker.fromJson(json)).toList();
   }
@@ -51,5 +51,6 @@ class LockerRepository {
 final lockerRepositoryProvider = Provider((ref) => LockerRepository(ref.read(apiClientProvider)));
 
 final lockersProvider = FutureProvider<List<Locker>>((ref) async {
-  return ref.read(lockerRepositoryProvider).getLockers();
+  final country = ref.watch(authProvider).countryCode; // 'GB', 'NG', etc.
+  return ref.read(lockerRepositoryProvider).getLockers(country: country);
 });
