@@ -12,6 +12,8 @@ import 'package:flota_mobile/features/marketplace/home_widgets.dart';
 import 'package:flota_mobile/features/sustainability/carbon_dashboard_screen.dart';
 import 'package:flota_mobile/features/location/ulez_service.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:flota_mobile/core/location_service.dart';
+import 'package:geocoding/geocoding.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -42,16 +44,29 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Future<void> _setupLocationAndWeather() async {
     final country = ref.read(authProvider).countryCode;
     
-    // Default Centers
-    if (country == 'NG') {
-      _mapCenter = const LatLng(6.5244, 3.3792); // Lagos
-      _locationName = 'Lagos';
-    } else if (country == 'GH') {
-      _mapCenter = const LatLng(5.6037, -0.1870); // Accra
-      _locationName = 'Accra';
-    } else {
-      _mapCenter = const LatLng(51.5074, -0.1278); // London
-      _locationName = 'London';
+    // 1. Try to get Real GPS Location
+    try {
+      final position = await LocationService.getCurrentLocation();
+      _mapCenter = LatLng(position.latitude, position.longitude);
+      
+      // Get City Name
+      List<Placemark> placemarks = await placemarkFromCoordinates(position.latitude, position.longitude);
+      if (placemarks.isNotEmpty) {
+        _locationName = placemarks.first.locality ?? placemarks.first.subAdministrativeArea ?? 'Your Area';
+      }
+    } catch (e) {
+      // 2. Fallback to Defaults if GPS fails
+      debugPrint('Location Error: $e');
+      if (country == 'NG') {
+        _mapCenter = const LatLng(6.5244, 3.3792); // Lagos
+        _locationName = 'Lagos';
+      } else if (country == 'GH') {
+        _mapCenter = const LatLng(5.6037, -0.1870); // Accra
+        _locationName = 'Accra';
+      } else {
+        _mapCenter = const LatLng(51.5074, -0.1278); // London
+        _locationName = 'London';
+      }
     }
 
     if (mounted) setState(() {});
