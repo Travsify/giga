@@ -475,6 +475,23 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         child: FadeInUp(
                           delay: const Duration(milliseconds: 400),
                           child: _ServiceTile(
+                            title: 'Shop & Ship',
+                            subtitle: 'Virtual UK Addr',
+                            icon: Icons.shopping_cart_checkout,
+                            color: Colors.blue[800]!, // Deep Blue for UK
+                            onTap: () => context.push('/shop-and-ship'),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 15),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: FadeInUp(
+                          delay: const Duration(milliseconds: 400),
+                          child: _ServiceTile(
                             title: 'Scheduled',
                             subtitle: 'Book for later',
                             icon: Icons.calendar_month_rounded,

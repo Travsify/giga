@@ -251,6 +251,7 @@ class _BusinessEnrollmentScreenState extends ConsumerState<BusinessEnrollmentScr
         ],
       ),
     );
+  }
   Future<void> _pickFile(String type) async {
     FilePickerResult? result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
