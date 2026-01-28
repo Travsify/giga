@@ -43,6 +43,7 @@ import 'package:flota_mobile/features/business/presentation/screens/billing_scre
 import 'package:flota_mobile/features/business/presentation/screens/team_management_screen.dart';
 import 'package:flota_mobile/features/business/presentation/screens/api_key_screen.dart';
 import 'package:flota_mobile/theme/app_theme.dart';
+import 'package:flota_mobile/features/shared/main_scaffold.dart';
 
 
 import 'firebase_options.dart';
@@ -211,10 +212,34 @@ final routerProvider = Provider<GoRouter>((ref) {
           return EmailVerificationScreen(isPhone: isPhone, phoneNumber: phoneNumber);
         },
       ),
-      GoRoute(
-        path: '/marketplace',
-        builder: (context, state) => const HomeScreen(),
+      
+      // Persistent Bottom Navigation Shell
+      ShellRoute(
+        builder: (context, state, child) {
+          // Only show for specific roles if needed, currently assumes any authenticated user
+          // accessing these routes gets the scaffold.
+          return MainScaffold(child: child);
+        },
+        routes: [
+          GoRoute(
+            path: '/marketplace',
+            builder: (context, state) => const HomeScreen(),
+          ),
+          GoRoute(
+            path: '/orders',
+            builder: (context, state) => const OrderHistoryScreen(),
+          ),
+          GoRoute(
+            path: '/wallet',
+            builder: (context, state) => const WalletScreen(),
+          ),
+          GoRoute(
+            path: '/profile',
+            builder: (context, state) => const ProfileScreen(),
+          ),
+        ],
       ),
+
       GoRoute(
         path: '/business',
         builder: (context, state) => const BusinessDashboardScreen(),
@@ -232,10 +257,7 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/notifications',
         builder: (context, state) => const NotificationScreen(),
       ),
-      GoRoute(
-        path: '/orders',
-        builder: (context, state) => const OrderHistoryScreen(),
-      ),
+      // /orders moved to ShellRoute
       GoRoute(
         path: '/ulez',
         builder: (context, state) => const ULEZScannerScreen(),
@@ -289,22 +311,17 @@ final routerProvider = Provider<GoRouter>((ref) {
           deliveryId: state.pathParameters['id'] ?? 'unknown',
         ),
       ),
-        GoRoute(
-          path: '/parcel-locker',
-          builder: (context, state) => const ParcelLockerScreen(),
-        ),
-        GoRoute(
-          path: '/profile',
-          builder: (context, state) => const ProfileScreen(),
-        ),
-        GoRoute(
-          path: '/giga-plus',
-          builder: (context, state) => const GigaPlusScreen(),
-        ),
-        GoRoute(
-          path: '/wallet',
-          builder: (context, state) => const WalletScreen(),
-        ),
+      GoRoute(
+        path: '/parcel-locker',
+        builder: (context, state) => const ParcelLockerScreen(),
+      ),
+      // /profile moved to ShellRoute
+      GoRoute(
+        path: '/giga-plus',
+        builder: (context, state) => const GigaPlusScreen(),
+      ),
+      // /wallet moved to ShellRoute
+
         GoRoute(
           path: '/withdraw',
           builder: (context, state) => const WithdrawalScreen(),

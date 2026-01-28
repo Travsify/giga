@@ -23,7 +23,7 @@ class HomeScreen extends ConsumerStatefulWidget {
 }
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
-  int _currentIndex = 0;
+
   Map<String, dynamic> _weather = {
     'temp': '--',
     'condition': 'Loading',
@@ -643,31 +643,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           const SliverPadding(padding: EdgeInsets.only(bottom: 150)),
         ],
       ),
-      bottomNavigationBar: Container(
-        decoration: BoxDecoration(
-          border: Border(top: BorderSide(color: theme.primaryColor.withOpacity(0.2), width: 1)),
-        ),
-        child: BottomNavigationBar(
-          currentIndex: _currentIndex,
-          onTap: (index) {
-            setState(() => _currentIndex = index);
-            if (index == 1) context.push('/orders');
-            if (index == 2) context.push('/wallet');
-            if (index == 3) context.push('/profile');
-          },
-          type: BottomNavigationBarType.fixed,
-          backgroundColor: const Color(0xFF0F1219),
-          selectedItemColor: theme.primaryColor,
-          unselectedItemColor: theme.textTheme.bodyMedium?.color?.withOpacity(0.4),
-          showUnselectedLabels: true,
-          items: const [
-            BottomNavigationBarItem(icon: Icon(Icons.home_filled), label: 'Home'),
-            BottomNavigationBarItem(icon: Icon(Icons.history_rounded), label: 'Orders'),
-            BottomNavigationBarItem(icon: Icon(Icons.account_balance_wallet_rounded), label: 'Wallet'),
-            BottomNavigationBarItem(icon: Icon(Icons.person_pin_rounded), label: 'Profile'),
-          ],
-        ),
-      ),
+
     );
   }
 }
