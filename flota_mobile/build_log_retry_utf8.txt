@@ -1,0 +1,300 @@
+﻿Running Gradle task 'assembleDebug'...                          
+flutter : Warning: 
+Flutter support for 
+your project's 
+Android Gradle 
+Plugin version 
+(Android Gradle 
+Plugin version 
+8.5.0) will soon be 
+dropped. Please 
+upgrade your Android 
+Gradle Plugin 
+version to a version 
+of at least Android 
+Gradle Plugin 
+version 8.6.0 soon.
+At line:1 char:1
++ flutter build apk 
+--debug > 
+build_log_retry.txt 
+2>&1
++ ~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~
+    + CategoryInfo   
+           : NotSpe  
+  cified: (Warning   
+ : Flutte...ion 8    
+.6.0 soon.:Strin    
+g) [], RemoteExc    
+eption
+    + FullyQualified 
+   ErrorId : Native  
+  CommandError
+ 
+Alternatively, use 
+the flag "--android-s
+kip-build-dependency-
+validation" to 
+bypass this check.
+
+Potential fix: Your 
+project's AGP 
+version is typically 
+defined in the 
+plugins block of the 
+`settings.gradle` 
+file (C:\Users\USER\D
+esktop\giga\flota_mob
+ile\android/settings.
+gradle), by a plugin 
+with the id of com.an
+droid.application. 
+If you don't see a 
+plugins block, your 
+project was likely 
+created with an 
+older template 
+version. In this 
+case it is most 
+likely defined in 
+the top-level 
+build.gradle file (C:
+\Users\USER\Desktop\g
+iga\flota_mobile\andr
+oid/build.gradle) by 
+the following line 
+in the dependencies 
+block of the 
+buildscript: 
+"classpath 'com.andro
+id.tools.build:gradle
+:<version>'".
+
+warning: [options] 
+source value 8 is 
+obsolete and will be 
+removed in a future 
+release
+warning: [options] 
+target value 8 is 
+obsolete and will be 
+removed in a future 
+release
+warning: [options] 
+To suppress warnings 
+about obsolete 
+options, use 
+-Xlint:-options.
+3 warnings
+warning: [options] 
+source value 8 is 
+obsolete and will be 
+removed in a future 
+release
+warning: [options] 
+target value 8 is 
+obsolete and will be 
+removed in a future 
+release
+warning: [options] 
+To suppress warnings 
+about obsolete 
+options, use 
+-Xlint:-options.
+3 warnings
+warning: [options] 
+source value 8 is 
+obsolete and will be 
+removed in a future 
+release
+warning: [options] 
+target value 8 is 
+obsolete and will be 
+removed in a future 
+release
+warning: [options] 
+To suppress warnings 
+about obsolete 
+options, use 
+-Xlint:-options.
+3 warnings
+warning: [options] 
+source value 8 is 
+obsolete and will be 
+removed in a future 
+release
+warning: [options] 
+target value 8 is 
+obsolete and will be 
+removed in a future 
+release
+warning: [options] 
+To suppress warnings 
+about obsolete 
+options, use 
+-Xlint:-options.
+Note: Some input 
+files use or 
+override a 
+deprecated API.
+Note: Recompile with 
+-Xlint:deprecation 
+for details.
+3 warnings
+warning: [options] 
+source value 8 is 
+obsolete and will be 
+removed in a future 
+release
+warning: [options] 
+target value 8 is 
+obsolete and will be 
+removed in a future 
+release
+warning: [options] 
+To suppress warnings 
+about obsolete 
+options, use 
+-Xlint:-options.
+Note: Some input 
+files use or 
+override a 
+deprecated API.
+Note: Recompile with 
+-Xlint:deprecation 
+for details.
+Note: C:\Users\USER\A
+ppData\Local\Pub\Cach
+e\hosted\pub.dev\fire
+base_messaging-14.7.1
+0\android\src\main\ja
+va\io\flutter\plugins
+\firebase\messaging\F
+lutterFirebaseMessagi
+ngPlugin.java uses 
+unchecked or unsafe 
+operations.
+Note: Recompile with 
+-Xlint:unchecked for 
+details.
+3 warnings
+warning: [options] 
+source value 8 is 
+obsolete and will be 
+removed in a future 
+release
+warning: [options] 
+target value 8 is 
+obsolete and will be 
+removed in a future 
+release
+warning: [options] 
+To suppress warnings 
+about obsolete 
+options, use 
+-Xlint:-options.
+3 warnings
+warning: [options] 
+source value 8 is 
+obsolete and will be 
+removed in a future 
+release
+warning: [options] 
+target value 8 is 
+obsolete and will be 
+removed in a future 
+release
+warning: [options] 
+To suppress warnings 
+about obsolete 
+options, use 
+-Xlint:-options.
+Note: Some input 
+files use or 
+override a 
+deprecated API.
+Note: Recompile with 
+-Xlint:deprecation 
+for details.
+Note: Some input 
+files use unchecked 
+or unsafe operations.
+Note: Recompile with 
+-Xlint:unchecked for 
+details.
+3 warnings
+warning: [options] 
+source value 8 is 
+obsolete and will be 
+removed in a future 
+release
+warning: [options] 
+target value 8 is 
+obsolete and will be 
+removed in a future 
+release
+warning: [options] 
+To suppress warnings 
+about obsolete 
+options, use 
+-Xlint:-options.
+3 warnings
+warning: [options] 
+source value 8 is 
+obsolete and will be 
+removed in a future 
+release
+warning: [options] 
+target value 8 is 
+obsolete and will be 
+removed in a future 
+release
+warning: [options] 
+To suppress warnings 
+about obsolete 
+options, use 
+-Xlint:-options.
+3 warnings
+warning: [options] 
+source value 8 is 
+obsolete and will be 
+removed in a future 
+release
+warning: [options] 
+target value 8 is 
+obsolete and will be 
+removed in a future 
+release
+warning: [options] 
+To suppress warnings 
+about obsolete 
+options, use 
+-Xlint:-options.
+3 warnings
+warning: [options] 
+source value 8 is 
+obsolete and will be 
+removed in a future 
+release
+warning: [options] 
+target value 8 is 
+obsolete and will be 
+removed in a future 
+release
+warning: [options] 
+To suppress warnings 
+about obsolete 
+options, use 
+-Xlint:-options.
+3 warnings
+Note: Some input 
+files use or 
+override a 
+deprecated API.
+Note: Recompile with 
+-Xlint:deprecation 
+for details.
+Running Gradle task 'assembleDebug'...                            300.3s
+ΓêÜ Built build\app\outputs\flutter-apk\app-debug.apk

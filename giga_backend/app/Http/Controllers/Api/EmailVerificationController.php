@@ -20,15 +20,17 @@ class EmailVerificationController extends Controller
     {
         $user = $request->user();
 
+        /* 
         if ($user->email_verified_at) {
             return response()->json(['message' => 'Email already verified.'], 400);
         }
+        */
 
         // Generate 6-digit verification code
         $code = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
         
         // Store the code with expiry (15 minutes)
-        \DB::table('email_verification_codes')->updateOrInsert(
+        DB::table('email_verification_codes')->updateOrInsert(
             ['user_id' => $user->id],
             [
                 'code' => $code,
@@ -39,14 +41,14 @@ class EmailVerificationController extends Controller
 
         // Send email
         try {
-            \Log::info('Attempting to send verification code to: ' . $user->email);
+            Log::info('Attempting to send verification code to: ' . $user->email);
             Mail::send('emails.verify', ['code' => $code, 'name' => $user->name], function ($message) use ($user) {
                 $message->to($user->email)
                         ->subject('Verify Your Email - GIGA LOGISTICS');
             });
-            \Log::info('Verification code successfully sent (queued or dispatched) to: ' . $user->email);
+            Log::info('Verification code successfully sent (queued or dispatched) to: ' . $user->email);
         } catch (\Exception $e) {
-            \Log::error('Failed to send verification code email: ' . $e->getMessage(), [
+            Log::error('Failed to send verification code email: ' . $e->getMessage(), [
                 'user_id' => $user->id,
                 'email' => $user->email,
                 'error' => $e->getMessage(),
@@ -74,12 +76,14 @@ class EmailVerificationController extends Controller
 
         $user = $request->user();
 
+        /*
         if ($user->email_verified_at) {
             return response()->json(['message' => 'Email already verified.'], 400);
         }
+        */
 
         // Find the verification record
-        $record = \DB::table('email_verification_codes')
+        $record = DB::table('email_verification_codes')
             ->where('user_id', $user->id)
             ->first();
 
@@ -102,7 +106,7 @@ class EmailVerificationController extends Controller
         $user->save();
 
         // Delete the verification record
-        \DB::table('email_verification_codes')->where('user_id', $user->id)->delete();
+        DB::table('email_verification_codes')->where('user_id', $user->id)->delete();
 
         return response()->json([
             'message' => 'Email verified successfully!',
@@ -133,7 +137,7 @@ class EmailVerificationController extends Controller
 
         $code = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
         
-        \DB::table('email_verification_codes')->updateOrInsert(
+        DB::table('email_verification_codes')->updateOrInsert(
             ['email' => $email], // We'll need to use email instead of user_id for signup codes
             [
                 'code' => $code,
@@ -148,7 +152,7 @@ class EmailVerificationController extends Controller
                         ->subject('Verify Your Email - GIGA LOGISTICS');
             });
         } catch (\Exception $e) {
-            \Log::error('Signup OTP Fail: ' . $e->getMessage());
+            Log::error('Signup OTP Fail: ' . $e->getMessage());
         }
 
         return response()->json(['message' => 'Verification code sent.']);
@@ -161,7 +165,7 @@ class EmailVerificationController extends Controller
             'code' => 'required|string|size:6',
         ]);
 
-        $record = \DB::table('email_verification_codes')
+        $record = DB::table('email_verification_codes')
             ->where('email', $request->email)
             ->first();
 

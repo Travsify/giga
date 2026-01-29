@@ -1,0 +1,500 @@
+[        ] 	at org.gr
+adle.internal.executi
+on.steps.ResolveChang
+esStep.execute(Resolv
+eChangesStep.java:36)
+[        ] 	at org.gr
+adle.internal.executi
+on.steps.ValidateStep
+.execute(ValidateStep
+.java:106)
+[        ] 	at org.gr
+adle.internal.executi
+on.steps.ValidateStep
+.execute(ValidateStep
+.java:55)
+[        ] 	at org.gr
+adle.internal.executi
+on.steps.AbstractCapt
+ureStateBeforeExecuti
+onStep.execute(Abstra
+ctCaptureStateBeforeE
+xecutionStep.java:64)
+[        ] 	at org.gr
+adle.internal.executi
+on.steps.AbstractCapt
+ureStateBeforeExecuti
+onStep.execute(Abstra
+ctCaptureStateBeforeE
+xecutionStep.java:43)
+[        ] 	at org.gr
+adle.internal.executi
+on.steps.AbstractSkip
+EmptyWorkStep.execute
+WithNonEmptySources(A
+bstractSkipEmptyWorkS
+tep.java:125)
+[        ] 	at org.gr
+adle.internal.executi
+on.steps.AbstractSkip
+EmptyWorkStep.execute
+(AbstractSkipEmptyWor
+kStep.java:56)
+[        ] 	at org.gr
+adle.internal.executi
+on.steps.AbstractSkip
+EmptyWorkStep.execute
+(AbstractSkipEmptyWor
+kStep.java:36)
+[        ] 	at org.gr
+adle.internal.executi
+on.steps.legacy.MarkS
+napshottingInputsStar
+tedStep.execute(MarkS
+napshottingInputsStar
+tedStep.java:38)
+[        ] 	at org.gr
+adle.internal.executi
+on.steps.LoadPrevious
+ExecutionStateStep.ex
+ecute(LoadPreviousExe
+cutionStateStep.java:
+36)
+[        ] 	at org.gr
+adle.internal.executi
+on.steps.LoadPrevious
+ExecutionStateStep.ex
+ecute(LoadPreviousExe
+cutionStateStep.java:
+23)
+[        ] 	at org.gr
+adle.internal.executi
+on.steps.HandleStaleO
+utputsStep.execute(Ha
+ndleStaleOutputsStep.
+java:75)
+[        ] 	at org.gr
+adle.internal.executi
+on.steps.HandleStaleO
+utputsStep.execute(Ha
+ndleStaleOutputsStep.
+java:41)
+[        ] 	at org.gr
+adle.internal.executi
+on.steps.AssignMutabl
+eWorkspaceStep.lambda
+$execute$0(AssignMuta
+bleWorkspaceStep.java
+:35)
+[        ] 	at org.gr
+adle.api.internal.tas
+ks.execution.TaskExec
+ution$4.withWorkspace
+(TaskExecution.java:2
+89)
+[        ] 	at org.gr
+adle.internal.executi
+on.steps.AssignMutabl
+eWorkspaceStep.execut
+e(AssignMutableWorksp
+aceStep.java:31)
+[        ] 	at org.gr
+adle.internal.executi
+on.steps.AssignMutabl
+eWorkspaceStep.execut
+e(AssignMutableWorksp
+aceStep.java:22)
+[        ] 	at org.gr
+adle.internal.executi
+on.steps.ChoosePipeli
+neStep.execute(Choose
+PipelineStep.java:40)
+[        ] 	at org.gr
+adle.internal.executi
+on.steps.ChoosePipeli
+neStep.execute(Choose
+PipelineStep.java:23)
+[        ] 	at org.gr
+adle.internal.executi
+on.steps.ExecuteWorkB
+uildOperationFiringSt
+ep.lambda$execute$2(E
+xecuteWorkBuildOperat
+ionFiringStep.java:67
+)
+[        ] 	at java.b
+ase/java.util.Optiona
+l.orElseGet(Unknown 
+Source)
+[        ] 	at org.gr
+adle.internal.executi
+on.steps.ExecuteWorkB
+uildOperationFiringSt
+ep.execute(ExecuteWor
+kBuildOperationFiring
+Step.java:67)
+[        ] 	at org.gr
+adle.internal.executi
+on.steps.ExecuteWorkB
+uildOperationFiringSt
+ep.execute(ExecuteWor
+kBuildOperationFiring
+Step.java:39)
+[        ] 	at org.gr
+adle.internal.executi
+on.steps.IdentityCach
+eStep.execute(Identit
+yCacheStep.java:46)
+[        ] 	at org.gr
+adle.internal.executi
+on.steps.IdentityCach
+eStep.execute(Identit
+yCacheStep.java:34)
+[        ] 	at org.gr
+adle.internal.executi
+on.steps.IdentifyStep
+.execute(IdentifyStep
+.java:48)
+[        ] 	at org.gr
+adle.internal.executi
+on.steps.IdentifyStep
+.execute(IdentifyStep
+.java:35)
+[        ] 	at org.gr
+adle.internal.executi
+on.impl.DefaultExecut
+ionEngine$1.execute(D
+efaultExecutionEngine
+.java:61)
+[        ] 	at org.gr
+adle.api.internal.tas
+ks.execution.ExecuteA
+ctionsTaskExecuter.ex
+ecuteIfValid(ExecuteA
+ctionsTaskExecuter.ja
+va:127)
+[        ] 	at org.gr
+adle.api.internal.tas
+ks.execution.ExecuteA
+ctionsTaskExecuter.ex
+ecute(ExecuteActionsT
+askExecuter.java:116)
+[        ] 	at org.gr
+adle.api.internal.tas
+ks.execution.Finalize
+PropertiesTaskExecute
+r.execute(FinalizePro
+pertiesTaskExecuter.j
+ava:46)
+[        ] 	at org.gr
+adle.api.internal.tas
+ks.execution.ResolveT
+askExecutionModeExecu
+ter.execute(ResolveTa
+skExecutionModeExecut
+er.java:51)
+[        ] 	at org.gr
+adle.api.internal.tas
+ks.execution.SkipTask
+WithNoActionsExecuter
+.execute(SkipTaskWith
+NoActionsExecuter.jav
+a:57)
+[        ] 	at org.gr
+adle.api.internal.tas
+ks.execution.SkipOnly
+IfTaskExecuter.execut
+e(SkipOnlyIfTaskExecu
+ter.java:74)
+[        ] 	at org.gr
+adle.api.internal.tas
+ks.execution.CatchExc
+eptionTaskExecuter.ex
+ecute(CatchExceptionT
+askExecuter.java:36)
+[        ] 	at org.gr
+adle.api.internal.tas
+ks.execution.EventFir
+ingTaskExecuter$1.exe
+cuteTask(EventFiringT
+askExecuter.java:77)
+[        ] 	at org.gr
+adle.api.internal.tas
+ks.execution.EventFir
+ingTaskExecuter$1.cal
+l(EventFiringTaskExec
+uter.java:55)
+[        ] 	at org.gr
+adle.api.internal.tas
+ks.execution.EventFir
+ingTaskExecuter$1.cal
+l(EventFiringTaskExec
+uter.java:52)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionRunner$CallableBu
+ildOperationWorker.ex
+ecute(DefaultBuildOpe
+rationRunner.java:200
+)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionRunner$CallableBu
+ildOperationWorker.ex
+ecute(DefaultBuildOpe
+rationRunner.java:195
+)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionRunner$2.execute(
+DefaultBuildOperation
+Runner.java:66)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionRunner$2.execute(
+DefaultBuildOperation
+Runner.java:59)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionRunner.execute(De
+faultBuildOperationRu
+nner.java:157)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionRunner.execute(De
+faultBuildOperationRu
+nner.java:59)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionRunner.call(Defau
+ltBuildOperationRunne
+r.java:53)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionExecutor.call(Def
+aultBuildOperationExe
+cutor.java:73)
+[        ] 	at org.gr
+adle.api.internal.tas
+ks.execution.EventFir
+ingTaskExecuter.execu
+te(EventFiringTaskExe
+cuter.java:52)
+[        ] 	at org.gr
+adle.execution.plan.L
+ocalTaskNodeExecutor.
+execute(LocalTaskNode
+Executor.java:42)
+[        ] 	at org.gr
+adle.execution.taskgr
+aph.DefaultTaskExecut
+ionGraph$InvokeNodeEx
+ecutorsAction.execute
+(DefaultTaskExecution
+Graph.java:331)
+[        ] 	at org.gr
+adle.execution.taskgr
+aph.DefaultTaskExecut
+ionGraph$InvokeNodeEx
+ecutorsAction.execute
+(DefaultTaskExecution
+Graph.java:318)
+[        ] 	at org.gr
+adle.execution.taskgr
+aph.DefaultTaskExecut
+ionGraph$BuildOperati
+onAwareExecutionActio
+n.lambda$execute$0(De
+faultTaskExecutionGra
+ph.java:314)
+[   +3 ms] 	at org.gr
+adle.internal.operati
+ons.CurrentBuildOpera
+tionRef.with(CurrentB
+uildOperationRef.java
+:80)
+[        ] 	at org.gr
+adle.execution.taskgr
+aph.DefaultTaskExecut
+ionGraph$BuildOperati
+onAwareExecutionActio
+n.execute(DefaultTask
+ExecutionGraph.java:3
+14)
+[        ] 	at org.gr
+adle.execution.taskgr
+aph.DefaultTaskExecut
+ionGraph$BuildOperati
+onAwareExecutionActio
+n.execute(DefaultTask
+ExecutionGraph.java:3
+03)
+[        ] 	at org.gr
+adle.execution.plan.D
+efaultPlanExecutor$Ex
+ecutorWorker.execute(
+DefaultPlanExecutor.j
+ava:463)
+[        ] 	at org.gr
+adle.execution.plan.D
+efaultPlanExecutor$Ex
+ecutorWorker.run(Defa
+ultPlanExecutor.java:
+380)
+[        ] 	at org.gr
+adle.internal.concurr
+ent.ExecutorPolicy$Ca
+tchAndRecordFailures.
+onExecute(ExecutorPol
+icy.java:64)
+[        ] 	at org.gr
+adle.internal.concurr
+ent.AbstractManagedEx
+ecutor$1.run(Abstract
+ManagedExecutor.java:
+47)
+[   +2 ms] 	at java.b
+ase/java.util.concurr
+ent.ThreadPoolExecuto
+r.runWorker(Unknown 
+Source)
+[        ] 	at java.b
+ase/java.util.concurr
+ent.ThreadPoolExecuto
+r$Worker.run(Unknown 
+Source)
+[        ] 	at java.b
+ase/java.lang.Thread.
+run(Unknown Source)
+[        ] BUILD 
+FAILED in 19s
+[        ] 7 actionable tasks: 3 executed, 4 up-to-date
+[        ] Watched directory hierarchies: [C:\FlutterVersions\flutter\packages\flutter_tools\gradle, C:\Users\USER\Desktop\giga\flota_mobile\android]
+[ +777 ms] Running Gradle task 'assembleDebug'... (completed in 21.1s)
+[   +4 ms] "flutter apk" took 24,405ms.
+[  +98 ms] Gradle 
+task assembleDebug 
+failed with exit 
+code 1
+[        ] 
+           #0      
+throwToolExit (packag
+e:flutter_tools/src/b
+ase/common.dart:34:3)
+           #1      An
+droidGradleBuilder.bu
+ildGradleApp (package
+:flutter_tools/src/an
+droid/gradle.dart:592
+:7)
+           
+<asynchronous 
+suspension>
+           #2      An
+droidGradleBuilder.bu
+ildApk (package:flutt
+er_tools/src/android/
+gradle.dart:234:5)
+           
+<asynchronous 
+suspension>
+           #3      Bu
+ildApkCommand.runComm
+and (package:flutter_
+tools/src/commands/bu
+ild_apk.dart:131:5)
+           
+<asynchronous 
+suspension>
+           #4      Fl
+utterCommand.run.<ano
+nymous closure> (pack
+age:flutter_tools/src
+/runner/flutter_comma
+nd.dart:1559:27)
+           
+<asynchronous 
+suspension>
+           #5      Ap
+pContext.run.<anonymo
+us closure> (package:
+flutter_tools/src/bas
+e/context.dart:154:19
+)
+           
+<asynchronous 
+suspension>
+           #6      Co
+mmandRunner.runComman
+d (package:args/comma
+nd_runner.dart:212:13
+)
+           
+<asynchronous 
+suspension>
+           #7      Fl
+utterCommandRunner.ru
+nCommand.<anonymous 
+closure> (package:flu
+tter_tools/src/runner
+/flutter_command_runn
+er.dart:487:9)
+           
+<asynchronous 
+suspension>
+           #8      Ap
+pContext.run.<anonymo
+us closure> (package:
+flutter_tools/src/bas
+e/context.dart:154:19
+)
+           
+<asynchronous 
+suspension>
+           #9      Fl
+utterCommandRunner.ru
+nCommand (package:flu
+tter_tools/src/runner
+/flutter_command_runn
+er.dart:422:5)
+           
+<asynchronous 
+suspension>
+           #10     
+run.<anonymous 
+closure>.<anonymous 
+closure> (package:flu
+tter_tools/runner.dar
+t:104:11)
+           
+<asynchronous 
+suspension>
+           #11     Ap
+pContext.run.<anonymo
+us closure> (package:
+flutter_tools/src/bas
+e/context.dart:154:19
+)
+           
+<asynchronous 
+suspension>
+           #12     
+main (package:flutter
+_tools/executable.dar
+t:103:3)
+           
+<asynchronous 
+suspension>
+
+
+[        ] Running 1 shutdown hook
+[  +16 ms] Shutdown hooks complete
+[        ] exiting with code 1

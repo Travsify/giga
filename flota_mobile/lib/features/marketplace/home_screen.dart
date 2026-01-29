@@ -443,84 +443,66 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 15),
-                  Row(
+                  GridView.count(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    crossAxisCount: 2, // Changed to 2 Columns
+                    crossAxisSpacing: 15,
+                    mainAxisSpacing: 15,
+                    childAspectRatio: 1.1, // Adjusted for 2-column layout
                     children: [
-                      Expanded(
-                        child: FadeInUp(
-                          delay: const Duration(milliseconds: 300),
-                          child: _ServiceTile(
-                            title: 'Multi-Stop',
-                            subtitle: 'Chain drop-offs',
-                            icon: Icons.alt_route_rounded,
-                            color: theme.primaryColor,
-                            onTap: () => context.push('/multi-stop'),
-                          ),
+                      FadeInUp(
+                        delay: const Duration(milliseconds: 300),
+                        child: _ServiceTile(
+                          title: 'Multi-Stop',
+                          subtitle: 'Chain drop-offs',
+                          icon: Icons.alt_route_rounded,
+                          color: theme.primaryColor,
+                          onTap: () => context.push('/multi-stop'),
                         ),
                       ),
-                      const SizedBox(width: 15),
-                      Expanded(
-                        child: FadeInUp(
-                          delay: const Duration(milliseconds: 350),
-                          child: _ServiceTile(
-                            title: 'Waybill',
-                            subtitle: 'Inter-state',
-                            icon: Icons.map_rounded,
-                            color: Colors.purple,
-                            onTap: () => context.push('/inter-state'),
-                          ),
+                      FadeInUp(
+                        delay: const Duration(milliseconds: 350),
+                        child: _ServiceTile(
+                          title: 'Waybill',
+                          subtitle: 'Inter-state',
+                          icon: Icons.map_rounded,
+                          color: Colors.purple,
+                          onTap: () => context.push('/inter-state'),
                         ),
                       ),
-                      const SizedBox(width: 15),
-                      Expanded(
-                        child: FadeInUp(
-                          delay: const Duration(milliseconds: 400),
-                          child: _ServiceTile(
-                            title: 'Shop & Ship',
-                            subtitle: 'Virtual UK Addr',
-                            icon: Icons.shopping_cart_checkout,
-                            color: Colors.blue[800]!, // Deep Blue for UK
-                            onTap: () => context.push('/shop-and-ship'),
-                          ),
+                      FadeInUp(
+                        delay: const Duration(milliseconds: 400),
+                        child: _ServiceTile(
+                          title: 'Shop & Ship',
+                          subtitle: 'Virtual UK Addr',
+                          icon: Icons.shopping_cart_checkout,
+                          color: Colors.blue[800]!,
+                          onTap: () => context.push('/shop-and-ship'),
                         ),
                       ),
-                    ],
-                  ),
-                  const SizedBox(height: 15),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: FadeInUp(
-                          delay: const Duration(milliseconds: 400),
-                          child: _ServiceTile(
-                            title: 'Scheduled',
-                            subtitle: 'Book for later',
-                            icon: Icons.calendar_month_rounded,
-                            color: Colors.orange,
-                            onTap: () => context.push('/delivery-request?scheduled=true'),
-                          ),
+                      FadeInUp(
+                        delay: const Duration(milliseconds: 450),
+                        child: _ServiceTile(
+                          title: 'Scheduled',
+                          subtitle: 'Book for later',
+                          icon: Icons.calendar_month_rounded,
+                          color: Colors.orange,
+                          onTap: () => context.push('/delivery-request?scheduled=true'),
                         ),
                       ),
-                    ],
-                  ),
-                  const SizedBox(height: 15),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: FadeInUp(
-                          delay: const Duration(milliseconds: 500),
-                          child: _ServiceTile(
-                            title: 'Giga Lockers',
-                            subtitle: 'Secure pickup',
-                            icon: Icons.inventory_2_outlined,
-                            color: AppTheme.slateBlue,
-                            onTap: () => context.push('/lockers'),
-                          ),
+                      FadeInUp(
+                        delay: const Duration(milliseconds: 500),
+                        child: _ServiceTile(
+                          title: 'Giga Lockers',
+                          subtitle: 'Secure pickup',
+                          icon: Icons.inventory_2_outlined,
+                          color: AppTheme.slateBlue,
+                          onTap: () => context.push('/lockers'),
                         ),
                       ),
-                      const SizedBox(width: 15),
                       if (authState.countryCode == 'GB')
-                      Expanded(
-                        child: FadeInUp(
+                        FadeInUp(
                           delay: const Duration(milliseconds: 600),
                           child: _ServiceTile(
                             title: 'ULEZ Check',
@@ -529,10 +511,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             color: AppTheme.successGreen,
                             onTap: () => context.push('/ulez'),
                           ),
-                        ),
-                      )
+                        )
                       else
-                        const Spacer(),
+                        FadeInUp(
+                          delay: const Duration(milliseconds: 600),
+                          child: _ServiceTile(
+                            title: 'Giga Go',
+                            subtitle: 'Errands & Tasks',
+                            icon: Icons.directions_run_rounded,
+                            color: Colors.teal,
+                            onTap: () => context.push('/giga-go'),
+                          ),
+                        ),
                     ],
                   ),
                 ],

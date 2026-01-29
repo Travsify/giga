@@ -245,7 +245,7 @@ class _EnhancedTrackingScreenState extends ConsumerState<EnhancedTrackingScreen>
                               debugPrint('Failed to sync contactless status: $e');
                             }
                           },
-                          activeColor: AppTheme.successGreen,
+                          activeThumbColor: AppTheme.successGreen,
                         ),
                       ),
 

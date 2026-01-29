@@ -131,4 +131,12 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Sustainability / Carbon Impact
     Route::get('/sustainability/stats', [App\Http\Controllers\Api\SustainabilityController::class, 'getStats']);
+
+    // Inter-state Delivery
+    Route::get('/inter-state/price', [App\Http\Controllers\Api\InterStateController::class, 'getPrice']);
+    Route::post('/inter-state/waybill', [App\Http\Controllers\Api\InterStateController::class, 'createWaybill']);
+
+    // Shop & Ship
+    Route::get('/shop-and-ship/address', [App\Http\Controllers\Api\ShopAndShipController::class, 'getAddress']);
+    Route::get('/shop-and-ship/packages', [App\Http\Controllers\Api\ShopAndShipController::class, 'getPackages']);
 });

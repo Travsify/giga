@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flota_mobile/theme/app_theme.dart';
 import 'package:flota_mobile/core/api_client.dart';
 import 'package:animate_do/animate_do.dart';
 

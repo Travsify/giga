@@ -174,7 +174,7 @@ class _OffersScreenState extends ConsumerState<OffersScreen> with SingleTickerPr
                 ),
               ),
             )
-          ).toList(),
+          ),
         ],
       ),
     );

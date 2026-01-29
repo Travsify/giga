@@ -41,8 +41,6 @@ dependencies:
   geolocator: ^10.1.0
   geocoding: ^2.1.1
   flutter_stripe: ^10.0.0
-  flutter_paystack:
-    path: ./packages/flutter_paystack
   flutterwave_standard: ^1.0.9
   flutter_secure_storage: ^9.0.0
   socket_io_client: ^2.0.3
@@ -56,17 +54,21 @@ dependencies:
   animate_do: ^3.3.2
   local_auth: ^2.1.8
 
+  audioplayers: ^5.2.0
+  permission_handler: ^11.0.0
+  path_provider: ^2.1.1
+
   # Phase 3: Safety & Advanced Features
-  camera: ^0.10.5
+  # camera: ^0.10.5  # TEMPORARILY DISABLED FOR BUILD
   image_picker: ^1.0.7
-  file_picker: ^6.1.1
+  file_picker: ^8.0.0
   qr_flutter: ^4.1.0
   url_launcher: ^6.2.3
   firebase_storage: ^11.5.6
-  share_plus: ^7.2.1
+  share_plus: ^10.1.0
   intl: ^0.19.0
   shared_preferences: ^2.2.2
-  package_info_plus: ^4.0.0
+  package_info_plus: ^8.1.1
 
 dev_dependencies:
   flutter_test:

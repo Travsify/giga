@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:animate_do/animate_do.dart';
 import 'package:flota_mobile/features/location/traffic_service.dart';
 
 // Payment Method Chip Widget
@@ -133,11 +132,20 @@ class LiveHeatmapWidget extends StatefulWidget {
 
 class _LiveHeatmapWidgetState extends State<LiveHeatmapWidget> {
   Map<String, dynamic>? _trafficStatus;
+  GoogleMapController? _mapController;
 
   @override
   void initState() {
     super.initState();
     _loadTraffic();
+  }
+
+  @override
+  void didUpdateWidget(LiveHeatmapWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.center != widget.center) {
+      _mapController?.animateCamera(CameraUpdate.newLatLng(widget.center));
+    }
   }
 
   Future<void> _loadTraffic() async {
@@ -221,6 +229,7 @@ class _LiveHeatmapWidgetState extends State<LiveHeatmapWidget> {
                     liteModeEnabled: false, // Set to false to allow interaction/traffic
                     trafficEnabled: true, // SHOW REAL TRAFFIC
                     mapType: MapType.normal,
+                    onMapCreated: (controller) => _mapController = controller,
                   ),
                 ),
               ],

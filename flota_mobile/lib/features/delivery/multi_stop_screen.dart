@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flota_mobile/theme/app_theme.dart';
 import 'package:flota_mobile/core/location_service.dart';
@@ -351,7 +350,7 @@ class _MultiStopScreenState extends ConsumerState<MultiStopScreen> {
                       overflow: TextOverflow.ellipsis,
                     ),
                     subtitle: isFilled ? Text(
-                      isPickup ? 'Pickup Point' : 'Stop ${index}',
+                      isPickup ? 'Pickup Point' : 'Stop $index',
                       style: TextStyle(color: Colors.grey[500], fontSize: 11),
                     ) : null,
                     trailing: Row(

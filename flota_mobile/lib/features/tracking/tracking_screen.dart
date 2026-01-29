@@ -22,7 +22,7 @@ class TrackingScreen extends StatefulWidget {
 
 class _TrackingScreenState extends State<TrackingScreen> {
   GoogleMapController? _mapController;
-  Map<MarkerId, Marker> _markers = {};
+  final Map<MarkerId, Marker> _markers = {};
   LatLng? _riderLocation;
   String _status = 'Rider assigned';
   String _eta = '15 mins';
@@ -243,7 +243,12 @@ class _TrackStep extends StatelessWidget {
   final bool isDone;
   final bool isActive;
 
-  const _TrackStep({required this.title, required this.subtitle, this.isDone = false, this.isActive = false});
+  const _TrackStep({
+    required this.title, 
+    required this.subtitle,
+    this.isDone = false,
+    this.isActive = false,
+  });
 
   @override
   Widget build(BuildContext context) {

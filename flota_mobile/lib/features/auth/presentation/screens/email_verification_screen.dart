@@ -7,7 +7,6 @@ import 'package:flota_mobile/features/auth/auth_provider.dart';
 import 'package:flota_mobile/theme/app_theme.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
-import 'package:firebase_auth/firebase_auth.dart' as io;
 
 class EmailVerificationScreen extends ConsumerStatefulWidget {
   final bool isPhone;
@@ -156,7 +155,7 @@ class _EmailVerificationScreenState extends ConsumerState<EmailVerificationScree
                 FadeInDown(
                   delay: const Duration(milliseconds: 100),
                   child: Text(
-                    widget.isPhone ? 'Verify Your Phone' : 'Verify Your Email',
+                    widget.isPhone ? 'Phone Verification' : 'Security Verification',
                     style: TextStyle(fontSize: 28, fontWeight: FontWeight.w800, color: Colors.black87),
                   ),
                 ),

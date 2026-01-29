@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -10,10 +9,8 @@ class PaymentConfigService {
   PaymentConfigService._internal();
 
   String? stripePublicKey;
-  String? paystackPublicKey;
   String? flutterwavePublicKey;
   String? flutterwaveEncryptionKey;
-  bool paystackEnabled = false;
   bool flutterwaveEnabled = false;
 
   final _storage = const FlutterSecureStorage();
@@ -31,24 +28,20 @@ class PaymentConfigService {
       if (response.statusCode == 200) {
         final data = response.data;
         stripePublicKey = data['stripe_public_key'];
-        paystackPublicKey = data['paystack_public_key'];
         flutterwavePublicKey = data['flutterwave_public_key'];
-        flutterwaveEncryptionKey = data['flutterwave_encryption_key']; // Optional if needed by SDK
+        flutterwaveEncryptionKey = data['flutterwave_encryption_key']; 
         
-        paystackEnabled = (data['paystack_enabled'] ?? false) || (paystackPublicKey != null && paystackPublicKey!.isNotEmpty);
         flutterwaveEnabled = data['flutterwave_enabled'] ?? false;
         
         await _storage.write(key: 'stripe_key', value: stripePublicKey);
-        await _storage.write(key: 'paystack_key', value: paystackPublicKey);
         await _storage.write(key: 'flutterwave_key', value: flutterwavePublicKey);
         
-        debugPrint('Payment Config Loaded: Stripe=${stripePublicKey != null}, Paystack=${paystackPublicKey != null}, Flutterwave=${flutterwavePublicKey != null}');
+        debugPrint('Payment Config Loaded: Stripe=${stripePublicKey != null}, Flutterwave=${flutterwavePublicKey != null}');
       }
     } catch (e) {
       debugPrint('Error fetching payment config: $e');
       // Fallback to cache
       stripePublicKey = await _storage.read(key: 'stripe_key');
-      paystackPublicKey = await _storage.read(key: 'paystack_key');
       flutterwavePublicKey = await _storage.read(key: 'flutterwave_key');
     }
   }

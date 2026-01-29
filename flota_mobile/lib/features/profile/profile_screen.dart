@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -7,8 +8,9 @@ import 'package:flota_mobile/features/auth/auth_provider.dart';
 import 'package:flota_mobile/theme/app_theme.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:flota_mobile/shared/map_picker_screen.dart';
+import 'package:flota_mobile/shared/address_autocomplete_field.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
@@ -22,6 +24,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   final _phoneController = TextEditingController();
   final _homeController = TextEditingController();
   final _workController = TextEditingController();
+  String? _selectedImagePath;
 
   @override
   void dispose() {
@@ -32,6 +35,16 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     super.dispose();
   }
 
+  Future<void> _pickImage() async {
+    final picker = ImagePicker();
+    final image = await picker.pickImage(source: ImageSource.gallery);
+    if (image != null) {
+      setState(() {
+        _selectedImagePath = image.path;
+      });
+    }
+  }
+
   void _showEditProfile() {
     final user = ref.read(profileProvider).user;
     if (user != null) {
@@ -40,76 +53,124 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       _homeController.text = user['home_address'] ?? '';
       _workController.text = user['work_address'] ?? '';
     }
+    setState(() {
+      _selectedImagePath = null; // Reset image path when opening
+    });
 
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => Container(
-        padding: EdgeInsets.only(
-          bottom: MediaQuery.of(context).viewInsets.bottom,
-          top: 20,
-          left: 20,
-          right: 20,
-        ),
-        decoration: BoxDecoration(
-          color: Theme.of(context).cardTheme.color,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-          border: Border.all(color: Theme.of(context).primaryColor.withOpacity(0.1)),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Center(
-              child: Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: Colors.grey[300],
-                  borderRadius: BorderRadius.circular(2),
+      builder: (context) => StatefulBuilder(
+        builder: (context, setModalState) => Container(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+            top: 20,
+            left: 20,
+            right: 20,
+          ),
+          decoration: BoxDecoration(
+            color: AppTheme.surfaceColor,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+            border: Border.all(color: AppTheme.primaryBlue.withOpacity(0.1)),
+          ),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Container(
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[700],
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
                 ),
-              ),
-            ),
-            const SizedBox(height: 20),
-            Text(
-              'Update Profile',
-              style: GoogleFonts.outfit(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-                color: AppTheme.textPrimary,
-              ),
-            ),
-            const SizedBox(height: 20),
-            TextField(
-              controller: _nameController,
-              decoration: const InputDecoration(
-                labelText: 'Full Name',
-                prefixIcon: Icon(Icons.person_outline),
-                hintText: 'Enter your name',
-              ),
-              textCapitalization: TextCapitalization.words,
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: _phoneController,
-              decoration: const InputDecoration(
-                labelText: 'UK Phone Number',
-                prefixIcon: Icon(Icons.phone_android),
-                hintText: '+44 7... ',
-              ),
-              keyboardType: TextInputType.phone,
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: _homeController,
-              decoration: InputDecoration(
-                labelText: 'Home Address',
-                prefixIcon: const Icon(Icons.home),
-                hintText: 'Enter your home address',
-                suffixIcon: IconButton(
-                  icon: const Icon(Icons.map_outlined, color: AppTheme.primaryBlue),
-                  onPressed: () async {
+                const SizedBox(height: 20),
+                Text(
+                  'Update Profile',
+                  style: GoogleFonts.outfit(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                    color: AppTheme.textPrimary,
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Center(
+                  child: Stack(
+                    children: [
+                      CircleAvatar(
+                        radius: 50,
+                        backgroundColor: AppTheme.primaryBlue.withOpacity(0.1),
+                        backgroundImage: _selectedImagePath != null 
+                          ? FileImage(File(_selectedImagePath!)) as ImageProvider
+                          : (user?['profile_image'] != null 
+                             ? NetworkImage(user!['profile_image']) as ImageProvider
+                             : null),
+                        child: _selectedImagePath == null && user?['profile_image'] == null
+                            ? const Icon(Icons.person, size: 50, color: AppTheme.primaryBlue)
+                            : null,
+                      ),
+                      Positioned(
+                        bottom: 0,
+                        right: 0,
+                        child: GestureDetector(
+                          onTap: () async {
+                            final picker = ImagePicker();
+                            final image = await picker.pickImage(source: ImageSource.gallery);
+                            if (image != null) {
+                              setModalState(() {
+                                _selectedImagePath = image.path;
+                              });
+                              setState(() {
+                                _selectedImagePath = image.path;
+                              });
+                            }
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: const BoxDecoration(
+                              color: AppTheme.primaryBlue,
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(Icons.camera_alt, color: Colors.white, size: 20),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 24),
+                TextField(
+                  controller: _nameController,
+                  style: const TextStyle(color: AppTheme.textPrimary),
+                  decoration: const InputDecoration(
+                    labelText: 'Full Name',
+                    prefixIcon: Icon(Icons.person_outline),
+                    hintText: 'Enter your name',
+                  ),
+                  textCapitalization: TextCapitalization.words,
+                ),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: _phoneController,
+                  style: const TextStyle(color: AppTheme.textPrimary),
+                  decoration: const InputDecoration(
+                    labelText: 'UK Phone Number',
+                    prefixIcon: Icon(Icons.phone_android),
+                    hintText: '+44 7... ',
+                  ),
+                  keyboardType: TextInputType.phone,
+                ),
+                const SizedBox(height: 16),
+                AddressAutocompleteField(
+                  controller: _homeController,
+                  label: 'Home Address',
+                  icon: Icons.home,
+                  onMapPickerTap: () async {
                     final result = await Navigator.push(
                       context,
                       MaterialPageRoute(
@@ -117,24 +178,21 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       ),
                     );
                     if (result != null && result is Map) {
+                      setModalState(() {
+                        _homeController.text = result['address'];
+                      });
                       setState(() {
                         _homeController.text = result['address'];
                       });
                     }
                   },
                 ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: _workController,
-              decoration: InputDecoration(
-                labelText: 'Work Address',
-                prefixIcon: const Icon(Icons.work),
-                hintText: 'Enter your work address',
-                suffixIcon: IconButton(
-                  icon: const Icon(Icons.map_outlined, color: AppTheme.primaryBlue),
-                  onPressed: () async {
+                const SizedBox(height: 16),
+                AddressAutocompleteField(
+                  controller: _workController,
+                  label: 'Work Address',
+                  icon: Icons.work,
+                  onMapPickerTap: () async {
                     final result = await Navigator.push(
                       context,
                       MaterialPageRoute(
@@ -142,32 +200,36 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       ),
                     );
                     if (result != null && result is Map) {
+                      setModalState(() {
+                        _workController.text = result['address'];
+                      });
                       setState(() {
                         _workController.text = result['address'];
                       });
                     }
                   },
                 ),
-              ),
+                const SizedBox(height: 24),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () async {
+                      await ref.read(profileProvider.notifier).updateProfile(
+                        name: _nameController.text,
+                        ukPhone: _phoneController.text,
+                        homeAddress: _homeController.text,
+                        workAddress: _workController.text,
+                        imagePath: _selectedImagePath,
+                      );
+                      if (mounted) Navigator.pop(context);
+                    },
+                    child: const Text('Save Changes'),
+                  ),
+                ),
+                const SizedBox(height: 20),
+              ],
             ),
-            const SizedBox(height: 24),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () async {
-                  await ref.read(profileProvider.notifier).updateProfile(
-                    name: _nameController.text,
-                    ukPhone: _phoneController.text,
-                    homeAddress: _homeController.text,
-                    workAddress: _workController.text,
-                  );
-                  if (mounted) Navigator.pop(context);
-                },
-                child: const Text('Save Changes'),
-              ),
-            ),
-            const SizedBox(height: 20),
-          ],
+          ),
         ),
       ),
     );
@@ -177,12 +239,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Logout', style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
-        content: const Text('Are you sure you want to log out of Giga?'),
+        backgroundColor: AppTheme.surfaceColor,
+        title: Text('Logout', style: GoogleFonts.outfit(fontWeight: FontWeight.bold, color: AppTheme.textPrimary)),
+        content: const Text('Are you sure you want to log out of Giga?', style: TextStyle(color: AppTheme.textSecondary)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text('Cancel', style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.5))),
+            child: const Text('Cancel', style: TextStyle(color: AppTheme.textSecondary)),
           ),
           ElevatedButton(
             onPressed: () async {
@@ -190,7 +253,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               if (mounted) context.go('/welcome');
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red[600],
+              backgroundColor: AppTheme.primaryRed,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
             ),
             child: const Text('Logout'),
@@ -201,12 +264,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   }
 
   void _showReferralDialog() {
-    final referralCode = ref.read(profileProvider).loyalty?['referral_code'] ?? '';
-    
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Have a Referral Code?'),
+        backgroundColor: AppTheme.surfaceColor,
+        title: const Text('Have a Referral Code?', style: TextStyle(color: AppTheme.textPrimary)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -214,16 +276,17 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               builder: (context) {
                 final country = ref.read(authProvider).countryCode;
                 final amount = (country == 'NG') ? 5000 : (country == 'GH' ? 500 : 10);
-                return Text('Enter a friend\'s code to get ${ref.read(authProvider).currencySymbol}$amount credit instantly.');
+                return Text(
+                  'Enter a friend\'s code to get ${ref.read(authProvider).currencySymbol}$amount credit instantly.',
+                  style: const TextStyle(color: AppTheme.textSecondary),
+                );
               }
             ),
             const SizedBox(height: 16),
             TextField(
-              decoration: InputDecoration(
+              style: const TextStyle(color: AppTheme.textPrimary),
+              decoration: const InputDecoration(
                 hintText: 'ENTER CODE',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
               ),
               onSubmitted: (value) async {
                 try {
@@ -252,12 +315,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final profileState = ref.watch(profileProvider);
     final user = profileState.user;
     final loyalty = profileState.loyalty;
-    final authState = ref.watch(authProvider);
-
 
     if (profileState.isLoading && user == null) {
       return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
+        backgroundColor: AppTheme.backgroundColor,
+        body: Center(child: CircularProgressIndicator(color: AppTheme.primaryBlue)),
       );
     }
 
@@ -266,25 +328,32 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       body: CustomScrollView(
         slivers: [
           SliverAppBar(
-            expandedHeight: 200,
+            expandedHeight: 220,
             pinned: true,
+            backgroundColor: AppTheme.primaryBlue,
             flexibleSpace: FlexibleSpaceBar(
               background: Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [Theme.of(context).primaryColor, Theme.of(context).primaryColor.withOpacity(0.7)],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [AppTheme.primaryBlue, AppTheme.primaryBlueDark],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
                   ),
+                ),
                 child: Center(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const CircleAvatar(
-                        radius: 40,
+                      const SizedBox(height: 40),
+                      CircleAvatar(
+                        radius: 45,
                         backgroundColor: Colors.white24,
-                        child: Icon(Icons.person, size: 40, color: Colors.white),
+                        backgroundImage: user?['profile_image'] != null 
+                          ? NetworkImage(user!['profile_image'])
+                          : null,
+                        child: user?['profile_image'] == null
+                          ? const Icon(Icons.person, size: 45, color: Colors.white)
+                          : null,
                       ),
                       const SizedBox(height: 12),
                       Text(
@@ -348,7 +417,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Loyalty Card
                   _buildLoyaltyCard(loyalty),
                   const SizedBox(height: 24),
 
@@ -405,7 +473,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     'Logout',
                     'Securely sign out of your account',
                     Icons.logout_rounded,
-                    onTap: () => _showLogoutConfirmation(),
+                    onTap: _showLogoutConfirmation,
                   ),
                   
                   const SizedBox(height: 32),
@@ -414,7 +482,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     child: OutlinedButton.icon(
                       onPressed: () async {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Refreshing your profile...'), duration: Duration(seconds: 1)),
+                          const SnackBar(content: Text('Refreshing...'), duration: Duration(seconds: 1)),
                         );
                         await ref.read(profileProvider.notifier).refresh();
                       },
@@ -453,7 +521,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         style: GoogleFonts.outfit(
           fontSize: 18,
           fontWeight: FontWeight.bold,
-          color: Theme.of(context).textTheme.bodyLarge?.color,
+          color: AppTheme.textPrimary,
         ),
       ),
     );
@@ -507,8 +575,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             child: const Row(
               children: [
                 Icon(Icons.stars, color: Colors.white, size: 20),
-                SizedBox(width: 8),
-                Text(
+                const SizedBox(width: 8),
+                const Text(
                   'Premium',
                   style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                 ),
@@ -521,30 +589,26 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   }
 
   Widget _buildSavedPlaceTile(String title, String subtitle, IconData icon, {VoidCallback? onTap}) {
-    final theme = Theme.of(context);
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: theme.cardTheme.color,
+        color: AppTheme.surfaceColor,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: theme.primaryColor.withOpacity(0.1)),
-        boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.2), blurRadius: 10, offset: const Offset(0, 4)),
-        ],
+        border: Border.all(color: AppTheme.primaryBlue.withOpacity(0.1)),
       ),
       child: ListTile(
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         leading: Container(
           padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
-            color: theme.primaryColor.withOpacity(0.1),
+            color: AppTheme.primaryBlue.withOpacity(0.1),
             borderRadius: BorderRadius.circular(10),
           ),
-          child: Icon(icon, color: theme.primaryColor, size: 20),
+          child: Icon(icon, color: AppTheme.primaryBlue, size: 20),
         ),
-        title: Text(title, style: GoogleFonts.outfit(fontWeight: FontWeight.w600, fontSize: 16, color: theme.textTheme.bodyLarge?.color)),
-        subtitle: Text(subtitle, style: TextStyle(color: theme.textTheme.bodyMedium?.color?.withOpacity(0.6), fontSize: 13), maxLines: 1, overflow: TextOverflow.ellipsis),
-        trailing: Icon(Icons.chevron_right, color: theme.textTheme.bodyMedium?.color?.withOpacity(0.3), size: 20),
+        title: Text(title, style: GoogleFonts.outfit(fontWeight: FontWeight.w600, fontSize: 16, color: AppTheme.textPrimary)),
+        subtitle: Text(subtitle, style: const TextStyle(color: AppTheme.textSecondary, fontSize: 13), maxLines: 1, overflow: TextOverflow.ellipsis),
+        trailing: const Icon(Icons.chevron_right, color: AppTheme.textSecondary, size: 20),
         onTap: onTap,
       ),
     );
@@ -553,13 +617,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   Widget _buildReferralCard(Map<String, dynamic>? loyalty) {
     final code = loyalty?['referral_code'] ?? 'GENERATING...';
     
-    final theme = Theme.of(context);
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: theme.cardTheme.color,
+        color: AppTheme.surfaceColor,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: theme.primaryColor.withOpacity(0.1)),
+        border: Border.all(color: AppTheme.primaryBlue.withOpacity(0.1)),
       ),
       child: Column(
         children: [
@@ -568,10 +631,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: theme.primaryColor.withOpacity(0.1),
+                  color: AppTheme.primaryBlue.withOpacity(0.1),
                   shape: BoxShape.circle,
                 ),
-                child: Icon(Icons.card_giftcard, color: theme.primaryColor),
+                child: const Icon(Icons.card_giftcard, color: AppTheme.primaryBlue),
               ),
               const SizedBox(width: 16),
               Expanded(
@@ -584,7 +647,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       children: [
                         Text(
                           'Refer & Earn ${ref.watch(authProvider).currencySymbol}$amount',
-                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AppTheme.textPrimary),
                         ),
                         const Text(
                           'Share your code with friends',
@@ -601,26 +664,26 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
-              color: const Color(0xFF0F1219),
+              color: const Color(0xFF0B0E14),
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: theme.primaryColor.withOpacity(0.2)),
+              border: Border.all(color: AppTheme.primaryBlue.withOpacity(0.2)),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
                   code,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
                     letterSpacing: 2,
-                    color: theme.primaryColor,
+                    color: AppTheme.primaryBlue,
                   ),
                 ),
                 Row(
                   children: [
                     IconButton(
-                      icon: const Icon(Icons.copy, size: 20),
+                      icon: const Icon(Icons.copy, size: 20, color: AppTheme.textSecondary),
                       onPressed: () {
                         Clipboard.setData(ClipboardData(text: code));
                         ScaffoldMessenger.of(context).showSnackBar(
@@ -629,9 +692,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       },
                     ),
                     IconButton(
-                      icon: const Icon(Icons.share, size: 20),
+                      icon: const Icon(Icons.share, size: 20, color: AppTheme.textSecondary),
                       onPressed: () {
-                        Share.share('Use my Giga code $code to get £10 off your first delivery! Download now.');
+                        Share.share('Use my Giga code $code to get credit off your first delivery! Download now.');
                       },
                     ),
                   ],
@@ -644,7 +707,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               _infoItem(loyalty?['referral_count']?.toString() ?? '0', 'Referrals'),
-              Container(width: 1, height: 30, color: Colors.grey[200]),
+              Container(width: 1, height: 30, color: Colors.grey[800]),
               _infoItem('${ref.watch(authProvider).currencySymbol}${loyalty?['referral_earnings'] ?? '0'}', 'Earned'),
             ],
           ),
@@ -658,7 +721,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       children: [
         Text(
           value,
-          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: AppTheme.textPrimary),
         ),
         Text(
           label,
@@ -668,3 +731,4 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     );
   }
 }
+

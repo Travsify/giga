@@ -62,6 +62,7 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
     String? ukPhone,
     String? homeAddress,
     String? workAddress,
+    String? imagePath,
   }) async {
     state = state.copyWith(isLoading: true);
     try {
@@ -71,7 +72,7 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
       if (homeAddress != null) data['home_address'] = homeAddress;
       if (workAddress != null) data['work_address'] = workAddress;
 
-      final updatedUser = await _repository.updateProfile(data);
+      final updatedUser = await _repository.updateProfile(data, imagePath: imagePath);
       state = state.copyWith(user: updatedUser, isLoading: false);
     } catch (e) {
       state = state.copyWith(error: e.toString(), isLoading: false);

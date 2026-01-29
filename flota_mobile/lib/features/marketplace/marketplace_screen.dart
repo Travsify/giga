@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flota_mobile/theme/app_theme.dart';
 import 'package:flota_mobile/shared/map_picker_screen.dart';
 import 'package:flota_mobile/core/error_handler.dart';
 import 'package:flota_mobile/features/auth/auth_provider.dart';

@@ -46,11 +46,11 @@ import 'package:flota_mobile/theme/app_theme.dart';
 import 'package:flota_mobile/features/shared/main_scaffold.dart';
 import 'package:flota_mobile/features/delivery/inter_state_screen.dart';
 import 'package:flota_mobile/features/shop_and_ship/screens/shop_and_ship_screen.dart';
+import 'package:flota_mobile/features/errands/giga_go_screen.dart';
 
 
 import 'firebase_options.dart';
 
-import 'package:flota_mobile/core/settings_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -246,9 +246,9 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/business',
         builder: (context, state) => const BusinessDashboardScreen(),
         routes: [
-          GoRoute(path: 'team', builder: (context, state) => const TeamManagementScreen()),
-          GoRoute(path: 'billing', builder: (context, state) => const BillingScreen()),
-          GoRoute(path: 'bulk-shipping', builder: (context, state) => const BulkBookingScreen()),
+          GoRoute(path: 'team', builder: (context, state) => TeamManagementScreen()),
+          GoRoute(path: 'billing', builder: (context, state) => BillingScreen()),
+          GoRoute(path: 'bulk-shipping', builder: (context, state) => BulkBookingScreen()),
         ],
       ),
       GoRoute(
@@ -375,6 +375,10 @@ final routerProvider = Provider<GoRouter>((ref) {
         GoRoute(
           path: '/api-keys',
           builder: (context, state) => const ApiKeyScreen(),
+        ),
+        GoRoute(
+          path: '/giga-go',
+          builder: (context, state) => const GigaGoScreen(),
         ),
       ],
   );

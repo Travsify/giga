@@ -1,21 +1,15 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:flota_mobile/core/payment_config_service.dart';
-import 'package:flutter_paystack/flutter_paystack.dart';
 import 'package:flutterwave_standard/flutterwave.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:flota_mobile/core/currency_service.dart';
-import 'dart:math';
 
 // Render Production Backend
 const String kApiBaseUrl = 'https://giga-ytn0.onrender.com/api'; 
 
 class PaymentService {
-  // static final _paystackPlugin = PaystackPlugin(); // Removed
 
   static Future<void> initialize() async {
     // 1. Fetch Remote Config
@@ -38,19 +32,17 @@ class PaymentService {
     debugPrint('PaymentService: Starting fundWallet for $currency $amount');
     
     // 1. Determine Provider
-    final africans = ['NGN', 'GHS', 'KES', 'ZAR', 'UGX', 'TZS', 'RWF'];
-    if (africans.contains(currency)) {
-      // Prefer Flutterwave if enabled and available, else Paystack for NGN/GHS, else Error
-      final config = PaymentConfigService();
-      
-      if (config.flutterwaveEnabled && config.flutterwavePublicKey != null) {
-         return await _fundWalletFlutterwave(context, amount, email, userId, currency);
-      } else if (config.paystackEnabled && config.paystackPublicKey != null && (currency == 'NGN' || currency == 'GHS')) {
-         return await _fundWalletPaystack(context, amount, email, currency);
-      } else {
-         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('No payment provider available for this currency.')));
-         return false;
-      }
+    // Comprehensive list of African currencies
+    final africans = [
+      'NGN', 'GHS', 'KES', 'ZAR', 'UGX', 'TZS', 'RWF', 'EGP', 'MAD', 'ETB', 
+      'XOF', 'XAF', 'MUR', 'MWK', 'SZL', 'LSL', 'BWP', 'NAD', 'ZMW', 'AOA',
+      'SCR', 'GMD', 'SLL', 'LRD', 'GNF', 'CVE', 'STD', 'DJF', 'ERN', 'SOS', 
+      'KMF', 'MGA'
+    ];
+
+    if (africans.contains(currency.toUpperCase())) {
+      // Flutterwave is now the primary and mandatory gateway for African nations
+      return await _fundWalletFlutterwave(context, amount, email, userId, currency.toUpperCase());
     } else {
       return await _fundWalletStripe(context, amount, email, userId, currency: currency);
     }
@@ -59,6 +51,12 @@ class PaymentService {
   // FLUTTERWAVE FLOW
   static Future<bool> _fundWalletFlutterwave(BuildContext context, double amount, String email, String userId, String currency) async {
     final config = PaymentConfigService();
+    
+    if (config.flutterwavePublicKey == null || config.flutterwavePublicKey!.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Flutterwave is not properly configured.')));
+      return false;
+    }
+
     // Use standard Flutterwave checkout
     final Customer customer = Customer(email: email, name: "Giga User", phoneNumber: "1234567890");
     final Flutterwave flutterwave = Flutterwave(
@@ -68,14 +66,14 @@ class PaymentService {
       txRef: "FLW_${DateTime.now().millisecondsSinceEpoch}", 
       amount: amount.toString(), 
       customer: customer, 
-      paymentOptions: "card, mobilemoneyghana, ussd", 
-      customization: Customization(title: "Giga Logistics Wallet Topup"), 
-      isTestMode: true
+      paymentOptions: "card, mobilemoney, ussd, account", 
+      customization: Customization(title: "Banks/Cards Payment"), 
+      isTestMode: false // Production readiness
     );
     
     try {
       final ChargeResponse response = await flutterwave.charge(context);
-      if (response.success == true) { // Updated check based on typical response
+      if (response.success == true) {
          debugPrint('Flutterwave Success: ${response.transactionId}');
          return await _confirmPaymentWithBackend(response.transactionId ?? 'UNKNOWN_REF', 'flutterwave', amount, currency);
       } else {
@@ -86,43 +84,6 @@ class PaymentService {
       debugPrint('Flutterwave Error: $e');
       return false;
     }
-  }
-
-  static Future<bool> _fundWalletPaystack(BuildContext context, double amount, String email, String currency) async {
-       final config = PaymentConfigService();
-       final plugin = PaystackPlugin();
-       
-       try {
-         await plugin.initialize(publicKey: config.paystackPublicKey!);
-         
-         final charge = Charge()
-           ..amount = (amount * 100).toInt() // In kobo
-           ..email = email
-           ..currency = currency
-           ..reference =  "PSTK_${DateTime.now().millisecondsSinceEpoch}";
-           
-         final response = await plugin.checkout(
-           context,
-           method: CheckoutMethod.card,
-           charge: charge,
-         );
-         
-         if (response.status) {
-           debugPrint('Paystack Success: ${response.reference}');
-           return await _confirmPaymentWithBackend(response.reference!, 'paystack', amount, currency);
-         } else {
-           if (context.mounted) {
-             ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Paystack Failed: ${response.message}')));
-           }
-           return false;
-         }
-       } catch (e) {
-         debugPrint('Paystack Error: $e');
-         if (context.mounted) {
-           ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Paystack Error: $e')));
-         }
-         return false;
-       }
   }
 
   // STRIPE FLOW

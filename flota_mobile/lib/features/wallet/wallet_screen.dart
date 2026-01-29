@@ -27,7 +27,7 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
   void initState() {
     super.initState();
     final country = ref.read(authProvider).countryCode;
-    _selectedMethod = ['NG', 'GH'].contains(country) ? 'paystack' : 'stripe';
+    _selectedMethod = ['NG', 'GH'].contains(country) ? 'banks_cards' : 'stripe';
     Future.microtask(() => ref.read(walletProvider.notifier).fetchWalletData());
   }
 
@@ -40,7 +40,7 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
     
     final methods = [
       if (isAfricanMarket)
-        {'id': 'paystack', 'label': 'Paystack', 'icon': Icons.credit_card}
+        {'id': 'banks_cards', 'label': 'Banks/Cards', 'icon': Icons.credit_card}
       else
         {'id': 'stripe', 'label': 'Stripe', 'icon': Icons.credit_card},
         

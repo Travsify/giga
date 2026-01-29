@@ -1,6 +1,6 @@
-import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flota_mobile/core/api_client.dart';
+import 'package:flota_mobile/features/auth/auth_provider.dart';
 
 class Locker {
   final int id;
@@ -51,6 +51,6 @@ class LockerRepository {
 final lockerRepositoryProvider = Provider((ref) => LockerRepository(ref.read(apiClientProvider)));
 
 final lockersProvider = FutureProvider<List<Locker>>((ref) async {
-  final country = ref.watch(authProvider).countryCode; // 'GB', 'NG', etc.
+  final country = ref.watch(authProvider).countryCode ?? 'GB'; // 'GB', 'NG', etc.
   return ref.read(lockerRepositoryProvider).getLockers(country: country);
 });

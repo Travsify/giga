@@ -10,7 +10,6 @@ import 'package:flota_mobile/theme/app_theme.dart';
 import 'package:flota_mobile/shared/map_picker_screen.dart';
 import 'package:flota_mobile/features/marketplace/data/models/delivery_models.dart';
 import 'package:flota_mobile/features/marketplace/delivery_provider.dart';
-import 'package:flota_mobile/features/profile/profile_provider.dart';
 import 'package:flota_mobile/features/auth/auth_provider.dart';
 import 'package:intl/intl.dart';
 
@@ -443,7 +442,7 @@ class _DeliveryRequestScreenState extends ConsumerState<DeliveryRequestScreen> {
             contentPadding: EdgeInsets.zero,
             title: const Text("Schedule for later"),
             value: isScheduled,
-            activeColor: AppTheme.primaryBlue,
+            activeThumbColor: AppTheme.primaryBlue,
             onChanged: (val) => setState(() => isScheduled = val),
           ),
           if (isScheduled) ...[
@@ -626,8 +625,9 @@ class _DeliveryRequestScreenState extends ConsumerState<DeliveryRequestScreen> {
           ),
           ElevatedButton(
             onPressed: () {
-              if (_currentStep < 4) _nextStep();
-              else {
+              if (_currentStep < 4) {
+                _nextStep();
+              } else {
                 // Final confirm logic
                 final req = DeliveryRequest(
                   pickupAddress: _pickupPostcode.text,

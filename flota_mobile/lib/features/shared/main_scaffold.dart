@@ -17,9 +17,9 @@ class MainScaffold extends StatelessWidget {
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _calculateSelectedIndex(context),
         onTap: (int idx) => _onItemTapped(idx, context),
-        backgroundColor: Colors.white,
-        selectedItemColor: AppTheme.primaryRed, // High visibility red
-        unselectedItemColor: Colors.grey,
+        backgroundColor: AppTheme.primaryBlue, // Giga Blue
+        selectedItemColor: AppTheme.primaryRed, // Giga Red
+        unselectedItemColor: Colors.white, // White
         type: BottomNavigationBarType.fixed,
         elevation: 8,
         items: const [

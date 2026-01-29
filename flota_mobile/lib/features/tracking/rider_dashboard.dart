@@ -108,7 +108,7 @@ class _RiderDashboardState extends ConsumerState<RiderDashboard> {
                     Switch(
                       value: isOnline,
                       onChanged: _toggleOnline,
-                      activeColor: Colors.green,
+                      activeThumbColor: Colors.green,
                       activeTrackColor: Colors.white.withOpacity(0.3),
                     ),
                   ],

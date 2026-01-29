@@ -88,17 +88,20 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
     try {
       await ref.read(authProvider.notifier).login(identifier, password);
-      // login method in AuthNotifier now handles both email and phone
       
       if (mounted) {
-        // Trigger OTP based on identifier type or user record
+        // Trigger OTP after successful credential verification
         try {
           final api = ref.read(apiClientProvider);
-          // The backend will know which way to send based on user preference or identifier
-          await api.dio.post('email/send-verification'); 
-          // Note: If it's phone, we might need Firebase verifyPhoneNumber here too
-          // But for now, let's assume the flow is consistent.
-        } catch (e) { }
+          if (_isPhoneLogin) {
+            await api.dio.post('phone/send-otp', data: {'phone': identifier});
+          } else {
+            await api.dio.post('email/send-verification'); 
+          }
+        } catch (e) { 
+          // Log error but proceed to verification screen where user can retry if needed
+          debugPrint('Failed to send OTP immediately: $e');
+        }
         
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(

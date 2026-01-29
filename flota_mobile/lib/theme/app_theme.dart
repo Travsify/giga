@@ -32,12 +32,10 @@ class AppTheme {
         primary: primaryBlue,
         secondary: primaryRed,
         surface: Colors.white,
-        background: Colors.white,
         error: primaryRed,
         onPrimary: Colors.white,
         onSecondary: Colors.white,
-        onSurface: Color(0xFF1E293B), // Slate 800
-        onBackground: Color(0xFF0F172A), // Slate 900
+        onSurface: Color(0xFF1E293B), // Slate 900
       ),
       
       textTheme: GoogleFonts.outfitTextTheme(

@@ -16,9 +16,25 @@ class ProfileRepository {
     }
   }
 
-  Future<Map<String, dynamic>> updateProfile(Map<String, dynamic> data) async {
+  Future<Map<String, dynamic>> updateProfile(Map<String, dynamic> data, {String? imagePath}) async {
     try {
-      final response = await _dio.patch('/profile', data: data);
+      dynamic requestData;
+      
+      if (imagePath != null) {
+        requestData = FormData.fromMap({
+          ...data,
+          'profile_image': await MultipartFile.fromFile(imagePath),
+          '_method': 'PATCH', // Helper for Laravel multipart PATCH
+        });
+      } else {
+        requestData = data;
+      }
+
+      // If we have an image, we use POST with _method override for Laravel compatibility
+      final response = await (imagePath != null 
+          ? _dio.post('/profile', data: requestData)
+          : _dio.patch('/profile', data: requestData));
+          
       return response.data;
     } on DioException catch (e) {
       throw _handleError(e);

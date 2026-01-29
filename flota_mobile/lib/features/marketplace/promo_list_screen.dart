@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flota_mobile/theme/app_theme.dart';
 import 'package:animate_do/animate_do.dart';
 
 class PromoListScreen extends StatelessWidget {

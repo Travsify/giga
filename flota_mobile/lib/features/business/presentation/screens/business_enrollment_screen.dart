@@ -7,7 +7,6 @@ import 'package:flota_mobile/features/auth/auth_provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:file_picker/file_picker.dart';
-import 'dart:io';
 
 class BusinessEnrollmentScreen extends ConsumerStatefulWidget {
   const BusinessEnrollmentScreen({super.key});

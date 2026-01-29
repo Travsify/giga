@@ -14,7 +14,7 @@ class NotificationRepository {
         return List<Map<String, dynamic>>.from(response.data);
       }
       return [];
-    } on DioException catch (e) {
+    } on DioException {
       // Return empty list on error for now or rethrow
       return [];
     }
