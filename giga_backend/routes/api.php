@@ -40,6 +40,18 @@ Route::get('/v2/test', function() {
     ]);
 });
 
+Route::get('/db-debug', function() {
+    return response()->json([
+        'settings' => \App\Models\AppSetting::all(),
+        'cache_driver' => config('cache.default'),
+        'env' => [
+            'MAIL_HOST' => env('MAIL_HOST'),
+            'MAIL_USERNAME' => env('MAIL_USERNAME'),
+            'FLW_PUBLIC_KEY' => env('FLW_PUBLIC_KEY'),
+        ]
+    ]);
+});
+
 Route::get('/countries', [App\Http\Controllers\Api\SettingsController::class, 'getCountries']);
 Route::get('/currency-rates', [App\Http\Controllers\Api\SettingsController::class, 'getCurrencyRates']);
 Route::get('/settings/payment', [App\Http\Controllers\Api\SettingsController::class, 'getPaymentConfig']);
