@@ -35,7 +35,11 @@ class AppServiceProvider extends ServiceProvider
 
                 $mailFrom = \App\Models\AppSetting::get('mail_from_address');
                 $mailName = \App\Models\AppSetting::get('mail_from_name');
+                $mailMailer = \App\Models\AppSetting::get('mail_mailer');
 
+                if ($mailMailer) {
+                    config(['mail.default' => $mailMailer]);
+                }
                 if ($mailFrom) {
                     config(['mail.from.address' => $mailFrom]);
                 }

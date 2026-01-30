@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Models\AppSetting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\DB;
@@ -62,7 +63,7 @@ class EmailVerificationController extends Controller
 
         return response()->json([
             'message' => 'Verification code sent to your email.',
-            'debug_code' => (config('mail.default') == 'log' || config('app.debug')) ? $code : null
+            'debug_code' => (config('mail.default') === 'log' || config('app.debug')) ? $code : null
         ]);
     }
 
@@ -158,7 +159,7 @@ class EmailVerificationController extends Controller
 
         return response()->json([
             'message' => 'Verification code sent.',
-            'debug_code' => (config('mail.default') == 'log' || config('app.debug')) ? $code : null
+            'debug_code' => (config('mail.default') === 'log' || config('app.debug')) ? $code : null
         ]);
     }
 
