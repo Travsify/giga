@@ -32,6 +32,14 @@ Route::middleware('throttle:5,1')->group(function () {
 // App Settings (Public - no auth required)
 Route::get('/settings', [SettingsController::class, 'index']);
 Route::get('/settings/check-version/{version}', [SettingsController::class, 'checkVersion']);
+Route::get('/v2/test', function() {
+    return response()->json([
+        'status' => 'live',
+        'time' => now()->toDateTimeString(),
+        'version' => 'v2'
+    ]);
+});
+
 Route::get('/countries', [App\Http\Controllers\Api\SettingsController::class, 'getCountries']);
 Route::get('/currency-rates', [App\Http\Controllers\Api\SettingsController::class, 'getCurrencyRates']);
 Route::get('/settings/payment', [App\Http\Controllers\Api\SettingsController::class, 'getPaymentConfig']);

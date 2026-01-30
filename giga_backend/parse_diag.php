@@ -1,5 +1,5 @@
 <?php
-$content = file_get_contents('diag_cb.json');
+$content = file_get_contents('diag_final.json');
 // Remove BOM if present (powershell Out-File often adds it)
 $content = preg_replace('/^\xEF\xBB\xBF/', '', $content);
 $j = json_decode($content, true);
