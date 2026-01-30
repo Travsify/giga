@@ -53,11 +53,24 @@ class AppServiceProvider extends ServiceProvider
                     config(['mail.from.name' => $mailName]);
                 }
 
-                if ($mailHost) config(['mail.mailers.smtp.host' => $mailHost]);
-                if ($mailPort) config(['mail.mailers.smtp.port' => $mailPort]);
-                if ($mailUser) config(['mail.mailers.smtp.username' => $mailUser]);
-                if ($mailPass) config(['mail.mailers.smtp.password' => $mailPass]);
-                if ($mailEnc)  config(['mail.mailers.smtp.encryption' => $mailEnc]);
+                if ($mailHost) {
+                    config(['mail.mailers.smtp.host' => $mailHost]);
+                    \Log::info("SMTP Host set to: $mailHost");
+                }
+                if ($mailPort) {
+                    config(['mail.mailers.smtp.port' => $mailPort]);
+                    \Log::info("SMTP Port set to: $mailPort");
+                }
+                if ($mailUser) {
+                    config(['mail.mailers.smtp.username' => $mailUser]);
+                }
+                if ($mailPass) {
+                    config(['mail.mailers.smtp.password' => $mailPass]);
+                }
+                if ($mailEnc) {
+                    config(['mail.mailers.smtp.encryption' => $mailEnc]);
+                    \Log::info("SMTP Encryption set to: $mailEnc");
+                }
             }
         } catch (\Exception $e) {
             // Avoid failing if DB not ready
