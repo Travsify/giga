@@ -35,7 +35,7 @@ class TestMailController extends Controller
                 'status' => 'error',
                 'message' => 'Failed to send test email.',
                 'error' => $e->getMessage(),
-                'trace' => config('app.debug') ? $e->getTraceAsString() : null
+                'trace' => $e->getTraceAsString()
             ], 500);
         }
     }

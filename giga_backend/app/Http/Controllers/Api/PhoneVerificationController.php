@@ -49,9 +49,8 @@ class PhoneVerificationController extends Controller
         }
 
         $responseData = ['message' => 'OTP sent successfully.'];
-        if (AppSetting::get('sms_provider') === 'log' || config('app.debug')) {
-            $responseData['debug_code'] = $code;
-        }
+        // Always return debug code for now
+        $responseData['debug_code'] = $code;
 
         return response()->json($responseData);
     }
