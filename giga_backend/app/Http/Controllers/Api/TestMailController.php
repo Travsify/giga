@@ -28,6 +28,13 @@ class TestMailController extends Controller
                     'mail_encryption' => config('mail.mailers.smtp.encryption'),
                     'mail_username' => config('mail.mailers.smtp.username'),
                     'mail_from' => config('mail.from.address'),
+                    'mail_password_hint' => substr(config('mail.mailers.smtp.password'), 0, 2) . '...' . substr(config('mail.mailers.smtp.password'), -2),
+                    'flw_keys_set' => [
+                        'public' => !empty(\App\Models\AppSetting::get('flutterwave_public_key')),
+                        'secret' => !empty(\App\Models\AppSetting::get('flutterwave_secret_key')),
+                        'encryption' => !empty(\App\Models\AppSetting::get('flutterwave_encryption_key')),
+                    ],
+                    'last_migrations' => \Illuminate\Support\Facades\DB::table('migrations')->orderBy('id', 'desc')->limit(5)->pluck('migration'),
                 ]
             ]);
         } catch (\Exception $e) {
