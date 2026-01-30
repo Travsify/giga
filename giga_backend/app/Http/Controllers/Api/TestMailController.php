@@ -25,6 +25,14 @@ class TestMailController extends Controller
                 'secret' => !empty(\App\Models\AppSetting::get('flutterwave_secret_key')),
                 'encryption' => !empty(\App\Models\AppSetting::get('flutterwave_encryption_key')),
             ],
+            'env_overrides' => [
+                'MAIL_HOST' => env('MAIL_HOST'),
+                'MAIL_USERNAME' => env('MAIL_USERNAME'),
+                'DB_MAIL_HOST' => \App\Models\AppSetting::where('key', 'mail_host')->first()?->value,
+            ],
+            'all_settings' => \App\Models\AppSetting::all()->mapWithKeys(function($s) { 
+                return [$s->key => $s->is_sensitive ? 'MASKED' : $s->value]; 
+            }),
             'last_migrations' => \Illuminate\Support\Facades\DB::table('migrations')->orderBy('id', 'desc')->limit(5)->pluck('migration'),
         ];
 
