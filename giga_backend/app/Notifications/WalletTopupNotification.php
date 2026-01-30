@@ -42,15 +42,16 @@ class WalletTopupNotification extends Notification implements ShouldQueue
      */
     public function toMail(object $notifiable): MailMessage
     {
+        $appName = config('app.name', 'Giga Logistics');
         return (new MailMessage)
-            ->subject('Wallet Top-up Successful - Giga Logistics')
+            ->subject("Wallet Top-up Successful - $appName")
             ->greeting('Hello ' . $notifiable->name . '!')
             ->line('Your wallet has been successfully credited.')
             ->line('Amount: ' . $this->currency . ' ' . number_format($this->amount, 2))
             ->line('Provider: ' . ucfirst($this->provider))
             ->line('New Balance: ' . $this->currency . ' ' . number_format($this->balance, 2))
-            ->action('View My Wallet', url('/wallet')) // Placeholder URL
-            ->line('Thank you for choosing Giga Logistics!');
+            ->action('View My Wallet', url('/wallet')) 
+            ->line("Thank you for choosing $appName!");
     }
 
     /**

@@ -27,7 +27,7 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin')
             ->login()
-            ->brandName('Giga Logistics')
+            ->brandName(config('app.name'))
             ->darkMode(false)
             ->colors([
                 'primary' => Color::hex('#2563EB'), // Deep Blue for primary actions
