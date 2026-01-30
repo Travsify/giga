@@ -64,7 +64,15 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
     setState(() => _isVerifyingEmail = true);
     try {
       final api = ref.read(apiClientProvider);
-      await api.dio.post('signup/verify-email/send', data: {'email': email});
+      final response = await api.dio.post('signup/verify-email/send', data: {'email': email});
+      final debugCode = response.data['debug_code'];
+      if (debugCode != null && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('DEBUG: Your Email OTP is $debugCode'),
+          duration: const Duration(seconds: 10),
+          backgroundColor: Colors.blueGrey,
+        ));
+      }
       if (mounted) _showOtpDialog(email, isEmail: true);
     } catch (e) {
       if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
@@ -86,7 +94,15 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
     setState(() => _isVerifyingPhone = true);
     try {
       final api = ref.read(apiClientProvider);
-      await api.dio.post('phone/send-otp', data: {'phone': phone});
+      final response = await api.dio.post('phone/send-otp', data: {'phone': phone});
+      final debugCode = response.data['debug_code'];
+      if (debugCode != null && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('DEBUG: Your Phone OTP is $debugCode'),
+          duration: const Duration(seconds: 10),
+          backgroundColor: Colors.deepOrange,
+        ));
+      }
       if (mounted) _showOtpDialog(phone, isEmail: false);
     } catch (e) {
       if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to send SMS: $e')));

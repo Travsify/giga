@@ -62,6 +62,7 @@ class EmailVerificationController extends Controller
 
         return response()->json([
             'message' => 'Verification code sent to your email.',
+            'debug_code' => (config('mail.default') == 'log' || config('app.debug')) ? $code : null
         ]);
     }
 
@@ -155,7 +156,10 @@ class EmailVerificationController extends Controller
             Log::error('Signup OTP Fail: ' . $e->getMessage());
         }
 
-        return response()->json(['message' => 'Verification code sent.']);
+        return response()->json([
+            'message' => 'Verification code sent.',
+            'debug_code' => (config('mail.default') == 'log' || config('app.debug')) ? $code : null
+        ]);
     }
 
     public function verifySignupCode(Request $request)

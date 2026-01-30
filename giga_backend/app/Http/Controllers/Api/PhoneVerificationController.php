@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Models\AppSetting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -23,6 +24,7 @@ class PhoneVerificationController extends Controller
      */
     public function sendOtp(Request $request)
     {
+        Log::info("sendOtp called for phone: " . $request->phone);
         $request->validate(['phone' => 'required|string']);
         $phone = $request->phone;
 
@@ -46,7 +48,12 @@ class PhoneVerificationController extends Controller
             return response()->json(['message' => 'Failed to send SMS. Please try again or check logs.'], 500);
         }
 
-        return response()->json(['message' => 'OTP sent successfully.']);
+        $responseData = ['message' => 'OTP sent successfully.'];
+        if (AppSetting::get('sms_provider') == 'log' || config('app.debug')) {
+            $responseData['debug_code'] = $code;
+        }
+
+        return response()->json($responseData);
     }
 
     /**

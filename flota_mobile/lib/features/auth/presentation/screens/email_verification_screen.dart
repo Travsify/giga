@@ -43,18 +43,26 @@ class _EmailVerificationScreenState extends ConsumerState<EmailVerificationScree
       final api = ref.read(apiClientProvider);
       if (widget.isPhone && widget.phoneNumber != null) {
          // Backend Phone OTP
-         await api.dio.post('phone/send-otp', data: {'phone': widget.phoneNumber});
+         final response = await api.dio.post('phone/send-otp', data: {'phone': widget.phoneNumber});
+         final debugCode = response.data['debug_code'];
          if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('SMS code sent!'), backgroundColor: Colors.green),
+              SnackBar(
+                content: Text(debugCode != null ? 'DEBUG OTP: $debugCode' : 'SMS code sent!'), 
+                backgroundColor: debugCode != null ? Colors.deepOrange : Colors.green
+              ),
             );
          }
       } else {
         // Backend Email OTP
-        await api.dio.post('email/send-verification');
+        final response = await api.dio.post('email/send-verification');
+        final debugCode = response.data['debug_code'];
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Verification code sent to your email!'), backgroundColor: Colors.green),
+            SnackBar(
+              content: Text(debugCode != null ? 'DEBUG OTP: $debugCode' : 'Verification code sent to your email!'), 
+              backgroundColor: debugCode != null ? Colors.blueGrey : Colors.green
+            ),
           );
         }
       }

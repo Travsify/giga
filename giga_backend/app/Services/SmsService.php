@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\AppSetting;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
@@ -11,7 +12,7 @@ class SmsService
 
     public function __construct()
     {
-        $this->driver = env('SMS_DRIVER', 'log');
+        $this->driver = AppSetting::get('sms_provider') ?? env('SMS_DRIVER', 'log');
     }
 
     public function send($to, $message)
@@ -42,9 +43,9 @@ class SmsService
 
     protected function sendTwilio($to, $message)
     {
-        $sid = env('TWILIO_SID');
-        $token = env('TWILIO_TOKEN');
-        $from = env('TWILIO_FROM');
+        $sid = AppSetting::get('twilio_sid') ?? env('TWILIO_SID');
+        $token = AppSetting::get('twilio_token') ?? env('TWILIO_TOKEN');
+        $from = AppSetting::get('twilio_from') ?? env('TWILIO_FROM');
 
         $url = "https://api.twilio.com/2010-04-01/Accounts/{$sid}/Messages.json";
 
@@ -64,12 +65,8 @@ class SmsService
 
     protected function sendTermii($to, $message)
     {
-        // Termii usually requires number without + for international or specific format. 
-        // Assuming user provides E.164, strip + if needed or use as is depending on Termii docs.
-        // Usually JSON body.
-        
-        $key = env('TERMII_API_KEY');
-        $from = env('TERMII_SENDER_ID', 'N-Alert'); // Default Sender ID
+        $key = AppSetting::get('termii_api_key') ?? env('TERMII_API_KEY');
+        $from = AppSetting::get('termii_sender_id') ?? env('TERMII_SENDER_ID', 'Giga');
 
         $response = Http::post('https://api.ng.termii.com/api/sms/send', [
             'to' => $to,
@@ -91,9 +88,9 @@ class SmsService
     protected function sendVonage($to, $message)
     {
         // Nexmo / Vonage
-        $key = env('VONAGE_KEY');
-        $secret = env('VONAGE_SECRET');
-        $from = env('VONAGE_FROM', 'Giga');
+        $key = AppSetting::get('vonage_key') ?? env('VONAGE_KEY');
+        $secret = AppSetting::get('vonage_secret') ?? env('VONAGE_SECRET');
+        $from = AppSetting::get('vonage_from') ?? env('VONAGE_FROM', 'Giga');
 
         $response = Http::post('https://rest.nexmo.com/sms/json', [
             'api_key' => $key,
@@ -117,8 +114,8 @@ class SmsService
 
     protected function sendMessageBird($to, $message)
     {
-        $key = env('MESSAGEBIRD_KEY');
-        $from = env('MESSAGEBIRD_FROM', 'Giga');
+        $key = AppSetting::get('messagebird_key') ?? env('MESSAGEBIRD_KEY');
+        $from = AppSetting::get('messagebird_from') ?? env('MESSAGEBIRD_FROM', 'Giga');
 
         $response = Http::withHeaders([
             'Authorization' => "AccessKey {$key}"
