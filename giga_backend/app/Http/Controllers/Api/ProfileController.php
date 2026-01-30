@@ -18,11 +18,12 @@ class ProfileController extends Controller
     {
         $user = Auth::user();
         
-        // Generate referral code if not exists
         if (!$user->referral_code) {
             $user->referral_code = strtoupper(Str::random(8));
             $user->save();
         }
+
+        $user->load('wallet');
 
         return response()->json($user);
     }

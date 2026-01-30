@@ -13,7 +13,7 @@ class AppSettingsSeeder extends Seeder
             // ========================
             // APP CONFIGURATION
             // ========================
-            ['group' => 'app', 'key' => 'app_name', 'value' => 'Giga', 'type' => 'string', 'label' => 'App Name', 'is_public' => true],
+            ['group' => 'app', 'key' => 'app_name', 'value' => 'Giga Logistics', 'type' => 'string', 'label' => 'App Name', 'is_public' => true],
             ['group' => 'app', 'key' => 'app_tagline', 'value' => 'Fast. Reliable. Delivery.', 'type' => 'string', 'label' => 'App Tagline', 'is_public' => true],
             ['group' => 'app', 'key' => 'app_version', 'value' => '1.0.0', 'type' => 'string', 'label' => 'Current App Version', 'is_public' => true],
             ['group' => 'app', 'key' => 'min_app_version', 'value' => '1.0.0', 'type' => 'string', 'label' => 'Minimum Required Version', 'is_public' => true, 'description' => 'Force users to update if below this version'],
@@ -64,6 +64,11 @@ class AppSettingsSeeder extends Seeder
             ['group' => 'payment', 'key' => 'stripe_public_key', 'value' => '', 'type' => 'string', 'label' => 'Stripe Publishable Key', 'is_public' => true],
             ['group' => 'payment', 'key' => 'stripe_secret_key', 'value' => '', 'type' => 'string', 'label' => 'Stripe Secret Key', 'is_sensitive' => true],
             ['group' => 'payment', 'key' => 'stripe_webhook_secret', 'value' => '', 'type' => 'string', 'label' => 'Stripe Webhook Secret', 'is_sensitive' => true],
+            ['group' => 'payment', 'key' => 'flutterwave_enabled', 'value' => '1', 'type' => 'boolean', 'label' => 'Flutterwave Enabled', 'is_public' => true],
+            ['group' => 'payment', 'key' => 'flutterwave_public_key', 'value' => '', 'type' => 'string', 'label' => 'Flutterwave Public Key', 'is_public' => true],
+            ['group' => 'payment', 'key' => 'flutterwave_encryption_key', 'value' => '', 'type' => 'string', 'label' => 'Flutterwave Encryption Key', 'is_sensitive' => true],
+            ['group' => 'payment', 'key' => 'paystack_enabled', 'value' => '1', 'type' => 'boolean', 'label' => 'Paystack Enabled', 'is_public' => true],
+            ['group' => 'payment', 'key' => 'paystack_public_key', 'value' => '', 'type' => 'string', 'label' => 'Paystack Public Key', 'is_public' => true],
             ['group' => 'payment', 'key' => 'paypal_enabled', 'value' => '0', 'type' => 'boolean', 'label' => 'PayPal Enabled', 'is_public' => true],
             ['group' => 'payment', 'key' => 'paypal_client_id', 'value' => '', 'type' => 'string', 'label' => 'PayPal Client ID', 'is_public' => true],
             ['group' => 'payment', 'key' => 'paypal_secret', 'value' => '', 'type' => 'string', 'label' => 'PayPal Secret', 'is_sensitive' => true],

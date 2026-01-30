@@ -9,8 +9,8 @@ class NotificationController extends Controller
 {
     public function index(Request $request)
     {
-        // Future: Return $request->user()->notifications;
-        // For now, return empty list to avoid mock data
-        return response()->json([]);
+        $notifications = $request->user()->notifications;
+        
+        return response()->json($notifications);
     }
 }

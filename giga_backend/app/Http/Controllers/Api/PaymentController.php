@@ -220,12 +220,19 @@ class PaymentController extends Controller
             $wallet->transactions()->create([
                 'amount' => $creditAmount, // Stored in Wallet Currency
                 'type' => 'credit',
-                'description' => "Wallet Top-up ($provider)",
+                'description' => "Wallet Top-up via " . ucfirst($provider),
                 'reference' => $reference,
                 'status' => 'completed',
                 'currency' => $walletCurrency, 
                 'metadata' => json_encode(['original_amount' => $amount, 'original_currency' => $txCurrency]),
             ]);
+
+            // Trigger Notification
+            try {
+                $user->notify(new \App\Notifications\WalletTopupNotification($creditAmount, $wallet->balance, $walletCurrency, $provider));
+            } catch (\Exception $e) {
+                Log::error('Failed to send top-up notification: ' . $e->getMessage());
+            }
 
             return response()->json([
                 'success' => true,
