@@ -213,8 +213,11 @@ class SettingsService extends ChangeNotifier {
           final detected = _supportedCountries.firstWhere(
             (c) => c.isoCode.toUpperCase() == isoCode.toUpperCase(),
             orElse: () => _supportedCountries.firstWhere(
-              (c) => c.isDefault,
-              orElse: () => _supportedCountries.first
+              (c) => c.isoCode.toUpperCase() == 'GB', // Explicitly UK as fallback
+              orElse: () => _supportedCountries.firstWhere(
+                (c) => c.isDefault,
+                orElse: () => _supportedCountries.first
+              )
             )
           );
           

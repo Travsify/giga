@@ -40,11 +40,14 @@ class PaymentService {
       'KMF', 'MGA'
     ];
 
-    if (africans.contains(currency.toUpperCase())) {
-      // Flutterwave is now the primary and mandatory gateway for African nations
+    final isGbp = currency.toUpperCase() == 'GBP';
+
+    if (africans.contains(currency.toUpperCase()) && !isGbp) {
+      // Flutterwave is the primary gateway for African nations (excluding GBP)
       return await _fundWalletFlutterwave(context, amount, email, userId, currency.toUpperCase());
     } else {
-      return await _fundWalletStripe(context, amount, email, userId, currency: currency);
+      // Stripe is preferred for GBP and all non-African currencies
+      return await _fundWalletStripe(context, amount, email, userId, currency: currency.toLowerCase());
     }
   }
 

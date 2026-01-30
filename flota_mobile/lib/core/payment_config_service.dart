@@ -25,18 +25,18 @@ class PaymentConfigService {
 
       final response = await dio.get('/settings/payment');
       
-      if (response.statusCode == 200) {
-        final data = response.data;
+      if (response.statusCode == 200 && response.data['success'] == true) {
+        final data = response.data['data'];
         stripePublicKey = data['stripe_public_key'];
         flutterwavePublicKey = data['flutterwave_public_key'];
         flutterwaveEncryptionKey = data['flutterwave_encryption_key']; 
         
-        flutterwaveEnabled = data['flutterwave_enabled'] ?? false;
+        flutterwaveEnabled = data['flutterwave_enabled'] == true || data['flutterwave_enabled'] == 1;
         
-        await _storage.write(key: 'stripe_key', value: stripePublicKey);
-        await _storage.write(key: 'flutterwave_key', value: flutterwavePublicKey);
+        await _storage.write(key: 'stripe_key', value: stripePublicKey ?? '');
+        await _storage.write(key: 'flutterwave_key', value: flutterwavePublicKey ?? '');
         
-        debugPrint('Payment Config Loaded: Stripe=${stripePublicKey != null}, Flutterwave=${flutterwavePublicKey != null}');
+        debugPrint('Payment Config Loaded: Stripe=${stripePublicKey != null}, Flutterwave=${flutterwavePublicKey != null}, Enabled=$flutterwaveEnabled');
       }
     } catch (e) {
       debugPrint('Error fetching payment config: $e');

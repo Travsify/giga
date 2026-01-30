@@ -40,9 +40,9 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
     
     final methods = [
       if (isAfricanMarket)
-        {'id': 'banks_cards', 'label': 'Banks/Cards', 'icon': Icons.credit_card}
+        {'id': 'banks_cards', 'label': 'Bank/Card (Flutterwave)', 'icon': Icons.credit_card}
       else
-        {'id': 'stripe', 'label': 'Stripe', 'icon': Icons.credit_card},
+        {'id': 'stripe', 'label': 'Credit/Debit Card (Stripe)', 'icon': Icons.credit_card},
         
       {'id': 'gift_card', 'label': 'Giga Gift Card', 'icon': Icons.card_giftcard},
       {'id': 'giga_card', 'label': 'Giga Card', 'icon': Icons.account_balance_wallet},

@@ -63,7 +63,7 @@ class WalletNotifier extends StateNotifier<WalletState> {
       
       // Let's fetch /profile (ProfileController@show) which usually loads more data.
       final response = await _dio.get('/profile');
-      final data = response.data['user'];
+      final data = response.data; // The /profile endpoint returns the user object directly
       
       // Parse balance
       final wallet = data['wallet'] ?? {};

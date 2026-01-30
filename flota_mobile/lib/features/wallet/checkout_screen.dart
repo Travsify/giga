@@ -358,8 +358,8 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                                 ),
                                 const SizedBox(height: 12),
                                 _PaymentOption(
-                                  title: 'Debit / Credit Card',
-                                  subtitle: 'Secure card payment via Stripe',
+                                  title: 'Credit / Debit Card (Stripe)',
+                                  subtitle: 'Secure payment via Stripe',
                                   icon: Icons.credit_card_rounded,
                                   isSelected: selectedMethod == 'Stripe',
                                   onTap: () => setState(() => selectedMethod = 'Stripe'),
