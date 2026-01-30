@@ -56,11 +56,11 @@ class AppServiceProvider extends ServiceProvider
 
                 if ($mailHost) {
                     config(['mail.mailers.smtp.host' => $mailHost]);
-                    \Log::info("SMTP Host set to: $mailHost");
+                    Log::info("SMTP Host set to: $mailHost");
                 }
                 if ($mailPort) {
                     config(['mail.mailers.smtp.port' => $mailPort]);
-                    \Log::info("SMTP Port set to: $mailPort");
+                    Log::info("SMTP Port set to: $mailPort");
                 }
                 if ($mailUser) {
                     config(['mail.mailers.smtp.username' => $mailUser]);
@@ -70,7 +70,7 @@ class AppServiceProvider extends ServiceProvider
                 }
                 if ($mailEnc) {
                     config(['mail.mailers.smtp.encryption' => $mailEnc]);
-                    \Log::info("SMTP Encryption set to: $mailEnc");
+                    Log::info("SMTP Encryption set to: $mailEnc");
                 }
             }
         } catch (\Exception $e) {
