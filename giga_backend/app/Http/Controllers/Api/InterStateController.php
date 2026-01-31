@@ -86,47 +86,41 @@ class InterStateController extends Controller
         if ($request->size === 'Large') $price += $route->large_surcharge;
         
         // 2. Check Wallet Balance
-        if ($user->wallet_balance < $price) {
+        $wallet = $user->wallet()->firstOrCreate([], ['balance' => 0.00, 'currency' => 'NGN']);
+        if ($wallet->balance < $price) {
             return response()->json(['message' => 'Insufficient wallet balance.'], 402);
         }
 
         // 3. Deduct Balance
-        $user->wallet_balance -= $price;
-        $user->save();
+        $wallet->balance -= $price;
+        $wallet->save();
         
         // 4. Create Delivery Record
         $trackingNumber = 'GIGA-' . strtoupper(Str::random(10));
         
-        // Storing "Waybill" as a Delivery with specific type/metadata
-        // Assuming Delivery model has flexible fields or we map to existing ones.
-        // pickup_address -> Origin Locker Name
-        // dropoff_address -> Dest Locker Name
-        
-        $delivery = new Delivery();
-        $delivery->user_id = $user->id;
-        $delivery->tracking_number = $trackingNumber;
-        $delivery->status = 'pending_dropoff';
-        $delivery->pickup_address = $originLocker->name . ' (' . $request->origin_state . ')';
-        $delivery->dropoff_address = $destLocker->name . ' (' . $request->destination_state . ')';
-        $delivery->package_size = $request->size;
-        $delivery->description = $request->items_description;
-        $delivery->price = $price;
-        $delivery->estimated_distance = 0; // Zone based
-        $delivery->estimated_duration = $route->delivery_days . ' days';
-        $delivery->recipient_name = $request->recipient_name;
-        $delivery->recipient_phone = $request->recipient_phone;
-        // Add metadata for locker IDs if needed
-        $delivery->pickup_latitude = $originLocker->latitude;
-        $delivery->pickup_longitude = $originLocker->longitude;
-        $delivery->dropoff_latitude = $destLocker->latitude;
-        $delivery->dropoff_longitude = $destLocker->longitude;
-        
-        $delivery->save();
+        $delivery = Delivery::create([
+            'customer_id' => $user->id,
+            'tracking_number' => $trackingNumber,
+            'status' => 'pending_dropoff',
+            'pickup_address' => $originLocker->name . ' (' . $request->origin_state . ')',
+            'dropoff_address' => $destLocker->name . ' (' . $request->destination_state . ')',
+            'parcel_size' => $request->size,
+            'parcel_type' => 'Inter-State Waybill',
+            'description' => $request->items_description,
+            'fare' => $price,
+            'estimated_duration' => $route->delivery_days . ' days',
+            'recipient_name' => $request->recipient_name,
+            'recipient_phone' => $request->recipient_phone,
+            'pickup_lat' => $originLocker->latitude,
+            'pickup_lng' => $originLocker->longitude,
+            'dropoff_lat' => $destLocker->latitude,
+            'dropoff_lng' => $destLocker->longitude,
+        ]);
 
         return response()->json([
             'message' => 'Waybill generated successfully.',
             'waybill_number' => $trackingNumber,
-            'dropoff_code' => rand(1000, 9999), // Mock code for now
+            'dropoff_code' => rand(1000, 9999), 
             'delivery' => $delivery
         ], 201);
     }

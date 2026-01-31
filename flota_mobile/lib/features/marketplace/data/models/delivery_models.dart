@@ -40,10 +40,13 @@ class DeliveryEstimationRequest {
     required this.dropoffLng,
     required this.vehicleType,
     required this.serviceTier,
+    this.parcelType,
     this.parcelCategory,
     this.parcelSize,
     this.stops,
   });
+
+  final String? parcelType;
 
   Map<String, dynamic> toJson() => {
     'pickup_lat': pickupLat,
@@ -52,7 +55,8 @@ class DeliveryEstimationRequest {
     'dropoff_lng': dropoffLng,
     'vehicle_type': vehicleType,
     'service_tier': serviceTier,
-    'parcel_category': parcelCategory,
+    'parcel_type': parcelType ?? parcelCategory ?? 'General',
+    'parcel_category': parcelCategory ?? 'General',
     'parcel_size': parcelSize,
     'stops': stops?.map((s) => s.toJson()).toList(),
   };
@@ -68,6 +72,7 @@ class DeliveryRequest {
   final String vehicleType;
   final String serviceTier;
   final double fare;
+  final String? parcelType;
   final String? parcelCategory;
   final String? parcelSize;
   final String? parcelPhotoUrl;
@@ -85,6 +90,7 @@ class DeliveryRequest {
     required this.vehicleType,
     required this.serviceTier,
     required this.fare,
+    this.parcelType,
     this.parcelCategory,
     this.parcelSize,
     this.parcelPhotoUrl,
@@ -103,6 +109,7 @@ class DeliveryRequest {
     'vehicle_type': vehicleType,
     'service_tier': serviceTier,
     'fare': fare,
+    'parcel_type': parcelType ?? parcelCategory ?? 'General',
     'parcel_category': parcelCategory ?? 'General',
     'parcel_size': parcelSize ?? 'Medium',
     'parcel_photo_url': parcelPhotoUrl,

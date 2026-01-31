@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flota_mobile/shared/map_picker_screen.dart';
 import 'package:flota_mobile/core/error_handler.dart';
+import 'package:flota_mobile/features/marketplace/data/delivery_repository.dart';
+import 'package:flota_mobile/features/marketplace/data/models/delivery_models.dart';
 import 'package:flota_mobile/features/auth/auth_provider.dart';
+import 'package:go_router/go_router.dart';
 
 class MarketplaceScreen extends ConsumerStatefulWidget {
   const MarketplaceScreen({super.key});
@@ -20,7 +21,8 @@ class _MarketplaceScreenState extends ConsumerState<MarketplaceScreen> {
   String _pickupAddress = '';
   String _dropoffAddress = '';
   String? _selectedService;
-  double? _estimatedFare;
+  double _estimatedFare = 0.0;
+  bool _isEstimating = false;
   bool _isBooking = false;
 
   Future<void> _selectLocation(bool isPickup) async {
@@ -55,19 +57,35 @@ class _MarketplaceScreenState extends ConsumerState<MarketplaceScreen> {
     }
   }
 
-  void _estimateFare() {
-     if (_pickupLocation == null || _dropoffLocation == null) return;
+  Future<void> _estimateFare() async {
+     if (_pickupLocation == null || _dropoffLocation == null || _selectedService == null) return;
      
-     double baseFare = 0;
-     switch(_selectedService) {
-       case 'bike': baseFare = 5; break;
-       case 'van': baseFare = 15; break;
-       case 'truck': baseFare = 50; break;
+     setState(() => _isEstimating = true);
+     
+     try {
+       final repository = ref.read(deliveryRepositoryProvider);
+       final request = DeliveryEstimationRequest(
+         pickupLat: _pickupLocation!.latitude,
+         pickupLng: _pickupLocation!.longitude,
+         dropoffLat: _dropoffLocation!.latitude,
+         dropoffLng: _dropoffLocation!.longitude,
+         vehicleType: _selectedService == 'bike' ? 'Bike' : 'Van',
+         serviceTier: 'Standard',
+         stops: [
+           DeliveryStopModel(address: _pickupAddress, lat: _pickupLocation!.latitude, lng: _pickupLocation!.longitude, type: 'pickup'),
+           DeliveryStopModel(address: _dropoffAddress, lat: _dropoffLocation!.latitude, lng: _dropoffLocation!.longitude, type: 'dropoff'),
+         ],
+       );
+
+       final result = await repository.estimateFare(request);
+       setState(() {
+         _estimatedFare = result.finalFare;
+         _isEstimating = false;
+       });
+     } catch (e) {
+       setState(() => _isEstimating = false);
+       if (mounted) ErrorHandler.handleError(context, e);
      }
-     
-     setState(() {
-       _estimatedFare = baseFare + 5;
-     });
   }
 
   Future<void> _confirmBooking() async {
@@ -79,27 +97,29 @@ class _MarketplaceScreenState extends ConsumerState<MarketplaceScreen> {
     setState(() => _isBooking = true);
 
     try {
-      final user = FirebaseAuth.instance.currentUser;
-      if (user == null) throw 'User not authenticated';
+      final repository = ref.read(deliveryRepositoryProvider);
+      final request = DeliveryRequest(
+        pickupAddress: _pickupAddress,
+        pickupLat: _pickupLocation!.latitude,
+        pickupLng: _pickupLocation!.longitude,
+        dropoffAddress: _dropoffAddress,
+        dropoffLat: _dropoffLocation!.latitude,
+        dropoffLng: _dropoffLocation!.longitude,
+        vehicleType: _selectedService == 'bike' ? 'Bike' : 'Van',
+        serviceTier: 'Standard',
+        fare: _estimatedFare,
+        parcelCategory: 'General',
+        parcelSize: 'Medium',
+        description: 'Single parcel delivery via ${_selectedService == 'bike' ? 'Bike' : 'Van'}',
+      );
 
-      await FirebaseFirestore.instance.collection('deliveries').add({
-        'user_id': user.uid,
-        'status': 'pending',
-        'parcel_type': _selectedService,
-        'pickup_address': _pickupAddress,
-        'pickup_lat': _pickupLocation!.latitude,
-        'pickup_lng': _pickupLocation!.longitude,
-        'dropoff_address': _dropoffAddress,
-        'dropoff_lat': _dropoffLocation!.latitude,
-        'dropoff_lng': _dropoffLocation!.longitude,
-        'fare': _estimatedFare ?? 0,
-        'created_at': FieldValue.serverTimestamp(),
-      });
+      await repository.createDelivery(request);
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
            const SnackBar(content: Text('Booking created successfully!')),
         );
+        context.push('/wallet'); // Redirect to payment
       }
     } catch (e) {
       if (mounted) ErrorHandler.handleError(context, e);
@@ -153,28 +173,28 @@ class _MarketplaceScreenState extends ConsumerState<MarketplaceScreen> {
                   children: [
                     _ServiceCard(
                       title: 'Standard Bike',
-                      price: _estimatedFare != null && _selectedService == 'bike'
-                          ? '${ref.watch(authProvider).currencySymbol}${_estimatedFare!.toStringAsFixed(2)}'
-                          : 'Starting at ${ref.watch(authProvider).currencySymbol}5.00',
-                      eta: '5 mins away',
+                      price: _estimatedFare > 0 && _selectedService == 'bike'
+                          ? '${ref.watch(authProvider).currencySymbol}${_estimatedFare.toStringAsFixed(2)}'
+                          : 'Starting at ${ref.watch(authProvider).currencySymbol}3.00',
+                      eta: _isEstimating && _selectedService == 'bike' ? 'Calculating...' : '5 mins away',
                       icon: Icons.motorcycle,
                       isSelected: _selectedService == 'bike',
-                      onTap: () {
+                      onTap: () async {
                         setState(() => _selectedService = 'bike');
-                        _estimateFare();
+                        await _estimateFare();
                       },
                     ),
                     _ServiceCard(
                       title: 'Delivery Van',
-                      price: _estimatedFare != null && _selectedService == 'van'
-                          ? '${ref.watch(authProvider).currencySymbol}${_estimatedFare!.toStringAsFixed(2)}'
-                          : 'Starting at ${ref.watch(authProvider).currencySymbol}15.00',
-                      eta: '12 mins away',
+                      price: _estimatedFare > 0 && _selectedService == 'van'
+                          ? '${ref.watch(authProvider).currencySymbol}${_estimatedFare.toStringAsFixed(2)}'
+                          : 'Starting at ${ref.watch(authProvider).currencySymbol}12.00',
+                      eta: _isEstimating && _selectedService == 'van' ? 'Calculating...' : '12 mins away',
                       icon: Icons.local_shipping,
                       isSelected: _selectedService == 'van',
-                      onTap: () {
+                      onTap: () async {
                         setState(() => _selectedService = 'van');
-                        _estimateFare();
+                        await _estimateFare();
                       },
                     ),
                   ],
