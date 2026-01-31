@@ -505,7 +505,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                       ),
                     ),
                   ),
-                   const SizedBox(height: 60),
+                   const SizedBox(height: 100),
                 ],
               ),
             ),
