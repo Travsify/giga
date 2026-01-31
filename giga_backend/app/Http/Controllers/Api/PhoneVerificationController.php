@@ -49,8 +49,7 @@ class PhoneVerificationController extends Controller
         }
 
         $responseData = ['message' => 'OTP sent successfully.'];
-        // Always return debug code for now
-        $responseData['debug_code'] = $code;
+        // Removed debug_code for security
 
         return response()->json($responseData);
     }
