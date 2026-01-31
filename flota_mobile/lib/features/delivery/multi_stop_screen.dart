@@ -219,7 +219,8 @@ class _MultiStopScreenState extends ConsumerState<MultiStopScreen> {
             ),
         ],
       ),
-      body: SingleChildScrollView(
+      body: SafeArea(
+        child: SingleChildScrollView(
         child: Column(
           children: [
             // Route Map Preview (Fully Functional)
@@ -341,15 +342,17 @@ class _MultiStopScreenState extends ConsumerState<MultiStopScreen> {
                       isPickup ? Icons.my_location_rounded : Icons.location_on_outlined, 
                       color: isPickup ? AppTheme.primaryBlue : Colors.redAccent
                     ),
-                    title: Text(
-                      isFilled ? (stop['address'] as String) : (isPickup ? 'Enter Pickup' : 'Enter Destination'),
-                      style: GoogleFonts.outfit(
-                        fontWeight: isFilled ? FontWeight.bold : FontWeight.normal,
-                        color: isFilled ? AppTheme.textPrimary : Colors.grey[500],
-                        fontSize: 15,
+                    title: Flexible(
+                      child: Text(
+                        isFilled ? (stop['address'] as String) : (isPickup ? 'Enter Pickup' : 'Enter Destination'),
+                        style: GoogleFonts.outfit(
+                          fontWeight: isFilled ? FontWeight.bold : FontWeight.normal,
+                          color: isFilled ? AppTheme.textPrimary : Colors.grey[500],
+                          fontSize: 15,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
                     ),
                     subtitle: isFilled ? Text(
                       isPickup ? 'Pickup Point' : 'Stop $index',
@@ -489,12 +492,12 @@ class _MultiStopScreenState extends ConsumerState<MultiStopScreen> {
                     ),
                   ],
                 ),
+                const SizedBox(height: 50),
               ],
             ),
           ),
-        ],
+        ),
       ),
-    ),
   );
 }
 }

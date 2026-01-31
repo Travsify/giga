@@ -101,10 +101,10 @@ class SettingsController extends Controller
     public function getPaymentConfig(): JsonResponse
     {
         // Fetch settings directly or via AppSetting wrapper
-        $stripeKey = AppSetting::get('stripe_public_key');
-        $paystackKey = AppSetting::get('paystack_public_key'); // Ensure this key exists in DB
-        $flutterwaveKey = AppSetting::get('flutterwave_public_key');
-        $flutterwaveEncKey = AppSetting::get('flutterwave_encryption_key');
+        $stripeKey = AppSetting::get('stripe_public_key') ?: env('STRIPE_PUBLIC_KEY');
+        $paystackKey = AppSetting::get('paystack_public_key') ?: env('PAYSTACK_PUBLIC_KEY');
+        $flutterwaveKey = AppSetting::get('flutterwave_public_key') ?: env('FLW_PUBLIC_KEY');
+        $flutterwaveEncKey = AppSetting::get('flutterwave_encryption_key') ?: env('FLW_ENCRYPTION_KEY');
         
         $paystackEnabled = AppSetting::get('paystack_enabled', false);
         $flutterwaveEnabled = AppSetting::get('flutterwave_enabled', false);
@@ -112,12 +112,12 @@ class SettingsController extends Controller
         return response()->json([
             'success' => true,
             'data' => [
-                'stripe_public_key' => $stripeKey,
-                'paystack_public_key' => $paystackKey,
-                'flutterwave_public_key' => $flutterwaveKey,
-                'flutterwave_encryption_key' => $flutterwaveEncKey,
-                'paystack_enabled' => $paystackEnabled,
-                'flutterwave_enabled' => $flutterwaveEnabled,
+                'stripe_public_key' => $stripeKey ?? '',
+                'paystack_public_key' => $paystackKey ?? '',
+                'flutterwave_public_key' => $flutterwaveKey ?? '',
+                'flutterwave_encryption_key' => $flutterwaveEncKey ?? '',
+                'paystack_enabled' => (bool)$paystackEnabled,
+                'flutterwave_enabled' => (bool)$flutterwaveEnabled,
             ]
         ]);
     }

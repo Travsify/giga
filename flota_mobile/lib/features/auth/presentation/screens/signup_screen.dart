@@ -349,8 +349,8 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                                               children: [
                                                 Text(c.isoCode, style: const TextStyle(fontWeight: FontWeight.bold)),
                                                 const SizedBox(width: 10),
-                                                Text(c.name),
-                                                const Spacer(),
+                                                Expanded(child: Text(c.name, overflow: TextOverflow.ellipsis)),
+                                                const SizedBox(width: 10),
                                                 Text(c.currencySymbol, style: const TextStyle(color: Colors.grey)),
                                               ],
                                             ),
