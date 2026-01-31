@@ -496,8 +496,10 @@ class _MultiStopScreenState extends ConsumerState<MultiStopScreen> {
               ],
             ),
           ),
-        ),
+        ],
       ),
-  );
+    ),
+  ),
+);
 }
 }

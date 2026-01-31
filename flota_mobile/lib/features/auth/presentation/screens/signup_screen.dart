@@ -113,13 +113,11 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Flexible(
-                child: Text(
+                Text(
                   'Enter the 6-digit code sent to $target',
                   textAlign: TextAlign.center,
                   softWrap: true,
                 ),
-              ),
               const SizedBox(height: 20),
               TextField(
                 controller: codeController,
@@ -244,7 +242,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                   
                   // Back Button
                   IconButton(
-                    onPressed: () => context.pop(),
+                    onPressed: () => context.canPop() ? context.pop() : context.go('/welcome'),
                     icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.black87, size: 20),
                   ),
                   

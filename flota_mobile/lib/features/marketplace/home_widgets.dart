@@ -3,6 +3,9 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flota_mobile/features/location/traffic_service.dart';
 
+import 'package:flota_mobile/features/auth/auth_provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 // Payment Method Chip Widget
 class PaymentMethodChip extends StatelessWidget {
   final IconData icon;
@@ -116,7 +119,7 @@ Widget buildDiscountBanner({
 
 // Live Heatmap Widget for Home Screen
 
-class LiveHeatmapWidget extends StatefulWidget {
+class LiveHeatmapWidget extends ConsumerStatefulWidget {
   final LatLng center;
   final String locationName;
 
@@ -127,10 +130,10 @@ class LiveHeatmapWidget extends StatefulWidget {
   });
 
   @override
-  State<LiveHeatmapWidget> createState() => _LiveHeatmapWidgetState();
+  ConsumerState<LiveHeatmapWidget> createState() => _LiveHeatmapWidgetState();
 }
 
-class _LiveHeatmapWidgetState extends State<LiveHeatmapWidget> {
+class _LiveHeatmapWidgetState extends ConsumerState<LiveHeatmapWidget> {
   Map<String, dynamic>? _trafficStatus;
   GoogleMapController? _mapController;
 
@@ -185,6 +188,7 @@ class _LiveHeatmapWidgetState extends State<LiveHeatmapWidget> {
                   fontWeight: FontWeight.bold,
                 ),
               ),
+              if (ref.read(authProvider).countryCode == 'GB')
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
@@ -196,7 +200,7 @@ class _LiveHeatmapWidgetState extends State<LiveHeatmapWidget> {
                     Container(
                       width: 8,
                       height: 8,
-                      decoration: BoxDecoration(
+                      decoration: const BoxDecoration(
                         color: Colors.red,
                         shape: BoxShape.circle,
                       ),
@@ -237,7 +241,7 @@ class _LiveHeatmapWidgetState extends State<LiveHeatmapWidget> {
           ),
           const SizedBox(height: 12),
           Text(
-            'High demand in ${widget.locationName}. Expected pickup: 5-8 mins.',
+            'High demand in ${widget.locationName}. Expected pickup: ${ref.read(authProvider).countryCode == 'NG' ? '10-15' : '5-8'} mins.',
             style: TextStyle(color: Colors.grey[600], fontSize: 13),
           ),
         ],

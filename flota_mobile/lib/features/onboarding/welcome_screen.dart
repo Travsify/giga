@@ -69,7 +69,7 @@ class WelcomeScreen extends StatelessWidget {
                   subtitle: 'Book instant city-wide delivery',
                   icon: Icons.local_shipping_outlined,
                   color: AppTheme.primaryBlue,
-                  onTap: () => context.go('/register/Customer'),
+                  onTap: () => context.push('/register/Customer'),
                 ),
               ),
               const SizedBox(height: 16),
@@ -82,7 +82,7 @@ class WelcomeScreen extends StatelessWidget {
                   subtitle: 'Become a Giga rider partner',
                   icon: Icons.two_wheeler_rounded,
                   color: AppTheme.successGreen,
-                  onTap: () => context.go('/register/Rider'),
+                  onTap: () => context.push('/register/Rider'),
                 ),
               ),
               const SizedBox(height: 16),
@@ -95,7 +95,7 @@ class WelcomeScreen extends StatelessWidget {
                   subtitle: 'Logistics solutions for companies',
                   icon: Icons.business_outlined,
                   color: Colors.purple,
-                  onTap: () => context.go('/register/Company'),
+                  onTap: () => context.push('/register/Company'),
                 ),
               ),
 
@@ -108,7 +108,7 @@ class WelcomeScreen extends StatelessWidget {
                   children: [
                     const Text('Already have an account?'),
                     TextButton(
-                      onPressed: () => context.go('/login'),
+                      onPressed: () => context.push('/login'),
                       child: const Text('Log In', style: TextStyle(fontWeight: FontWeight.bold)),
                     ),
                   ],

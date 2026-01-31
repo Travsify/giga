@@ -188,58 +188,63 @@ class PaymentController extends Controller
                 $currency = strtoupper($data['currency']);
             }
 
-            // Check duplicate
-            $existingTx = $user->wallet 
-                ? $user->wallet->transactions()->where('reference', $reference)->first()
-                : null;
+            return \Illuminate\Support\Facades\DB::transaction(function () use ($user, $provider, $reference, $amount, $currency) {
+                // Check duplicate within transaction
+                $existingTx = $user->wallet 
+                    ? $user->wallet->transactions()->where('reference', $reference)->first()
+                    : null;
+                    
+                if ($existingTx) {
+                    return response()->json(['message' => 'Transaction already processed', 'balance' => $user->wallet->balance, 'success' => true]);
+                }
+
+                // Update Wallet
+                $wallet = $user->wallet()->firstOrCreate([], ['balance' => 0.00, 'currency' => strtoupper($currency)]);
                 
-            if ($existingTx) {
-                return response()->json(['message' => 'Transaction already processed', 'balance' => $user->wallet->balance, 'success' => true]);
-            }
+                $walletCurrency = strtoupper($wallet->currency);
+                $txCurrency = strtoupper($currency);
+                $creditAmount = $amount;
+                
+                if ($walletCurrency !== $txCurrency) {
+                     $rate = \App\Models\CurrencyRate::where('currency_code', $txCurrency)->first();
+                     if ($rate && $rate->rate_to_gbp > 0) {
+                         $creditAmount = $amount / $rate->rate_to_gbp;
+                     } else {
+                         // Basic fallback for common pairs if rates missing
+                         if ($txCurrency == 'NGN' && $walletCurrency == 'GBP') $creditAmount = $amount / 2000;
+                         if ($txCurrency == 'GBP' && $walletCurrency == 'NGN') $creditAmount = $amount * 2000;
+                     }
+                }
 
-            // Update Wallet
-            $wallet = $user->wallet()->firstOrCreate([], ['balance' => 0.00, 'currency' => strtoupper($currency)]);
-            
-            $walletCurrency = strtoupper($wallet->currency);
-            $txCurrency = strtoupper($currency);
-            $creditAmount = $amount;
-            
-            if ($walletCurrency !== $txCurrency) {
-                 $rate = \App\Models\CurrencyRate::where('currency_code', $txCurrency)->first();
-                 if ($rate && $rate->rate_to_gbp > 0) {
-                     $creditAmount = $amount / $rate->rate_to_gbp;
-                 } else {
-                     if ($txCurrency == 'NGN' && $walletCurrency == 'GBP') $creditAmount = $amount / 2000;
-                 }
-            }
+                $wallet->increment('balance', $creditAmount);
 
-            $wallet->balance += $creditAmount;
-            $wallet->save();
+                // Record Transaction
+                $wallet->transactions()->create([
+                    'amount' => $creditAmount,
+                    'type' => 'credit',
+                    'description' => "Wallet Top-up via " . ucfirst($provider),
+                    'reference' => $reference,
+                    'status' => 'completed',
+                    'currency' => $txCurrency, 
+                    'metadata' => json_encode(['original_amount' => $amount, 'original_currency' => $txCurrency]),
+                ]);
 
-            // Record Transaction
-            $wallet->transactions()->create([
-                'amount' => $creditAmount, // Stored in Wallet Currency
-                'type' => 'credit',
-                'description' => "Wallet Top-up via " . ucfirst($provider),
-                'reference' => $reference,
-                'status' => 'completed',
-                'currency' => $walletCurrency, 
-                'metadata' => json_encode(['original_amount' => $amount, 'original_currency' => $txCurrency]),
-            ]);
+                // Trigger Notification
+                try {
+                    $user->notify(new \App\Notifications\WalletTopupNotification($creditAmount, $wallet->balance, $walletCurrency, $provider));
+                } catch (\Exception $e) {
+                    Log::error('Failed to send top-up notification: ' . $e->getMessage());
+                }
 
-            // Trigger Notification
-            try {
-                $user->notify(new \App\Notifications\WalletTopupNotification($creditAmount, $wallet->balance, $walletCurrency, $provider));
-            } catch (\Exception $e) {
-                Log::error('Failed to send top-up notification: ' . $e->getMessage());
-            }
+                Log::info("Payment confirmed: $provider | Ref: $reference | Amount: $creditAmount $walletCurrency");
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Payment confirmed and wallet credited.',
-                'balance' => $wallet->balance,
-                'currency' => $walletCurrency
-            ]);
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Payment confirmed and wallet credited.',
+                    'balance' => $wallet->balance,
+                    'currency' => $walletCurrency
+                ]);
+            });
 
         } catch (\Exception $e) {
             Log::error('Payment Confirmation Error: ' . $e->getMessage());

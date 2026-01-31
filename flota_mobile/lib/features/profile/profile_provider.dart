@@ -90,10 +90,10 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
     }
   }
 
-  Future<void> subscribe() async {
+  Future<void> subscribe({bool useWallet = false}) async {
     state = state.copyWith(isLoading: true);
     try {
-      await _repository.subscribe();
+      await _repository.subscribe(useWallet: useWallet);
       await refresh();
     } catch (e) {
       state = state.copyWith(error: e.toString(), isLoading: false);

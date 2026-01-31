@@ -77,15 +77,16 @@ class PaymentService {
     try {
       final ChargeResponse response = await flutterwave.charge(context);
       if (response.success == true) {
-         debugPrint('Flutterwave Success: ${response.transactionId}');
-         return await _confirmPaymentWithBackend(response.transactionId ?? 'UNKNOWN_REF', 'flutterwave', amount, currency);
+         debugPrint('PaymentService: Flutterwave payment successful at gateway.');
+         return await _confirmPaymentWithBackend(response.transactionId ?? 'FLW_UNKNOWN', 'flutterwave', amount, currency);
       } else {
-         debugPrint('Flutterwave Failed');
-         return false;
+         debugPrint('PaymentService: Flutterwave payment cancelled or failed at gateway.');
+         throw 'Payment was not successful. Please try again.';
       }
     } catch (e) {
-      debugPrint('Flutterwave Error: $e');
-      return false;
+      if (e is String) rethrow;
+      debugPrint('PaymentService: Flutterwave Error: $e');
+      throw 'Flutterwave Error: $e';
     }
   }
 
@@ -93,11 +94,11 @@ class PaymentService {
   static Future<bool> _fundWalletStripe(BuildContext context, double amount, String email, String userId, {String currency = 'gbp'}) async {
     try {
       // 1. Create Payment Intent on Backend (Stripe always needs backend intent first)
-      debugPrint('PaymentService: Creating Stripe payment intent...');
+      debugPrint('PaymentService: Requesting Stripe Payment Intent from backend...');
        final paymentIntent = await _createPaymentIntent(amount, currency);
        
-       if (paymentIntent == null) {
-         throw 'Failed to create payment intent.';
+       if (paymentIntent == null || paymentIntent['clientSecret'] == null) {
+         throw 'Failed to initialize secure payment session.';
        }
 
       // 2. Initialize Payment Sheet
@@ -119,17 +120,12 @@ class PaymentService {
       return await _confirmPaymentWithBackend(intentId, 'stripe', amount, currency);
 
     } on StripeException catch (e) {
-      debugPrint('Stripe Error: ${e.error.localizedMessage}');
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Payment Failed: ${e.error.localizedMessage}')));
-      }
-      return false;
+      debugPrint('PaymentService: Stripe UI Error: ${e.error.localizedMessage}');
+      throw e.error.localizedMessage ?? 'Stripe payment failed';
     } catch (e) {
-      debugPrint('Payment Error: $e');
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Payment Error: $e')));
-      }
-      return false;
+      if (e is String) rethrow;
+      debugPrint('PaymentService: Unexpected Stripe error: $e');
+      throw 'Payment Error: $e';
     }
   }
 
@@ -146,15 +142,20 @@ class PaymentService {
         });
 
         if (confirmResponse.statusCode == 200) {
-          debugPrint('Payment confirmed by backend.');
+          debugPrint('PaymentService: Backend confirmation successful.');
           return true;
         } else {
-          throw 'Backend confirmation failed: ${confirmResponse.data}';
+          final errorMsg = confirmResponse.data?['error'] ?? 'Unknown backend error';
+          debugPrint('PaymentService: Backend confirmation failed: $errorMsg');
+          throw errorMsg;
         }
+      } on DioException catch (e) {
+        final errorMsg = e.response?.data?['error'] ?? e.message ?? 'Network error during confirmation';
+        debugPrint('PaymentService: Dio Error during confirmation: $errorMsg');
+        throw errorMsg;
       } catch (e) {
-        debugPrint('Backend Confirmation Error: $e');
-        return false; // Payment succeeded at Gateway, but failed to record? 
-        // In prod, use webhooks to handle this case!
+        debugPrint('PaymentService: Unexpected Error during confirmation: $e');
+        throw 'Failed to sync with Giga servers: $e';
       }
   }
 

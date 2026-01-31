@@ -63,46 +63,48 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => Container(
-        padding: EdgeInsets.fromLTRB(24, 24, 24, MediaQuery.of(context).viewInsets.bottom + 24),
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Redeem Gift Card', style: GoogleFonts.outfit(fontSize: 22, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 12),
-            Text('Enter your 8-digit PIN (e.g., GIGA-100)', style: TextStyle(color: Colors.grey[600])),
-            const SizedBox(height: 20),
-            TextField(
-              controller: pinController,
-              autofocus: true,
-              textCapitalization: TextCapitalization.characters,
-              decoration: InputDecoration(
-                hintText: 'GIGA-XXXX',
-                filled: true,
-                fillColor: Colors.grey[100],
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
-                prefixIcon: const Icon(Icons.vpn_key),
-              ),
-            ),
-            const SizedBox(height: 24),
-            SizedBox(
-              width: double.infinity,
-              height: 56,
-              child: ElevatedButton(
-                onPressed: () => Navigator.pop(context, pinController.text),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppTheme.primaryBlue,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      builder: (context) => SingleChildScrollView(
+        child: Container(
+          padding: EdgeInsets.fromLTRB(24, 24, 24, MediaQuery.of(context).viewInsets.bottom + 24),
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Redeem Gift Card', style: GoogleFonts.outfit(fontSize: 22, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 12),
+              Text('Enter your 8-digit PIN (e.g., GIGA-100)', style: TextStyle(color: Colors.grey[600])),
+              const SizedBox(height: 20),
+              TextField(
+                controller: pinController,
+                autofocus: true,
+                textCapitalization: TextCapitalization.characters,
+                decoration: InputDecoration(
+                  hintText: 'GIGA-XXXX',
+                  filled: true,
+                  fillColor: Colors.grey[100],
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
+                  prefixIcon: const Icon(Icons.vpn_key),
                 ),
-                child: const Text('Redeem Now'),
               ),
-            ),
-          ],
+              const SizedBox(height: 24),
+              SizedBox(
+                width: double.infinity,
+                height: 56,
+                child: ElevatedButton(
+                  onPressed: () => Navigator.pop(context, pinController.text),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppTheme.primaryBlue,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  ),
+                  child: const Text('Redeem Now'),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -182,8 +184,9 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
   }
 
   Widget _buildAmountInputSheet(TextEditingController controller) {
-    return Container(
-        padding: EdgeInsets.fromLTRB(24, 24, 24, MediaQuery.of(context).viewInsets.bottom + 24),
+    return SingleChildScrollView(
+      child: Container(
+          padding: EdgeInsets.fromLTRB(24, 24, 24, MediaQuery.of(context).viewInsets.bottom + 24),
         decoration: const BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
@@ -252,7 +255,8 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
             ),
           ],
         ),
-      );
+      ),
+    );
   }
 
   Future<void> _sendFunds(AuthState authState) async {
@@ -263,58 +267,60 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => Container(
-        padding: EdgeInsets.fromLTRB(24, 24, 24, MediaQuery.of(context).viewInsets.bottom + 24),
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Send Funds', style: GoogleFonts.outfit(fontSize: 22, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 20),
-            TextField(
-              controller: emailController,
-              decoration: const InputDecoration(
-                labelText: "Recipient's Email",
-                hintText: "Enter friend's email",
-                prefixIcon: Icon(Icons.alternate_email),
-              ),
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: amountController,
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
-              decoration: InputDecoration(
-                labelText: "Amount (${ref.watch(authProvider).currencySymbol})",
-                hintText: "0.00",
-                prefixIcon: const Icon(Icons.attach_money),
-              ),
-            ),
-            const SizedBox(height: 24),
-            SizedBox(
-              width: double.infinity,
-              height: 56,
-              child: ElevatedButton(
-                onPressed: () {
-                  final amount = double.tryParse(amountController.text);
-                  if (emailController.text.isNotEmpty && amount != null && amount > 0) {
-                    Navigator.pop(context, {
-                      'email': emailController.text.trim(),
-                      'amount': amount,
-                    });
-                  }
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppTheme.primaryBlue,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      builder: (context) => SingleChildScrollView(
+        child: Container(
+          padding: EdgeInsets.fromLTRB(24, 24, 24, MediaQuery.of(context).viewInsets.bottom + 24),
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Send Funds', style: GoogleFonts.outfit(fontSize: 22, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 20),
+              TextField(
+                controller: emailController,
+                decoration: const InputDecoration(
+                  labelText: "Recipient's Email",
+                  hintText: "Enter friend's email",
+                  prefixIcon: Icon(Icons.alternate_email),
                 ),
-                child: const Text('Send Now'),
               ),
-            ),
-          ],
+              const SizedBox(height: 16),
+              TextField(
+                controller: amountController,
+                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                decoration: InputDecoration(
+                  labelText: "Amount (${ref.watch(authProvider).currencySymbol})",
+                  hintText: "0.00",
+                  prefixIcon: const Icon(Icons.attach_money),
+                ),
+              ),
+              const SizedBox(height: 24),
+              SizedBox(
+                width: double.infinity,
+                height: 56,
+                child: ElevatedButton(
+                  onPressed: () {
+                    final amount = double.tryParse(amountController.text);
+                    if (emailController.text.isNotEmpty && amount != null && amount > 0) {
+                      Navigator.pop(context, {
+                        'email': emailController.text.trim(),
+                        'amount': amount,
+                      });
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppTheme.primaryBlue,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  ),
+                  child: const Text('Send Now'),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -553,7 +559,7 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
                     physics: const NeverScrollableScrollPhysics(),
                     mainAxisSpacing: 12,
                     crossAxisSpacing: 12,
-                    childAspectRatio: 1.5,
+                    childAspectRatio: 1.6,
                     children: _getPaymentMethods().map((method) {
                       final bool isActive = _selectedMethod == method['id'];
                       return GestureDetector(
@@ -585,13 +591,17 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
                                 size: 32,
                               ),
                               const SizedBox(height: 12),
-                              Text(
-                                method['label'] as String,
-                                textAlign: TextAlign.center,
-                                style: GoogleFonts.outfit(
-                                  color: isActive ? AppTheme.primaryBlue : Colors.grey[600],
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 14,
+                              Flexible(
+                                child: Text(
+                                  method['label'] as String,
+                                  textAlign: TextAlign.center,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: GoogleFonts.outfit(
+                                    color: isActive ? AppTheme.primaryBlue : Colors.grey[600],
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 14,
+                                  ),
                                 ),
                               ),
                               if (isActive) ...[

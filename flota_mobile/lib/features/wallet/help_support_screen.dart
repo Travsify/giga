@@ -2,12 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flota_mobile/theme/app_theme.dart';
 import 'package:animate_do/animate_do.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flota_mobile/features/auth/auth_provider.dart';
 
-class HelpSupportScreen extends StatelessWidget {
+class HelpSupportScreen extends ConsumerWidget {
   const HelpSupportScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final country = ref.watch(authProvider).countryCode;
+    final isAfricanMarket = ['NG', 'GH'].contains(country);
+
     return Scaffold(
       backgroundColor: Colors.grey[50],
       appBar: AppBar(
@@ -57,21 +62,36 @@ class HelpSupportScreen extends StatelessWidget {
             const SizedBox(height: 32),
             Text('Frequently Asked Questions', style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold)),
             const SizedBox(height: 16),
-            _FAQItem(
-              question: 'How do I fund my wallet?',
-              answer: 'You can fund your wallet using Stripe, Apple Pay, Google Pay, or Giga Gift Cards in the Wallet section.',
-            ),
-            _FAQItem(
-              question: 'Are my transactions secure?',
-              answer: 'Yes, all payments are processed through Stripe with industry-standard encryption.',
-            ),
-            _FAQItem(
+            if (isAfricanMarket) ...[
+              const _FAQItem(
+                question: 'How do I fund my wallet?',
+                answer: 'In Nigeria and Ghana, you can fund your wallet using Flutterwave (Bank Transfer, Card, or USSD) and Giga Gift Cards.',
+              ),
+              const _FAQItem(
+                question: 'Are my transactions secure?',
+                answer: 'Yes, all transactions are processed through Flutterwave, which is PCI-DSS compliant with industry-level security.',
+              ),
+              const _FAQItem(
+                question: 'How do I send items locally?',
+                answer: 'Select "Giga Go" or "Local Delivery" on the Home screen, enter the recipient details, and a rider will be assigned to you.',
+              ),
+            ] else ...[
+              const _FAQItem(
+                question: 'How do I fund my wallet?',
+                answer: 'You can fund your wallet using Stripe, Apple Pay, Google Pay, or Giga Gift Cards in the Wallet section.',
+              ),
+              const _FAQItem(
+                question: 'Are my transactions secure?',
+                answer: 'Yes, all payments are processed through Stripe with industry-standard encryption and 3D Secure verification.',
+              ),
+              const _FAQItem(
+                question: 'How do I scan a ULEZ zone?',
+                answer: 'Use the ULEZ Scanner tool on the home screen to check if an address is within the London Ultra Low Emission Zone.',
+              ),
+            ],
+            const _FAQItem(
               question: 'Can I withdraw my balance?',
-              answer: 'Yes, go to Wallet > Withdraw to transfer funds back to your linked bank account.',
-            ),
-            _FAQItem(
-              question: 'How do I scan a ULEZ zone?',
-              answer: 'Use the ULEZ Scanner tool on the home screen to check if an address is within the London ULEZ zone.',
+              answer: 'Yes, you can request a withdrawal to your verified bank account from the Wallet screen. Processing takes 1-3 business days.',
             ),
             const SizedBox(height: 32),
             Text('Contact Us', style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold)),

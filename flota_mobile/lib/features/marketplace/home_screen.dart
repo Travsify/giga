@@ -9,6 +9,7 @@ import 'package:flota_mobile/theme/app_theme.dart';
 import 'package:flota_mobile/features/auth/auth_provider.dart';
 import 'package:flota_mobile/features/marketplace/weather_service.dart';
 import 'package:flota_mobile/features/marketplace/home_widgets.dart';
+import 'package:flota_mobile/features/wallet/wallet_provider.dart';
 import 'package:flota_mobile/features/sustainability/carbon_dashboard_screen.dart';
 import 'package:flota_mobile/features/location/ulez_service.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -38,7 +39,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   void initState() {
     super.initState();
     // Delay to allow provider to be ready
-    Future.microtask(() => _setupLocationAndWeather());
+    Future.microtask(() {
+      _setupLocationAndWeather();
+      ref.read(walletProvider.notifier).fetchWalletData();
+    });
   }
 
   Future<void> _setupLocationAndWeather() async {
@@ -92,8 +96,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final user = FirebaseAuth.instance.currentUser;
     final theme = Theme.of(context);
 
-    // Stream for wallet balance
-    final userStream = FirebaseFirestore.instance.collection('users').doc(user?.uid).snapshots();
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
@@ -159,7 +161,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         Row(
                           children: [
                             if (authState.countryCode == 'GB') // Hide ULEZ (Woolies) for non-UK
-                              _UlezStatusBubble(),
+                              _UlezStatusBubble(center: _mapCenter),
                             const SizedBox(width: 8),
                             GestureDetector(
                               onTap: () => context.push('/profile'),
@@ -205,13 +207,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       ],
                     ),
                     const SizedBox(height: 30),
-                    // Glassmorphic Wallet Card
-                    StreamBuilder<DocumentSnapshot>(
-                      stream: userStream,
-                      builder: (context, snapshot) {
-                        final balance = snapshot.data?.data() != null 
-                            ? (snapshot.data!.get('wallet_balance') ?? 0.0) 
-                            : 0.0;
+                    // API-based Wallet Card
+                    Consumer(
+                      builder: (context, ref, child) {
+                        final walletState = ref.watch(walletProvider);
+                        final balance = walletState.balance;
                         
                         return ZoomIn(
                           child: Container(
@@ -819,6 +819,9 @@ class _ServiceTile extends StatelessWidget {
 }
 
 class _UlezStatusBubble extends StatefulWidget {
+  final LatLng center;
+  const _UlezStatusBubble({required this.center});
+
   @override
   State<_UlezStatusBubble> createState() => _UlezStatusBubbleState();
 }
@@ -833,8 +836,8 @@ class _UlezStatusBubbleState extends State<_UlezStatusBubble> {
   }
 
   Future<void> _checkUlez() async {
-    // Mocking current location to Central London for ULEZ check
-    final inZone = await ULEZService.isAddressInULEZ(const LatLng(51.5074, -0.1278));
+    // Dynamically check the current map center for ULEZ
+    final inZone = await ULEZService.isAddressInULEZ(widget.center);
     if (mounted) setState(() => _isInZone = inZone);
   }
 

@@ -167,6 +167,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
 
     return Scaffold(
       backgroundColor: Colors.white,
+      resizeToAvoidBottomInset: true,
       body: Stack(
         children: [
           // Background Decor
@@ -417,7 +418,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                                 ),
                           ),
                         ),
-                        const SizedBox(height: 40), // Extra bottom padding
+                        const SizedBox(height: 60), // Extra bottom padding
                       ],
                     ),
                   ),

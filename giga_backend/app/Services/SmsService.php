@@ -29,6 +29,14 @@ class SmsService
                     return $this->sendVonage($to, $message);
                 case 'messagebird':
                     return $this->sendMessageBird($to, $message);
+                case 'africastalking':
+                    return $this->sendAfricasTalking($to, $message);
+                case 'sendchamp':
+                    return $this->sendSendchamp($to, $message);
+                case 'infobip':
+                    return $this->sendInfobip($to, $message);
+                case 'msg91':
+                    return $this->sendMsg91($to, $message);
                 case 'log':
                     return true;
                 default:
@@ -39,6 +47,104 @@ class SmsService
             Log::error("SMS Send Failed ({$this->driver}): " . $e->getMessage());
             return false;
         }
+    }
+
+    protected function sendAfricasTalking($to, $message)
+    {
+        $username = AppSetting::get('africastalking_username') ?? env('AFRICASTALKING_USERNAME');
+        $apiKey = AppSetting::get('africastalking_api_key') ?? env('AFRICASTALKING_API_KEY');
+        $from = AppSetting::get('africastalking_from') ?? env('AFRICASTALKING_FROM');
+
+        $response = Http::withHeaders([
+            'apiKey' => $apiKey,
+            'Content-Type' => 'application/x-www-form-urlencoded',
+            'Accept' => 'application/json',
+        ])->asForm()->post('https://api.africastalking.com/version1/messaging', [
+            'username' => $username,
+            'to' => $to,
+            'message' => $message,
+            'from' => $from,
+        ]);
+
+        if ($response->successful()) {
+            return true;
+        }
+
+        Log::error("AfricasTalking Error: " . $response->body());
+        return false;
+    }
+
+    protected function sendSendchamp($to, $message)
+    {
+        $apiKey = AppSetting::get('sendchamp_api_key') ?? env('SENDCHAMP_API_KEY');
+        $senderId = AppSetting::get('sendchamp_sender_id') ?? env('SENDCHAMP_SENDER_ID', 'Giga');
+
+        $response = Http::withToken($apiKey)->post('https://api.sendchamp.com/api/v1/sms/send', [
+            'to' => [$to],
+            'message' => $message,
+            'sender_name' => $senderId,
+            'route' => 'non_dnd', // or dnd, international
+        ]);
+
+        if ($response->successful()) {
+            return true;
+        }
+
+        Log::error("Sendchamp Error: " . $response->body());
+        return false;
+    }
+
+    protected function sendInfobip($to, $message)
+    {
+        $baseUrl = AppSetting::get('infobip_base_url') ?? env('INFOBIP_BASE_URL');
+        $apiKey = AppSetting::get('infobip_api_key') ?? env('INFOBIP_API_KEY');
+        $from = AppSetting::get('infobip_from') ?? env('INFOBIP_FROM', 'Giga');
+
+        $response = Http::withHeaders([
+            'Authorization' => "App {$apiKey}",
+            'Content-Type' => 'application/json',
+            'Accept' => 'application/json',
+        ])->post("https://{$baseUrl}/sms/2/text/advanced", [
+            'messages' => [
+                [
+                    'from' => $from,
+                    'destinations' => [['to' => $to]],
+                    'text' => $message,
+                ]
+            ],
+        ]);
+
+        if ($response->successful()) {
+            return true;
+        }
+
+        Log::error("Infobip Error: " . $response->body());
+        return false;
+    }
+
+    protected function sendMsg91($to, $message)
+    {
+        $authKey = AppSetting::get('msg91_auth_key') ?? env('MSG91_AUTH_KEY');
+        $templateId = AppSetting::get('msg91_template_id') ?? env('MSG91_TEMPLATE_ID');
+
+        $response = Http::withHeaders([
+            'authkey' => $authKey,
+            'Content-Type' => 'application/json',
+        ])->post('https://api.msg91.com/api/v5/otp', [
+            'template_id' => $templateId,
+            'mobile' => str_replace('+', '', $to),
+            'authkey' => $authKey,
+        ]);
+
+        // Note: Msg91 OTP API is slightly different from bulk SMS.
+        // If they want general SMS, we'd use /api/v5/flow/
+        
+        if ($response->successful()) {
+            return true;
+        }
+
+        Log::error("Msg91 Error: " . $response->body());
+        return false;
     }
 
     protected function sendTwilio($to, $message)

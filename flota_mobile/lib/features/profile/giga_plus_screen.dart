@@ -7,6 +7,7 @@ import 'package:flota_mobile/theme/app_theme.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flota_mobile/core/payment_service.dart';
 import 'package:flota_mobile/features/auth/auth_provider.dart';
+import 'package:flota_mobile/features/wallet/wallet_provider.dart';
 
 class GigaPlusScreen extends ConsumerWidget {
   const GigaPlusScreen({super.key});
@@ -17,21 +18,28 @@ class GigaPlusScreen extends ConsumerWidget {
     final isGigaPlus = profileState.subscription?['is_giga_plus'] ?? false;
     final authState = ref.watch(authProvider);
     final expiry = profileState.subscription?['expiry'];
+    final walletState = ref.watch(walletProvider);
+    final walletBalance = walletState.balance;
 
     // Dynamic Pricing Logic
-    String currency = '£';
+    String currencySymbol = '£';
+    String currencyIso = 'GBP';
     double price = 39.99;
     double freeDeliveryThreshold = 15.0;
 
     if (authState.countryCode == 'NG') {
-      currency = '₦';
-      price = 39.99 * 2025; // 1 GBP = 2025 NGN
-      freeDeliveryThreshold = 15.0 * 2025;
+      currencySymbol = '₦';
+      currencyIso = 'NGN';
+      price = 80000.0; 
+      freeDeliveryThreshold = 30000.0;
     } else if (authState.countryCode == 'GH') {
-      currency = '₵';
-      price = 39.99 * 15; // Approximate rate, update if user provides
-      freeDeliveryThreshold = 150.0;
+      currencySymbol = '₵';
+      currencyIso = 'GHS';
+      price = 600.0; // Approx 40 GBP
+      freeDeliveryThreshold = 250.0;
     }
+
+    final hasSufficientBalance = walletBalance >= price;
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -94,15 +102,31 @@ class GigaPlusScreen extends ConsumerWidget {
                   if (isGigaPlus)
                     _buildActiveStatus(context, ref, expiry)
                   else
-                    const Text(
-                      'Membership Benefits',
-                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          'Membership Benefits',
+                          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: AppTheme.primaryBlue.withOpacity(0.05),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            'Balance: $currencySymbol${walletBalance.toStringAsFixed(2)}',
+                            style: const TextStyle(fontWeight: FontWeight.bold, color: AppTheme.primaryBlue),
+                          ),
+                        ),
+                      ],
                     ),
                   const SizedBox(height: 20),
                     _buildBenefitItem(
                     Icons.delivery_dining_rounded,
-                    '$currency${(0).toStringAsFixed(0)} Delivery Fees',
-                    'Unlimited free delivery on all standard orders over $currency${freeDeliveryThreshold.toStringAsFixed(0)}.',
+                    '$currencySymbol${(0).toStringAsFixed(0)} Delivery Fees',
+                    'Unlimited free delivery on all standard orders over $currencySymbol${freeDeliveryThreshold.toStringAsFixed(0)}.',
                   ),
                   _buildBenefitItem(
                     Icons.bolt_rounded,
@@ -132,7 +156,7 @@ class GigaPlusScreen extends ConsumerWidget {
                         child: Column(
                           children: [
                             Text(
-                              'Only $currency${price.toStringAsFixed(2)} / month',
+                              'Only $currencySymbol${price.toStringAsFixed(2)} / month',
                               style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                             ),
                             const Text(
@@ -140,57 +164,81 @@ class GigaPlusScreen extends ConsumerWidget {
                               style: TextStyle(color: Colors.grey),
                             ),
                             const SizedBox(height: 24),
-                            SizedBox(
-                              width: double.infinity,
-                              child: ElevatedButton(
-                                onPressed: () async {
-                                  final authState = ref.read(authProvider);
-                                  if (authState.status != AuthStatus.authenticated) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(content: Text('Please log in to join Giga+')),
-                                    );
-                                    return;
-                                  }
-
-                                  try {
-                                    // 1. Initialize Stripe
-                                    await PaymentService.initialize();
-                                    
-                                    // 2. Charge Price
-                                    final success = await PaymentService.fundWallet(
-                                      context, 
-                                      price, 
-                                      authState.userEmail!, 
-                                      authState.userId!
-                                    );
-
-                                    if (success) {
-                                      // 3. Activate Subscription on Backend
-                                      await ref.read(profileProvider.notifier).subscribe();
+                            if (hasSufficientBalance)
+                              SizedBox(
+                                width: double.infinity,
+                                child: ElevatedButton.icon(
+                                  onPressed: profileState.isLoading ? null : () async {
+                                    try {
+                                      await ref.read(profileProvider.notifier).subscribe(useWallet: true);
                                       if (context.mounted) {
                                         ScaffoldMessenger.of(context).showSnackBar(
-                                          const SnackBar(
-                                            content: Text('Welcome to Giga+! Membership active.'),
-                                            backgroundColor: AppTheme.successGreen,
-                                          ),
+                                          const SnackBar(content: Text('Welcome to Giga+! Deducted from wallet.'), backgroundColor: AppTheme.successGreen),
                                         );
                                       }
+                                    } catch (e) {
+                                      if (context.mounted) {
+                                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
+                                      }
                                     }
-                                  } catch (e) {
-                                    if (context.mounted) {
-                                      ScaffoldMessenger.of(context).showSnackBar(
-                                        SnackBar(content: Text(e.toString())),
-                                      );
-                                    }
-                                  }
-                                },
-                                style: ElevatedButton.styleFrom(
-                                  padding: const EdgeInsets.all(18),
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                                  },
+                                  icon: profileState.isLoading 
+                                    ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                                    : const Icon(Icons.account_balance_wallet_rounded),
+                                  label: Text(profileState.isLoading ? 'Processing...' : 'Pay with Wallet'),
+                                  style: ElevatedButton.styleFrom(
+                                    padding: const EdgeInsets.all(18),
+                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                                    backgroundColor: AppTheme.primaryBlue,
+                                  ),
                                 ),
-                                child: const Text('Join Giga+ Now'),
+                              )
+                            else
+                              SizedBox(
+                                width: double.infinity,
+                                child: ElevatedButton.icon(
+                                  onPressed: profileState.isLoading ? null : () async {
+                                    final authState = ref.read(authProvider);
+                                    if (authState.status != AuthStatus.authenticated) {
+                                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please log in to join Giga+')));
+                                      return;
+                                    }
+
+                                    try {
+                                      await PaymentService.initialize();
+                                      
+                                      final success = await PaymentService.fundWallet(
+                                        context, 
+                                        price, 
+                                        authState.userEmail!, 
+                                        authState.userId!,
+                                        currency: currencyIso
+                                      );
+
+                                      if (success) {
+                                        await ref.read(profileProvider.notifier).subscribe(useWallet: false);
+                                        if (context.mounted) {
+                                          ScaffoldMessenger.of(context).showSnackBar(
+                                            const SnackBar(content: Text('Welcome to Giga+! Membership active.'), backgroundColor: AppTheme.successGreen),
+                                          );
+                                        }
+                                      }
+                                    } catch (e) {
+                                      if (context.mounted) {
+                                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
+                                      }
+                                    }
+                                  },
+                                  icon: profileState.isLoading 
+                                    ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                                    : const Icon(Icons.credit_card_rounded),
+                                  label: Text(profileState.isLoading ? 'Processing...' : 'Checkout & Join'),
+                                  style: ElevatedButton.styleFrom(
+                                    padding: const EdgeInsets.all(18),
+                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                                  ),
+                                ),
                               ),
-                            ),
                           ],
                         ),
                       ),

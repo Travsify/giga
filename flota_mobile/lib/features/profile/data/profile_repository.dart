@@ -68,9 +68,11 @@ class ProfileRepository {
     }
   }
 
-  Future<Map<String, dynamic>> subscribe() async {
+  Future<Map<String, dynamic>> subscribe({bool useWallet = false}) async {
     try {
-      final response = await _dio.post('/subscription/subscribe');
+      final response = await _dio.post('/subscription/subscribe', data: {
+        'use_wallet': useWallet,
+      });
       return response.data;
     } on DioException catch (e) {
       throw _handleError(e);

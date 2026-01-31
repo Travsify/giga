@@ -139,7 +139,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const SizedBox(height: 60),
+                  const SizedBox(height: 20),
+                  
+                  // Back Button
+                  IconButton(
+                    onPressed: () => context.canPop() ? context.pop() : context.go('/welcome'),
+                    icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.black87, size: 20),
+                  ),
+                  
+                  const SizedBox(height: 10),
                   
                   // Brand Header
                   FadeInDown(

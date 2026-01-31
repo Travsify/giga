@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flota_mobile/theme/app_theme.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class MainScaffold extends StatelessWidget {
   final Widget child;
@@ -17,11 +18,14 @@ class MainScaffold extends StatelessWidget {
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _calculateSelectedIndex(context),
         onTap: (int idx) => _onItemTapped(idx, context),
-        backgroundColor: AppTheme.primaryBlue, // Giga Blue
-        selectedItemColor: AppTheme.primaryRed, // Giga Red
-        unselectedItemColor: Colors.white, // White
+        backgroundColor: Colors.white, 
+        selectedItemColor: AppTheme.primaryBlue,
+        unselectedItemColor: Colors.grey.shade400,
+        showUnselectedLabels: true,
         type: BottomNavigationBarType.fixed,
-        elevation: 8,
+        elevation: 15,
+        selectedLabelStyle: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 12),
+        unselectedLabelStyle: GoogleFonts.outfit(fontSize: 12),
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.home_outlined),
