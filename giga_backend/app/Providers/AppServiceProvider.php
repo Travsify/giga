@@ -50,6 +50,12 @@ class AppServiceProvider extends ServiceProvider
                 if ($mailFrom) {
                     config(['mail.from.address' => $mailFrom]);
                 }
+
+                // SECURE OVERRIDE: Hostinger requires FROM to match USERNAME
+                if ($mailHost === 'smtp.hostinger.com' || env('MAIL_HOST') === 'smtp.hostinger.com') {
+                    config(['mail.from.address' => 'info@usegiga.site']);
+                    Log::info("SMTP From Address forced to info@usegiga.site for Hostinger.");
+                }
                 if ($mailName) {
                     config(['mail.from.name' => $mailName]);
                 }
