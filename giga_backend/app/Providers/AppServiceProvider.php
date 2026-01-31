@@ -54,20 +54,29 @@ class AppServiceProvider extends ServiceProvider
                     config(['mail.from.name' => $mailName]);
                 }
 
-                if ($mailHost) {
+                // Prioritize Hostinger or ignore if DB contains Mailgun
+                if ($mailHost && $mailHost !== 'smtp.mailgun.org') {
                     config(['mail.mailers.smtp.host' => $mailHost]);
-                    Log::info("SMTP Host set to: $mailHost");
+                    Log::info("SMTP Host set from DB: $mailHost");
+                } elseif (env('MAIL_HOST') === 'smtp.hostinger.com') {
+                    config(['mail.mailers.smtp.host' => 'smtp.hostinger.com']);
+                    Log::info("SMTP Host prioritized from ENV: smtp.hostinger.com");
                 }
-                if ($mailPort) {
+
+                if ($mailPort && $mailPort != '587') {
                     config(['mail.mailers.smtp.port' => $mailPort]);
-                    Log::info("SMTP Port set to: $mailPort");
+                    Log::info("SMTP Port set from DB: $mailPort");
+                } elseif (env('MAIL_HOST') === 'smtp.hostinger.com') {
+                    config(['mail.mailers.smtp.port' => 465]);
                 }
+
                 if ($mailUser) {
                     config(['mail.mailers.smtp.username' => $mailUser]);
                 }
                 if ($mailPass) {
                     config(['mail.mailers.smtp.password' => $mailPass]);
                 }
+
                 if ($mailEnc) {
                     config(['mail.mailers.smtp.encryption' => $mailEnc]);
                     Log::info("SMTP Encryption set to: $mailEnc");
