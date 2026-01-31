@@ -9,10 +9,16 @@ use Illuminate\Support\Facades\Log;
 class SmsService
 {
     protected $driver;
+    protected $lastError;
 
     public function __construct()
     {
         $this->driver = AppSetting::get('sms_provider') ?? env('SMS_DRIVER', 'log');
+    }
+
+    public function getLastError()
+    {
+        return $this->lastError;
     }
 
     public function send($to, $message)
@@ -183,12 +189,13 @@ class SmsService
             'api_key' => $key,
         ]);
 
-        if ($response->successful()) {
-            return true;
+        if (!$response->successful()) {
+            $this->lastError = "Termii Error: " . $response->body();
+            Log::error($this->lastError);
+            return false;
         }
-        
-        Log::error("Termii Error: " . $response->body());
-        return false;
+
+        return true;
     }
 
     protected function sendVonage($to, $message)

@@ -38,6 +38,7 @@ class TestMailController extends Controller
         return response()->json([
             'status' => 'error',
             'message' => 'Failed to send test SMS. Check laravel.log for details.',
+            'error_details' => $this->smsService->getLastError(),
             'driver' => $driver
         ], 500);
     }

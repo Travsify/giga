@@ -63,7 +63,7 @@ Route::get('/test-mail', [TestMailController::class, 'sendTestMail']);
 Route::get('/test-sms', [TestMailController::class, 'sendTestSms']);
 Route::get('/currency-rates', [CurrencyController::class, 'getRates']);
 Route::get('/currencies', [CurrencyController::class, 'index']);
-Route::get('/status', function() { return response()->json(['status' => 'online', 'version' => '1.1.1']); });
+Route::get('/status', function() { return response()->json(['status' => 'online', 'version' => '1.1.2']); });
 
 // SECRET: One-time Admin Provisioning Endpoint (Delete after use!)
 Route::get('/provision-admin-giga2026secret', function() {
