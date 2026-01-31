@@ -6,8 +6,42 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 
+use App\Services\SmsService;
+
 class TestMailController extends Controller
 {
+    protected $smsService;
+
+    public function __construct(SmsService $smsService)
+    {
+        $this->smsService = $smsService;
+    }
+
+    public function sendTestSms(Request $request)
+    {
+        $phone = $request->query('phone');
+        if (!$phone) {
+            return response()->json(['status' => 'error', 'message' => 'Phone number is required. Usage: /api/test-sms?phone=+1234567890'], 400);
+        }
+
+        $driver = \App\Models\AppSetting::get('sms_provider') ?? env('SMS_DRIVER', 'log');
+        $sent = $this->smsService->send($phone, "GIGA SMS Test - Your system is correctly configured on driver: [{$driver}].");
+
+        if ($sent) {
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Test SMS sent successfully to ' . $phone,
+                'driver' => $driver
+            ]);
+        }
+
+        return response()->json([
+            'status' => 'error',
+            'message' => 'Failed to send test SMS. Check laravel.log for details.',
+            'driver' => $driver
+        ], 500);
+    }
+
     public function sendTestMail(Request $request)
     {
         $to = $request->query('email', 'info@usegiga.site');
