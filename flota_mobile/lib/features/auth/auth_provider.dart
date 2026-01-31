@@ -252,7 +252,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
   }
 
   Future<void> markAsVerified() async {
-    await _storage.write(key: 'is_verified', value: 'true');
+    await _storage.write(key: 'is_email_verified', value: 'true');
     state = state.copyWith(isEmailVerified: true);
   }
 

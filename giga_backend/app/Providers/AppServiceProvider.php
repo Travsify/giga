@@ -72,6 +72,9 @@ class AppServiceProvider extends ServiceProvider
                     config(['mail.mailers.smtp.encryption' => $mailEnc]);
                     Log::info("SMTP Encryption set to: $mailEnc");
                 }
+
+                // Force re-initialization of the mailer with these new configs
+                \Illuminate\Support\Facades\Mail::forgetMailers();
             }
         } catch (\Exception $e) {
             // Avoid failing if DB not ready

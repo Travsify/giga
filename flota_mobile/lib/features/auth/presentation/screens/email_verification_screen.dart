@@ -45,23 +45,24 @@ class _EmailVerificationScreenState extends ConsumerState<EmailVerificationScree
          // Backend Phone OTP
          final response = await api.dio.post('phone/send-otp', data: {'phone': widget.phoneNumber});
          final debugCode = response.data['debug_code'];
-         if (mounted) {
+         if (mounted && debugCode != null) {
+            _showDebugOtpDialog(debugCode.toString());
+         } else if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(debugCode != null ? 'DEBUG OTP: $debugCode' : 'SMS code sent!'), 
-                backgroundColor: debugCode != null ? Colors.deepOrange : Colors.green
-              ),
+              const SnackBar(content: Text('SMS code sent!'), backgroundColor: Colors.green),
             );
          }
       } else {
         // Backend Email OTP
         final response = await api.dio.post('email/send-verification');
         final debugCode = response.data['debug_code'];
-        if (mounted) {
+        if (mounted && debugCode != null) {
+          _showDebugOtpDialog(debugCode.toString());
+        } else if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(debugCode != null ? 'DEBUG OTP: $debugCode' : 'Verification code sent to your email!'), 
-              backgroundColor: debugCode != null ? Colors.blueGrey : Colors.green
+            const SnackBar(
+              content: Text('Verification code sent to your email!'), 
+              backgroundColor: Colors.green
             ),
           );
         }
@@ -73,8 +74,57 @@ class _EmailVerificationScreenState extends ConsumerState<EmailVerificationScree
         );
       }
     } finally {
-      if (mounted) setState(() => _isResending = false); // Removed !isPhone check, now relevant for both
+      if (mounted) setState(() => _isResending = false);
     }
+  }
+
+  void _showDebugOtpDialog(String code) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        title: Row(
+          children: [
+            const Icon(Icons.bug_report, color: Colors.deepOrange),
+            const SizedBox(width: 10),
+            const Text('Debug OTP'),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('Since this is a test environment, use this code to verify:'),
+            const SizedBox(height: 20),
+            Container(
+              padding: const EdgeInsets.all(15),
+              decoration: BoxDecoration(
+                color: Colors.grey[100],
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: Colors.deepOrange.withOpacity(0.3)),
+              ),
+              child: Text(
+                code,
+                style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold, letterSpacing: 5),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              _codeController.text = code;
+              Navigator.pop(context);
+              _verifyCode();
+            },
+            child: const Text('AUTO-FILL & VERIFY'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('CLOSE'),
+          ),
+        ],
+      ),
+    );
   }
 
   Future<void> _verifyCode() async {

@@ -42,6 +42,9 @@ class EmailVerificationController extends Controller
 
         // Send email
         try {
+            // Force refresh of mailer config before sending
+            Mail::forgetMailers();
+            
             Log::info('Attempting to send verification code to: ' . $user->email);
             Mail::send('emails.verify', ['code' => $code, 'name' => $user->name], function ($message) use ($user) {
                 $message->to($user->email)
@@ -149,6 +152,7 @@ class EmailVerificationController extends Controller
         );
 
         try {
+            Mail::forgetMailers();
             Mail::send('emails.verify', ['code' => $code, 'name' => 'New User'], function ($message) use ($email) {
                 $message->to($email)
                         ->subject('Verify Your Email - GIGA LOGISTICS');

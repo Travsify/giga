@@ -219,83 +219,85 @@ class _MultiStopScreenState extends ConsumerState<MultiStopScreen> {
             ),
         ],
       ),
-      body: Column(
-        children: [
-          // Route Map Preview (Fully Functional)
-          Container(
-            height: 250,
-            width: double.infinity,
-            decoration: BoxDecoration(
-              boxShadow: [
-                BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 10),
-              ],
-            ),
-            child: Stack(
-              children: [
-                GoogleMap(
-                  onMapCreated: (controller) {
-                    _mapController = controller;
-                    _getUserLocation(); // Center on user
-                  },
-                  initialCameraPosition: const CameraPosition(
-                    target: LatLng(51.5074, -0.1278), // Default London
-                    zoom: 13,
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            // Route Map Preview (Fully Functional)
+            Container(
+              height: 250,
+              width: double.infinity,
+              decoration: BoxDecoration(
+                boxShadow: [
+                  BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 10),
+                ],
+              ),
+              child: Stack(
+                children: [
+                  GoogleMap(
+                    onMapCreated: (controller) {
+                      _mapController = controller;
+                      _getUserLocation(); // Center on user
+                    },
+                    initialCameraPosition: const CameraPosition(
+                      target: LatLng(51.5074, -0.1278), // Default London
+                      zoom: 13,
+                    ),
+                    markers: _stops
+                        .asMap()
+                        .entries
+                        .where((e) => e.value['position'] != null)
+                        .map((e) => Marker(
+                              markerId: MarkerId('stop_${e.key}'),
+                              position: e.value['position'] as LatLng,
+                              infoWindow: InfoWindow(title: e.key == 0 ? 'Pickup' : 'Stop ${e.key}'),
+                              icon: BitmapDescriptor.defaultMarkerWithHue(
+                                e.key == 0 ? BitmapDescriptor.hueAzure : BitmapDescriptor.hueRed,
+                              ),
+                            ))
+                        .toSet(),
+                    myLocationEnabled: true,
+                    myLocationButtonEnabled: false,
+                    zoomControlsEnabled: false,
+                    mapToolbarEnabled: false,
                   ),
-                  markers: _stops
-                      .asMap()
-                      .entries
-                      .where((e) => e.value['position'] != null)
-                      .map((e) => Marker(
-                            markerId: MarkerId('stop_${e.key}'),
-                            position: e.value['position'] as LatLng,
-                            infoWindow: InfoWindow(title: e.key == 0 ? 'Pickup' : 'Stop ${e.key}'),
-                            icon: BitmapDescriptor.defaultMarkerWithHue(
-                              e.key == 0 ? BitmapDescriptor.hueAzure : BitmapDescriptor.hueRed,
+                  Positioned(
+                    bottom: 15,
+                    right: 15,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 4),
+                        ],
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.auto_awesome, color: AppTheme.successGreen, size: 16),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Route Optimized',
+                            style: GoogleFonts.outfit(
+                              fontWeight: FontWeight.bold,
+                              color: AppTheme.successGreen,
+                              fontSize: 12,
                             ),
-                          ))
-                      .toSet(),
-                  myLocationEnabled: true,
-                  myLocationButtonEnabled: false,
-                  zoomControlsEnabled: false,
-                  mapToolbarEnabled: false,
-                ),
-                Positioned(
-                  bottom: 15,
-                  right: 15,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(20),
-                      boxShadow: [
-                        BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 4),
-                      ],
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(Icons.auto_awesome, color: AppTheme.successGreen, size: 16),
-                        const SizedBox(width: 8),
-                        Text(
-                          'Route Optimized',
-                          style: GoogleFonts.outfit(
-                            fontWeight: FontWeight.bold,
-                            color: AppTheme.successGreen,
-                            fontSize: 12,
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-
-          // Stops List
-          Expanded(
-            child: ReorderableListView.builder(
+  
+            // Stops List
+            ReorderableListView.builder(
               padding: const EdgeInsets.all(20),
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
               itemCount: _stops.length,
               onReorder: (oldIndex, newIndex) {
                 setState(() {
@@ -368,7 +370,6 @@ class _MultiStopScreenState extends ConsumerState<MultiStopScreen> {
                 );
               },
             ),
-          ),
           
           // Action Buttons
           Padding(
@@ -493,6 +494,7 @@ class _MultiStopScreenState extends ConsumerState<MultiStopScreen> {
           ),
         ],
       ),
-    );
-  }
+    ),
+  );
+}
 }

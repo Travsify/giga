@@ -66,22 +66,20 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
       final api = ref.read(apiClientProvider);
       final response = await api.dio.post('signup/verify-email/send', data: {'email': email});
       final debugCode = response.data['debug_code'];
-      if (debugCode != null && mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text('DEBUG: Your Email OTP is $debugCode'),
-          duration: const Duration(seconds: 10),
-          backgroundColor: Colors.blueGrey,
-        ));
+      
+      if (mounted) {
+        if (debugCode != null) {
+          _showDebugOtpOverlay(debugCode.toString(), email, isEmail: true);
+        } else {
+          _showOtpDialog(email, isEmail: true);
+        }
       }
-      if (mounted) _showOtpDialog(email, isEmail: true);
     } catch (e) {
       if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
     } finally {
       if (mounted) setState(() => _isVerifyingEmail = false);
     }
   }
-
-  // _showEmailVerificationDialog is no longer needed as we use _showOtpDialog again
 
     // --- Phone Verification Logic ---
   Future<void> _sendPhoneOtp() async {
@@ -96,19 +94,94 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
       final api = ref.read(apiClientProvider);
       final response = await api.dio.post('phone/send-otp', data: {'phone': phone});
       final debugCode = response.data['debug_code'];
-      if (debugCode != null && mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text('DEBUG: Your Phone OTP is $debugCode'),
-          duration: const Duration(seconds: 10),
-          backgroundColor: Colors.deepOrange,
-        ));
+      
+      if (mounted) {
+        if (debugCode != null) {
+          _showDebugOtpOverlay(debugCode.toString(), phone, isEmail: false);
+        } else {
+          _showOtpDialog(phone, isEmail: false);
+        }
       }
-      if (mounted) _showOtpDialog(phone, isEmail: false);
     } catch (e) {
       if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to send SMS: $e')));
     } finally {
       if (mounted) setState(() => _isVerifyingPhone = false);
     }
+  }
+
+  void _showDebugOtpOverlay(String code, String target, {required bool isEmail}) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Row(
+          children: [
+            const Icon(Icons.bug_report, color: Colors.deepOrange, size: 28),
+            const SizedBox(width: 12),
+            Text('Debug: Verify ${isEmail ? 'Email' : 'Phone'}', style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              'A verification code would have been sent to $target. Since this is a test, use the code below:',
+              style: GoogleFonts.outfit(color: Colors.grey[600]),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 24),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+              decoration: BoxDecoration(
+                color: Colors.deepOrange.withOpacity(0.05),
+                borderRadius: BorderRadius.circular(15),
+                border: Border.all(color: Colors.deepOrange.withOpacity(0.2)),
+              ),
+              child: Text(
+                code,
+                style: GoogleFonts.outfit(
+                  fontSize: 36,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 8,
+                  color: Colors.deepOrange,
+                ),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('MANUAL ENTRY', style: GoogleFonts.outfit(color: Colors.grey)),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              Navigator.pop(context);
+              // Automate verification
+              try {
+                final api = ref.read(apiClientProvider);
+                if (isEmail) {
+                  await api.dio.post('signup/verify-email/confirm', data: {'email': target, 'code': code});
+                  setState(() => _isEmailVerified = true);
+                } else {
+                  await api.dio.post('phone/verify-otp', data: {'phone': target, 'code': code});
+                  setState(() => _isPhoneVerified = true);
+                }
+              } catch (e) {
+                if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Verification Failed')));
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.deepOrange,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+            child: Text('AUTO-VERIFY', style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
+    );
   }
 
   void _showOtpDialog(String target, {required bool isEmail}) {
