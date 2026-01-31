@@ -35,7 +35,7 @@ class EmailVerificationController extends Controller
             ['user_id' => $user->id],
             [
                 'code' => $code,
-                'expires_at' => now()->addMinutes(2),
+                'expires_at' => now()->addMinutes(15),
                 'created_at' => now(),
             ]
         );
@@ -102,6 +102,7 @@ class EmailVerificationController extends Controller
 
         // Check if expired
         if (now()->gt($record->expires_at)) {
+            Log::warning("Email verification code expired for user {$user->id}. Expired at: {$record->expires_at}, Now: " . now());
             return response()->json(['message' => 'Verification code has expired. Request a new one.'], 400);
         }
 
@@ -132,7 +133,7 @@ class EmailVerificationController extends Controller
     public function sendSignupCode(Request $request)
     {
         $request->validate(['email' => 'required|email']);
-        $email = $request->email;
+        $email = trim($request->email);
 
         // Check if email already exists
         if (\App\Models\User::where('email', $email)->exists()) {
@@ -145,7 +146,7 @@ class EmailVerificationController extends Controller
             ['email' => $email], // We'll need to use email instead of user_id for signup codes
             [
                 'code' => $code,
-                'expires_at' => now()->addMinutes(2),
+                'expires_at' => now()->addMinutes(15),
                 'created_at' => now(),
             ]
         );
@@ -167,17 +168,26 @@ class EmailVerificationController extends Controller
 
     public function verifySignupCode(Request $request)
     {
-        $request->validate([
-            'email' => 'required|email',
-            'code' => 'required|string|size:6',
-        ]);
+        $email = trim($request->email);
+        $code = trim($request->code);
 
         $record = DB::table('email_verification_codes')
-            ->where('email', $request->email)
+            ->where('email', $email)
             ->first();
 
-        if (!$record || $record->code !== $request->code || now()->gt($record->expires_at)) {
-            return response()->json(['message' => 'Invalid or expired code.'], 400);
+        if (!$record) {
+            Log::warning("No verification record found for email: {$email}");
+            return response()->json(['message' => 'No verification code found. Request a new one.'], 400);
+        }
+
+        if ($record->code !== $code) {
+            Log::warning("Verification code mismatch for email: {$email}. Expected: {$record->code}, Got: {$code}");
+            return response()->json(['message' => 'Invalid verification code.'], 400);
+        }
+
+        if (now()->gt($record->expires_at)) {
+            Log::warning("Verification code expired for email: {$email}. Expired at: {$record->expires_at}");
+            return response()->json(['message' => 'Verification code has expired.'], 400);
         }
 
         // We don't delete yet, it will be used at registration time or just let it expire

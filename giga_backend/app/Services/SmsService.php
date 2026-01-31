@@ -175,7 +175,7 @@ class SmsService
         $from = AppSetting::get('termii_sender_id') ?? env('TERMII_SENDER_ID', 'Giga');
 
         $response = Http::post('https://api.ng.termii.com/api/sms/send', [
-            'to' => $to,
+            'to' => str_replace('+', '', $to),
             'from' => $from,
             'sms' => $message,
             'type' => 'plain',

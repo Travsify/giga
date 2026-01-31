@@ -26,7 +26,7 @@ class PhoneVerificationController extends Controller
     {
         Log::info("sendOtp called for phone: " . $request->phone);
         $request->validate(['phone' => 'required|string']);
-        $phone = $request->phone;
+        $phone = trim($request->phone);
 
         // Generate 6-digit verification code
         $code = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
@@ -36,7 +36,7 @@ class PhoneVerificationController extends Controller
             ['phone' => $phone],
             [
                 'code' => $code,
-                'expires_at' => now()->addMinutes(2),
+                'expires_at' => now()->addMinutes(15),
                 'created_at' => now(),
             ]
         );
@@ -59,13 +59,11 @@ class PhoneVerificationController extends Controller
      */
     public function verifyOtp(Request $request)
     {
-        $request->validate([
-            'phone' => 'required|string',
-            'code' => 'required|string|size:6',
-        ]);
+        $phone = trim($request->phone);
+        $code = trim($request->code);
 
         $record = DB::table('phone_verification_codes')
-            ->where('phone', $request->phone)
+            ->where('phone', $phone)
             ->first();
 
         if (!$record) {
@@ -73,12 +71,14 @@ class PhoneVerificationController extends Controller
         }
 
         // Check if code matches
-        if ($record->code !== $request->code) {
+        if ($record->code !== $code) {
+            Log::warning("Verification code mismatch for phone: {$phone}. Expected: {$record->code}, Got: {$code}");
             return response()->json(['message' => 'Invalid verification code.'], 400);
         }
 
         // Check if expired
         if (now()->gt($record->expires_at)) {
+            Log::warning("Phone verification code expired for phone: {$request->phone}. Expired at: {$record->expires_at}");
             return response()->json(['message' => 'Verification code has expired. Request a new one.'], 400);
         }
         
