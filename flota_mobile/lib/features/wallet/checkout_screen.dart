@@ -388,38 +388,37 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                             ],
                           ),
                         ),
-                      ],
-                    ),
-                  ),
-                ),
-
-                // Confirm Payment Button
-                Padding(
-                  padding: const EdgeInsets.all(24),
-                  child: SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: (deliveryState.isLoading || _isProcessing) ? null : _handlePayment,
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 20),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                        backgroundColor: AppTheme.primaryBlue,
-                        elevation: 0,
-                      ),
-                      child: (deliveryState.isLoading || _isProcessing)
-                        ? const SizedBox(
-                            height: 24,
-                            width: 24,
-                            child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
-                          )
-                        : Text(
-                            'Pay and Confirm',
-                            style: GoogleFonts.outfit(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
+                        
+                        // Confirm Payment Button (Moved Inside ScrollView)
+                        const SizedBox(height: 40),
+                        SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            onPressed: (deliveryState.isLoading || _isProcessing) ? null : _handlePayment,
+                            style: ElevatedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 20),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                              backgroundColor: AppTheme.primaryBlue,
+                              elevation: 0,
                             ),
+                            child: (deliveryState.isLoading || _isProcessing)
+                              ? const SizedBox(
+                                  height: 24,
+                                  width: 24,
+                                  child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                                )
+                              : Text(
+                                  'Pay and Confirm',
+                                  style: GoogleFonts.outfit(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                  ),
+                                ),
                           ),
+                        ),
+                        const SizedBox(height: 40), // Extra bottom padding
+                      ],
                     ),
                   ),
                 ),

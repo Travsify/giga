@@ -127,6 +127,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      resizeToAvoidBottomInset: true,
       body: Stack(
         children: [
           // Premium Background Design
@@ -176,7 +177,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     ),
                   ),
                   
-                  const SizedBox(height: 50),
+                  const SizedBox(height: 30),
                   
                   // Welcome Text
                   FadeInLeft(
@@ -448,7 +449,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       ),
                     ),
                   ),
-                   const SizedBox(height: 40),
+                   const SizedBox(height: 100),
                 ],
               ),
             ),

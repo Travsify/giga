@@ -103,7 +103,6 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
             left: 0,
             right: 0,
             child: Container(
-              padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
                 color: theme.scaffoldBackgroundColor,
                 borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
@@ -115,34 +114,40 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
                   ),
                 ],
               ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    _selectedAddress,
-                    style: theme.textTheme.bodyLarge?.copyWith(
-                      fontWeight: FontWeight.w500,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 24),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: _selectedPosition == null
-                          ? null
-                          : () => Navigator.pop(context, {
-                                'position': _selectedPosition,
-                                'address': _selectedAddress,
-                              }),
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 18),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              child: SafeArea(
+                top: false,
+                child: Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        _selectedAddress,
+                        style: theme.textTheme.bodyLarge?.copyWith(
+                          fontWeight: FontWeight.w500,
+                        ),
+                        textAlign: TextAlign.center,
                       ),
-                      child: const Text('Confirm Location'),
-                    ),
+                      const SizedBox(height: 24),
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: _selectedPosition == null
+                              ? null
+                              : () => Navigator.pop(context, {
+                                    'position': _selectedPosition,
+                                    'address': _selectedAddress,
+                                  }),
+                          style: ElevatedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 18),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                          ),
+                          child: const Text('Confirm Location'),
+                        ),
+                      ),
+                    ],
                   ),
-                ],
+                ),
               ),
             ),
           ),

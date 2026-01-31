@@ -109,17 +109,25 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
       barrierDismissible: false,
       builder: (context) => AlertDialog(
         title: Text('Verify ${isEmail ? 'Email' : 'Phone'}'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text('Enter the 6-digit code sent to $target'),
-            const SizedBox(height: 20),
-            TextField(
-              controller: codeController,
-              keyboardType: TextInputType.number,
-              decoration: const InputDecoration(hintText: '000000', border: OutlineInputBorder()),
-            ),
-          ],
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Flexible(
+                child: Text(
+                  'Enter the 6-digit code sent to $target',
+                  textAlign: TextAlign.center,
+                  softWrap: true,
+                ),
+              ),
+              const SizedBox(height: 20),
+              TextField(
+                controller: codeController,
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(hintText: '000000', border: OutlineInputBorder()),
+              ),
+            ],
+          ),
         ),
         actions: [
           TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
