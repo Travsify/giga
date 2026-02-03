@@ -179,7 +179,7 @@ class TestMailController extends Controller
 
     public function envCheck(Request $request)
     {
-        $prefixes = ['MAIL_', 'RESEND_', 'APP_'];
+        $prefixes = ['MAIL_', 'RESEND_', 'APP_', 'PREMBLY_', 'DVLA_', 'FLW_'];
         $env = [];
         
         foreach ($_SERVER as $key => $value) {
