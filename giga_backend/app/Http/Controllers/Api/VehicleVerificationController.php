@@ -45,7 +45,6 @@ class VehicleVerificationController extends Controller
     {
         $apiKey = env('PREMBLY_API_KEY');
         if (!$apiKey || $apiKey === 'MOCK') {
-            Log::info("Nigeria VRN: Using MOCK data for $plateNumber");
             // Mock response for development if no key
             return response()->json([
                 'status' => 'success',
