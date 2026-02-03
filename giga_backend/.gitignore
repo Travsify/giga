@@ -21,3 +21,13 @@
 Homestead.json
 Homestead.yaml
 Thumbs.db
+
+/flota_mobile/
+/*.json
+/*.txt
+/*.html
+/*.apk
+/*.aab
+/giga_backend/*.json
+/giga_backend/*.txt
+/giga_backend/*.html

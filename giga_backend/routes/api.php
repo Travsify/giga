@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\DeliveryController;
 use App\Http\Controllers\Api\ChatController;
 use App\Http\Controllers\Api\ProfileController;
+use App\Http\Controllers\Api\NotificationController;
 
 use App\Http\Controllers\Api\PasswordResetController;
 use App\Http\Controllers\Api\PaymentController;
@@ -18,11 +19,16 @@ use App\Http\Controllers\Api\PromoController;
 use App\Http\Controllers\Api\LockerController;
 use App\Http\Controllers\Api\SustainabilityController;
 use App\Http\Controllers\Api\SettingsController;
+use App\Http\Controllers\Api\CurrencyController;
 
 // Rate-limited auth routes (5 attempts per minute per IP)
 Route::middleware('throttle:5,1')->group(function () {
     Route::post('/register', [AuthController::class, 'register']);
-    Route::post('/login', [AuthController::class, 'login']);
+    Route::get('/ping', function() {
+    return response()->json(['status' => 'pong', 'time' => now()->toDateTimeString(), 'debug' => config('app.debug')]);
+});
+
+Route::post('/login', [AuthController::class, 'login']);
     Route::post('/forgot-password', [PasswordResetController::class, 'sendResetLink']);
     Route::post('/reset-password', [PasswordResetController::class, 'reset']);
 });
@@ -30,13 +36,56 @@ Route::middleware('throttle:5,1')->group(function () {
 // App Settings (Public - no auth required)
 Route::get('/settings', [SettingsController::class, 'index']);
 Route::get('/settings/check-version/{version}', [SettingsController::class, 'checkVersion']);
+Route::get('/v2/test', function() {
+    return response()->json([
+        'status' => 'live',
+        'time' => now()->toDateTimeString(),
+        'version' => 'v2'
+    ]);
+});
+
+Route::get('/db-debug', function() {
+    return response()->json([
+        'settings' => \App\Models\AppSetting::all(),
+        'cache_driver' => config('cache.default'),
+        'env' => [
+            'MAIL_HOST' => env('MAIL_HOST'),
+            'MAIL_USERNAME' => env('MAIL_USERNAME'),
+            'FLW_PUBLIC_KEY' => env('FLW_PUBLIC_KEY'),
+        ]
+    ]);
+});
+
 Route::get('/countries', [App\Http\Controllers\Api\SettingsController::class, 'getCountries']);
+Route::get('/currency-rates', [App\Http\Controllers\Api\SettingsController::class, 'getCurrencyRates']);
+Route::get('/settings/payment', [App\Http\Controllers\Api\SettingsController::class, 'getPaymentConfig']);
 
 // Payment (Public for Demo)
 Route::post('/create-payment-intent-public', [PaymentController::class, 'createPaymentIntentPublic']);
 Route::get('/diag', [PaymentController::class, 'diag']);
 Route::get('/test-mail', [TestMailController::class, 'sendTestMail']);
-Route::get('/status', function() { return response()->json(['status' => 'online', 'version' => '1.1.0']); });
+Route::get('/test-view', [TestMailController::class, 'sendTestView']);
+Route::get('/live-smtp-test', [TestMailController::class, 'liveSmtpTest']);
+Route::get('/resend-diag', [TestMailController::class, 'resendDiag']);
+Route::get('/test-sms', [TestMailController::class, 'sendTestSms']);
+Route::get('/env-check', [App\Http\Controllers\Api\TestMailController::class, 'envCheck']);
+Route::get('/sync-mail-settings', [App\Http\Controllers\Api\TestMailController::class, 'syncMailSettings']);
+Route::get('/test-smtp', [App\Http\Controllers\Api\TestSmtpController::class, 'test']);
+Route::get('/currency-rates', [CurrencyController::class, 'getRates']);
+Route::get('/currencies', [CurrencyController::class, 'index']);
+// SECRET: Force Migration (Delete after use!)
+Route::get('/fix-migrations', function() {
+    try {
+        \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
+        return response()->json(['message' => 'Migrations run successfully', 'output' => \Illuminate\Support\Facades\Artisan::output()]);
+    } catch (\Exception $e) {
+        return response()->json(['error' => $e->getMessage()], 500);
+    }
+});
+
+Route::post('/verify-vehicle', [App\Http\Controllers\Api\VehicleVerificationController::class, 'verify']);
+Route::get('/view-logs', [App\Http\Controllers\Api\TestMailController::class, 'viewLogs']);
+Route::get('/status', function() { return response()->json(['status' => 'online', 'version' => '1.1.11']); });
 
 // SECRET: One-time Admin Provisioning Endpoint (Delete after use!)
 Route::get('/provision-admin-giga2026secret', function() {
@@ -70,6 +119,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/email/verify', [EmailVerificationController::class, 'verifyCode']);
     Route::post('/email/resend', [EmailVerificationController::class, 'resendCode']);
 
+    // Notifications
+    Route::get('/notifications', [NotificationController::class, 'index']);
+
     // Deliveries
     Route::get('/deliveries', [DeliveryController::class, 'index']);
     Route::post('/deliveries/estimate', [DeliveryController::class, 'estimateFare']);
@@ -87,11 +139,14 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update']);
     Route::get('/loyalty', [ProfileController::class, 'loyaltyInfo']);
     Route::post('/referral/submit', [ProfileController::class, 'submitReferral']);
+    Route::patch('/profile/rider', [ProfileController::class, 'updateRiderStatus']);
+    Route::post('/profile/vehicle-document', [App\Http\Controllers\Api\VehicleVerificationController::class, 'uploadDocument']);
 
     // Payments
     Route::post('/create-payment-intent', [App\Http\Controllers\Api\PaymentController::class, 'createPaymentIntent']);
     Route::post('/payment/confirm', [App\Http\Controllers\Api\PaymentController::class, 'confirmPayment']);
     Route::post('/wallet/redeem', [App\Http\Controllers\Api\PaymentController::class, 'redeem']);
+    Route::post('/wallet/withdraw', [App\Http\Controllers\Api\PaymentController::class, 'withdraw']);
     Route::get('/wallet/transactions', [App\Http\Controllers\Api\PaymentController::class, 'getTransactions']);
 
     // Subscriptions
@@ -105,6 +160,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/business/team', [BusinessController::class, 'getTeam']);
     Route::post('/business/invite', [BusinessController::class, 'inviteMember']);
     Route::get('/business/billing', [BusinessController::class, 'getBilling']);
+    Route::get('/business/stats', [BusinessController::class, 'getStats']);
+    Route::get('/business/activity', [BusinessController::class, 'getRecentActivity']);
     Route::post('/business/bulk-book', [BulkBookingController::class, 'processBatch']);
     
     // Placeholder for API Keys
@@ -120,4 +177,12 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Sustainability / Carbon Impact
     Route::get('/sustainability/stats', [App\Http\Controllers\Api\SustainabilityController::class, 'getStats']);
+
+    // Inter-state Delivery
+    Route::get('/inter-state/price', [App\Http\Controllers\Api\InterStateController::class, 'getPrice']);
+    Route::post('/inter-state/waybill', [App\Http\Controllers\Api\InterStateController::class, 'createWaybill']);
+
+    // Shop & Ship
+    Route::get('/shop-and-ship/address', [App\Http\Controllers\Api\ShopAndShipController::class, 'getAddress']);
+    Route::get('/shop-and-ship/packages', [App\Http\Controllers\Api\ShopAndShipController::class, 'getPackages']);
 });
