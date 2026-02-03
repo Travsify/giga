@@ -44,7 +44,8 @@ class VehicleVerificationController extends Controller
     private function verifyNigeria($plateNumber)
     {
         $apiKey = env('PREMBLY_API_KEY');
-        if (!$apiKey) {
+        if (!$apiKey || $apiKey === 'MOCK') {
+            Log::info("Nigeria VRN: Using MOCK data for $plateNumber");
             // Mock response for development if no key
             return response()->json([
                 'status' => 'success',
@@ -54,7 +55,8 @@ class VehicleVerificationController extends Controller
                     'model' => 'COROLLA',
                     'color' => 'SILVER',
                     'owner' => 'TEST USER',
-                    'expiry' => '2025-12-31'
+                    'expiry' => '2025-12-31',
+                    'plate' => $plateNumber,
                 ]
             ]);
         }
