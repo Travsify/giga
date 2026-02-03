@@ -141,6 +141,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/referral/submit', [ProfileController::class, 'submitReferral']);
     Route::patch('/profile/rider', [ProfileController::class, 'updateRiderStatus']);
     Route::post('/profile/vehicle-document', [App\Http\Controllers\Api\VehicleVerificationController::class, 'uploadDocument']);
+    Route::get('/rider/dashboard-stats', [App\Http\Controllers\Api\RiderController::class, 'getDashboardStats']);
 
     // Payments
     Route::post('/create-payment-intent', [App\Http\Controllers\Api\PaymentController::class, 'createPaymentIntent']);
