@@ -7,6 +7,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flota_mobile/features/tracking/rider_dashboard_controller.dart';
 import 'package:flota_mobile/features/tracking/rider_stats_service.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:share_plus/share_plus.dart';
 
 class RiderDashboard extends ConsumerStatefulWidget {
   const RiderDashboard({super.key});
@@ -242,19 +244,47 @@ class _ControlCenterHeader extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           // Vehicle Selector
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: const Row(
-              children: [
-                Icon(Icons.directions_car, size: 16, color: Colors.black87),
-                SizedBox(width: 6),
-                Text("Toyota Camry • ABJ-123", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
-                Icon(Icons.arrow_drop_down, size: 16),
-              ],
+          GestureDetector(
+            onTap: () {
+              showModalBottomSheet(
+                context: context,
+                builder: (context) => Container(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Text("Select Active Vehicle", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                      const SizedBox(height: 15),
+                      ListTile(
+                        leading: const Icon(Icons.directions_car),
+                        title: const Text("Toyota Camry • ABJ-123"),
+                        trailing: const Icon(Icons.check_circle, color: AppTheme.primaryBlue),
+                        onTap: () => Navigator.pop(context),
+                      ),
+                      ListTile(
+                        leading: const Icon(Icons.motorcycle),
+                        title: const Text("Honda Ace • KJA-456"),
+                        onTap: () => Navigator.pop(context), // Logic to switch would go here
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: const Row(
+                children: [
+                  Icon(Icons.directions_car, size: 16, color: Colors.black87),
+                  SizedBox(width: 6),
+                  Text("Toyota Camry • ABJ-123", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                  Icon(Icons.arrow_drop_down, size: 16),
+                ],
+              ),
             ),
           ),
 
@@ -432,7 +462,8 @@ class _JobRadarList extends StatelessWidget {
               ],
             ),
             onTap: () {
-              // Accept or View Job
+               // Navigate to Job Detail / Acceptance Screen
+               context.push('/tracking/enhanced/${job.id}');
             },
           ),
         );
@@ -526,21 +557,36 @@ class _SafetyToolkitSheet extends StatelessWidget {
             leading: const CircleAvatar(backgroundColor: Colors.red, child: Icon(Icons.sos, color: Colors.white)),
             title: const Text("Emergency Assistance", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.red)),
             subtitle: const Text("Call police or emergency services"),
-            onTap: () {},
+            onTap: () async {
+              final Uri launchUri = Uri(scheme: 'tel', path: '112');
+              try {
+                if (await canLaunchUrl(launchUri)) {
+                  await launchUrl(launchUri);
+                }
+              } catch (e) {
+                debugPrint('Error launching dialer: $e');
+              }
+            },
           ),
           const Divider(),
           ListTile(
             leading: const CircleAvatar(backgroundColor: Colors.blue, child: Icon(Icons.share, color: Colors.white)),
             title: const Text("Share My Trip"),
             subtitle: const Text("Share live location with trusted contacts"),
-            onTap: () {},
+            onTap: () {
+              Share.share('I am currently online and delivering with Giga. My location is secure.');
+            },
           ),
           const Divider(),
           ListTile(
             leading: const CircleAvatar(backgroundColor: Colors.orange, child: Icon(Icons.warning, color: Colors.white)),
             title: const Text("Report Incident"),
             subtitle: const Text("Report an accident or safety issue"),
-            onTap: () {},
+            onTap: () {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text("Incident Reporting feature coming soon")),
+              );
+            },
           ),
           const SizedBox(height: 20),
         ],
