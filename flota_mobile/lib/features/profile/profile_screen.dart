@@ -410,9 +410,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     children: [
                       _buildPillar('Rating', '${stats?.rating.toStringAsFixed(1) ?? "5.0"}', Icons.star_rounded, Colors.orange),
                       const SizedBox(width: 12),
-                      _buildPillar('Deliveries', '${stats?.totalJobsCompleted ?? "0"}', Icons.local_shipping_rounded, AppTheme.primaryBlue),
+                      _buildPillar('Deliveries', '${stats?.totalJobsCompleted ?? 0}', Icons.local_shipping_rounded, AppTheme.accentCyan),
                       const SizedBox(width: 12),
-                      _buildPillar('Tier', 'Level 1', Icons.workspace_premium_rounded, Colors.purple),
+                      _buildPillar('On-Time', '${stats?.onTimeRate ?? 100}%', Icons.timer_rounded, AppTheme.successGreen),
                     ],
                   ),
                   const SizedBox(height: 32),
@@ -457,15 +457,15 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 16),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppTheme.surfaceColor,
           borderRadius: BorderRadius.circular(20),
-          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 4))],
+          border: Border.all(color: AppTheme.borderBlue),
         ),
         child: Column(
           children: [
             Icon(icon, color: color, size: 24),
             const SizedBox(height: 8),
-            Text(value, style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold, color: AppTheme.textPrimary)),
+            Text(value, style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
             Text(label, style: GoogleFonts.outfit(fontSize: 12, color: AppTheme.textSecondary)),
           ],
         ),
@@ -536,19 +536,24 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   }
 
   Widget _buildVerificationHub(Map<String, dynamic>? rider) {
+    final hasVehicle = rider?['has_vehicle'] == true || (rider?['vehicle_plate_number'] != null && rider?['vehicle_plate_number'].toString().isNotEmpty);
+    final isVerified = rider?['vehicle_verified'] == true;
+    final hasLicense = rider?['license_number'] != null && rider?['license_number'].toString().isNotEmpty;
+    
     return Container(
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppTheme.surfaceColor,
         borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: AppTheme.borderBlue),
       ),
       child: Column(
         children: [
-          _buildHubItem('Driving License', 'Expires 2028', true),
-          const Divider(height: 1, indent: 50),
-          _buildHubItem('Commercial Insurance', 'Verified', true),
-          const Divider(height: 1, indent: 50),
-          _buildHubItem('Background Check', 'Completed', true),
+          _buildHubItem('Vehicle Registration', hasVehicle ? 'Verified' : 'Not Submitted', hasVehicle),
+          Divider(height: 1, indent: 50, color: AppTheme.borderBlue),
+          _buildHubItem('Driver License', hasLicense ? 'On File' : 'Required', hasLicense),
+          Divider(height: 1, indent: 50, color: AppTheme.borderBlue),
+          _buildHubItem('Account Status', isVerified ? 'Active Partner' : 'Pending Verification', isVerified),
         ],
       ),
     );
@@ -558,12 +563,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     return ListTile(
       leading: Container(
         padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(color: Colors.green.withOpacity(0.1), shape: BoxShape.circle),
-        child: const Icon(Icons.verified_user_rounded, color: Colors.green, size: 18),
+        decoration: BoxDecoration(color: (isVerified ? Colors.green : Colors.orange).withOpacity(0.15), shape: BoxShape.circle),
+        child: Icon(isVerified ? Icons.verified_user_rounded : Icons.pending_rounded, color: isVerified ? Colors.green : Colors.orange, size: 18),
       ),
-      title: Text(title, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
-      subtitle: Text(subtitle, style: const TextStyle(fontSize: 12)),
-      trailing: const Icon(Icons.chevron_right, size: 20),
+      title: Text(title, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: AppTheme.textPrimary)),
+      subtitle: Text(subtitle, style: TextStyle(fontSize: 12, color: isVerified ? AppTheme.successGreen : Colors.orange)),
+      trailing: Icon(Icons.chevron_right, size: 20, color: AppTheme.textSecondary),
     );
   }
 
@@ -571,15 +576,16 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppTheme.surfaceColor,
         borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppTheme.borderBlue),
       ),
       child: ListTile(
         onTap: onTap,
-        leading: Icon(icon, color: isDestructive ? Colors.red : AppTheme.primaryBlue),
-        title: Text(title, style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15, color: isDestructive ? Colors.red : AppTheme.textPrimary)),
-        subtitle: Text(subtitle, style: const TextStyle(fontSize: 12)),
-        trailing: const Icon(Icons.chevron_right, size: 20),
+        leading: Icon(icon, color: isDestructive ? Colors.red : AppTheme.accentCyan),
+        title: Text(title, style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15, color: isDestructive ? Colors.red : Colors.white)),
+        subtitle: Text(subtitle, style: TextStyle(fontSize: 12, color: AppTheme.textSecondary)),
+        trailing: Icon(Icons.chevron_right, size: 20, color: AppTheme.textSecondary),
       ),
     );
   }
