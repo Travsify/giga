@@ -85,8 +85,8 @@ class GigaPlusScreen extends ConsumerWidget {
                   const SizedBox(height: 20),
                   _buildBenefitItem(
                     Icons.delivery_dining_rounded,
-                    '£0 Delivery Fees',
-                    'Unlimited free delivery on all standard orders over £15.',
+                    '${authState.currencySymbol}0 Delivery Fees',
+                    'Unlimited free delivery on all standard orders over ${authState.currencySymbol}${isNG ? '15,000' : '15'}.',
                   ),
                   _buildBenefitItem(
                     Icons.bolt_rounded,
@@ -101,7 +101,7 @@ class GigaPlusScreen extends ConsumerWidget {
                   _buildBenefitItem(
                     Icons.percent_rounded,
                     'Exclusive Deals',
-                    'Monthly coupons and partner discounts across the UK.',
+                    'Monthly coupons and partner discounts across ${isNG ? 'Lagos & Abuja' : 'the UK'}.',
                   ),
                   const SizedBox(height: 40),
                   if (!isGigaPlus)
@@ -115,38 +115,56 @@ class GigaPlusScreen extends ConsumerWidget {
                         ),
                         child: Column(
                           children: [
-                            const Text(
-                              'Only £39.99 / month',
-                              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                            ),
-                            const Text(
-                              'Instant professional logistics access.',
-                              style: TextStyle(color: Colors.grey),
-                            ),
-                            const SizedBox(height: 24),
-                            SizedBox(
-                              width: double.infinity,
-                              child: ElevatedButton(
-                                onPressed: () async {
-                                  final authState = ref.read(authProvider);
-                                  if (authState.status != AuthStatus.authenticated) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(content: Text('Please log in to join Giga+')),
-                                    );
-                                    return;
-                                  }
+                            final settings = ref.watch(settingsServiceProvider);
+                            final authState = ref.watch(authProvider);
+                            final double basePrice = settings.get<double>('giga_plus_price_gbp', 39.99);
+                            final double rate = settings.get<double>('ngn_exchange_rate', 2000.0);
+                            
+                            final bool isNG = authState.countryCode == 'NG';
+                            final String displayPrice = isNG 
+                              ? '${authState.currencySymbol}${(basePrice * rate).toStringAsFixed(0)}' 
+                              : '${authState.currencySymbol}${basePrice.toStringAsFixed(2)}';
 
-                                  try {
-                                    // 1. Initialize Stripe
-                                    await PaymentService.initialize();
-                                    
-                                    // 2. Charge £39.99
-                                    final success = await PaymentService.fundWallet(
-                                      context, 
-                                      39.99, 
-                                      authState.userEmail!, 
-                                      authState.userId!
-                                    );
+                            return Text(
+                              'Only $displayPrice / month',
+                              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                            );
+                          }),
+                          const Text(
+                            'Instant professional logistics access.',
+                            style: TextStyle(color: Colors.grey),
+                          ),
+                          const SizedBox(height: 24),
+                          SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton(
+                              onPressed: () async {
+                                final authState = ref.read(authProvider);
+                                final settings = ref.read(settingsServiceProvider);
+                                
+                                if (authState.status != AuthStatus.authenticated) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(content: Text('Please log in to join Giga+')),
+                                  );
+                                  return;
+                                }
+
+                                try {
+                                  final double basePrice = settings.get<double>('giga_plus_price_gbp', 39.99);
+                                  final double rate = settings.get<double>('ngn_exchange_rate', 2000.0);
+                                  final bool isNG = authState.countryCode == 'NG';
+                                  final double finalAmount = isNG ? (basePrice * rate) : basePrice;
+
+                                  // 1. Initialize Stripe (if UK)
+                                  if (!isNG) await PaymentService.initialize();
+                                  
+                                  // 2. Charge localized amount
+                                  final success = await PaymentService.fundWallet(
+                                    context, 
+                                    finalAmount, 
+                                    authState.userEmail!, 
+                                    authState.userId!
+                                  );
 
                                     if (success) {
                                       // 3. Activate Subscription on Backend

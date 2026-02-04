@@ -167,14 +167,37 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               textCapitalization: TextCapitalization.characters,
             ),
             const SizedBox(height: 16),
-            TextField(
-              controller: _vehicleTypeController,
-              decoration: const InputDecoration(
-                labelText: 'Vehicle Type',
-                prefixIcon: Icon(Icons.directions_car),
-                hintText: 'e.g. Toyota Camry, Honda Ace',
-              ),
-              textCapitalization: TextCapitalization.words,
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text('Vehicle Type', style: TextStyle(color: AppTheme.textSecondary, fontSize: 13)),
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 8,
+                  children: ['Bike', 'Car', 'Truck', 'Sedan', 'SUV'].map((type) {
+                    final bool isSelected = _vehicleTypeController.text == type;
+                    return ChoiceChip(
+                      label: Text(type),
+                      selected: isSelected,
+                      onSelected: (val) {
+                        setState(() {
+                          _vehicleTypeController.text = type;
+                        });
+                      },
+                      selectedColor: AppTheme.primaryBlue.withOpacity(0.2),
+                      labelStyle: TextStyle(
+                        color: isSelected ? AppTheme.primaryBlue : AppTheme.textSecondary,
+                        fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                      ),
+                      backgroundColor: AppTheme.surfaceColor,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        side: BorderSide(color: isSelected ? AppTheme.primaryBlue : AppTheme.borderBlue),
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ],
             ),
             const SizedBox(height: 24),
             SizedBox(
@@ -431,7 +454,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   // 5. ACCOUNT ACTIONS
                   _sectionHeader('Account & Settings'),
                   _buildActionTile('Giga+ Membership', 'Manage your premium subscription', Icons.auto_awesome, () => context.push('/giga-plus')),
-                  _buildActionTile('Referral Rewards', 'Earn £10 per referral', Icons.card_giftcard, _showReferralDialog),
+                  _buildActionTile('Referral Rewards', 'Earn ${authState.currencySymbol}${isNG ? '20,000' : '10'} per referral', Icons.card_giftcard, _showReferralDialog),
                   _buildActionTile('Payout Settings', 'Bank transfers & wallet', Icons.account_balance_wallet_outlined, () => context.push('/wallet')),
                   _buildActionTile('Help & Support', '24/7 Rider support', Icons.help_outline_rounded, () {}),
                   const SizedBox(height: 12),
@@ -440,7 +463,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   const SizedBox(height: 40),
                   Center(
                     child: Text(
-                      'App Version 1.2.5 (UK-PRO)',
+                      'App Version 1.2.5 (${authState.countryCode ?? 'UK'}-PRO)',
                       style: TextStyle(color: Colors.grey[500], fontSize: 12),
                     ),
                   ),
@@ -475,6 +498,37 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   }
 
   Widget _buildVehicleCard(Map<String, dynamic>? rider) {
+    final bool hasVehicle = (rider?['has_vehicle'] as bool?) ?? false;
+    
+    if (!hasVehicle) {
+      return GestureDetector(
+        onTap: _showEditProfile,
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: AppTheme.surfaceColor,
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(color: AppTheme.borderBlue, style: BorderStyle.solid),
+          ),
+          child: Column(
+            children: [
+              Icon(Icons.add_circle_outline, color: AppTheme.primaryBlue, size: 40),
+              const SizedBox(height: 12),
+              Text(
+                'Add Your Vehicle',
+                style: GoogleFonts.outfit(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const Text(
+                'Register your vehicle to start receiving jobs.',
+                style: TextStyle(color: AppTheme.textSecondary, fontSize: 12),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(20),
