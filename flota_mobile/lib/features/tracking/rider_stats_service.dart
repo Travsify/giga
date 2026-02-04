@@ -51,19 +51,23 @@ class RiderStats {
 
   factory RiderStats.fromJson(Map<String, dynamic> json) {
     final data = json['data'];
+    if (data == null) {
+      throw Exception('Response data is null. Check backend implementation.');
+    }
+    
     return RiderStats(
       todaysEarnings: (data['todays_earnings'] as num?)?.toDouble() ?? 0.0,
       completedJobsToday: data['completed_jobs_today'] as int? ?? 0,
       totalJobsCompleted: data['total_jobs_completed'] as int? ?? 0,
-      completionRate: data['completion_rate'] as int? ?? 0,
+      completionRate: (data['completion_rate'] as num?)?.toInt() ?? 0,
       shiftGoalTarget: (data['shift_goal_target'] as num?)?.toDouble() ?? 100.0,
       productivityTips: (data['productivity_tips'] as List?)?.map((e) => e.toString()).toList() ?? [],
       currency: data['currency'] as String? ?? 'GBP',
       currencySymbol: data['currency_symbol'] as String? ?? '£',
       walletBalance: (data['wallet_balance'] as num?)?.toDouble() ?? 0.0,
-      acceptanceRate: data['acceptance_rate'] as int? ?? 100,
+      acceptanceRate: (data['acceptance_rate'] as num?)?.toInt() ?? 100,
       cancellationRate: (data['cancellation_rate'] as num?)?.toDouble() ?? 0.0,
-      onTimeRate: data['on_time_rate'] as int? ?? 100,
+      onTimeRate: (data['on_time_rate'] as num?)?.toInt() ?? 100,
       totalDistance: (data['total_distance'] as num?)?.toDouble() ?? 0.0,
       activity: List<Map<String, dynamic>>.from(data['activity'] ?? []),
       rating: (data['rating'] as num?)?.toDouble() ?? 5.0,

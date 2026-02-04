@@ -23,6 +23,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   final _phoneController = TextEditingController();
   final _homeController = TextEditingController();
   final _workController = TextEditingController();
+  final _plateController = TextEditingController();
+  final _vehicleTypeController = TextEditingController();
 
   @override
   void dispose() {
@@ -30,6 +32,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     _phoneController.dispose();
     _homeController.dispose();
     _workController.dispose();
+    _plateController.dispose();
+    _vehicleTypeController.dispose();
     super.dispose();
   }
 
@@ -151,6 +155,26 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 ),
               ),
             ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: _plateController,
+              decoration: const InputDecoration(
+                labelText: 'Vehicle Plate Number',
+                prefixIcon: Icon(Icons.numbers),
+                hintText: 'e.g. ABJ-123',
+              ),
+              textCapitalization: TextCapitalization.characters,
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: _vehicleTypeController,
+              decoration: const InputDecoration(
+                labelText: 'Vehicle Type',
+                prefixIcon: Icon(Icons.directions_car),
+                hintText: 'e.g. Toyota Camry, Honda Ace',
+              ),
+              textCapitalization: TextCapitalization.words,
+            ),
             const SizedBox(height: 24),
             SizedBox(
               width: double.infinity,
@@ -161,7 +185,15 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     ukPhone: _phoneController.text,
                     homeAddress: _homeController.text,
                     workAddress: _workController.text,
+                    vehiclePlate: _plateController.text,
+                    vehicleType: _vehicleTypeController.text,
                   );
+                  // Update Rider specific info
+                  final user = ref.read(profileProvider).user;
+                  if (user != null && user['role'] == 'Rider') {
+                     // We should add an endpoint for this or update the general profile one
+                     // For now, let's assume we can pass it to the profile update
+                  }
                   if (mounted) Navigator.pop(context);
                 },
                 child: const Text('Save Changes'),
