@@ -93,4 +93,19 @@ class User extends Authenticatable implements FilamentUser
     {
         return $this->belongsTo(Country::class);
     }
+
+    public function company()
+    {
+        return $this->hasOne(LogisticsCompany::class);
+    }
+
+    public function getCurrencySymbolAttribute()
+    {
+        switch ($this->currency_code) {
+            case 'NGN': return '₦';
+            case 'GHS': return '₵';
+            case 'USD': return '$';
+            case 'GBP': default: return '£';
+        }
+    }
 }
