@@ -88,6 +88,40 @@ Route::get('/fix-migrations', function() {
     }
 });
 
+Route::get('/direct-fix-settings', function() {
+    try {
+        $keys = [
+            'flutterwave_public_key' => 'FLWPUBK-a1a7a1e074a86a64e6a3f57d89f4165c-X',
+            'flutterwave_secret_key' => 'FLWSECK-fd0351a5fbf3d6e25438d75b1d069347-19c2b052fc9vt-X',
+            'flutterwave_encryption_key' => 'fd0351a5fbf3696f229da328',
+        ];
+
+        foreach ($keys as $key => $value) {
+            \App\Models\AppSetting::updateOrCreate(
+                ['key' => $key],
+                [
+                    'key' => $key,
+                    'value' => (string) $value,
+                    'group' => 'payment',
+                    'type' => 'string',
+                    'is_public' => ($key === 'flutterwave_public_key'),
+                    'is_sensitive' => ($key !== 'flutterwave_public_key'),
+                ]
+            );
+        }
+        
+        \Illuminate\Support\Facades\Cache::flush();
+        
+        return response()->json(['message' => 'Settings updated successfully', 'current_keys_status' => [
+            'public' => \App\Models\AppSetting::get('flutterwave_public_key') ? 'present' : 'missing',
+            'secret' => \App\Models\AppSetting::get('flutterwave_secret_key') ? 'present' : 'missing',
+        ]]);
+    } catch (\Exception $e) {
+        return response()->json(['error' => $e->getMessage()], 500);
+    }
+});
+\Illuminate\Support\Facades\Log::info('API Routes loaded');
+
 Route::post('/verify-vehicle', [App\Http\Controllers\Api\VehicleVerificationController::class, 'verify']);
 Route::get('/view-logs', [App\Http\Controllers\Api\TestMailController::class, 'viewLogs']);
 Route::get('/status', function() { return response()->json(['status' => 'online', 'version' => '1.2.2']); });
