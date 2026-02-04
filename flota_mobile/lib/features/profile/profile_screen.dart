@@ -305,6 +305,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final user = profileState.user;
     final loyalty = profileState.loyalty;
     final stats = ref.watch(riderStatsProvider).value;
+    final authState = ref.watch(authProvider);
+    final isNG = authState.countryCode == 'NG';
 
     if (profileState.isLoading && user == null) {
       return const Scaffold(

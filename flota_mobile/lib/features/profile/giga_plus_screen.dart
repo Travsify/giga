@@ -7,6 +7,7 @@ import 'package:flota_mobile/theme/app_theme.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flota_mobile/core/payment_service.dart';
 import 'package:flota_mobile/features/auth/auth_provider.dart';
+import 'package:flota_mobile/core/settings_service.dart';
 
 class GigaPlusScreen extends ConsumerWidget {
   const GigaPlusScreen({super.key});
@@ -16,6 +17,15 @@ class GigaPlusScreen extends ConsumerWidget {
     final profileState = ref.watch(profileProvider);
     final isGigaPlus = profileState.subscription?['is_giga_plus'] ?? false;
     final expiry = profileState.subscription?['expiry'];
+
+    final settings = ref.watch(settingsServiceProvider);
+    final authState = ref.watch(authProvider);
+    final isNG = authState.countryCode == 'NG';
+    final double basePrice = settings.get<double>('giga_plus_price_gbp', 39.99);
+    final double rate = settings.get<double>('ngn_exchange_rate', 2000.0);
+    final String displayPrice = isNG 
+      ? '${authState.currencySymbol}${(basePrice * rate).toStringAsFixed(0)}' 
+      : '${authState.currencySymbol}${basePrice.toStringAsFixed(2)}';
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -115,21 +125,10 @@ class GigaPlusScreen extends ConsumerWidget {
                         ),
                         child: Column(
                           children: [
-                            final settings = ref.watch(settingsServiceProvider);
-                            final authState = ref.watch(authProvider);
-                            final double basePrice = settings.get<double>('giga_plus_price_gbp', 39.99);
-                            final double rate = settings.get<double>('ngn_exchange_rate', 2000.0);
-                            
-                            final bool isNG = authState.countryCode == 'NG';
-                            final String displayPrice = isNG 
-                              ? '${authState.currencySymbol}${(basePrice * rate).toStringAsFixed(0)}' 
-                              : '${authState.currencySymbol}${basePrice.toStringAsFixed(2)}';
-
-                            return Text(
+                            Text(
                               'Only $displayPrice / month',
                               style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                            );
-                          }),
+                            ),
                           const Text(
                             'Instant professional logistics access.',
                             style: TextStyle(color: Colors.grey),
