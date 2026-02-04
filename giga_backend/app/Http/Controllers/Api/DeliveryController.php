@@ -30,6 +30,10 @@ class DeliveryController extends Controller
             $query->whereIn('status', $statuses);
         }
 
+        if ($request->has('parcel_type')) {
+            $query->where('parcel_type', $request->parcel_type);
+        }
+
         $deliveries = $query->orderBy('created_at', 'desc')->get();
 
         return response()->json([
