@@ -162,6 +162,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/wallet/transactions', [App\Http\Controllers\Api\PaymentController::class, 'getTransactions']);
     Route::post('/wallet/flutterwave/create', [App\Http\Controllers\Api\PaymentController::class, 'createFlutterwavePayment']);
     Route::post('/wallet/flutterwave/verify', [App\Http\Controllers\Api\PaymentController::class, 'verifyFlutterwavePayment']);
+    Route::post('/wallet/transfer', [App\Http\Controllers\Api\PaymentController::class, 'transfer']);
 
     // Subscriptions
     Route::get('/subscription/status', [App\Http\Controllers\Api\SubscriptionController::class, 'status']);

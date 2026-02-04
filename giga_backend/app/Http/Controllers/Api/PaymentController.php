@@ -8,6 +8,7 @@ use Stripe\Stripe;
 use Stripe\PaymentIntent;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
 
 class PaymentController extends Controller
 {
@@ -70,7 +71,7 @@ class PaymentController extends Controller
         ]);
 
         try {
-            \Log::info('Creating payment intent for amount: ' . $request->amount . ' ' . $request->currency);
+            Log::info('Creating payment intent for amount: ' . $request->amount . ' ' . $request->currency);
             $secret = env('STRIPE_SECRET');
             if (empty($secret) || $secret === 'sk_test_your_stripe_secret_key_here') {
                 return response()->json(['error' => 'STRIPE_SECRET is missing or using placeholder in Render env variables.'], 500);
@@ -215,7 +216,7 @@ class PaymentController extends Controller
             });
 
         } catch (\Exception $e) {
-            \Log::error('Gift Card Redemption Error: ' . $e->getMessage());
+            Log::error('Gift Card Redemption Error: ' . $e->getMessage());
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
@@ -328,8 +329,82 @@ class PaymentController extends Controller
             ]);
 
         } catch (\Exception $e) {
-            \Log::error('Withdrawal Error: ' . $e->getMessage());
+            Log::error('Withdrawal Error: ' . $e->getMessage());
             return response()->json(['error' => 'Failed to process withdrawal: ' . $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * Handle user-to-user fund transfers.
+     */
+    public function transfer(Request $request)
+    {
+        $request->validate([
+            'recipient_email' => 'required|email|exists:users,email',
+            'amount' => 'required|numeric|min:1',
+        ]);
+
+        try {
+            return DB::transaction(function () use ($request) {
+                $sender = $request->user();
+                $recipient = \App\Models\User::where('email', $request->recipient_email)->first();
+
+                if ($sender->id === $recipient->id) {
+                    return response()->json(['error' => 'Cannot transfer to yourself'], 400);
+                }
+
+                $senderWallet = $sender->wallet;
+                if (!$senderWallet || $senderWallet->balance < $request->amount) {
+                    return response()->json(['error' => 'Insufficient funds'], 400);
+                }
+
+                // Currency check (Simplified: they must match for now)
+                $recipientWallet = $recipient->wallet()->firstOrCreate(
+                    [], 
+                    ['balance' => 0, 'currency' => $senderWallet->currency]
+                );
+
+                if (strtoupper($senderWallet->currency) !== strtoupper($recipientWallet->currency)) {
+                    return response()->json(['error' => 'Currency mismatch between accounts'], 400);
+                }
+
+                $reference = 'XFER_' . time() . '_' . $sender->id;
+
+                // Deduct from sender
+                $senderWallet->balance -= $request->amount;
+                $senderWallet->save();
+
+                $senderWallet->transactions()->create([
+                    'amount' => -$request->amount,
+                    'type' => 'debit',
+                    'description' => 'Transfer to ' . $recipient->email,
+                    'reference' => $reference,
+                    'status' => 'completed',
+                    'currency' => $senderWallet->currency,
+                ]);
+
+                // Credit recipient
+                $recipientWallet->balance += $request->amount;
+                $recipientWallet->save();
+
+                $recipientWallet->transactions()->create([
+                    'amount' => $request->amount,
+                    'type' => 'credit',
+                    'description' => 'Transfer from ' . $sender->email,
+                    'reference' => $reference,
+                    'status' => 'completed',
+                    'currency' => $recipientWallet->currency,
+                ]);
+
+                return response()->json([
+                    'status' => 'success',
+                    'message' => 'Transfer completed successfully',
+                    'balance' => $senderWallet->balance
+                ]);
+            });
+        } catch (\Exception $e) {
+            Log::error('Transfer Error: ' . $e->getMessage());
+            return response()->json(['error' => 'Failed to process transfer'], 500);
         }
     }
 
@@ -340,24 +415,47 @@ class PaymentController extends Controller
     {
         $request->validate([
             'amount' => 'required|numeric|min:10',
-            'currency' => 'required|string|in:NGN,GHS,KES',
+            'currency' => 'required|string|in:NGN,GHS,KES,USD,GBP',
         ]);
 
         try {
-            // This would normally call Flutterwave API to generate a checkout URL
-            return response()->json([
-                'status' => 'success',
-                'reference' => 'FLW_' . time() . '_' . $request->user()->id,
-                'amount' => $request->amount,
-                'currency' => $request->currency,
-                'checkout_url' => 'https://checkout.flutterwave.com/v3/hosted/pay/giga_simulated_' . time(),
-                'customer' => [
-                    'email' => $request->user()->email,
-                    'name' => $request->user()->name,
-                ]
-            ]);
+            $user = $request->user();
+            $reference = 'FLW_TOPUP_' . time() . '_' . $user->id;
+
+            // In production, we call Flutterwave API to get a real hosted payment link
+            $secretKey = env('FLW_SECRET_KEY');
+            if (!$secretKey) {
+                return response()->json(['error' => 'Flutterwave configuration missing'], 500);
+            }
+
+            $response = Http::withToken($secretKey)
+                ->post('https://api.flutterwave.com/v3/payments', [
+                    'tx_ref' => $reference,
+                    'amount' => $request->amount,
+                    'currency' => $request->currency,
+                    'redirect_url' => env('APP_URL') . '/api/wallet/flutterwave/callback',
+                    'customer' => [
+                        'email' => $user->email,
+                        'name' => $user->name,
+                    ],
+                    'customizations' => [
+                        'title' => 'Giga Wallet Top-up',
+                        'description' => 'Funding Giga logistics wallet',
+                    ],
+                ]);
+
+            if ($response->successful()) {
+                return response()->json([
+                    'status' => 'success',
+                    'checkout_url' => $response->json('data.link'),
+                    'reference' => $reference
+                ]);
+            }
+
+            throw new \Exception('Flutterwave API error: ' . $response->body());
         } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 500);
+            Log::error('FLW Create Payment Error: ' . $e->getMessage());
+            return response()->json(['error' => 'Failed to initialize payment: ' . $e->getMessage()], 500);
         }
     }
 
@@ -368,31 +466,47 @@ class PaymentController extends Controller
     {
         $request->validate([
             'transaction_id' => 'required|string',
-            'amount' => 'required|numeric',
-            'currency' => 'required|string',
         ]);
 
         try {
-            // Here we would verify with Flutterwave API
-            $user = $request->user();
-            $wallet = $user->wallet()->firstOrCreate([], ['balance' => 0, 'currency' => 'NGN']);
+            $secretKey = env('FLW_SECRET_KEY');
+            $response = Http::withToken($secretKey)
+                ->get("https://api.flutterwave.com/v3/transactions/{$request->transaction_id}/verify");
 
-            $wallet->balance += $request->amount;
-            $wallet->save();
+            if ($response->successful() && $response->json('data.status') === 'successful') {
+                $data = $response->json('data');
+                $amount = $data['amount'];
+                $currency = $data['currency'];
+                $reference = $data['tx_ref'];
 
-            $wallet->transactions()->create([
-                'amount' => $request->amount,
-                'type' => 'credit',
-                'description' => 'Wallet Top-up (Flutterwave)',
-                'reference' => $request->transaction_id,
-                'status' => 'completed',
-                'currency' => $request->currency,
-            ]);
+                $user = $request->user();
+                
+                // Idempotency check
+                $existingTx = \App\Models\Transaction::where('reference', $reference)->first();
+                if ($existingTx) {
+                    return response()->json(['status' => 'success', 'message' => 'Already processed']);
+                }
 
-            return response()->json([
-                'success' => true,
-                'balance' => $wallet->balance
-            ]);
+                $wallet = $user->wallet()->firstOrCreate([], ['balance' => 0, 'currency' => $currency]);
+                $wallet->balance += $amount;
+                $wallet->save();
+
+                $wallet->transactions()->create([
+                    'amount' => $amount,
+                    'type' => 'credit',
+                    'description' => 'Wallet Top-up (Flutterwave)',
+                    'reference' => $reference,
+                    'status' => 'completed',
+                    'currency' => $currency,
+                ]);
+
+                return response()->json([
+                    'status' => 'success',
+                    'balance' => $wallet->balance
+                ]);
+            }
+
+            return response()->json(['error' => 'Verification failed or payment not successful'], 400);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
         }
