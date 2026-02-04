@@ -24,6 +24,7 @@ class RiderJob {
   final String status;
   final double fare;
   final String? createdAt;
+  final String parcelType;
 
   RiderJob({
     required this.id,
@@ -32,6 +33,7 @@ class RiderJob {
     required this.status,
     required this.fare,
     this.createdAt,
+    required this.parcelType,
   });
 
   factory RiderJob.fromJson(Map<String, dynamic> json) {
@@ -42,6 +44,7 @@ class RiderJob {
       status: json['status'] ?? 'pending',
       fare: (json['fare'] as num?)?.toDouble() ?? 0.0,
       createdAt: json['created_at'],
+      parcelType: json['parcel_type'] ?? 'Parcel',
     );
   }
 }
@@ -197,12 +200,11 @@ class _RiderJobsScreenState extends ConsumerState<RiderJobsScreen> with SingleTi
 
   List<RiderJob> _getFilteredJobs(List<RiderJob> jobs) {
     if (_activeMode == DispatchMode.orders) {
-      return jobs;
+      // Filter for standard parcels/deliveries
+      return jobs.where((j) => j.parcelType.toLowerCase() != 'errand').toList();
     } else {
-      return [
-        RiderJob(id: 'E-101', pickupAddress: 'Tesco Superstore', deliveryAddress: '22 Baker St', status: 'available', fare: 8.50),
-        RiderJob(id: 'E-102', pickupAddress: 'Asda Pharmacy', deliveryAddress: 'High St Clinic', status: 'available', fare: 12.00),
-      ];
+      // Filter for specific errand requests
+      return jobs.where((j) => j.parcelType.toLowerCase() == 'errand').toList();
     }
   }
 

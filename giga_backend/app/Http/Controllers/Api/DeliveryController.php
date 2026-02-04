@@ -13,7 +13,17 @@ class DeliveryController extends Controller
     public function index(Request $request)
     {
         $user = $request->user();
-        $query = Delivery::where('customer_id', $user->id);
+        
+        // Role-based query adjustment
+        if ($user->role === 'Rider') {
+            $riderId = $user->rider ? $user->rider->id : null;
+            $query = Delivery::where(function($q) use ($user, $riderId) {
+                $q->where('rider_id', $riderId)
+                  ->orWhere('status', 'pending');
+            });
+        } else {
+            $query = Delivery::where('customer_id', $user->id);
+        }
 
         if ($request->has('status')) {
             $statuses = explode(',', $request->status);
@@ -22,7 +32,10 @@ class DeliveryController extends Controller
 
         $deliveries = $query->orderBy('created_at', 'desc')->get();
 
-        return response()->json($deliveries);
+        return response()->json([
+            'status' => 'success',
+            'data' => $deliveries
+        ]);
     }
 
     public function estimateFare(Request $request)

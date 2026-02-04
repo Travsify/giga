@@ -12,6 +12,10 @@ class RiderStats {
   final String currencySymbol;
   final double walletBalance;
   final int acceptanceRate;
+  final double cancellationRate;
+  final int onTimeRate;
+  final double totalDistance;
+  final List<Map<String, dynamic>> activity;
   final double rating;
   final bool isOnline;
   final int totalJobsCompleted;
@@ -30,6 +34,10 @@ class RiderStats {
     required this.currencySymbol,
     required this.walletBalance,
     required this.acceptanceRate,
+    required this.cancellationRate,
+    required this.onTimeRate,
+    required this.totalDistance,
+    required this.activity,
     required this.rating,
     required this.isOnline,
     required this.fareEarnings,
@@ -50,6 +58,10 @@ class RiderStats {
       currencySymbol: data['currency_symbol'] as String? ?? '£',
       walletBalance: (data['wallet_balance'] as num?)?.toDouble() ?? 0.0,
       acceptanceRate: data['acceptance_rate'] as int? ?? 100,
+      cancellationRate: (data['cancellation_rate'] as num?)?.toDouble() ?? 0.0,
+      onTimeRate: data['on_time_rate'] as int? ?? 100,
+      totalDistance: (data['total_distance'] as num?)?.toDouble() ?? 0.0,
+      activity: List<Map<String, dynamic>>.from(data['activity'] ?? []),
       rating: (data['rating'] as num?)?.toDouble() ?? 5.0,
       isOnline: data['is_online'] as bool? ?? false,
       fareEarnings: (data['fare_earnings'] as num?)?.toDouble() ?? 0.0,
