@@ -428,6 +428,13 @@ class PaymentController extends Controller
                 return response()->json(['error' => 'Flutterwave configuration missing'], 500);
             }
 
+            Log::info('Initiating Flutterwave payment link request', [
+                'user' => $user->id,
+                'amount' => $request->amount,
+                'currency' => $request->currency,
+                'tx_ref' => $reference
+            ]);
+
             $response = Http::withToken($secretKey)
                 ->post('https://api.flutterwave.com/v3/payments', [
                     'tx_ref' => $reference,
@@ -445,6 +452,7 @@ class PaymentController extends Controller
                 ]);
 
             if ($response->successful()) {
+                Log::info('Flutterwave payment link created successfully', ['link' => $response->json('data.link')]);
                 return response()->json([
                     'status' => 'success',
                     'checkout_url' => $response->json('data.link'),
@@ -452,7 +460,12 @@ class PaymentController extends Controller
                 ]);
             }
 
-            throw new \Exception('Flutterwave API error: ' . $response->body());
+            Log::error('Flutterwave Payment Link API Error', [
+                'status' => $response->status(),
+                'body' => $response->json()
+            ]);
+
+            throw new \Exception('Flutterwave API error: ' . ($response->json('message') ?? $response->body()));
         } catch (\Exception $e) {
             Log::error('FLW Create Payment Error: ' . $e->getMessage());
             return response()->json(['error' => 'Failed to initialize payment: ' . $e->getMessage()], 500);

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\BankAccount;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Log;
 
 class BankController extends Controller
 {
@@ -113,14 +114,21 @@ class BankController extends Controller
     public function getBanks(Request $request)
     {
         $country = $request->query('country', 'NG');
+        \Log::info('Fetching supported banks from Flutterwave', ['country' => $country]);
+        
         $flw = new \App\Services\FlutterwaveTransferService();
         $banks = $flw->getBanks($country);
+
+        if (empty($banks)) {
+            \Log::warning('Flutterwave returned empty bank list', ['country' => $country]);
+        }
 
         return response()->json([
             'status' => 'success',
             'data' => $banks
         ]);
     }
+
     /**
      * Resolve a bank account name.
      */
@@ -129,6 +137,11 @@ class BankController extends Controller
         $request->validate([
             'account_number' => 'required|string',
             'bank_code' => 'required|string',
+        ]);
+
+        \Log::info('Resolving bank account', [
+            'account' => $request->account_number,
+            'bank_code' => $request->bank_code
         ]);
 
         $flw = new \App\Services\FlutterwaveTransferService();
@@ -140,6 +153,8 @@ class BankController extends Controller
                 'data' => $result['data']
             ]);
         }
+
+        \Log::error('Bank account resolution failed', ['message' => $result['message']]);
 
         return response()->json([
             'status' => 'error',

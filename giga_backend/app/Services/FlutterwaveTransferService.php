@@ -70,6 +70,7 @@ class FlutterwaveTransferService
 
             return [];
         } catch (\Exception $e) {
+            Log::error('Flutterwave GetBanks Exception: ' . $e->getMessage());
             return [];
         }
     }
