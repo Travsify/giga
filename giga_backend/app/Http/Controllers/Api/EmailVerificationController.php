@@ -11,8 +11,16 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
+use App\Services\ResendService;
+
 class EmailVerificationController extends Controller
 {
+    protected $resend;
+
+    public function __construct(ResendService $resend)
+    {
+        $this->resend = $resend;
+    }
     /**
      * Send verification code to user's email
      */
@@ -37,25 +45,12 @@ class EmailVerificationController extends Controller
             ]
         );
 
-        // Send email
-        try {
-            \Log::info('Attempting to send verification code to: ' . $user->email);
-            Mail::send('emails.verify', ['code' => $code, 'name' => $user->name], function ($message) use ($user) {
-                $message->to($user->email)
-                        ->subject('Verify Your Email - GIGA LOGISTICS');
-            });
-            \Log::info('Verification code successfully sent (queued or dispatched) to: ' . $user->email);
-        } catch (\Exception $e) {
-            \Log::error('Failed to send verification code email: ' . $e->getMessage(), [
-                'user_id' => $user->id,
-                'email' => $user->email,
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
-            
-            // For demo purposes, we return a success message even if mail fails, 
-            // but log the error so we can fix SMTP.
-            // Or we could return a 500. Let's return success but with a warning in logs.
+        // Send email via Resend
+        $html = "<h3>Verify Your Email</h3><p>Hello {$user->name},</p><p>Your verification code is: <strong>{$code}</strong></p><p>This code will expire in 15 minutes.</p>";
+        $sent = $this->resend->sendEmail($user->email, 'Verify Your Email - GIGA LOGISTICS', $html);
+
+        if (!$sent) {
+            \Log::error("Failed to send verification email to {$user->email}");
         }
 
         return response()->json([
@@ -142,14 +137,8 @@ class EmailVerificationController extends Controller
             ]
         );
 
-        try {
-            Mail::send('emails.verify', ['code' => $code, 'name' => 'New User'], function ($message) use ($email) {
-                $message->to($email)
-                        ->subject('Verify Your Email - GIGA LOGISTICS');
-            });
-        } catch (\Exception $e) {
-            \Log::error('Signup OTP Fail: ' . $e->getMessage());
-        }
+        $html = "<h3>Welcome to Giga!</h3><p>Your signup verification code is: <strong>{$code}</strong></p>";
+        $this->resend->sendEmail($email, 'Verify Your Email - GIGA LOGISTICS', $html);
 
         return response()->json(['message' => 'Verification code sent.']);
     }

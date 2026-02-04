@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Stripe\Stripe;
 use Stripe\PaymentIntent;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
 
 class PaymentController extends Controller
 {
@@ -280,7 +281,7 @@ class PaymentController extends Controller
             $transaction = $wallet->transactions()->create([
                 'amount' => -$request->amount,
                 'type' => 'debit',
-                'description' => 'Withdrawal to ' . $request->bank_account . ' (' . strtoupper($request->method) . ')',
+                'description' => 'Withdrawal to ' . $request->bank_account . ' (' . strtoupper($request->input('method')) . ')',
                 'reference' => 'WITHDRAW_' . time() . '_' . $user->id,
                 'status' => 'pending',
                 'currency' => $wallet->currency,
@@ -314,12 +315,12 @@ class PaymentController extends Controller
 
         try {
             // This would normally call Flutterwave API to generate a checkout URL
-            // For now, we return a success response that the frontend can handle
             return response()->json([
                 'status' => 'success',
                 'reference' => 'FLW_' . time() . '_' . $request->user()->id,
                 'amount' => $request->amount,
                 'currency' => $request->currency,
+                'checkout_url' => 'https://checkout.flutterwave.com/v3/hosted/pay/giga_simulated_' . time(),
                 'customer' => [
                     'email' => $request->user()->email,
                     'name' => $request->user()->name,

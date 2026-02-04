@@ -96,6 +96,12 @@ class RiderController extends Controller
                 'currency' => $user->wallet ? $user->wallet->currency : 'GBP',
                 'currency_symbol' => $user->currency_symbol ?? '£',
                 'is_online' => (bool) $user->is_online,
+                'wallet_balance' => $user->wallet ? (float)$user->wallet->balance : 0.0,
+                'fare_earnings' => (float)$todaysEarnings, // Mock for now
+                'tips' => 0.0,
+                'bonuses' => 0.0,
+                'has_vehicle' => !empty($rider->vehicle_plate_number),
+                'is_verified' => !empty($rider->license_number), // Simplistic check
             ]
         ]);
     }
@@ -134,9 +140,15 @@ class RiderController extends Controller
             'shift_goal_target' => 100.00,
             'activity' => $this->getActivityHistory(0), // Returns 0s
             'productivity_tips' => ["Welcome! Go online to start receiving orders."],
+            'tips' => 0.0,
+            'bonuses' => 0.0,
             'currency' => $user->wallet ? $user->wallet->currency : 'GBP',
             'currency_symbol' => $user->currency_symbol ?? '£',
             'is_online' => (bool)$user->is_online,
+            'wallet_balance' => $user->wallet ? (float)$user->wallet->balance : 0.0,
+            'fare_earnings' => 0.0,
+            'has_vehicle' => false,
+            'is_verified' => false,
         ];
     }
 
