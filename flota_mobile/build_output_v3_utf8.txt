@@ -1,0 +1,111 @@
+﻿Running Gradle task 'assembleDebug'...                          
+flutter : Warning: 
+Flutter support for 
+your project's 
+Gradle version 
+(8.5.0) will soon be 
+dropped. Please 
+upgrade your Gradle 
+version to a version 
+of at least 8.7.0 
+soon.
+At line:1 char:1
++ flutter build apk 
+--debug > 
+build_output_v3.txt 
+2>&1
++ ~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~
+    + CategoryInfo   
+           : 
+NotSpecified: (W    
+arning: Flutte...ast 
+    8.7.0 
+soon.:String) [    
+], RemoteException
+    + 
+FullyQualifiedError  
+  Id : 
+NativeCommandErr    
+or
+ 
+Alternatively, use 
+the flag "--android-s
+kip-build-dependency-
+validation" to 
+bypass this check.
+
+Potential fix: Your 
+project's gradle 
+version is typically 
+defined in the 
+gradle wrapper file. 
+By default, this can 
+be found at C:\Users\
+USER\Desktop\giga\flo
+ta_mobile\android/gra
+dle/wrapper/gradle-wr
+apper.properties. 
+For more 
+information, see http
+s://docs.gradle.org/c
+urrent/userguide/grad
+le_wrapper.html.
+
+Warning: Flutter 
+support for your 
+project's Android 
+Gradle Plugin 
+version (Android 
+Gradle Plugin 
+version 8.2.1) will 
+soon be dropped. 
+Please upgrade your 
+Android Gradle 
+Plugin version to a 
+version of at least 
+Android Gradle 
+Plugin version 8.6.0 
+soon.
+Alternatively, use 
+the flag "--android-s
+kip-build-dependency-
+validation" to 
+bypass this check.
+
+Potential fix: Your 
+project's AGP 
+version is typically 
+defined in the 
+plugins block of the 
+`settings.gradle` 
+file (C:\Users\USER\D
+esktop\giga\flota_mob
+ile\android/settings.
+gradle), by a plugin 
+with the id of com.an
+droid.application. 
+If you don't see a 
+plugins block, your 
+project was likely 
+created with an 
+older template 
+version. In this 
+case it is most 
+likely defined in 
+the top-level 
+build.gradle file (C:
+\Users\USER\Desktop\g
+iga\flota_mobile\andr
+oid/build.gradle) by 
+the following line 
+in the dependencies 
+block of the 
+buildscript: 
+"classpath 'com.andro
+id.tools.build:gradle
+:<version>'".
+
+Running Gradle task 'assembleDebug'...                             36.8s
+ΓêÜ Built build\app\outputs\flutter-apk\app-debug.apk

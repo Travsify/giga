@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:geolocator/geolocator.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flota_mobile/theme/app_theme.dart';
 import 'package:flota_mobile/core/location_service.dart';
-import 'package:flota_mobile/core/error_handler.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:flota_mobile/features/auth/auth_provider.dart';
+import 'package:flota_mobile/features/tracking/rider_dashboard_controller.dart';
+import 'package:flota_mobile/features/tracking/rider_stats_service.dart';
 
 class RiderDashboard extends ConsumerStatefulWidget {
   const RiderDashboard({super.key});
@@ -17,264 +16,564 @@ class RiderDashboard extends ConsumerStatefulWidget {
 }
 
 class _RiderDashboardState extends ConsumerState<RiderDashboard> {
-  bool isOnline = false;
-  Position? _currentPosition;
+  GoogleMapController? _mapController;
 
   @override
   void initState() {
     super.initState();
-    _getCurrentLocation();
-  }
-
-  Future<void> _getCurrentLocation() async {
-    try {
-      final position = await LocationService.getCurrentLocation();
-      if (mounted) {
-        setState(() => _currentPosition = position);
-      }
-    } catch (e) {
-      debugPrint('Error getting location: $e');
-    }
-  }
-
-  void _toggleOnline(bool value) {
-    setState(() => isOnline = value);
-    
-    if (isOnline) {
-      _startLocationUpdates();
-      // No manual fetch needed, StreamBuilder handles it
-    }
-  }
-
-  void _startLocationUpdates() {
+    // Start listening to location updates immediately
     LocationService.getPositionStream().listen((position) {
-      if (isOnline) {
-        // Here we would write to Firestore 'riders' collection
-        // FirebaseFirestore.instance.collection('riders').doc(ID).update(...)
-        if (mounted) {
-          setState(() => _currentPosition = position);
+      if (mounted) {
+        final latLng = LatLng(position.latitude, position.longitude);
+        ref.read(riderDashboardControllerProvider.notifier).updateLocation(latLng);
+        
+        // If we want to follow the rider on the map:
+        final state = ref.read(riderDashboardControllerProvider);
+        if (state.isOnline) {
+           _mapController?.animateCamera(CameraUpdate.newLatLng(latLng));
         }
       }
     });
   }
 
-  Future<void> _acceptRequest(String id) async {
-    try {
-      await FirebaseFirestore.instance.collection('deliveries').doc(id).update({
-        'status': 'accepted',
-        'rider_id': 'CURRENT_USER_ID', // Replace with Auth ID
-        'accepted_at': FieldValue.serverTimestamp(),
-      });
-      
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-           const SnackBar(content: Text('Delivery Accepted!'), backgroundColor: AppTheme.successGreen),
-        );
-      }
-    } catch (e) {
-      if (mounted) ErrorHandler.handleError(context, e);
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
+    final state = ref.watch(riderDashboardControllerProvider);
+    final controller = ref.read(riderDashboardControllerProvider.notifier);
+    final stats = state.stats;
+
     return Scaffold(
       backgroundColor: Colors.white,
-      body: Column(
+      resizeToAvoidBottomInset: false, // Prevent map resize on keyboard
+      body: Stack(
         children: [
-          // Custom Top Bar
-          Container(
-            padding: const EdgeInsets.fromLTRB(20, 50, 20, 20),
-            color: AppTheme.primaryBlue,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Giga',
-                  style: GoogleFonts.outfit(
-                    color: Colors.white,
-                    fontSize: 32,
-                    fontWeight: FontWeight.bold,
+          // 1. Map Layer (Background)
+          GoogleMap(
+            initialCameraPosition: CameraPosition(
+              target: state.currentLocation ?? const LatLng(6.5244, 3.3792), // Default Lagos
+              zoom: 15,
+            ),
+            myLocationEnabled: true,
+            myLocationButtonEnabled: false,
+            zoomControlsEnabled: false,
+            onMapCreated: (c) {
+              _mapController = c;
+              if (_mapStyle != null) {
+                // ignore: invalid_use_of_protected_member
+                c.setMapStyle(_mapStyle);
+              }
+            },
+            tileOverlays: state.heatmapTileOverlay != null ? {state.heatmapTileOverlay!} : {},
+          ),
+
+          // 2. Performance & Heatmap Overlays (Middle Layer)
+          Positioned(
+             top: 140, 
+             left: 20, 
+             child: (state.isOnline && state.heatmapTileOverlay != null) 
+              ? Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: AppTheme.primaryRed,
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 4)],
                   ),
-                ),
-                Row(
-                  children: [
-                    const Text(
-                      'Go Online',
-                      style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(width: 10),
-                    Switch(
-                      value: isOnline,
-                      onChanged: _toggleOnline,
-                      activeColor: Colors.green,
-                      activeTrackColor: Colors.white.withOpacity(0.3),
-                    ),
-                  ],
-                ),
-              ],
+                  child: const Row(
+                    children: [
+                      Icon(Icons.local_fire_department, color: Colors.white, size: 16),
+                      SizedBox(width: 4),
+                      Text("High Demand Area", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12)),
+                    ],
+                  ),
+                )
+              : const SizedBox(),
+          ),
+
+          // 3. Control Center Header (Top Layer)
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: _ControlCenterHeader(
+              isOnline: state.isOnline,
+              onToggleStatus: (val) => controller.toggleOnlineStatus(val),
             ),
           ),
 
-          // Map with Heatmap Placeholder
-          Expanded(
-            flex: 2,
-            child: Stack(
-              children: [
-                 Image.asset(
-                  'assets/images/heatmap_placeholder.png', 
-                  fit: BoxFit.cover,
-                  width: double.infinity,
-                  errorBuilder: (context, error, stackTrace) => Container(
-                    color: Colors.blue[50],
-                    child: const Center(child: Icon(Icons.wb_sunny_outlined, size: 80, color: Colors.blueAccent)),
+          // 4. Safety FAB (Top Right)
+          Positioned(
+            top: 60,
+            right: 20,
+            child: SafeArea(
+              child: FloatingActionButton.small(
+                backgroundColor: Colors.white,
+                child: const Icon(Icons.shield_outlined, color: AppTheme.primaryBlue),
+                onPressed: () {
+                  showModalBottomSheet(
+                    context: context, 
+                    backgroundColor: Colors.transparent,
+                    builder: (_) => const _SafetyToolkitSheet()
+                  );
+                },
+              )
+            ),
+          ),
+
+          // 5. Draggable Sheet (Bottom Layer)
+          NotificationListener<DraggableScrollableNotification>(
+            onNotification: (notification) {
+               return true;
+            },
+            child: DraggableScrollableSheet(
+              initialChildSize: 0.40,
+              minChildSize: 0.25,
+              maxChildSize: 0.85, 
+              builder: (context, scrollController) {
+                return Container(
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                    boxShadow: [
+                      BoxShadow(color: Colors.black12, blurRadius: 10, offset: Offset(0, -5)),
+                    ],
                   ),
-                ),
-                // "You" marker overlay
-                Center(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                        decoration: BoxDecoration(
-                          color: AppTheme.primaryBlue,
-                          borderRadius: BorderRadius.circular(20),
+                  child: SingleChildScrollView(
+                    controller: scrollController,
+                    padding: const EdgeInsets.all(20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Center(
+                          child: Container(
+                            width: 40,
+                            height: 4,
+                            margin: const EdgeInsets.only(bottom: 20),
+                            decoration: BoxDecoration(
+                              color: Colors.grey[300],
+                              borderRadius: BorderRadius.circular(2),
+                            ),
+                          ),
                         ),
-                        child: const Row(
-                          mainAxisSize: MainAxisSize.min,
+                        
+                        // Earnings Section (Always Visible)
+                        if (stats != null)
+                          _EarningsHeader(
+                            stats: stats,
+                            isVisible: state.isEarningsVisible,
+                            onToggleVisibility: controller.toggleEarningsVisibility,
+                          )
+                        else if (state.isLoading)
+                          const Center(child: CircularProgressIndicator())
+                        else 
+                          const Center(child: Text("Unable to load stats")),
+                        
+                        const SizedBox(height: 25),
+                        
+                        // Quick Actions Grid
+                        Row(
                           children: [
-                            Icon(Icons.person, color: Colors.white, size: 16),
-                            SizedBox(width: 4),
-                            Text('You', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                            Expanded(child: _ActionBtn(icon: Icons.account_balance_wallet, label: "Wallet", onTap: () => context.push('/wallet'))),
+                            const SizedBox(width: 10),
+                            Expanded(child: _ActionBtn(icon: Icons.list_alt, label: "Jobs", onTap: () => context.push('/rider/jobs'))),
+                            const SizedBox(width: 10),
+                            Expanded(child: _ActionBtn(icon: Icons.insights, label: "Insights", onTap: () => context.push('/rider/earnings'))),
                           ],
                         ),
-                      ),
-                      const Icon(Icons.arrow_drop_down, color: AppTheme.primaryBlue, size: 30),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
 
-          // Stats Cards
-          Expanded(
-            flex: 3,
-            child: Container(
-              padding: const EdgeInsets.all(20),
-              color: const Color(0xFFF1F4FA),
-              child: Column(
-                children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _StatCard(
-                          title: 'Today\'s Earnings',
-                          value: '${ref.watch(authProvider).currencySymbol}128.50',
-                          actionLabel: 'View Details',
-                          color: AppTheme.primaryBlue,
-                        ),
-                      ),
-                      const SizedBox(width: 15),
-                      Expanded(
-                        child: _StatCard(
-                          title: 'Completed Jobs',
-                          value: '8',
-                          actionLabel: 'View History',
-                          color: AppTheme.primaryBlue,
-                        ),
-                      ),
-                    ],
+                        const SizedBox(height: 30),
+
+                        // Job Radar / Feed
+                        const Text("Nearby Opportunities", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                        const SizedBox(height: 15),
+                        
+                        state.isOnline 
+                          ? _JobRadarList(
+                              jobs: state.nearbyJobs, 
+                              isLoading: state.isLoading && state.nearbyJobs.isEmpty,
+                              scrollController: scrollController,
+                              currencySymbol: stats?.currencySymbol ?? '₦',
+                            )
+                          : _OfflineStateWidget(onGoOnline: () => controller.toggleOnlineStatus(true)),
+
+                        const SizedBox(height: 30),
+
+                        // Productivity & News
+                         if (stats?.productivityTips.isNotEmpty == true) ...[
+                           const Text("For You", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                           const SizedBox(height: 10),
+                           _TipCard(tip: stats!.productivityTips.first),
+                         ]
+                      ],
+                    ),
                   ),
-                ],
-              ),
+                );
+              },
             ),
           ),
-        ],
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: 0,
-        onTap: (index) {
-          if (index == 3) context.push('/profile');
-        },
-        type: BottomNavigationBarType.fixed,
-        selectedItemColor: AppTheme.primaryBlue,
-        unselectedItemColor: AppTheme.textSecondary,
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Dashboard'),
-          BottomNavigationBarItem(icon: Icon(Icons.assignment), label: 'Jobs'),
-          BottomNavigationBarItem(icon: Icon(Icons.attach_money), label: 'Earnings'),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
         ],
       ),
     );
   }
 }
 
-class _StatCard extends StatelessWidget {
-  final String title;
-  final String value;
-  final String actionLabel;
-  final Color color;
+// ---------------- Helper Widgets ----------------
 
-  const _StatCard({
-    required this.title,
-    required this.value,
-    required this.actionLabel,
-    required this.color,
+class _ControlCenterHeader extends StatelessWidget {
+  final bool isOnline;
+  final Function(bool) onToggleStatus;
+
+  const _ControlCenterHeader({required this.isOnline, required this.onToggleStatus});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(20, 50, 20, 20),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            Colors.black.withOpacity(0.6),
+            Colors.transparent,
+          ],
+        ),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          // Vehicle Selector
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: const Row(
+              children: [
+                Icon(Icons.directions_car, size: 16, color: Colors.black87),
+                SizedBox(width: 6),
+                Text("Toyota Camry • ABJ-123", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                Icon(Icons.arrow_drop_down, size: 16),
+              ],
+            ),
+          ),
+
+          // Status Toggle
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+            decoration: BoxDecoration(
+              color: isOnline ? Colors.white : Colors.black54,
+              borderRadius: BorderRadius.circular(30),
+            ),
+            child: Row(
+              children: [
+                if (isOnline) const Padding(
+                  padding: EdgeInsets.only(left: 10, right: 6),
+                  child: Text("ONLINE", style: TextStyle(fontWeight: FontWeight.w900, color: AppTheme.successGreen, fontSize: 12)),
+                ),
+                Switch(
+                  value: isOnline,
+                  onChanged: onToggleStatus,
+                  activeColor: AppTheme.successGreen,
+                  activeTrackColor: Colors.grey[200],
+                  inactiveThumbColor: Colors.white,
+                  inactiveTrackColor: Colors.grey,
+                ),
+                if (!isOnline) const Padding(
+                  padding: EdgeInsets.only(left: 6, right: 10),
+                  child: Text("OFFLINE", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 12)),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _EarningsHeader extends StatelessWidget {
+  final RiderStats stats;
+  final bool isVisible;
+  final VoidCallback onToggleVisibility;
+
+  const _EarningsHeader({required this.stats, required this.isVisible, required this.onToggleVisibility});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Text("Today's Earnings", style: TextStyle(color: Colors.grey[600], fontSize: 14)),
+                    const SizedBox(width: 8),
+                    GestureDetector(
+                      onTap: onToggleVisibility,
+                      child: Icon(
+                        isVisible ? Icons.visibility : Icons.visibility_off,
+                        size: 18, 
+                        color: Colors.grey[400]
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  isVisible 
+                    ? '${stats.currencySymbol}${stats.todaysEarnings.toStringAsFixed(2)}'
+                    : '****',
+                  style: GoogleFonts.outfit(
+                    fontSize: 32,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black87,
+                  ),
+                ),
+              ],
+            ),
+            // Daily Goal Ring
+            Stack(
+              alignment: Alignment.center,
+              children: [
+                SizedBox(
+                  width: 50,
+                  height: 50,
+                  child: CircularProgressIndicator(
+                    value: (stats.todaysEarnings / (stats.shiftGoalTarget == 0 ? 1 : stats.shiftGoalTarget)).clamp(0.0, 1.0),
+                    backgroundColor: Colors.grey[200],
+                    valueColor: const AlwaysStoppedAnimation<Color>(AppTheme.primaryBlue),
+                    strokeWidth: 5,
+                  ),
+                ),
+                Text(
+                  "${((stats.todaysEarnings / (stats.shiftGoalTarget == 0 ? 1 : stats.shiftGoalTarget)) * 100).toInt()}%",
+                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 10),
+                )
+              ],
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+class _JobRadarList extends StatelessWidget {
+  final List<JobOpportunity> jobs;
+  final bool isLoading;
+  final ScrollController scrollController;
+  final String currencySymbol;
+
+  const _JobRadarList({
+    required this.jobs, 
+    required this.isLoading, 
+    required this.scrollController,
+    required this.currencySymbol,
   });
+
+  @override
+  Widget build(BuildContext context) {
+    if (isLoading) {
+      return const Center(child: Padding(padding: EdgeInsets.all(20), child: CircularProgressIndicator()));
+    }
+
+    if (jobs.isEmpty) {
+      return Container(
+        padding: const EdgeInsets.all(20),
+        width: double.infinity,
+        decoration: BoxDecoration(
+          color: Colors.grey[50],
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.grey[200]!),
+        ),
+        child: Column(
+          children: [
+            const Icon(Icons.radar, size: 40, color: Colors.grey),
+            const SizedBox(height: 10),
+            const Text("Scanning for jobs...", style: TextStyle(fontWeight: FontWeight.bold)),
+            Text("Move to a high demand area", style: TextStyle(color: Colors.grey[600], fontSize: 12)),
+          ],
+        ),
+      );
+    }
+
+    return ListView.builder(
+      physics: const NeverScrollableScrollPhysics(), // Handled by sheet
+      shrinkWrap: true,
+      itemCount: jobs.length,
+      itemBuilder: (context, index) {
+        final job = jobs[index];
+        return Card(
+          margin: const EdgeInsets.only(bottom: 10),
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+            side: BorderSide(color: Colors.grey[200]!),
+          ),
+          child: ListTile(
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            leading: CircleAvatar(
+              backgroundColor: AppTheme.primaryBlue.withOpacity(0.1),
+              child: const Icon(Icons.local_shipping, color: AppTheme.primaryBlue),
+            ),
+            title: Text(job.title, style: const TextStyle(fontWeight: FontWeight.bold)),
+            subtitle: Text("${job.distance} • ${job.location}", maxLines: 1, overflow: TextOverflow.ellipsis),
+            trailing: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text("$currencySymbol${job.earnings.toStringAsFixed(0)}", style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 16)),
+                const Text("Est. earn", style: TextStyle(fontSize: 10, color: Colors.grey)),
+              ],
+            ),
+            onTap: () {
+              // Accept or View Job
+            },
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _OfflineStateWidget extends StatelessWidget {
+  final VoidCallback onGoOnline;
+
+  const _OfflineStateWidget({required this.onGoOnline});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(30),
+      color: Colors.grey[50],
+      child: Column(
+        children: [
+          const Icon(Icons.offline_bolt, size: 50, color: Colors.grey),
+          const SizedBox(height: 15),
+          const Text("You are Offline", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          const Text("Go online to start receiving orders", style: TextStyle(color: Colors.grey)),
+          const SizedBox(height: 20),
+          ElevatedButton(
+            onPressed: onGoOnline,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppTheme.primaryBlue,
+              padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 12),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+            ),
+            child: const Text("GO ONLINE", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ActionBtn extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  const _ActionBtn({required this.icon, required this.label, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 15),
+        decoration: BoxDecoration(
+          color: Colors.grey[50],
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.grey[200]!),
+        ),
+        child: Column(
+          children: [
+            Icon(icon, color: AppTheme.primaryBlue),
+            const SizedBox(height: 8),
+            Text(label, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SafetyToolkitSheet extends StatelessWidget {
+  const _SafetyToolkitSheet();
 
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(15),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            title,
-            style: TextStyle(
-              color: color,
-              fontWeight: FontWeight.bold,
-              fontSize: 14,
-            ),
+          const Text("Safety Toolkit", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 20),
+          ListTile(
+            leading: const CircleAvatar(backgroundColor: Colors.red, child: Icon(Icons.sos, color: Colors.white)),
+            title: const Text("Emergency Assistance", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.red)),
+            subtitle: const Text("Call police or emergency services"),
+            onTap: () {},
           ),
-          const SizedBox(height: 15),
-          Text(
-            value,
-            style: const TextStyle(
-              fontSize: 28,
-              fontWeight: FontWeight.w900,
-            ),
+          const Divider(),
+          ListTile(
+            leading: const CircleAvatar(backgroundColor: Colors.blue, child: Icon(Icons.share, color: Colors.white)),
+            title: const Text("Share My Trip"),
+            subtitle: const Text("Share live location with trusted contacts"),
+            onTap: () {},
           ),
-          const Divider(height: 30),
-          Row(
-            children: [
-              Text(
-                actionLabel,
-                style: TextStyle(
-                  color: color,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 12,
-                ),
-              ),
-              Icon(Icons.chevron_right, color: color, size: 16),
-            ],
+          const Divider(),
+          ListTile(
+            leading: const CircleAvatar(backgroundColor: Colors.orange, child: Icon(Icons.warning, color: Colors.white)),
+            title: const Text("Report Incident"),
+            subtitle: const Text("Report an accident or safety issue"),
+            onTap: () {},
           ),
+          const SizedBox(height: 20),
         ],
       ),
     );
   }
 }
+
+class _TipCard extends StatelessWidget {
+  final String tip;
+  const _TipCard({required this.tip});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(15),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF0F4FF),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppTheme.primaryBlue.withOpacity(0.2)),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.lightbulb, color: AppTheme.primaryBlue),
+          const SizedBox(width: 15),
+          Expanded(child: Text(tip, style: const TextStyle(color: Color(0xFF1A237E), fontWeight: FontWeight.w500))),
+        ],
+      ),
+    );
+  }
+}
+
+// Minimal Map Style (Optional)
+const String _mapStyle = '''
+[]
+''';

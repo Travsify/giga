@@ -1,0 +1,260 @@
+﻿Running Gradle task 'assembleDebug'...                          
+flutter : Warning: 
+Flutter support for your 
+project's Gradle version 
+(8.5.0) will soon be 
+dropped. Please upgrade 
+your Gradle version to a 
+version of at least 8.7.0 
+soon.
+At line:1 char:1
++ flutter build apk 
+--debug > 
+build_output.txt 2>&1
++ ~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo        
+      : NotSpecified: (W  
+  arning: Flutte...ast    
+ 8.7.0 soon.:String) [    
+], RemoteException
+    + FullyQualifiedError 
+   Id : NativeCommandErr  
+  or
+ 
+Alternatively, use the 
+flag "--android-skip-build
+-dependency-validation" 
+to bypass this check.
+
+Potential fix: Your 
+project's gradle version 
+is typically defined in 
+the gradle wrapper file. 
+By default, this can be 
+found at C:\Users\USER\Des
+ktop\giga\flota_mobile\and
+roid/gradle/wrapper/gradle
+-wrapper.properties. 
+For more information, see 
+https://docs.gradle.org/cu
+rrent/userguide/gradle_wra
+pper.html.
+
+Warning: Flutter support 
+for your project's 
+Android Gradle Plugin 
+version (Android Gradle 
+Plugin version 8.2.1) 
+will soon be dropped. 
+Please upgrade your 
+Android Gradle Plugin 
+version to a version of 
+at least Android Gradle 
+Plugin version 8.6.0 soon.
+Alternatively, use the 
+flag "--android-skip-build
+-dependency-validation" 
+to bypass this check.
+
+Potential fix: Your 
+project's AGP version is 
+typically defined in the 
+plugins block of the 
+`settings.gradle` file (C:
+\Users\USER\Desktop\giga\f
+lota_mobile\android/settin
+gs.gradle), by a plugin 
+with the id of 
+com.android.application. 
+If you don't see a 
+plugins block, your 
+project was likely 
+created with an older 
+template version. In this 
+case it is most likely 
+defined in the top-level 
+build.gradle file (C:\User
+s\USER\Desktop\giga\flota_
+mobile\android/build.gradl
+e) by the following line 
+in the dependencies block 
+of the buildscript: 
+"classpath 'com.android.to
+ols.build:gradle:<version>
+'".
+
+Warning: SDK processing. 
+This version only 
+understands SDK XML 
+versions up to 3 but an 
+SDK XML file of version 4 
+was encountered. This can 
+happen if you use 
+versions of Android 
+Studio and the 
+command-line tools that 
+were released at 
+different times.
+warning: [options] source 
+value 8 is obsolete and 
+will be removed in a 
+future release
+warning: [options] target 
+value 8 is obsolete and 
+will be removed in a 
+future release
+warning: [options] To 
+suppress warnings about 
+obsolete options, use 
+-Xlint:-options.
+3 warnings
+warning: [options] source 
+value 8 is obsolete and 
+will be removed in a 
+future release
+warning: [options] target 
+value 8 is obsolete and 
+will be removed in a 
+future release
+warning: [options] To 
+suppress warnings about 
+obsolete options, use 
+-Xlint:-options.
+Note: C:\Users\USER\AppDat
+a\Local\Pub\Cache\hosted\p
+ub.dev\cloud_firestore-4.1
+5.8\android\src\main\java\
+io\flutter\plugins\firebas
+e\firestore\FlutterFirebas
+eFirestorePlugin.java 
+uses or overrides a 
+deprecated API.
+Note: Recompile with 
+-Xlint:deprecation for 
+details.
+Note: Some input files 
+use unchecked or unsafe 
+operations.
+Note: Recompile with 
+-Xlint:unchecked for 
+details.
+3 warnings
+warning: [options] source 
+value 8 is obsolete and 
+will be removed in a 
+future release
+warning: [options] target 
+value 8 is obsolete and 
+will be removed in a 
+future release
+warning: [options] To 
+suppress warnings about 
+obsolete options, use 
+-Xlint:-options.
+Note: Some input files 
+use or override a 
+deprecated API.
+Note: Recompile with 
+-Xlint:deprecation for 
+details.
+3 warnings
+warning: [options] source 
+value 8 is obsolete and 
+will be removed in a 
+future release
+warning: [options] target 
+value 8 is obsolete and 
+will be removed in a 
+future release
+warning: [options] To 
+suppress warnings about 
+obsolete options, use 
+-Xlint:-options.
+Note: Some input files 
+use or override a 
+deprecated API.
+Note: Recompile with 
+-Xlint:deprecation for 
+details.
+Note: C:\Users\USER\AppDat
+a\Local\Pub\Cache\hosted\p
+ub.dev\firebase_messaging-
+14.7.19\android\src\main\j
+ava\io\flutter\plugins\fir
+ebase\messaging\FlutterFir
+ebaseMessagingPlugin.java 
+uses unchecked or unsafe 
+operations.
+Note: Recompile with 
+-Xlint:unchecked for 
+details.
+3 warnings
+warning: [options] source 
+value 8 is obsolete and 
+will be removed in a 
+future release
+warning: [options] target 
+value 8 is obsolete and 
+will be removed in a 
+future release
+warning: [options] To 
+suppress warnings about 
+obsolete options, use 
+-Xlint:-options.
+3 warnings
+warning: [options] source 
+value 8 is obsolete and 
+will be removed in a 
+future release
+warning: [options] target 
+value 8 is obsolete and 
+will be removed in a 
+future release
+warning: [options] To 
+suppress warnings about 
+obsolete options, use 
+-Xlint:-options.
+C:\Users\USER\AppData\Loca
+l\Pub\Cache\hosted\pub.dev
+\flutter_local_notificatio
+ns-16.3.3\android\src\main
+\java\com\dexterous\flutte
+rlocalnotifications\Flutte
+rLocalNotificationsPlugin.
+java:1033: error: 
+reference to bigLargeIcon 
+is ambiguous
+      bigPictureStyle.bigL
+argeIcon(null);
+                     ^
+  both method 
+bigLargeIcon(Bitmap) in 
+BigPictureStyle and 
+method bigLargeIcon(Icon) 
+in BigPictureStyle match
+1 error
+3 warnings
+
+FAILURE: Build failed 
+with an exception.
+
+* What went wrong:
+Execution failed for task 
+':flutter_local_notificati
+ons:compileDebugJavaWithJa
+vac'.
+> Compilation failed; see 
+the compiler error output 
+for details.
+
+* Try:
+> Run with --info option 
+to get more log output.
+> Run with --scan to get 
+full insights.
+
+BUILD FAILED in 1m 50s
+Running Gradle task 'assembleDebug'...                            111.9s
+Gradle task assembleDebug 
+failed with exit code 1

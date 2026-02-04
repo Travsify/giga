@@ -1,0 +1,147 @@
+﻿Running Gradle task 'assembleDebug'...                          
+flutter : Warning: 
+Flutter support for your 
+project's Gradle version 
+(8.5.0) will soon be 
+dropped. Please upgrade 
+your Gradle version to a 
+version of at least 8.7.0 
+soon.
+At line:1 char:1
++ flutter build apk 
+--debug > 
+build_output_v2.txt 2>&1
++ ~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~
+    + CategoryInfo        
+      : NotSpecified: (W  
+  arning: Flutte...ast    
+ 8.7.0 soon.:String) [    
+], RemoteException
+    + FullyQualifiedError 
+   Id : NativeCommandErr  
+  or
+ 
+Alternatively, use the 
+flag "--android-skip-build
+-dependency-validation" 
+to bypass this check.
+
+Potential fix: Your 
+project's gradle version 
+is typically defined in 
+the gradle wrapper file. 
+By default, this can be 
+found at C:\Users\USER\Des
+ktop\giga\flota_mobile\and
+roid/gradle/wrapper/gradle
+-wrapper.properties. 
+For more information, see 
+https://docs.gradle.org/cu
+rrent/userguide/gradle_wra
+pper.html.
+
+Warning: Flutter support 
+for your project's 
+Android Gradle Plugin 
+version (Android Gradle 
+Plugin version 8.2.1) 
+will soon be dropped. 
+Please upgrade your 
+Android Gradle Plugin 
+version to a version of 
+at least Android Gradle 
+Plugin version 8.6.0 soon.
+Alternatively, use the 
+flag "--android-skip-build
+-dependency-validation" 
+to bypass this check.
+
+Potential fix: Your 
+project's AGP version is 
+typically defined in the 
+plugins block of the 
+`settings.gradle` file (C:
+\Users\USER\Desktop\giga\f
+lota_mobile\android/settin
+gs.gradle), by a plugin 
+with the id of 
+com.android.application. 
+If you don't see a 
+plugins block, your 
+project was likely 
+created with an older 
+template version. In this 
+case it is most likely 
+defined in the top-level 
+build.gradle file (C:\User
+s\USER\Desktop\giga\flota_
+mobile\android/build.gradl
+e) by the following line 
+in the dependencies block 
+of the buildscript: 
+"classpath 'com.android.to
+ols.build:gradle:<version>
+'".
+
+warning: [options] source 
+value 8 is obsolete and 
+will be removed in a 
+future release
+warning: [options] target 
+value 8 is obsolete and 
+will be removed in a 
+future release
+warning: [options] To 
+suppress warnings about 
+obsolete options, use 
+-Xlint:-options.
+3 warnings
+warning: [options] source 
+value 8 is obsolete and 
+will be removed in a 
+future release
+warning: [options] target 
+value 8 is obsolete and 
+will be removed in a 
+future release
+warning: [options] To 
+suppress warnings about 
+obsolete options, use 
+-Xlint:-options.
+3 warnings
+warning: [options] source 
+value 8 is obsolete and 
+will be removed in a 
+future release
+warning: [options] target 
+value 8 is obsolete and 
+will be removed in a 
+future release
+warning: [options] To 
+suppress warnings about 
+obsolete options, use 
+-Xlint:-options.
+3 warnings
+warning: [options] source 
+value 8 is obsolete and 
+will be removed in a 
+future release
+warning: [options] target 
+value 8 is obsolete and 
+will be removed in a 
+future release
+warning: [options] To 
+suppress warnings about 
+obsolete options, use 
+-Xlint:-options.
+3 warnings
+Note: Some input files 
+use or override a 
+deprecated API.
+Note: Recompile with 
+-Xlint:deprecation for 
+details.
+Running Gradle task 'assembleDebug'...                            266.0s
+ΓêÜ Built build\app\outputs\flutter-apk\app-debug.apk

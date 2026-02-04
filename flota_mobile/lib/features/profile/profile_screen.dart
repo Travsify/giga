@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flota_mobile/features/profile/profile_provider.dart';
-import 'package:flota_mobile/features/auth/auth_provider.dart';
+import '../auth/auth_provider.dart';
 import 'package:flota_mobile/theme/app_theme.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:go_router/go_router.dart';
@@ -243,6 +243,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final profileState = ref.watch(profileProvider);
     final user = profileState.user;
     final loyalty = profileState.loyalty;

@@ -139,6 +139,8 @@ class _LiveHeatmapWidgetState extends State<LiveHeatmapWidget> {
     if (mounted) setState(() => _trafficStatus = status);
   }
 
+  @override
+  Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Container(
       width: double.infinity,

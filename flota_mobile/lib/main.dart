@@ -24,6 +24,8 @@ import 'package:flota_mobile/features/delivery/locker_map_screen.dart';
 import 'package:flota_mobile/features/sustainability/carbon_dashboard_screen.dart';
 import 'package:flota_mobile/features/promos/screens/offers_screen.dart';
 import 'package:flota_mobile/features/tracking/rider_dashboard.dart';
+import 'package:flota_mobile/features/tracking/rider_earnings_screen.dart';
+import 'package:flota_mobile/features/tracking/rider_jobs_screen.dart';
 import 'package:flota_mobile/features/tracking/tracking_screen.dart';
 import 'package:flota_mobile/features/tracking/enhanced_tracking_screen.dart';
 import 'package:flota_mobile/features/delivery/multi_stop_screen.dart';
@@ -45,9 +47,6 @@ import 'package:flota_mobile/features/business/presentation/screens/api_key_scre
 import 'package:flota_mobile/theme/app_theme.dart';
 
 
-import 'package:flota_mobile/features/business/presentation/screens/business_dashboard_screen.dart';
-import 'package:flota_mobile/features/business/presentation/screens/team_management_screen.dart';
-import 'package:flota_mobile/features/business/presentation/screens/billing_screen.dart';
 import 'package:flota_mobile/features/business/presentation/screens/bulk_shipping_screen.dart';
 
 import 'firebase_options.dart';
@@ -287,6 +286,14 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/rider',
         builder: (context, state) => const RiderDashboard(),
+      ),
+      GoRoute(
+        path: '/rider/earnings',
+        builder: (context, state) => const RiderEarningsScreen(),
+      ),
+      GoRoute(
+        path: '/rider/jobs',
+        builder: (context, state) => const RiderJobsScreen(),
       ),
       GoRoute(
         path: '/tracking',

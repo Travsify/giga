@@ -113,5 +113,8 @@ class AppTheme {
 
   // Maintaining lightTheme alias for backward compatibility but using dark colors
   static ThemeData get lightTheme => darkTheme;
-}
+
+  static const Color slateBlue = Color(0xFF475569);
+  static const Color cardBg = surfaceColor;
+  static const Color primaryOrange = Color(0xFFF59E0B);
 }
