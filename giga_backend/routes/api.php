@@ -20,6 +20,7 @@ use App\Http\Controllers\Api\LockerController;
 use App\Http\Controllers\Api\SustainabilityController;
 use App\Http\Controllers\Api\SettingsController;
 use App\Http\Controllers\Api\CurrencyController;
+use App\Http\Controllers\Api\BankController;
 
 // Rate-limited auth routes (5 attempts per minute per IP)
 Route::middleware('throttle:5,1')->group(function () {
@@ -145,6 +146,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/rider/dashboard-stats', [App\Http\Controllers\Api\RiderController::class, 'getDashboardStats']);
     Route::get('/rider/history', [App\Http\Controllers\Api\RiderController::class, 'getHistory']);
     Route::get('/rider/active-job', [App\Http\Controllers\Api\RiderController::class, 'getActiveJob']);
+
+    // Banks
+    Route::get('/rider/banks', [BankController::class, 'index']);
+    Route::post('/rider/banks', [BankController::class, 'store']);
+    Route::put('/rider/banks/{id}', [BankController::class, 'update']);
+    Route::delete('/rider/banks/{id}', [BankController::class, 'destroy']);
+    Route::get('/banks', [BankController::class, 'getBanks']);
 
     // Payments
     Route::post('/create-payment-intent', [App\Http\Controllers\Api\PaymentController::class, 'createPaymentIntent']);

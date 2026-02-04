@@ -1,0 +1,124 @@
+<?php
+
+namespace App\Http\Controllers\Api;
+
+use App\Http\Controllers\Controller;
+use App\Models\BankAccount;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
+
+class BankController extends Controller
+{
+    /**
+     * Display a listing of the rider's bank accounts.
+     */
+    public function index(Request $request)
+    {
+        $rider = $request->user()->rider;
+
+        if (!$rider) {
+            return response()->json(['error' => 'Rider not found'], 404);
+        }
+
+        $accounts = $rider->bankAccounts()->orderBy('is_active', 'desc')->get();
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $accounts
+        ]);
+    }
+
+    /**
+     * Store a newly created bank account.
+     */
+    public function store(Request $request)
+    {
+        $rider = $request->user()->rider;
+
+        if (!$rider) {
+            return response()->json(['error' => 'Rider not found'], 404);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'account_name' => 'required|string',
+            'account_number' => 'required|string',
+            'bank_name' => 'required|string',
+            'bank_code' => 'sometimes|string',
+            'sort_code' => 'sometimes|string',
+            'gateway_type' => 'required|in:flutterwave,stripe',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        $account = $rider->bankAccounts()->create($request->all());
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Bank account added successfully',
+            'data' => $account
+        ], 201);
+    }
+
+    /**
+     * Update the specified bank account.
+     */
+    public function update(Request $request, $id)
+    {
+        $rider = $request->user()->rider;
+        $account = $rider->bankAccounts()->findOrFail($id);
+
+        $validator = Validator::make($request->all(), [
+            'account_name' => 'sometimes|string',
+            'account_number' => 'sometimes|string',
+            'bank_name' => 'sometimes|string',
+            'bank_code' => 'sometimes|string',
+            'sort_code' => 'sometimes|string',
+            'is_active' => 'sometimes|boolean',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        $account->update($request->all());
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Bank account updated successfully',
+            'data' => $account
+        ]);
+    }
+
+    /**
+     * Remove the specified bank account.
+     */
+    public function destroy(Request $request, $id)
+    {
+        $rider = $request->user()->rider;
+        $account = $rider->bankAccounts()->findOrFail($id);
+
+        $account->delete();
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Bank account removed successfully'
+        ]);
+    }
+
+    /**
+     * Get list of supported banks (for frontend selector).
+     */
+    public function getBanks(Request $request)
+    {
+        $country = $request->query('country', 'NG');
+        $flw = new \App\Services\FlutterwaveTransferService();
+        $banks = $flw->getBanks($country);
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $banks
+        ]);
+    }
+}

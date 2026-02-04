@@ -44,4 +44,9 @@ class Rider extends Model
     {
         return $this->hasMany(Delivery::class);
     }
+
+    public function bankAccounts()
+    {
+        return $this->hasMany(BankAccount::class);
+    }
 }

@@ -255,25 +255,58 @@ class PaymentController extends Controller
     /**
      * Handle fund withdrawal requests.
      */
+    /**
+     * Handle fund withdrawal requests.
+     */
     public function withdraw(Request $request)
     {
         $request->validate([
             'amount' => 'required|numeric|min:1',
-            'bank_account' => 'required|string',
-            'bank_code' => 'sometimes|string',
-            'method' => 'required|string|in:stripe,flutterwave',
+            'bank_account_id' => 'required|exists:bank_accounts,id',
         ]);
 
         try {
             $user = $request->user();
+            $rider = $user->rider;
             $wallet = $user->wallet;
+            $bankAccount = \App\Models\BankAccount::findOrFail($request->bank_account_id);
+
+            // Security check
+            if ($bankAccount->rider_id !== $rider->id) {
+                return response()->json(['error' => 'Unauthorized bank account'], 403);
+            }
 
             if (!$wallet || $wallet->balance < $request->amount) {
                 return response()->json(['error' => 'Insufficient funds'], 400);
             }
 
-            // Deduct from wallet immediately (or mark as pending)
-            // For production, we'd typically queue this or use a pending_withdrawals column
+            // Reference for the transaction
+            $reference = 'WITHDRAW_' . time() . '_' . $user->id;
+
+            // Payout Logic based on gateway
+            if ($bankAccount->gateway_type === 'flutterwave') {
+                $flw = new \App\Services\FlutterwaveTransferService();
+                $result = $flw->initiateTransfer([
+                    'bank_code' => $bankAccount->bank_code,
+                    'account_number' => $bankAccount->account_number,
+                    'amount' => $request->amount,
+                    'currency' => $wallet->currency,
+                    'reference' => $reference,
+                ]);
+
+                if (!$result['success']) {
+                    return response()->json(['error' => $result['message']], 400);
+                }
+            } else {
+                $stripe = new \App\Services\StripePayoutService();
+                $result = $stripe->initiatePayout($request->amount, strtolower($wallet->currency));
+
+                if (!$result['success']) {
+                    return response()->json(['error' => $result['message']], 400);
+                }
+            }
+
+            // Deduct from wallet
             $wallet->balance -= $request->amount;
             $wallet->save();
 
@@ -281,25 +314,22 @@ class PaymentController extends Controller
             $transaction = $wallet->transactions()->create([
                 'amount' => -$request->amount,
                 'type' => 'debit',
-                'description' => 'Withdrawal to ' . $request->bank_account . ' (' . strtoupper($request->input('method')) . ')',
-                'reference' => 'WITHDRAW_' . time() . '_' . $user->id,
-                'status' => 'pending',
+                'description' => 'Withdrawal to ' . $bankAccount->bank_name . ' (' . $bankAccount->account_number . ')',
+                'reference' => $reference,
+                'status' => 'completed', // In real prod, this might stay 'pending' until webhook
                 'currency' => $wallet->currency,
             ]);
 
-            // Logic for Stripe Payouts or Flutterwave Transfers would go here
-            // \Log::info("Withdrawal request initiated: " . $transaction->reference);
-
             return response()->json([
-                'success' => true,
-                'message' => 'Withdrawal request submitted successfully.',
+                'status' => 'success',
+                'message' => 'Withdrawal processed successfully.',
                 'balance' => $wallet->balance,
-                'transaction' => $transaction
+                'data' => $transaction
             ]);
 
         } catch (\Exception $e) {
             \Log::error('Withdrawal Error: ' . $e->getMessage());
-            return response()->json(['error' => 'Failed to process withdrawal'], 500);
+            return response()->json(['error' => 'Failed to process withdrawal: ' . $e->getMessage()], 500);
         }
     }
 
