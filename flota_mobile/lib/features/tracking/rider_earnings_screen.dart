@@ -171,7 +171,7 @@ class _RiderEarningsScreenState extends ConsumerState<RiderEarningsScreen> {
               children: [
                 Icon(Icons.cloud_off, size: 64, color: Colors.grey[400]),
                 const SizedBox(height: 16),
-                const Text(
+                Text(
                   'Unable to load earnings',
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppTheme.textPrimary),
                 ),

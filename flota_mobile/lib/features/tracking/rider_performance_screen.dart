@@ -33,7 +33,7 @@ class RiderPerformanceScreen extends ConsumerWidget {
             ],
           ),
         ),
-        loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.primaryRed)),
+        loading: () => Center(child: CircularProgressIndicator(color: AppTheme.primaryRed)),
         error: (e, _) => Center(
           child: Padding(
             padding: const EdgeInsets.all(24),
