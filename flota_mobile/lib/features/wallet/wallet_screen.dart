@@ -1,17 +1,14 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flota_mobile/features/auth/auth_provider.dart';
+import 'package:flota_mobile/features/tracking/rider_earnings_screen.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:flota_mobile/theme/app_theme.dart';
 import 'package:flota_mobile/core/payment_service.dart';
-import 'package:flota_mobile/core/error_handler.dart';
-import 'package:intl/intl.dart';
 import 'wallet_provider.dart';
-import 'transaction_list_screen.dart';
 
 class WalletScreen extends ConsumerStatefulWidget {
   const WalletScreen({super.key});
@@ -126,145 +123,6 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
     }
   }
 
-  Future<void> _fundWallet(AuthState authState) async {
-    // ... [Validation checks remain same] ...
-    if (authState.userEmail == null) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please log in first')));
-      return;
-    }
-
-    final amountController = TextEditingController();
-    final result = await showModalBottomSheet<double>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => _buildAmountInputSheet(amountController), // Extracted for brevity
-    );
-
-    if (result != null && result > 0) {
-      setState(() => _isLoading = true);
-      try {
-        bool success = false;
-        if (_region == 'UK/Intl') {
-          await PaymentService.initialize();
-          success = await PaymentService.fundWallet(context, result, authState.userEmail!, authState.userId!);
-        } else {
-          // African User - Use Flutterwave
-          final currency = authState.currencySymbol == '₦' ? 'NGN' : 'GHS';
-          success = await PaymentService.fundWithFlutterwave(context, result, currency);
-        }
-        
-        if (success) {
-          // Refresh Wallet Provider
-          await ref.read(walletProvider.notifier).fetchWalletData();
-          
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('${authState.currencySymbol}${result.toStringAsFixed(2)} added!'), backgroundColor: AppTheme.successGreen),
-            );
-          }
-        }
-      } catch (e) {
-        if (mounted) ErrorHandler.handleError(context, e);
-      } finally {
-        if (mounted) setState(() => _isLoading = false);
-      }
-    }
-  }
-
-  Future<void> _handleWithdraw(AuthState authState) async {
-    final amountController = TextEditingController();
-    final accountController = TextEditingController();
-    
-    final result = await showModalBottomSheet<Map<String, dynamic>>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => Container(
-        padding: EdgeInsets.fromLTRB(24, 24, 24, MediaQuery.of(context).viewInsets.bottom + 24),
-        decoration: const BoxDecoration(
-          color: AppTheme.surfaceColor,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Withdraw Funds', style: GoogleFonts.outfit(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white)),
-            const SizedBox(height: 20),
-            TextField(
-              controller: amountController,
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
-              style: const TextStyle(color: Colors.white),
-              decoration: InputDecoration(
-                labelText: 'Amount (${authState.currencySymbol})',
-                hintText: '0.00',
-                filled: true,
-                fillColor: AppTheme.surfaceColor,
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
-                prefixIcon: const Icon(Icons.account_balance_wallet, color: AppTheme.primaryBlue),
-              ),
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: accountController,
-              style: const TextStyle(color: Colors.white),
-              decoration: InputDecoration(
-                labelText: _region == 'UK/Intl' ? 'Sort Code & Account Number' : 'Bank Account Number',
-                hintText: _region == 'UK/Intl' ? 'XX-XX-XX XXXXXXXX' : 'Enter 10-digit number',
-                filled: true,
-                fillColor: AppTheme.surfaceColor,
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
-                prefixIcon: const Icon(Icons.account_balance, color: AppTheme.primaryBlue),
-              ),
-            ),
-            const SizedBox(height: 24),
-            SizedBox(
-              width: double.infinity,
-              height: 56,
-              child: ElevatedButton(
-                onPressed: () {
-                  final amount = double.tryParse(amountController.text);
-                  if (amount != null && accountController.text.isNotEmpty) {
-                    Navigator.pop(context, {'amount': amount, 'account': accountController.text});
-                  }
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppTheme.primaryBlue,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                ),
-                child: const Text('Confirm Withdrawal'),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-
-    if (result != null) {
-      setState(() => _isLoading = true);
-      try {
-        final success = await PaymentService.withdrawFunds(
-          context, 
-          result['amount'], 
-          result['account'], 
-          _region == 'UK/Intl' ? 'stripe' : 'flutterwave'
-        );
-        
-        if (success) {
-          await ref.read(walletProvider.notifier).fetchWalletData();
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Withdrawal request submitted!'), backgroundColor: AppTheme.successGreen),
-            );
-          }
-        }
-      } finally {
-        if (mounted) setState(() => _isLoading = false);
-      }
-    }
-  }
-
   Widget _buildAmountInputSheet(TextEditingController controller) {
     return Container(
         padding: EdgeInsets.fromLTRB(24, 24, 24, MediaQuery.of(context).viewInsets.bottom + 24),
@@ -319,6 +177,148 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
       );
   }
 
+  Future<void> _fundWallet(AuthState authState) async {
+    if (authState.userEmail == null) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please log in first')));
+      return;
+    }
+
+    final amountController = TextEditingController();
+    final result = await showModalBottomSheet<double>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => _buildAmountInputSheet(amountController),
+    );
+
+    if (result != null && result > 0) {
+      setState(() => _isLoading = true);
+      try {
+        bool success = false;
+        if (_region == 'UK/Intl') {
+          await PaymentService.initialize();
+          success = await PaymentService.fundWallet(context, result, authState.userEmail!, authState.userId!);
+        } else {
+          final currency = authState.currencySymbol == '₦' ? 'NGN' : (authState.currencySymbol == '₵' ? 'GHS' : 'USD');
+          success = await PaymentService.fundWithFlutterwave(context, result, currency);
+        }
+        
+        if (success) {
+          await ref.read(walletProvider.notifier).fetchWalletData();
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('${authState.currencySymbol}${result.toStringAsFixed(2)} added!'), backgroundColor: AppTheme.successGreen),
+            );
+          }
+        }
+      } finally {
+        if (mounted) setState(() => _isLoading = false);
+      }
+    }
+  }
+  }
+
+  Future<void> _handleWithdraw(AuthState authState) async {
+    final banksAsync = ref.read(bankAccountsProvider);
+    final banks = banksAsync.asData?.value ?? [];
+
+    if (banks.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please link a bank account in Earnings Hub first.')));
+      return;
+    }
+
+    final amountController = TextEditingController();
+    final result = await showModalBottomSheet<Map<String, dynamic>>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        padding: EdgeInsets.fromLTRB(24, 24, 24, MediaQuery.of(context).viewInsets.bottom + 24),
+        decoration: const BoxDecoration(
+          color: AppTheme.surfaceColor,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Withdraw Funds', style: GoogleFonts.outfit(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white)),
+            const SizedBox(height: 20),
+            TextField(
+              controller: amountController,
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              style: const TextStyle(color: Colors.white),
+              decoration: InputDecoration(
+                labelText: 'Amount (${authState.currencySymbol})',
+                hintText: '0.00',
+                filled: true,
+                fillColor: AppTheme.surfaceColor,
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
+                prefixIcon: const Icon(Icons.account_balance_wallet, color: AppTheme.primaryBlue),
+              ),
+            ),
+            const SizedBox(height: 16),
+            DropdownButtonFormField<String>(
+              dropdownColor: AppTheme.surfaceColor,
+              decoration: InputDecoration(
+                labelText: 'Payout Account',
+                filled: true,
+                fillColor: AppTheme.surfaceColor,
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
+                prefixIcon: const Icon(Icons.account_balance, color: AppTheme.primaryBlue),
+              ),
+              items: banks.map((b) => DropdownMenuItem(
+                value: b.id,
+                child: Text('${b.bankName} (••${b.accountNumber.substring(b.accountNumber.length - 2)})', style: const TextStyle(color: Colors.white)),
+              )).toList(),
+              onChanged: (val) {},
+              value: banks[0].id,
+            ),
+            const SizedBox(height: 24),
+            SizedBox(
+              width: double.infinity,
+              height: 56,
+              child: ElevatedButton(
+                onPressed: () {
+                  final amount = double.tryParse(amountController.text);
+                  if (amount != null) {
+                    Navigator.pop(context, {'amount': amount, 'bank_id': banks[0].id});
+                  }
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppTheme.primaryBlue,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                ),
+                child: const Text('Confirm Withdrawal'),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    if (result != null) {
+      setState(() => _isLoading = true);
+      try {
+        final success = await PaymentService.withdrawFunds(
+          result['amount'], 
+          result['bank_id'], 
+        );
+        
+        if (success) {
+          await ref.read(walletProvider.notifier).fetchWalletData();
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Withdrawal request submitted!'), backgroundColor: AppTheme.successGreen),
+            );
+          }
+        }
+      } finally {
+        if (mounted) setState(() => _isLoading = false);
+      }
+    }
+  }
+
   Future<void> _sendFunds(AuthState authState) async {
     final emailController = TextEditingController();
     final amountController = TextEditingController();
@@ -344,7 +344,7 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
               style: const TextStyle(color: Colors.white),
               decoration: InputDecoration(
                 labelText: "Recipient's Email",
-                hintText: "Enter friend's email",
+                hintText: "Enter user's email",
                 filled: true,
                 fillColor: AppTheme.surfaceColor,
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
@@ -392,71 +392,16 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
     );
 
     if (result != null) {
-      final String recipientEmail = result['email'];
-      final double amount = result['amount'];
-
       setState(() => _isLoading = true);
       try {
-        // 1. Find recipient by email
-        final recipientQuery = await FirebaseFirestore.instance
-            .collection('users')
-            .where('email', isEqualTo: recipientEmail)
-            .limit(1)
-            .get();
-
-        if (recipientQuery.docs.isEmpty) throw 'Recipient not found';
-        
-        final recipientDoc = recipientQuery.docs.first;
-        final recipientId = recipientDoc.id;
-
-        if (recipientId == authState.userId) throw 'You cannot send funds to yourself';
-
-        // 2. Perform atomic transaction
-        final senderRef = FirebaseFirestore.instance.collection('users').doc(authState.userId);
-        final recipientRef = FirebaseFirestore.instance.collection('users').doc(recipientId);
-
-        await FirebaseFirestore.instance.runTransaction((transaction) async {
-          final senderSnap = await transaction.get(senderRef);
-          final senderBalance = (senderSnap.data()?['wallet_balance'] ?? 0.0).toDouble();
-
-          if (senderBalance < amount) throw 'Insufficient funds';
-
-          // Update sender
-          transaction.update(senderRef, {'wallet_balance': senderBalance - amount});
-          
-          // Update recipient
-          final recipientSnap = await transaction.get(recipientRef);
-          final recipientBalance = (recipientSnap.data()?['wallet_balance'] ?? 0.0).toDouble();
-          transaction.update(recipientRef, {'wallet_balance': recipientBalance + amount});
-
-          // Add transaction record for sender
-          final senderTxRef = senderRef.collection('transactions').doc();
-          transaction.set(senderTxRef, {
-            'amount': -amount,
-            'type': 'debit',
-            'description': 'Sent to $recipientEmail',
-            'created_at': FieldValue.serverTimestamp(),
-            'reference': 'SEND_${DateTime.now().millisecondsSinceEpoch}',
-            'status': 'completed',
-          });
-
-          // Add transaction record for recipient
-          final recipientTxRef = recipientRef.collection('transactions').doc();
-          transaction.set(recipientTxRef, {
-            'amount': amount,
-            'type': 'credit',
-            'description': 'Received from ${authState.userEmail}',
-            'created_at': FieldValue.serverTimestamp(),
-            'reference': 'RECV_${DateTime.now().millisecondsSinceEpoch}',
-            'status': 'completed',
-          });
-        });
-
-        await ref.read(walletProvider.notifier).fetchWalletData();
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Funds sent successfully!'), backgroundColor: AppTheme.successGreen),
-          );
+        final success = await PaymentService.sendFunds(result['email'], result['amount']);
+        if (success) {
+          await ref.read(walletProvider.notifier).fetchWalletData();
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Funds sent successfully!'), backgroundColor: AppTheme.successGreen),
+            );
+          }
         }
       } catch (e) {
         if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
@@ -482,12 +427,7 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
               title: const Text('Transaction History'),
               onTap: () {
                 Navigator.pop(context);
-                if (authState.userId != null) {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => TransactionListScreen(userId: authState.userId!)),
-                  );
-                }
+                context.push('/transactions');
               },
             ),
             ListTile(

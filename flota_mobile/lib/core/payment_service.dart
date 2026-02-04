@@ -227,7 +227,6 @@ class PaymentService {
     ));
 
     try {
-      // 1. Create Flutterwave Session on Backend
       final response = await dio.post('/wallet/flutterwave/create', data: {
         'amount': amount,
         'currency': currency,
@@ -240,14 +239,9 @@ class PaymentService {
           final uri = Uri.parse(checkoutUrl);
           if (await canLaunchUrl(uri)) {
              await launchUrl(uri, mode: LaunchMode.externalApplication);
-             // Return true to indicate the process started. 
-             // Logic for verification should typically happen on return or via webhook.
              return true; 
-          } else {
-            throw 'Could not launch payment URL';
           }
         }
-        return false;
       }
       return false;
     } catch (e) {
@@ -256,7 +250,37 @@ class PaymentService {
     }
   }
 
-  static Future<bool> withdrawFunds(BuildContext context, double amount, String bankAccount, String method) async {
+  static Future<bool> sendFunds(String recipientEmail, double amount) async {
+    const storage = FlutterSecureStorage();
+    final token = await storage.read(key: 'auth_token');
+    if (token == null) throw 'Authentication token not found';
+
+    final dio = Dio(BaseOptions(
+      baseUrl: kApiBaseUrl,
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      }
+    ));
+
+    try {
+      final response = await dio.post('/wallet/transfer', data: {
+        'recipient_email': recipientEmail,
+        'amount': amount,
+      });
+
+      return response.data['status'] == 'success';
+    } catch (e) {
+      debugPrint('Transfer Error: $e');
+      if (e is DioException) {
+        throw e.response?.data['error'] ?? 'Transfer failed';
+      }
+      throw 'An unexpected error occurred';
+    }
+  }
+
+  static Future<bool> withdrawFunds(double amount, String bankAccountId) async {
     const storage = FlutterSecureStorage();
     final token = await storage.read(key: 'auth_token');
     if (token == null) throw 'Authentication token not found';
@@ -273,11 +297,10 @@ class PaymentService {
     try {
       final response = await dio.post('/wallet/withdraw', data: {
         'amount': amount,
-        'bank_account': bankAccount,
-        'method': method,
+        'bank_account_id': bankAccountId,
       });
 
-      return response.data['success'] == true;
+      return response.data['status'] == 'success';
     } catch (e) {
       debugPrint('Withdrawal Error: $e');
       return false;
