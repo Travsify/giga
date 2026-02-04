@@ -21,9 +21,9 @@ class _RiderEarningsScreenState extends ConsumerState<RiderEarningsScreen> {
     final statsAsync = ref.watch(riderStatsProvider);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FA),
+      backgroundColor: AppTheme.backgroundColor,
       appBar: AppBar(
-        backgroundColor: AppTheme.primaryBlue,
+        backgroundColor: AppTheme.surfaceColor,
         title: Text(
           'Earnings',
           style: GoogleFonts.outfit(fontWeight: FontWeight.bold, color: Colors.white),
@@ -47,17 +47,17 @@ class _RiderEarningsScreenState extends ConsumerState<RiderEarningsScreen> {
                         padding: const EdgeInsets.symmetric(vertical: 12),
                         margin: const EdgeInsets.symmetric(horizontal: 4),
                         decoration: BoxDecoration(
-                          color: isSelected ? AppTheme.primaryBlue : Colors.white,
+                          color: isSelected ? AppTheme.primaryBlue : AppTheme.surfaceColor,
                           borderRadius: BorderRadius.circular(10),
                           border: Border.all(
-                            color: isSelected ? AppTheme.primaryBlue : Colors.grey.shade300,
+                            color: isSelected ? AppTheme.primaryBlue : AppTheme.borderBlue,
                           ),
                         ),
                         child: Center(
                           child: Text(
                             period,
                             style: TextStyle(
-                              color: isSelected ? Colors.white : Colors.black87,
+                              color: isSelected ? Colors.white : AppTheme.textPrimary,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -117,7 +117,7 @@ class _RiderEarningsScreenState extends ConsumerState<RiderEarningsScreen> {
               // Breakdown Section
               Text(
                 'Earnings Breakdown',
-                style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold),
+                style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold, color: AppTheme.textPrimary),
               ),
               const SizedBox(height: 16),
 
@@ -173,12 +173,12 @@ class _RiderEarningsScreenState extends ConsumerState<RiderEarningsScreen> {
                 const SizedBox(height: 16),
                 const Text(
                   'Unable to load earnings',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppTheme.textPrimary),
                 ),
                 const SizedBox(height: 8),
                 Text(
                   'Please check your connection and try again.',
-                  style: TextStyle(color: Colors.grey[600], fontSize: 14),
+                  style: TextStyle(color: AppTheme.textSecondary, fontSize: 14),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 24),
@@ -232,25 +232,23 @@ class _BreakdownItem extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppTheme.surfaceColor,
         borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 8, offset: const Offset(0, 2)),
-        ],
+        border: Border.all(color: AppTheme.borderBlue),
       ),
       child: Row(
         children: [
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: AppTheme.primaryBlue.withOpacity(0.1),
+              color: AppTheme.primaryBlue.withOpacity(0.2),
               borderRadius: BorderRadius.circular(10),
             ),
-            child: Icon(icon, color: AppTheme.primaryBlue),
+            child: Icon(icon, color: AppTheme.accentCyan),
           ),
           const SizedBox(width: 16),
-          Expanded(child: Text(label, style: const TextStyle(fontWeight: FontWeight.w600))),
-          Text(amount, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+          Expanded(child: Text(label, style: const TextStyle(fontWeight: FontWeight.w600, color: AppTheme.textPrimary))),
+          Text(amount, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AppTheme.successGreen)),
         ],
       ),
     );
