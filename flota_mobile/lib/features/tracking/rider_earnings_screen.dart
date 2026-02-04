@@ -445,6 +445,8 @@ class _AddBankSheetState extends ConsumerState<_AddBankSheet> {
   
   bool _isLoading = false;
   bool _isResolving = false;
+  bool _isFetchingBanks = false;
+  String? _fetchError;
   List<dynamic> _banks = [];
   List<dynamic> _filteredBanks = [];
   Map<String, dynamic>? _selectedBank;
@@ -461,6 +463,10 @@ class _AddBankSheetState extends ConsumerState<_AddBankSheet> {
   }
 
   Future<void> _fetchBanks() async {
+    setState(() {
+      _isFetchingBanks = true;
+      _fetchError = null;
+    });
     try {
       final api = ref.read(apiClientProvider);
       final response = await api.dio.get('banks?country=NG'); 
@@ -468,10 +474,17 @@ class _AddBankSheetState extends ConsumerState<_AddBankSheet> {
         setState(() {
           _banks = response.data['data'] ?? [];
           _filteredBanks = _banks;
+          _isFetchingBanks = false;
         });
       }
     } catch (e) {
       debugPrint('Error fetching banks: $e');
+      if (mounted) {
+        setState(() {
+          _fetchError = 'Failed to load banks. Please check your connection.';
+          _isFetchingBanks = false;
+        });
+      }
     }
   }
 
@@ -637,21 +650,42 @@ class _AddBankSheetState extends ConsumerState<_AddBankSheet> {
               ),
               const SizedBox(height: 20),
               Expanded(
-                child: _banks.isEmpty 
+                child: _isFetchingBanks 
                   ? const Center(child: CircularProgressIndicator())
-                  : ListView.builder(
-                      itemCount: _filteredBanks.length,
-                      itemBuilder: (context, i) => ListTile(
-                        title: Text(_filteredBanks[i]['name'], style: const TextStyle(color: Colors.white)),
-                        onTap: () {
-                          setState(() {
-                            _selectedBank = _filteredBanks[i];
-                            _resolveAccount();
-                          });
-                          Navigator.pop(context);
-                        },
-                      ),
-                    ),
+                  : _fetchError != null
+                    ? Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Icon(Icons.error_outline, size: 48, color: AppTheme.primaryRed),
+                            const SizedBox(height: 16),
+                            Text(_fetchError!, textAlign: TextAlign.center, style: const TextStyle(color: Colors.white70)),
+                            const SizedBox(height: 20),
+                            ElevatedButton(
+                              onPressed: () {
+                                _fetchBanks();
+                                setModalState(() {});
+                              },
+                              child: const Text('Retry'),
+                            ),
+                          ],
+                        ),
+                      )
+                    : _filteredBanks.isEmpty
+                      ? const Center(child: Text('No banks found', style: TextStyle(color: Colors.white70)))
+                      : ListView.builder(
+                          itemCount: _filteredBanks.length,
+                          itemBuilder: (context, i) => ListTile(
+                            title: Text(_filteredBanks[i]['name'], style: const TextStyle(color: Colors.white)),
+                            onTap: () {
+                              setState(() {
+                                _selectedBank = _filteredBanks[i];
+                                _resolveAccount();
+                              });
+                              Navigator.pop(context);
+                            },
+                          ),
+                        ),
               ),
             ],
           ),

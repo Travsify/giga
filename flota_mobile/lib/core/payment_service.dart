@@ -240,12 +240,31 @@ class PaymentService {
           if (await canLaunchUrl(uri)) {
              await launchUrl(uri, mode: LaunchMode.externalApplication);
              return true; 
+          } else {
+            throw 'Could not launch payment browser. Please check your device settings.';
           }
+        } else {
+          throw 'Server failed to provide a checkout link.';
         }
+      } else {
+        final msg = response.data['error'] ?? response.data['message'] ?? 'Initialization failed';
+        throw 'Payment Init Error: $msg';
       }
-      return false;
     } catch (e) {
       debugPrint('Flutterwave Error: $e');
+      if (context.mounted) {
+        String errorMsg = e.toString();
+        if (e is DioException) {
+          errorMsg = e.response?.data['error'] ?? e.response?.data['message'] ?? e.message;
+        }
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(errorMsg),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 5),
+          ),
+        );
+      }
       return false;
     }
   }
