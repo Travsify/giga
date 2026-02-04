@@ -10,7 +10,7 @@ import 'package:flota_mobile/features/tracking/rider_stats_service.dart';
 import 'package:flota_mobile/features/tracking/rider_earnings_screen.dart';
 import 'package:flota_mobile/features/tracking/rider_jobs_screen.dart';
 import 'package:flota_mobile/features/profile/profile_screen.dart';
-import 'package:flota_mobile/features/wallet/wallet_screen.dart';
+import 'package:flota_mobile/features/tracking/rider_performance_screen.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:share_plus/share_plus.dart';
 
@@ -28,7 +28,9 @@ class _RiderDashboardState extends ConsumerState<RiderDashboard> {
   final List<Widget> _tabs = [
     const _RiderHomeTab(),
     const RiderJobsScreen(),
-    const WalletScreen(),
+    const RiderEarningsScreen(),
+    const RiderPerformanceScreen(),
+    const ProfileScreen(),
   ];
 
   @override
@@ -45,7 +47,6 @@ class _RiderDashboardState extends ConsumerState<RiderDashboard> {
 
   Widget _buildBrandedFooter() {
     return Container(
-      height: 90,
       decoration: BoxDecoration(
         color: AppTheme.surfaceColor,
         border: const Border(top: BorderSide(color: AppTheme.borderBlue, width: 1)),
@@ -58,41 +59,43 @@ class _RiderDashboardState extends ConsumerState<RiderDashboard> {
         ],
       ),
       child: SafeArea(
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            _FooterItem(
-              icon: Icons.radar,
-              label: 'Command',
-              isActive: _currentIndex == 0,
-              onTap: () => setState(() => _currentIndex = 0),
-            ),
-            _FooterItem(
-              icon: Icons.list_alt,
-              label: 'Dispatch',
-              isActive: _currentIndex == 1,
-              onTap: () => setState(() => _currentIndex = 1),
-            ),
-            // Central Giga Action Button
-            _GigaCenterButton(
-              onTap: () {
-                // Quick Toggle Status or Action
-                ref.read(riderDashboardControllerProvider.notifier).toggleOnlineStatus(!ref.read(riderDashboardControllerProvider).isOnline);
-              },
-            ),
-            _FooterItem(
-              icon: Icons.account_balance_wallet,
-              label: 'Wallet',
-              isActive: _currentIndex == 2,
-              onTap: () => setState(() => _currentIndex = 2),
-            ),
-            _FooterItem(
-              icon: Icons.insights,
-              label: 'Insights',
-              isActive: false, // Placeholder for future
-              onTap: () => context.push('/earnings'), 
-            ),
-          ],
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              _FooterItem(
+                icon: Icons.radar,
+                label: 'Home',
+                isActive: _currentIndex == 0,
+                onTap: () => setState(() => _currentIndex = 0),
+              ),
+              _FooterItem(
+                icon: Icons.list_alt,
+                label: 'Orders',
+                isActive: _currentIndex == 1,
+                onTap: () => setState(() => _currentIndex = 1),
+              ),
+              _FooterItem(
+                icon: Icons.account_balance_wallet,
+                label: 'Earnings',
+                isActive: _currentIndex == 2,
+                onTap: () => setState(() => _currentIndex = 2),
+              ),
+              _FooterItem(
+                icon: Icons.insights,
+                label: 'Insights',
+                isActive: _currentIndex == 3,
+                onTap: () => setState(() => _currentIndex = 3),
+              ),
+              _FooterItem(
+                icon: Icons.person,
+                label: 'Profile',
+                isActive: _currentIndex == 4,
+                onTap: () => setState(() => _currentIndex = 4),
+              ),
+            ],
+          ),
         ),
       ),
     );

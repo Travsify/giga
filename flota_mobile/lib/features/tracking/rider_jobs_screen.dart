@@ -46,7 +46,7 @@ class RiderJob {
   }
 }
 
-enum DispatchMode { orders, errands, rides }
+enum DispatchMode { orders, errands }
 
 class RiderJobsScreen extends ConsumerStatefulWidget {
   const RiderJobsScreen({super.key});
@@ -196,17 +196,12 @@ class _RiderJobsScreenState extends ConsumerState<RiderJobsScreen> with SingleTi
   }
 
   List<RiderJob> _getFilteredJobs(List<RiderJob> jobs) {
-    // For now, filter existing jobs as 'Orders', and return dummy data for Others
     if (_activeMode == DispatchMode.orders) {
       return jobs;
-    } else if (_activeMode == DispatchMode.errands) {
+    } else {
       return [
         RiderJob(id: 'E-101', pickupAddress: 'Tesco Superstore', deliveryAddress: '22 Baker St', status: 'available', fare: 8.50),
         RiderJob(id: 'E-102', pickupAddress: 'Asda Pharmacy', deliveryAddress: 'High St Clinic', status: 'available', fare: 12.00),
-      ];
-    } else {
-      return [
-        RiderJob(id: 'R-901', pickupAddress: 'Victoria Station', deliveryAddress: 'Heathrow T5', status: 'available', fare: 45.00),
       ];
     }
   }

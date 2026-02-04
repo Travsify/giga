@@ -15,6 +15,9 @@ class RiderStats {
   final double rating;
   final bool isOnline;
   final int totalJobsCompleted;
+  final double fareEarnings;
+  final double tips;
+  final double bonuses;
 
   RiderStats({
     required this.todaysEarnings,
@@ -29,6 +32,9 @@ class RiderStats {
     required this.acceptanceRate,
     required this.rating,
     required this.isOnline,
+    required this.fareEarnings,
+    required this.tips,
+    required this.bonuses,
   });
 
   factory RiderStats.fromJson(Map<String, dynamic> json) {
@@ -46,6 +52,9 @@ class RiderStats {
       acceptanceRate: data['acceptance_rate'] as int? ?? 100,
       rating: (data['rating'] as num?)?.toDouble() ?? 5.0,
       isOnline: data['is_online'] as bool? ?? false,
+      fareEarnings: (data['fare_earnings'] as num?)?.toDouble() ?? 0.0,
+      tips: (data['tips'] as num?)?.toDouble() ?? 0.0,
+      bonuses: (data['bonuses'] as num?)?.toDouble() ?? 0.0,
     );
   }
 }

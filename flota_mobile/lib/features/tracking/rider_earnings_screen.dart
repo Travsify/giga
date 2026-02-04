@@ -124,17 +124,17 @@ class _RiderEarningsScreenState extends ConsumerState<RiderEarningsScreen> {
               _BreakdownItem(
                 icon: Icons.local_shipping,
                 label: 'Delivery Fares',
-                amount: '${stats.currencySymbol}${(stats.todaysEarnings * 0.85).toStringAsFixed(2)}',
+                amount: '${stats.currencySymbol}${stats.fareEarnings.toStringAsFixed(2)}',
               ),
               _BreakdownItem(
                 icon: Icons.star,
                 label: 'Tips',
-                amount: '${stats.currencySymbol}${(stats.todaysEarnings * 0.10).toStringAsFixed(2)}',
+                amount: '${stats.currencySymbol}${stats.tips.toStringAsFixed(2)}',
               ),
               _BreakdownItem(
                 icon: Icons.flash_on,
                 label: 'Bonuses',
-                amount: '${stats.currencySymbol}${(stats.todaysEarnings * 0.05).toStringAsFixed(2)}',
+                amount: '${stats.currencySymbol}${stats.bonuses.toStringAsFixed(2)}',
               ),
 
               const SizedBox(height: 24),

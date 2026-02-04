@@ -24,12 +24,19 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
   @override
   void initState() {
     super.initState();
-    Future.microtask(() => ref.read(walletProvider.notifier).fetchWalletData());
+    Future.microtask(() {
+      final authState = ref.read(authProvider);
+      setState(() {
+        _region = (authState.countryCode == 'NG' || authState.countryCode == 'AF') ? 'Africa' : 'UK/Intl';
+        _selectedMethod = (_region == 'Africa') ? 'flutterwave' : 'stripe';
+      });
+      ref.read(walletProvider.notifier).fetchWalletData();
+    });
   }
 
   bool _isLoading = false;
-  String _region = 'UK/Intl'; // Toggle between UK/Intl (Stripe) and Africa (Flutterwave)
-  String _selectedMethod = 'stripe';
+  late String _region; 
+  String _selectedMethod = '';
 
   List<Map<String, dynamic>> _getPaymentMethods() {
     final methods = [
@@ -304,7 +311,7 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
                   backgroundColor: AppTheme.primaryBlue,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                 ),
-                child: Text('Add Funds via $_region', style: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.bold)),
+                child: Text('Add Funds via ${_region == 'Africa' ? 'Flutterwave' : 'Stripe'}', style: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.bold)),
               ),
             ),
           ],
@@ -539,44 +546,7 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
               children: [
                 const SizedBox(height: 20),
                 
-                // Region Selector
-                Container(
-                  padding: const EdgeInsets.all(4),
-                  decoration: BoxDecoration(
-                    color: AppTheme.surfaceColor,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: AppTheme.borderBlue),
-                  ),
-                  child: Row(
-                    children: ['UK/Intl', 'Africa'].map((r) {
-                      final active = _region == r;
-                      return Expanded(
-                        child: GestureDetector(
-                          onTap: () => setState(() => _region = r),
-                          child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 200),
-                            padding: const EdgeInsets.symmetric(vertical: 10),
-                            decoration: BoxDecoration(
-                              color: active ? AppTheme.primaryBlue : Colors.transparent,
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Center(
-                              child: Text(
-                                r,
-                                style: TextStyle(
-                                  color: active ? Colors.white : AppTheme.textSecondary,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 13,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      );
-                    }).toList(),
-                  ),
-                ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 12),
 
                 // Glassmorphism Balance Card
                 FadeInDown(
