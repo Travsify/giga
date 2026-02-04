@@ -41,16 +41,35 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
   }
 
   Future<void> refresh() async {
-    state = state.copyWith(isLoading: true);
+    state = state.copyWith(isLoading: true, error: null);
     try {
+      // Fetch profile first - this is critical
       final user = await _repository.getProfile();
-      final loyalty = await _repository.getLoyaltyInfo();
-      final subscription = await _repository.getSubscriptionStatus();
+      
+      // Fetch loyalty and subscription separately to handle partial failures
+      Map<String, dynamic>? loyalty;
+      Map<String, dynamic>? subscription;
+      
+      try {
+        loyalty = await _repository.getLoyaltyInfo();
+      } catch (e) {
+        // Loyalty failed but we can continue
+        loyalty = {'loyalty_points': 0, 'referral_code': '', 'referral_count': 0};
+      }
+      
+      try {
+        subscription = await _repository.getSubscriptionStatus();
+      } catch (e) {
+        // Subscription failed but we can continue
+        subscription = {'is_subscribed': false};
+      }
+      
       state = state.copyWith(
         user: user, 
         loyalty: loyalty, 
         subscription: subscription,
-        isLoading: false
+        isLoading: false,
+        error: null,
       );
     } catch (e) {
       state = state.copyWith(error: e.toString(), isLoading: false);
