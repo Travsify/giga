@@ -4,18 +4,11 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flota_mobile/theme/app_theme.dart';
 import 'package:flota_mobile/core/api_client.dart';
+import 'package:flota_mobile/features/auth/auth_provider.dart';
 
-// Provider for fetching rider jobs
-final riderJobsProvider = FutureProvider<List<RiderJob>>((ref) async {
-  final api = ref.watch(apiClientProvider);
-  try {
-    final response = await api.dio.get('deliveries');
-    final List deliveries = response.data['data'] ?? response.data ?? [];
-    return deliveries.map((d) => RiderJob.fromJson(d)).toList();
-  } catch (e) {
-    return [];
-  }
-});
+// 1. DATA MODELS & PROVIDERS
+
+enum JobSegment { live, active, history }
 
 class RiderJob {
   final String id;
@@ -24,7 +17,12 @@ class RiderJob {
   final String status;
   final double fare;
   final String? createdAt;
+  final String? updatedAt;
   final String parcelType;
+  final String? description; // Errand instructions
+  final Map<String, dynamic>? payoutBreakdown;
+  final Map<String, dynamic>? customer;
+  final List<dynamic>? stops;
 
   RiderJob({
     required this.id,
@@ -33,8 +31,15 @@ class RiderJob {
     required this.status,
     required this.fare,
     this.createdAt,
+    this.updatedAt,
     required this.parcelType,
+    this.description,
+    this.payoutBreakdown,
+    this.customer,
+    this.stops,
   });
+
+  bool get isErrand => parcelType.toLowerCase() == 'errand';
 
   factory RiderJob.fromJson(Map<String, dynamic> json) {
     return RiderJob(
@@ -44,12 +49,55 @@ class RiderJob {
       status: json['status'] ?? 'pending',
       fare: (json['fare'] as num?)?.toDouble() ?? 0.0,
       createdAt: json['created_at'],
+      updatedAt: json['updated_at'],
       parcelType: json['parcel_type'] ?? 'Parcel',
+      description: json['description'],
+      payoutBreakdown: json['payout_breakdown'],
+      customer: json['customer'],
+      stops: json['stops'],
     );
   }
 }
 
-enum DispatchMode { orders, errands }
+// Live Jobs (Radar)
+final riderLiveJobsProvider = FutureProvider<List<RiderJob>>((ref) async {
+  final api = ref.watch(apiClientProvider);
+  try {
+    final response = await api.dio.get('deliveries', queryParameters: {'status': 'pending'});
+    final List deliveries = response.data['data'] ?? response.data ?? [];
+    return deliveries.map((d) => RiderJob.fromJson(d)).toList();
+  } catch (e) {
+    return [];
+  }
+});
+
+// Active Job
+final riderActiveJobProvider = FutureProvider<RiderJob?>((ref) async {
+  final api = ref.watch(apiClientProvider);
+  try {
+    final response = await api.dio.get('rider/active-job');
+    if (response.data['status'] == 'success' && response.data['data'] != null) {
+      return RiderJob.fromJson(response.data['data']);
+    }
+    return null;
+  } catch (e) {
+    return null;
+  }
+});
+
+// History
+final riderHistoryJobsProvider = FutureProvider<List<RiderJob>>((ref) async {
+  final api = ref.watch(apiClientProvider);
+  try {
+    final response = await api.dio.get('rider/history');
+    final List deliveries = response.data['data']['data'] ?? response.data['data'] ?? [];
+    return deliveries.map((d) => RiderJob.fromJson(d)).toList();
+  } catch (e) {
+    return [];
+  }
+});
+
+// 2. MAIN UI SCREEN
 
 class RiderJobsScreen extends ConsumerStatefulWidget {
   const RiderJobsScreen({super.key});
@@ -59,7 +107,7 @@ class RiderJobsScreen extends ConsumerStatefulWidget {
 }
 
 class _RiderJobsScreenState extends ConsumerState<RiderJobsScreen> with SingleTickerProviderStateMixin {
-  DispatchMode _activeMode = DispatchMode.orders;
+  JobSegment _activeSegment = JobSegment.live;
   late AnimationController _radarController;
 
   @override
@@ -79,13 +127,11 @@ class _RiderJobsScreenState extends ConsumerState<RiderJobsScreen> with SingleTi
 
   @override
   Widget build(BuildContext context) {
-    final jobsAsync = ref.watch(riderJobsProvider);
-
     return Scaffold(
       backgroundColor: AppTheme.backgroundColor,
       body: CustomScrollView(
         slivers: [
-          // Glassmorphism Dispatcher Header
+          // Dynamic Header with Segment Control
           SliverAppBar(
             expandedHeight: 180,
             floating: false,
@@ -93,105 +139,60 @@ class _RiderJobsScreenState extends ConsumerState<RiderJobsScreen> with SingleTi
             backgroundColor: AppTheme.surfaceColor,
             elevation: 0,
             flexibleSpace: FlexibleSpaceBar(
-              background: Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      AppTheme.primaryBlue.withOpacity(0.8),
-                      AppTheme.backgroundColor,
-                    ],
-                  ),
-                ),
-                child: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const SizedBox(height: 40),
-                      _RadarScanner(controller: _radarController),
-                      const SizedBox(height: 12),
-                      Text(
-                        'DISPATCH CENTER',
-                        style: GoogleFonts.outfit(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w900,
-                          fontSize: 22,
-                          letterSpacing: 2.0,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
+              background: _buildHeaderBackground(),
             ),
             bottom: PreferredSize(
               preferredSize: const Size.fromHeight(60),
-              child: _buildModeToggle(),
+              child: _buildSegmentControl(),
             ),
           ),
 
-          // Job List
-          jobsAsync.when(
-            data: (jobs) {
-              final filteredJobs = _getFilteredJobs(jobs);
-              if (filteredJobs.isEmpty) {
-                return SliverFillRemaining(
-                  child: _buildEmptyState(),
-                );
-              }
-              return SliverPadding(
-                padding: const EdgeInsets.all(20),
-                sliver: SliverList(
-                  delegate: SliverChildBuilderDelegate(
-                    (context, index) => _ModernJobCard(job: filteredJobs[index]),
-                    childCount: filteredJobs.length,
-                  ),
-                ),
-              );
-            },
-            loading: () => const SliverFillRemaining(child: Center(child: CircularProgressIndicator())),
-            error: (e, _) => SliverFillRemaining(
-              child: Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(24),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.cloud_off, size: 64, color: Colors.grey[400]),
-                      const SizedBox(height: 16),
-                      Text(
-                        'Unable to load jobs',
-                        style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Check your connection and try again.',
-                        style: TextStyle(color: AppTheme.textSecondary, fontSize: 14),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 24),
-                      ElevatedButton.icon(
-                        onPressed: () => ref.refresh(riderJobsProvider),
-                        icon: const Icon(Icons.refresh),
-                        label: const Text('Retry'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppTheme.primaryBlue,
-                          foregroundColor: Colors.white,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
+          // Content based on Segment
+          _buildSegmentContent(),
         ],
       ),
     );
   }
 
-  Widget _buildModeToggle() {
+  Widget _buildHeaderBackground() {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            AppTheme.primaryBlue.withOpacity(0.8),
+            AppTheme.backgroundColor,
+          ],
+        ),
+      ),
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const SizedBox(height: 40),
+            if (_activeSegment == JobSegment.live)
+              _RadarScanner(controller: _radarController)
+            else
+              const Icon(Icons.assignment_ind, size: 40, color: Colors.white24),
+            const SizedBox(height: 12),
+            Text(
+              _activeSegment == JobSegment.live ? 'DISPATCH RADAR' : 
+              _activeSegment == JobSegment.active ? 'ACTIVE MISSIONS' : 'JOB LOGS',
+              style: GoogleFonts.outfit(
+                color: Colors.white,
+                fontWeight: FontWeight.w900,
+                fontSize: 22,
+                letterSpacing: 2.0,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSegmentControl() {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
       padding: const EdgeInsets.all(4),
@@ -201,11 +202,11 @@ class _RiderJobsScreenState extends ConsumerState<RiderJobsScreen> with SingleTi
         border: Border.all(color: AppTheme.borderBlue),
       ),
       child: Row(
-        children: DispatchMode.values.map((mode) {
-          final isActive = _activeMode == mode;
+        children: JobSegment.values.map((segment) {
+          final isActive = _activeSegment == segment;
           return Expanded(
             child: GestureDetector(
-              onTap: () => setState(() => _activeMode = mode),
+              onTap: () => setState(() => _activeSegment = segment),
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 250),
                 padding: const EdgeInsets.symmetric(vertical: 12),
@@ -215,7 +216,7 @@ class _RiderJobsScreenState extends ConsumerState<RiderJobsScreen> with SingleTi
                 ),
                 child: Center(
                   child: Text(
-                    mode.name.toUpperCase(),
+                    segment.name.toUpperCase(),
                     style: TextStyle(
                       color: isActive ? Colors.white : AppTheme.textSecondary,
                       fontWeight: FontWeight.bold,
@@ -231,30 +232,430 @@ class _RiderJobsScreenState extends ConsumerState<RiderJobsScreen> with SingleTi
     );
   }
 
-  List<RiderJob> _getFilteredJobs(List<RiderJob> jobs) {
-    if (_activeMode == DispatchMode.orders) {
-      // Filter for standard parcels/deliveries
-      return jobs.where((j) => j.parcelType.toLowerCase() != 'errand').toList();
-    } else {
-      // Filter for specific errand requests
-      return jobs.where((j) => j.parcelType.toLowerCase() == 'errand').toList();
+  Widget _buildSegmentContent() {
+    switch (_activeSegment) {
+      case JobSegment.live:
+        return _buildLiveList();
+      case JobSegment.active:
+        return _buildActiveView();
+      case JobSegment.history:
+        return _buildHistoryList();
     }
   }
 
-  Widget _buildEmptyState() {
+  Widget _buildLiveList() {
+    final liveJobsAsync = ref.watch(riderLiveJobsProvider);
+    return liveJobsAsync.when(
+      data: (jobs) {
+        if (jobs.isEmpty) {
+          return SliverFillRemaining(child: _buildEmptyState('SCANNING FOR ORDERS...'));
+        }
+        return SliverPadding(
+          padding: const EdgeInsets.all(20),
+          sliver: SliverList(
+            delegate: SliverChildBuilderDelegate(
+              (context, index) => _LiveJobCard(
+                job: jobs[index],
+                onAccept: () => _acceptJob(jobs[index]),
+              ),
+              childCount: jobs.length,
+            ),
+          ),
+        );
+      },
+      loading: () => const SliverFillRemaining(child: Center(child: CircularProgressIndicator())),
+      error: (e, _) => _buildErrorState('Live Jobs'),
+    );
+  }
+
+  Widget _buildActiveView() {
+    final activeJobAsync = ref.watch(riderActiveJobProvider);
+    return activeJobAsync.when(
+      data: (job) {
+        if (job == null) {
+          return SliverFillRemaining(child: _buildEmptyState('NO ACTIVE JOBS'));
+        }
+        return SliverPadding(
+          padding: const EdgeInsets.all(20),
+          sliver: SliverToBoxAdapter(
+            child: _ActiveJobCard(
+              job: job,
+              onUpdateStatus: (newStatus) => _updateJobStatus(job.id, newStatus),
+              onNavigate: () => _navigateToMap(job),
+            ),
+          ),
+        );
+      },
+      loading: () => const SliverFillRemaining(child: Center(child: CircularProgressIndicator())),
+      error: (e, _) => _buildErrorState('Active Job'),
+    );
+  }
+
+  Future<void> _acceptJob(RiderJob job) async {
+    final api = ref.read(apiClientProvider);
+    try {
+      final response = await api.dio.post('deliveries/${job.id}/accept');
+      if (response.data['status'] == 'success') {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Job accepted! Switching to Active view.')),
+        );
+        setState(() => _activeSegment = JobSegment.active);
+        ref.invalidate(riderLiveJobsProvider);
+        ref.invalidate(riderActiveJobProvider);
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: ${e.toString()}')),
+      );
+    }
+  }
+
+  Future<void> _updateJobStatus(String jobId, String status) async {
+    final api = ref.read(apiClientProvider);
+    try {
+      final response = await api.dio.patch('deliveries/$jobId/status', data: {'status': status});
+      if (response.data['status'] == 'success') {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Status updated to ${status.replaceAll('_', ' ')}')),
+        );
+        if (status == 'delivered') {
+          setState(() => _activeSegment = JobSegment.history);
+          ref.invalidate(riderHistoryJobsProvider);
+        }
+        ref.invalidate(riderActiveJobProvider);
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: ${e.toString()}')),
+      );
+    }
+  }
+
+  void _navigateToMap(RiderJob job) {
+    // In a real app, this would use a maps plugin or deep link
+    // For now, we simulate opening navigation
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Redirecting to Google Maps...')),
+    );
+  }
+
+  Widget _buildHistoryList() {
+    final historyJobsAsync = ref.watch(riderHistoryJobsProvider);
+    return historyJobsAsync.when(
+      data: (jobs) {
+        if (jobs.isEmpty) {
+          return SliverFillRemaining(child: _buildEmptyState('NO PAST DELIVERIES'));
+        }
+        return SliverPadding(
+          padding: const EdgeInsets.all(20),
+          sliver: SliverList(
+            delegate: SliverChildBuilderDelegate(
+              (context, index) => _HistoryJobCard(job: jobs[index]),
+              childCount: jobs.length,
+            ),
+          ),
+        );
+      },
+      loading: () => const SliverFillRemaining(child: Center(child: CircularProgressIndicator())),
+      error: (e, _) => _buildErrorState('History'),
+    );
+  }
+
+  Widget _buildEmptyState(String message) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Icon(Icons.radar, size: 64, color: AppTheme.borderBlue.withOpacity(0.5)),
         const SizedBox(height: 16),
         Text(
-          'SCANNING FOR ${_activeMode.name.toUpperCase()}...',
+          message,
           style: GoogleFonts.outfit(color: AppTheme.textSecondary, fontWeight: FontWeight.bold),
         ),
       ],
     );
   }
+
+  Widget _buildErrorState(String section) {
+    return SliverFillRemaining(
+      child: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.cloud_off, size: 64, color: Colors.grey[400]),
+              const SizedBox(height: 16),
+              Text(
+                'Unable to load $section',
+                style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+              ),
+              const SizedBox(height: 24),
+              ElevatedButton.icon(
+                onPressed: () {
+                  if (_activeSegment == JobSegment.live) ref.refresh(riderLiveJobsProvider);
+                  if (_activeSegment == JobSegment.active) ref.refresh(riderActiveJobProvider);
+                  if (_activeSegment == JobSegment.history) ref.refresh(riderHistoryJobsProvider);
+                },
+                icon: const Icon(Icons.refresh),
+                label: const Text('Retry'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppTheme.primaryBlue,
+                  foregroundColor: Colors.white,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }
+
+// 3. SPECIALIZED UI COMPONENTS
+
+class _LiveJobCard extends StatelessWidget {
+  final RiderJob job;
+  final VoidCallback onAccept;
+  const _LiveJobCard({required this.job, required this.onAccept});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 20),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: AppTheme.surfaceColor,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: job.isErrand ? AppTheme.accentCyan.withOpacity(0.5) : AppTheme.borderBlue),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: job.isErrand ? AppTheme.accentCyan.withOpacity(0.2) : AppTheme.primaryBlue.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  job.isErrand ? 'ERRAND' : 'ORDER',
+                  style: TextStyle(
+                    color: job.isErrand ? AppTheme.accentCyan : AppTheme.primaryBlue,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 10,
+                  ),
+                ),
+              ),
+              Text(
+                '£${job.fare.toStringAsFixed(2)}',
+                style: GoogleFonts.outfit(fontSize: 24, fontWeight: FontWeight.w900, color: Colors.white),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          if (job.isErrand) ...[
+            Text(
+              'TASKS:',
+              style: TextStyle(color: AppTheme.textSecondary, fontSize: 10, letterSpacing: 1.0),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              job.description ?? 'Personal request',
+              style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+            const SizedBox(height: 16),
+          ],
+          _RouteVisualizer(pickup: job.pickupAddress, destination: job.deliveryAddress),
+          const SizedBox(height: 24),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: onAccept,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: job.isErrand ? AppTheme.accentCyan : AppTheme.primaryBlue,
+                padding: const EdgeInsets.symmetric(vertical: 16),
+              ),
+              child: Text(job.isErrand ? 'ACCEPT ERRAND' : 'ACCEPT ORDER'),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ActiveJobCard extends StatelessWidget {
+  final RiderJob job;
+  final Function(String) onUpdateStatus;
+  final VoidCallback onNavigate;
+  const _ActiveJobCard({required this.job, required this.onUpdateStatus, required this.onNavigate});
+
+  @override
+  Widget build(BuildContext context) {
+    final nextStatusLabel = job.status == 'assigned' ? 'SWIPE TO PICK UP' : 
+                          job.status == 'picked_up' ? 'SWIPE TO START TRIP' : 'SWIPE TO COMPLETE';
+    
+    final nextStatusValue = job.status == 'assigned' ? 'picked_up' : 
+                          job.status == 'picked_up' ? 'in_transit' : 'delivered';
+
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: AppTheme.surfaceColor,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: AppTheme.successGreen, width: 2),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(color: AppTheme.successGreen.withOpacity(0.2), shape: BoxShape.circle),
+                child: const Icon(Icons.directions_bike, color: AppTheme.successGreen),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('ONGOING MISSION', style: TextStyle(color: AppTheme.successGreen, fontWeight: FontWeight.bold, fontSize: 12)),
+                    Text(
+                      job.status == 'assigned' ? 'Head to Pickup Point' : 
+                      job.status == 'picked_up' ? 'Parcel Securely Loaded' : 'In Transit to Destination',
+                      style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 24),
+          _RouteVisualizer(pickup: job.pickupAddress, destination: job.deliveryAddress),
+          const SizedBox(height: 32),
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: () {}, // Chat logic in next phase
+                  icon: const Icon(Icons.chat_bubble_outline, size: 18),
+                  label: const Text('CHAT'),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: Colors.white,
+                    side: const BorderSide(color: Colors.white24),
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: ElevatedButton.icon(
+                  onPressed: onNavigate,
+                  icon: const Icon(Icons.navigation, size: 18),
+                  label: const Text('NAVIGATE'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppTheme.primaryBlue,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: () => onUpdateStatus(nextStatusValue),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppTheme.successGreen,
+                padding: const EdgeInsets.symmetric(vertical: 16),
+              ),
+              child: Text(nextStatusLabel, style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 16)),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _HistoryJobCard extends StatelessWidget {
+  final RiderJob job;
+  const _HistoryJobCard({required this.job});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppTheme.surfaceColor,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppTheme.borderBlue),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: job.status == 'delivered' ? AppTheme.successGreen.withOpacity(0.1) : Colors.red.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(
+              job.isErrand ? Icons.shopping_basket : Icons.local_shipping,
+              color: job.status == 'delivered' ? AppTheme.successGreen : Colors.red,
+              size: 20,
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(job.id, style: const TextStyle(color: Colors.white24, fontSize: 10)),
+                Text(
+                  job.deliveryAddress,
+                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                Text(
+                  job.isErrand ? 'Errand Request' : 'Standard Delivery',
+                  style: TextStyle(color: AppTheme.textSecondary, fontSize: 11),
+                ),
+              ],
+            ),
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                '£${job.fare.toStringAsFixed(2)}',
+                style: const TextStyle(color: AppTheme.successGreen, fontWeight: FontWeight.bold, fontSize: 16),
+              ),
+              Text(
+                job.status.toUpperCase(),
+                style: TextStyle(
+                  color: job.status == 'delivered' ? AppTheme.successGreen.withOpacity(0.6) : Colors.red.withOpacity(0.6),
+                  fontSize: 9,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// SHARED UTILS
 
 class _RadarScanner extends StatelessWidget {
   final AnimationController controller;
@@ -288,80 +689,6 @@ class _RadarScanner extends StatelessWidget {
   }
 }
 
-class _ModernJobCard extends StatelessWidget {
-  final RiderJob job;
-  const _ModernJobCard({required this.job});
-
-  @override
-  Widget build(BuildContext context) {
-    final currency = "£"; // Defaulting to UK theme
-    return Container(
-      margin: const EdgeInsets.only(bottom: 20),
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: AppTheme.surfaceColor,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppTheme.borderBlue),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                decoration: BoxDecoration(
-                  color: AppTheme.primaryBlue.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(
-                  'ID: #${job.id}',
-                  style: const TextStyle(color: AppTheme.primaryBlue, fontWeight: FontWeight.bold, fontSize: 12),
-                ),
-              ),
-              Text(
-                '$currency${job.fare.toStringAsFixed(2)}',
-                style: GoogleFonts.outfit(fontSize: 24, fontWeight: FontWeight.w900, color: Colors.white),
-              ),
-            ],
-          ),
-          const SizedBox(height: 20),
-          
-          // Route Visualizer (Styled)
-          _RouteVisualizer(pickup: job.pickupAddress, destination: job.deliveryAddress),
-          
-          const SizedBox(height: 24),
-          
-          Row(
-            children: [
-              Expanded(
-                child: ElevatedButton(
-                  onPressed: () {},
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppTheme.primaryBlue,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                  ),
-                  child: const Text('ACCEPT JOB'),
-                ),
-              ),
-              const SizedBox(width: 12),
-              IconButton(
-                onPressed: () {},
-                icon: const Icon(Icons.info_outline, color: Colors.white70),
-                style: IconButton.styleFrom(
-                  backgroundColor: Colors.white.withOpacity(0.05),
-                  padding: const EdgeInsets.all(16),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 class _RouteVisualizer extends StatelessWidget {
   final String pickup;
   final String destination;
@@ -377,7 +704,7 @@ class _RouteVisualizer extends StatelessWidget {
           padding: const EdgeInsets.only(left: 11),
           child: Container(
             width: 2,
-            height: 30,
+            height: 24,
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
