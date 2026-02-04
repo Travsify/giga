@@ -128,6 +128,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/deliveries', [DeliveryController::class, 'create']);
     Route::post('/deliveries/{id}/proof', [DeliveryController::class, 'uploadProof']);
     Route::patch('/deliveries/{id}/status', [DeliveryController::class, 'updateStatus']);
+    Route::post('/deliveries/{id}/accept', [DeliveryController::class, 'accept']);
     Route::get('/riders/nearby', [DeliveryController::class, 'getNearbyRiders']);
 
     // Chat
@@ -142,6 +143,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::patch('/profile/rider', [ProfileController::class, 'updateRiderStatus']);
     Route::post('/profile/vehicle-document', [App\Http\Controllers\Api\VehicleVerificationController::class, 'uploadDocument']);
     Route::get('/rider/dashboard-stats', [App\Http\Controllers\Api\RiderController::class, 'getDashboardStats']);
+    Route::get('/rider/history', [App\Http\Controllers\Api\RiderController::class, 'getHistory']);
+    Route::get('/rider/active-job', [App\Http\Controllers\Api\RiderController::class, 'getActiveJob']);
 
     // Payments
     Route::post('/create-payment-intent', [App\Http\Controllers\Api\PaymentController::class, 'createPaymentIntent']);

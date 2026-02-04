@@ -214,12 +214,57 @@ class DeliveryController extends Controller
         return response()->json($riders->values());
     }
 
+    public function accept(Request $request, $id)
+    {
+        $delivery = Delivery::findOrFail($id);
+        $user = $request->user();
+        $rider = $user->rider;
+
+        if (!$rider) {
+            return response()->json(['error' => 'User is not a rider'], 403);
+        }
+
+        if ($delivery->status !== 'pending') {
+            return response()->json(['error' => 'Job is no longer available'], 400);
+        }
+
+        // Check if rider already has an active job
+        $activeJob = Delivery::where('rider_id', $rider->id)
+            ->whereIn('status', ['assigned', 'picked_up', 'in_transit'])
+            ->first();
+
+        if ($activeJob) {
+            return response()->json(['error' => 'You already have an active job'], 400);
+        }
+
+        $delivery->rider_id = $rider->id;
+        $delivery->status = 'assigned';
+        $delivery->assigned_at = now();
+        $delivery->save();
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Job accepted successfully',
+            'data' => $delivery->load('customer', 'stops')
+        ]);
+    }
+
     public function updateStatus(Request $request, $id)
     {
         $delivery = Delivery::findOrFail($id);
+        $user = $request->user();
+
+        // Security: Only assigned rider or customer can update status
+        if ($user->role === 'Rider') {
+            if ($delivery->rider_id !== ($user->rider->id ?? null)) {
+                return response()->json(['error' => 'Unauthorized'], 403);
+            }
+        } elseif ($delivery->customer_id !== $user->id) {
+             return response()->json(['error' => 'Unauthorized'], 403);
+        }
 
         $validator = Validator::make($request->all(), [
-            'status' => 'sometimes|in:pending,assigned,picked_up,in_transit,delivered,cancelled',
+            'status' => 'required|in:pending,assigned,picked_up,in_transit,delivered,cancelled',
             'contactless_delivery' => 'sometimes|boolean',
             'locker_id' => 'sometimes|string',
             'locker_code' => 'sometimes|string',
@@ -229,9 +274,7 @@ class DeliveryController extends Controller
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        if ($request->has('status')) {
-            $delivery->status = $request->status;
-        }
+        $delivery->status = $request->status;
 
         if ($request->has('contactless_delivery')) {
             $delivery->contactless_delivery = $request->contactless_delivery;
@@ -253,7 +296,10 @@ class DeliveryController extends Controller
 
         $delivery->save();
 
-        return response()->json($delivery);
+        return response()->json([
+            'status' => 'success',
+            'data' => $delivery->load('customer', 'stops')
+        ]);
     }
 
     private function calculateDistance($lat1, $lon1, $lat2, $lon2)

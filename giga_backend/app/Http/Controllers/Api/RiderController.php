@@ -125,6 +125,54 @@ class RiderController extends Controller
         }
     }
 
+    public function getHistory()
+    {
+        try {
+            $user = Auth::user();
+            $rider = $user->rider;
+
+            if (!$rider) {
+                return response()->json(['status' => 'success', 'data' => []]);
+            }
+
+            $history = Delivery::where('rider_id', $rider->id)
+                ->whereIn('status', ['delivered', 'cancelled'])
+                ->orderBy('updated_at', 'desc')
+                ->paginate(20);
+
+            return response()->json([
+                'status' => 'success',
+                'data' => $history
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
+        }
+    }
+
+    public function getActiveJob()
+    {
+        try {
+            $user = Auth::user();
+            $rider = $user->rider;
+
+            if (!$rider) {
+                return response()->json(['status' => 'success', 'data' => null]);
+            }
+
+            $activeJob = Delivery::where('rider_id', $rider->id)
+                ->whereIn('status', ['assigned', 'picked_up', 'in_transit'])
+                ->with('customer', 'stops')
+                ->first();
+
+            return response()->json([
+                'status' => 'success',
+                'data' => $activeJob
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
+        }
+    }
+
     private function getActivityHistory($riderId)
     {
         $days = [];
