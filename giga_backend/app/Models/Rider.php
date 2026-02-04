@@ -19,7 +19,12 @@ class Rider extends Model
         'current_lat',
         'current_lng',
         'has_vehicle',
-        'vehicle_verified'
+        'vehicle_verified',
+        'driver_license_path',
+        'vehicle_license_path',
+        'vehicle_registration_path',
+        'insurance_certificate_path',
+        'verification_status'
     ];
 
     protected $casts = [

@@ -153,6 +153,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/rider/banks/{id}', [BankController::class, 'update']);
     Route::delete('/rider/banks/{id}', [BankController::class, 'destroy']);
     Route::get('/banks', [BankController::class, 'getBanks']);
+    Route::get('/banks/resolve', [BankController::class, 'resolveAccount']);
 
     // Payments
     Route::post('/create-payment-intent', [App\Http\Controllers\Api\PaymentController::class, 'createPaymentIntent']);

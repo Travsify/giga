@@ -130,12 +130,12 @@ class VehicleVerificationController extends Controller
     }
 
     /**
-     * Upload vehicle documents (License, Insurance)
+     * Upload rider/vehicle documents
      */
     public function uploadDocument(Request $request)
     {
         $request->validate([
-            'type' => 'required|string|in:license,insurance',
+            'type' => 'required|string|in:vehicle_license,insurance,driver_license,vehicle_registration',
             'file' => 'required|file|mimes:jpg,jpeg,png,pdf|max:5120', // 5MB max
         ]);
 
@@ -149,20 +149,35 @@ class VehicleVerificationController extends Controller
         $type = $request->type;
         $file = $request->file('file');
         
-        $path = $file->store('vehicle_documents/' . $user->id, 'public');
+        $path = $file->store('rider_documents/' . $user->id, 'public');
 
-        if ($type === 'license') {
-            $rider->vehicle_license_path = $path;
-        } else {
-            $rider->insurance_certificate_path = $path;
+        switch ($type) {
+            case 'vehicle_license':
+                $rider->vehicle_license_path = $path;
+                break;
+            case 'insurance':
+                $rider->insurance_certificate_path = $path;
+                break;
+            case 'driver_license':
+                $rider->driver_license_path = $path;
+                break;
+            case 'vehicle_registration':
+                $rider->vehicle_registration_path = $path;
+                break;
+        }
+
+        // Auto-update status to 'submitted' if certain key docs are in
+        if ($rider->driver_license_path && $rider->vehicle_license_path) {
+            $rider->verification_status = 'submitted';
         }
 
         $rider->save();
 
         return response()->json([
             'status' => 'success',
-            'message' => ucfirst($type) . ' uploaded successfully.',
-            'path' => $path
+            'message' => str_replace('_', ' ', ucfirst($type)) . ' uploaded successfully.',
+            'path' => $path,
+            'verification_status' => $rider->verification_status
         ]);
     }
 }
