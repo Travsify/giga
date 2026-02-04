@@ -536,9 +536,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   }
 
   Widget _buildVerificationHub(Map<String, dynamic>? rider) {
-    final hasVehicle = rider?['has_vehicle'] == true || (rider?['vehicle_plate_number'] != null && rider?['vehicle_plate_number'].toString().isNotEmpty);
-    final isVerified = rider?['vehicle_verified'] == true;
-    final hasLicense = rider?['license_number'] != null && rider?['license_number'].toString().isNotEmpty;
+    final bool hasVehicle = (rider?['has_vehicle'] as bool?) ?? false || 
+        (rider?['vehicle_plate_number'] != null && (rider?['vehicle_plate_number']?.toString() ?? '').isNotEmpty);
+    final bool isVerified = (rider?['vehicle_verified'] as bool?) ?? false;
+    final bool hasLicense = rider?['license_number'] != null && (rider?['license_number']?.toString() ?? '').isNotEmpty;
     
     return Container(
       padding: const EdgeInsets.all(8),
