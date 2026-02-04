@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'dart:math';
 
 // Render Production Backend
@@ -233,18 +234,20 @@ class PaymentService {
       });
 
       if (response.data['status'] == 'success') {
-        // In a real app, you'd launch Flutterwave dedicated SDK or WebView here.
-        // For this redesign, we simulate a successful payment flow.
-        debugPrint('Flutterwave: Session created. Ref: ${response.data['reference']}');
-        
-        // 2. Verify with Backend (In real life, this happens after user returns from FW)
-        final verifyRes = await dio.post('/wallet/flutterwave/verify', data: {
-          'transaction_id': response.data['reference'],
-          'amount': amount,
-          'currency': currency,
-        });
-
-        return verifyRes.data['success'] == true;
+        final checkoutUrl = response.data['checkout_url'];
+        if (checkoutUrl != null) {
+          debugPrint('Flutterwave: Redirecting to $checkoutUrl');
+          final uri = Uri.parse(checkoutUrl);
+          if (await canLaunchUrl(uri)) {
+             await launchUrl(uri, mode: LaunchMode.externalApplication);
+             // Return true to indicate the process started. 
+             // Logic for verification should typically happen on return or via webhook.
+             return true; 
+          } else {
+            throw 'Could not launch payment URL';
+          }
+        }
+        return false;
       }
       return false;
     } catch (e) {

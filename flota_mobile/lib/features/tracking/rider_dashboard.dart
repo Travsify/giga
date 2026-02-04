@@ -240,14 +240,14 @@ class _RiderHomeTabState extends ConsumerState<_RiderHomeTab> {
             tileOverlays: state.heatmapTileOverlay != null ? {state.heatmapTileOverlay!} : {},
           ),
 
-          // 2. Control Center Header (Floating)
           Positioned(
             top: 0,
             left: 0,
             right: 0,
             child: _ControlCenterHeader(
               isOnline: state.isOnline,
-              onToggleStatus: controller.toggleOnlineStatus,
+              stats: stats,
+              onToggleStatus: (val) => controller.toggleOnlineStatus(val),
             ),
           ),
 
@@ -348,9 +348,10 @@ class _StatusPill extends StatelessWidget {
 
 class _ControlCenterHeader extends StatelessWidget {
   final bool isOnline;
+  final RiderStats? stats;
   final Function(bool) onToggleStatus;
 
-  const _ControlCenterHeader({required this.isOnline, required this.onToggleStatus});
+  const _ControlCenterHeader({required this.isOnline, this.stats, required this.onToggleStatus});
 
   @override
   Widget build(BuildContext context) {
@@ -390,52 +391,72 @@ class _ControlCenterHeader extends StatelessWidget {
              ),
            ),
 
-           // Vehicle Selector
-           GestureDetector(
-             onTap: () {
-               // Show Vehicle Switcher
-               showModalBottomSheet(
-                context: context,
-                builder: (context) => Container(
-                  padding: const EdgeInsets.all(20),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Text("Select Active Vehicle", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                      const SizedBox(height: 15),
-                      ListTile(
-                        leading: const Icon(Icons.directions_car),
-                        title: const Text("Toyota Camry • ABJ-123"),
-                        trailing: const Icon(Icons.check_circle, color: AppTheme.primaryBlue),
-                        onTap: () => Navigator.pop(context),
-                      ),
-                      ListTile(
-                        leading: const Icon(Icons.motorcycle),
-                        title: const Text("Honda Ace • KJA-456"),
-                        onTap: () => Navigator.pop(context),
-                      ),
-                    ],
-                  ),
+            // Vehicle Selector / Verification Prompt
+            GestureDetector(
+              onTap: () {
+                if (stats?.hasVehicle == true) {
+                  // Show Vehicle Switcher
+                  showModalBottomSheet(
+                    context: context,
+                    builder: (context) => _buildVehicleSwitcher(context),
+                  );
+                } else {
+                  // Navigate to Verification/Add Vehicle
+                  context.push('/profile');
+                }
+              },
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: (stats?.isVerified == true) ? Colors.white.withOpacity(0.2) : AppTheme.primaryRed.withOpacity(0.8),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: Colors.white30),
                 ),
-              );
-             },
-             child: Container(
-               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-               decoration: BoxDecoration(
-                 color: Colors.white.withOpacity(0.2),
-                 borderRadius: BorderRadius.circular(20),
-                 border: Border.all(color: Colors.white30),
-               ),
-               child: const Row(
-                 children: [
-                   Icon(Icons.directions_car, size: 16, color: Colors.white),
-                   SizedBox(width: 6),
-                   Text("Toyota Camry", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: Colors.white)),
-                   Icon(Icons.arrow_drop_down, size: 16, color: Colors.white),
-                 ],
-               ),
-             ),
-           ),
+                child: Row(
+                  children: [
+                    Icon(
+                      (stats?.hasVehicle == true) ? Icons.directions_car : Icons.add_circle_outline, 
+                      size: 16, 
+                      color: Colors.white
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      (stats?.hasVehicle == true) ? "Standard Fleet" : "VERIFY NOW", 
+                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: Colors.white)
+                    ),
+                    if (stats?.hasVehicle == true) const Icon(Icons.arrow_drop_down, size: 16, color: Colors.white),
+                  ],
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildVehicleSwitcher(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: const BoxDecoration(
+        color: AppTheme.surfaceColor,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text("Select Active Vehicle", style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
+          const SizedBox(height: 15),
+          ListTile(
+            leading: const Icon(Icons.directions_car, color: Colors.white),
+            title: const Text("Giga Fleet • ABJ-123", style: TextStyle(color: Colors.white)),
+            trailing: const Icon(Icons.check_circle, color: AppTheme.primaryBlue),
+            onTap: () => Navigator.pop(context),
+          ),
+          ListTile(
+            leading: const Icon(Icons.motorcycle, color: Colors.white),
+            title: const Text("Honda Ace • KJA-456", style: TextStyle(color: Colors.white)),
+            onTap: () => Navigator.pop(context),
+          ),
         ],
       ),
     );

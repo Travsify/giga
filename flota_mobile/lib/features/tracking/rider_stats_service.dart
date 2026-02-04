@@ -22,6 +22,8 @@ class RiderStats {
   final double fareEarnings;
   final double tips;
   final double bonuses;
+  final bool isVerified;
+  final bool hasVehicle;
 
   RiderStats({
     required this.todaysEarnings,
@@ -43,6 +45,8 @@ class RiderStats {
     required this.fareEarnings,
     required this.tips,
     required this.bonuses,
+    required this.isVerified,
+    required this.hasVehicle,
   });
 
   factory RiderStats.fromJson(Map<String, dynamic> json) {
@@ -67,6 +71,8 @@ class RiderStats {
       fareEarnings: (data['fare_earnings'] as num?)?.toDouble() ?? 0.0,
       tips: (data['tips'] as num?)?.toDouble() ?? 0.0,
       bonuses: (data['bonuses'] as num?)?.toDouble() ?? 0.0,
+      isVerified: data['is_verified'] as bool? ?? false,
+      hasVehicle: data['has_vehicle'] as bool? ?? false,
     );
   }
 }
