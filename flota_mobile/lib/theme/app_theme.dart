@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class AppTheme {
-  // Command Dashboard Colors (High-Tech Dark)
-  static const Color primaryBlue = Color(0xFF3B82F6); // Tech Blue
-  static const Color primaryRed = Color(0xFFEF4444);  // Tech Red
+  // Command Dashboard Colors (High-Tech Dark + UK Union Jack)
+  static const Color primaryBlue = Color(0xFF00247D); // UK Royal Blue (Deep)
+  static const Color primaryRed = Color(0xFFCF142B);  // UK Red (Rich)
   static const Color backgroundColor = Color(0xFF0B0E14); // Deep Space Dark
   static const Color surfaceColor = Color(0xFF141820); // Card Dark
   

@@ -51,6 +51,11 @@ class RiderController extends Controller
         // Productivity Tips
         $tips = $this->getProductivityTips($completedJobsToday, $todaysEarnings);
 
+        \Illuminate\Support\Facades\Log::info('Rider Dashboard Stats Fetch', [
+            'user_id' => $user->id,
+            'is_online' => (bool) $user->is_online
+        ]);
+
         return response()->json([
             'status' => 'success',
             'data' => [
@@ -61,6 +66,7 @@ class RiderController extends Controller
                 'productivity_tips' => $tips,
                 'currency' => $user->wallet ? $user->wallet->currency : 'GBP',
                 'currency_symbol' => $user->currency_symbol ?? '£',
+                'is_online' => (bool) $user->is_online,
             ]
         ]);
     }

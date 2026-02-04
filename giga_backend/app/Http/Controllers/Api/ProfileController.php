@@ -39,13 +39,14 @@ class ProfileController extends Controller
             'uk_phone' => 'sometimes|string|max:20',
             'home_address' => 'sometimes|string|max:255',
             'work_address' => 'sometimes|string|max:255',
+            'is_online' => 'sometimes|boolean',
         ]);
 
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        $user->update($request->only(['name', 'uk_phone', 'home_address', 'work_address']));
+        $user->update($request->only(['name', 'uk_phone', 'home_address', 'work_address', 'is_online']));
 
         return response()->json($user);
     }
@@ -98,5 +99,34 @@ class ProfileController extends Controller
         $referrer->save();
 
         return response()->json(['message' => 'Referral code applied. £10 credit added to both of you!']);
+    }
+
+    /**
+     * Update rider online status.
+     */
+    public function updateRiderStatus(Request $request)
+    {
+        $user = Auth::user();
+        \Illuminate\Support\Facades\Log::info('Rider Status Update Request', [
+            'user_id' => $user->id,
+            'is_online' => $request->is_online,
+            'ip' => $request->ip()
+        ]);
+
+        $validator = Validator::make($request->all(), [
+            'is_online' => 'required|boolean',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        $user->is_online = $request->is_online;
+        $user->save();
+
+        return response()->json([
+            'status' => 'success',
+            'is_online' => (bool)$user->is_online
+        ]);
     }
 }

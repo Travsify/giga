@@ -80,10 +80,7 @@ class _RiderJobsScreenState extends ConsumerState<RiderJobsScreen> with SingleTi
           'My Jobs',
           style: GoogleFonts.outfit(fontWeight: FontWeight.bold, color: Colors.white),
         ),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => context.go('/rider'),
-        ),
+        leading: null, // No back button for tab view
         bottom: TabBar(
           controller: _tabController,
           indicatorColor: Colors.white,

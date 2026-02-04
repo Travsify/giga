@@ -71,6 +71,7 @@ class RiderDashboardController extends StateNotifier<RiderDashboardState> {
         stats: stats,
         nearbyJobs: jobs,
         heatmapTileOverlay: heatmap,
+        isOnline: stats.isOnline, // Sync starting status
       );
     } catch (e) {
       state = state.copyWith(isLoading: false, error: e.toString());
@@ -93,7 +94,8 @@ class RiderDashboardController extends StateNotifier<RiderDashboardState> {
       }
     } catch (e) {
       // Revert on error
-      state = state.copyWith(isOnline: previousStatus, error: "Failed to update status");
+      print('Status Toggle Error: $e'); // Debug log
+      state = state.copyWith(isOnline: previousStatus, error: "Failed to update status: $e");
     }
   }
 

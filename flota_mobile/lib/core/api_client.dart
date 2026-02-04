@@ -6,12 +6,14 @@ class ApiClient {
   late final Dio _dio;
   
   // Production URL
-  static const String _baseUrl = 'https://giga-ytn0.onrender.com/api/';
+  static const String _prodUrl = 'https://giga-ytn0.onrender.com/api/';
+  // Local Development (Android Emulator)
+  static const String _localUrl = 'http://10.0.2.2:8000/api/';
 
   ApiClient() {
     _dio = Dio(
       BaseOptions(
-        baseUrl: _baseUrl,
+        baseUrl: _prodUrl, // TOGGLE THIS FOR LOCAL TESTING
         connectTimeout: const Duration(seconds: 60),
         receiveTimeout: const Duration(seconds: 60),
         headers: {

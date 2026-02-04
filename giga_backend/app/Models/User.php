@@ -31,6 +31,7 @@ class User extends Authenticatable implements FilamentUser
         'currency_code',
         'country_id',
         'is_country_admin',
+        'is_online',
     ];
 
     protected $hidden = [
@@ -44,6 +45,7 @@ class User extends Authenticatable implements FilamentUser
         'is_giga_plus' => 'boolean',
         'giga_plus_expiry' => 'datetime',
         'is_country_admin' => 'boolean',
+        'is_online' => 'boolean',
     ];
 
     public function wallet()

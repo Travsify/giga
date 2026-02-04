@@ -28,10 +28,7 @@ class _RiderEarningsScreenState extends ConsumerState<RiderEarningsScreen> {
           'Earnings',
           style: GoogleFonts.outfit(fontWeight: FontWeight.bold, color: Colors.white),
         ),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => context.go('/rider'),
-        ),
+        leading: null, // No back button for tab view
       ),
       body: statsAsync.when(
         data: (stats) => SingleChildScrollView(
