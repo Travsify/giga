@@ -121,4 +121,29 @@ class BankController extends Controller
             'data' => $banks
         ]);
     }
+    /**
+     * Resolve a bank account name.
+     */
+    public function resolveAccount(Request $request)
+    {
+        $request->validate([
+            'account_number' => 'required|string',
+            'bank_code' => 'required|string',
+        ]);
+
+        $flw = new \App\Services\FlutterwaveTransferService();
+        $result = $flw->resolveAccount($request->account_number, $request->bank_code);
+
+        if ($result['success']) {
+            return response()->json([
+                'status' => 'success',
+                'data' => $result['data']
+            ]);
+        }
+
+        return response()->json([
+            'status' => 'error',
+            'message' => $result['message']
+        ], 400);
+    }
 }

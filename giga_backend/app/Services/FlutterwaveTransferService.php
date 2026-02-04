@@ -73,4 +73,34 @@ class FlutterwaveTransferService
             return [];
         }
     }
+    /**
+     * Resolve account number to name.
+     */
+    public function resolveAccount($accountNumber, $bankCode)
+    {
+        try {
+            $response = Http::withToken($this->secretKey)
+                ->post("{$this->baseUrl}/accounts/resolve", [
+                    'account_number' => $accountNumber,
+                    'account_bank' => $bankCode,
+                ]);
+
+            if ($response->successful()) {
+                return [
+                    'success' => true,
+                    'data' => $response->json('data')
+                ];
+            }
+
+            return [
+                'success' => false,
+                'message' => $response->json('message') ?? 'Could not resolve account'
+            ];
+        } catch (\Exception $e) {
+            return [
+                'success' => false,
+                'message' => $e->getMessage()
+            ];
+        }
+    }
 }
