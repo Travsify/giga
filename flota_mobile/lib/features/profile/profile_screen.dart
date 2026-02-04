@@ -566,7 +566,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         decoration: BoxDecoration(color: (isVerified ? Colors.green : Colors.orange).withOpacity(0.15), shape: BoxShape.circle),
         child: Icon(isVerified ? Icons.verified_user_rounded : Icons.pending_rounded, color: isVerified ? Colors.green : Colors.orange, size: 18),
       ),
-      title: Text(title, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: AppTheme.textPrimary)),
+      title: Text(title, style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: AppTheme.textPrimary)),
       subtitle: Text(subtitle, style: TextStyle(fontSize: 12, color: isVerified ? AppTheme.successGreen : Colors.orange)),
       trailing: Icon(Icons.chevron_right, size: 20, color: AppTheme.textSecondary),
     );
