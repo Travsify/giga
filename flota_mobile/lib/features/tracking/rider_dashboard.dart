@@ -10,6 +10,7 @@ import 'package:flota_mobile/features/tracking/rider_stats_service.dart';
 import 'package:flota_mobile/features/tracking/rider_earnings_screen.dart';
 import 'package:flota_mobile/features/tracking/rider_jobs_screen.dart';
 import 'package:flota_mobile/features/profile/profile_screen.dart';
+import 'package:flota_mobile/features/wallet/wallet_screen.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:share_plus/share_plus.dart';
 
@@ -23,42 +24,140 @@ class RiderDashboard extends ConsumerStatefulWidget {
 class _RiderDashboardState extends ConsumerState<RiderDashboard> {
   int _currentIndex = 0;
 
-  // Tabs for the Bottom Navigation
+  // Primary Tabs for the Dispatcher Console
   final List<Widget> _tabs = [
     const _RiderHomeTab(),
-    const RiderEarningsScreen(),
     const RiderJobsScreen(),
-    const ProfileScreen(),
+    const WalletScreen(),
   ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppTheme.backgroundColor,
       body: IndexedStack(
         index: _currentIndex,
         children: _tabs,
       ),
-      bottomNavigationBar: Container(
+      bottomNavigationBar: _buildBrandedFooter(),
+    );
+  }
+
+  Widget _buildBrandedFooter() {
+    return Container(
+      height: 90,
+      decoration: BoxDecoration(
+        color: AppTheme.surfaceColor,
+        border: const Border(top: BorderSide(color: AppTheme.borderBlue, width: 1)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.3),
+            blurRadius: 20,
+            offset: const Offset(0, -5),
+          ),
+        ],
+      ),
+      child: SafeArea(
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            _FooterItem(
+              icon: Icons.radar,
+              label: 'Command',
+              isActive: _currentIndex == 0,
+              onTap: () => setState(() => _currentIndex = 0),
+            ),
+            _FooterItem(
+              icon: Icons.list_alt,
+              label: 'Dispatch',
+              isActive: _currentIndex == 1,
+              onTap: () => setState(() => _currentIndex = 1),
+            ),
+            // Central Giga Action Button
+            _GigaCenterButton(
+              onTap: () {
+                // Quick Toggle Status or Action
+                ref.read(riderDashboardControllerProvider.notifier).toggleOnlineStatus(!ref.read(riderDashboardControllerProvider).isOnline);
+              },
+            ),
+            _FooterItem(
+              icon: Icons.account_balance_wallet,
+              label: 'Wallet',
+              isActive: _currentIndex == 2,
+              onTap: () => setState(() => _currentIndex = 2),
+            ),
+            _FooterItem(
+              icon: Icons.insights,
+              label: 'Insights',
+              isActive: false, // Placeholder for future
+              onTap: () => context.push('/earnings'), 
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _FooterItem extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final bool isActive;
+  final VoidCallback onTap;
+
+  const _FooterItem({required this.icon, required this.label, required this.isActive, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            icon,
+            color: isActive ? AppTheme.primaryRed : AppTheme.textSecondary,
+            size: 26,
+          ),
+          const SizedBox(height: 4),
+          Text(
+            label,
+            style: TextStyle(
+              color: isActive ? Colors.white : AppTheme.textSecondary,
+              fontSize: 10,
+              fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _GigaCenterButton extends StatelessWidget {
+  final VoidCallback onTap;
+  const _GigaCenterButton({required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
+          color: AppTheme.primaryBlue,
+          shape: BoxShape.circle,
           boxShadow: [
-            BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 10, offset: const Offset(0, -2)),
+            BoxShadow(
+              color: AppTheme.primaryBlue.withOpacity(0.5),
+              blurRadius: 15,
+              spreadRadius: 2,
+            ),
           ],
+          border: Border.all(color: Colors.white24, width: 2),
         ),
-        child: BottomNavigationBar(
-          currentIndex: _currentIndex,
-          onTap: (index) => setState(() => _currentIndex = index),
-          type: BottomNavigationBarType.fixed,
-          backgroundColor: Colors.white,
-          selectedItemColor: AppTheme.primaryBlue,
-          unselectedItemColor: Colors.grey,
-          selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold),
-          items: const [
-            BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-            BottomNavigationBarItem(icon: Icon(Icons.account_balance_wallet), label: 'Earnings'),
-            BottomNavigationBarItem(icon: Icon(Icons.list_alt), label: 'Jobs'),
-            BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
-          ],
-        ),
+        child: const Icon(Icons.power_settings_new, color: Colors.white, size: 28),
       ),
     );
   }
@@ -268,21 +367,24 @@ class _ControlCenterHeader extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
            // Profile / Greeting
-           Row(
-             children: [
-               const CircleAvatar(
-                 backgroundColor: Colors.white24,
-                 child: Icon(Icons.person, color: Colors.white),
-               ),
-               const SizedBox(width: 10),
-               Column(
-                 crossAxisAlignment: CrossAxisAlignment.start,
-                 children: [
-                   const Text("Giga Rider", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                   Text(isOnline ? "Active" : "Offline", style: TextStyle(color: isOnline ? AppTheme.successGreen : Colors.white70, fontSize: 12)),
-                 ],
-               )
-             ],
+           GestureDetector(
+             onTap: () => context.push('/profile'),
+             child: Row(
+               children: [
+                 const CircleAvatar(
+                   backgroundColor: AppTheme.primaryBlue,
+                   child: Icon(Icons.person, color: Colors.white),
+                 ),
+                 const SizedBox(width: 10),
+                 Column(
+                   crossAxisAlignment: CrossAxisAlignment.start,
+                   children: [
+                     const Text("Giga Rider", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                     Text(isOnline ? "Active" : "Offline", style: TextStyle(color: isOnline ? AppTheme.successGreen : Colors.white70, fontSize: 12)),
+                   ],
+                 )
+               ],
+             ),
            ),
 
            // Vehicle Selector

@@ -214,8 +214,8 @@ class PaymentController extends Controller
             });
 
         } catch (\Exception $e) {
-             Log::error('Gift Card Redemption Error: ' . $e->getMessage());
-             return response()->json(['error' => $e->getMessage()], 500);
+            \Log::error('Gift Card Redemption Error: ' . $e->getMessage());
+            return response()->json(['error' => $e->getMessage()], 500);
         }
     }
 
@@ -241,10 +241,127 @@ class PaymentController extends Controller
                         'created_at' => $tx->created_at,
                         'reference' => $tx->reference,
                         'currency' => $tx->currency,
+                        'status' => $tx->status ?? 'completed',
                     ];
                 });
 
             return response()->json(['transactions' => $transactions]);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * Handle fund withdrawal requests.
+     */
+    public function withdraw(Request $request)
+    {
+        $request->validate([
+            'amount' => 'required|numeric|min:1',
+            'bank_account' => 'required|string',
+            'bank_code' => 'sometimes|string',
+            'method' => 'required|string|in:stripe,flutterwave',
+        ]);
+
+        try {
+            $user = $request->user();
+            $wallet = $user->wallet;
+
+            if (!$wallet || $wallet->balance < $request->amount) {
+                return response()->json(['error' => 'Insufficient funds'], 400);
+            }
+
+            // Deduct from wallet immediately (or mark as pending)
+            // For production, we'd typically queue this or use a pending_withdrawals column
+            $wallet->balance -= $request->amount;
+            $wallet->save();
+
+            // Record Transaction
+            $transaction = $wallet->transactions()->create([
+                'amount' => -$request->amount,
+                'type' => 'debit',
+                'description' => 'Withdrawal to ' . $request->bank_account . ' (' . strtoupper($request->method) . ')',
+                'reference' => 'WITHDRAW_' . time() . '_' . $user->id,
+                'status' => 'pending',
+                'currency' => $wallet->currency,
+            ]);
+
+            // Logic for Stripe Payouts or Flutterwave Transfers would go here
+            // \Log::info("Withdrawal request initiated: " . $transaction->reference);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Withdrawal request submitted successfully.',
+                'balance' => $wallet->balance,
+                'transaction' => $transaction
+            ]);
+
+        } catch (\Exception $e) {
+            \Log::error('Withdrawal Error: ' . $e->getMessage());
+            return response()->json(['error' => 'Failed to process withdrawal'], 500);
+        }
+    }
+
+    /**
+     * Create a Flutterwave payment link/session.
+     */
+    public function createFlutterwavePayment(Request $request)
+    {
+        $request->validate([
+            'amount' => 'required|numeric|min:10',
+            'currency' => 'required|string|in:NGN,GHS,KES',
+        ]);
+
+        try {
+            // This would normally call Flutterwave API to generate a checkout URL
+            // For now, we return a success response that the frontend can handle
+            return response()->json([
+                'status' => 'success',
+                'reference' => 'FLW_' . time() . '_' . $request->user()->id,
+                'amount' => $request->amount,
+                'currency' => $request->currency,
+                'customer' => [
+                    'email' => $request->user()->email,
+                    'name' => $request->user()->name,
+                ]
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * Verify a Flutterwave payment.
+     */
+    public function verifyFlutterwavePayment(Request $request)
+    {
+        $request->validate([
+            'transaction_id' => 'required|string',
+            'amount' => 'required|numeric',
+            'currency' => 'required|string',
+        ]);
+
+        try {
+            // Here we would verify with Flutterwave API
+            $user = $request->user();
+            $wallet = $user->wallet()->firstOrCreate([], ['balance' => 0, 'currency' => 'NGN']);
+
+            $wallet->balance += $request->amount;
+            $wallet->save();
+
+            $wallet->transactions()->create([
+                'amount' => $request->amount,
+                'type' => 'credit',
+                'description' => 'Wallet Top-up (Flutterwave)',
+                'reference' => $request->transaction_id,
+                'status' => 'completed',
+                'currency' => $request->currency,
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'balance' => $wallet->balance
+            ]);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
         }

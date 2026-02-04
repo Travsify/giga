@@ -46,6 +46,8 @@ class RiderJob {
   }
 }
 
+enum DispatchMode { orders, errands, rides }
+
 class RiderJobsScreen extends ConsumerStatefulWidget {
   const RiderJobsScreen({super.key});
 
@@ -54,17 +56,21 @@ class RiderJobsScreen extends ConsumerStatefulWidget {
 }
 
 class _RiderJobsScreenState extends ConsumerState<RiderJobsScreen> with SingleTickerProviderStateMixin {
-  late TabController _tabController;
+  DispatchMode _activeMode = DispatchMode.orders;
+  late AnimationController _radarController;
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _radarController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 2),
+    )..repeat();
   }
 
   @override
   void dispose() {
-    _tabController.dispose();
+    _radarController.dispose();
     super.dispose();
   }
 
@@ -73,108 +79,199 @@ class _RiderJobsScreenState extends ConsumerState<RiderJobsScreen> with SingleTi
     final jobsAsync = ref.watch(riderJobsProvider);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FA),
-      appBar: AppBar(
-        backgroundColor: AppTheme.primaryBlue,
-        title: Text(
-          'My Jobs',
-          style: GoogleFonts.outfit(fontWeight: FontWeight.bold, color: Colors.white),
-        ),
-        leading: null, // No back button for tab view
-        bottom: TabBar(
-          controller: _tabController,
-          indicatorColor: Colors.white,
-          labelColor: Colors.white,
-          unselectedLabelColor: Colors.white60,
-          tabs: const [
-            Tab(text: 'Available'),
-            Tab(text: 'Active'),
-            Tab(text: 'Completed'),
-          ],
-        ),
-      ),
-      body: jobsAsync.when(
-        data: (jobs) {
-          final available = jobs.where((j) => j.status == 'pending' || j.status == 'available').toList();
-          final active = jobs.where((j) => j.status == 'in_progress' || j.status == 'picked_up').toList();
-          final completed = jobs.where((j) => j.status == 'delivered' || j.status == 'completed').toList();
+      backgroundColor: AppTheme.backgroundColor,
+      body: CustomScrollView(
+        slivers: [
+          // Glassmorphism Dispatcher Header
+          SliverAppBar(
+            expandedHeight: 180,
+            floating: false,
+            pinned: true,
+            backgroundColor: AppTheme.surfaceColor,
+            elevation: 0,
+            flexibleSpace: FlexibleSpaceBar(
+              background: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      AppTheme.primaryBlue.withOpacity(0.8),
+                      AppTheme.backgroundColor,
+                    ],
+                  ),
+                ),
+                child: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const SizedBox(height: 40),
+                      _RadarScanner(controller: _radarController),
+                      const SizedBox(height: 12),
+                      Text(
+                        'DISPATCH CENTER',
+                        style: GoogleFonts.outfit(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w900,
+                          fontSize: 22,
+                          letterSpacing: 2.0,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            bottom: PreferredSize(
+              preferredSize: const Size.fromHeight(60),
+              child: _buildModeToggle(),
+            ),
+          ),
 
-          return TabBarView(
-            controller: _tabController,
-            children: [
-              _JobList(jobs: available, emptyMessage: 'No available jobs right now', showAccept: true),
-              _JobList(jobs: active, emptyMessage: 'No active jobs'),
-              _JobList(jobs: completed, emptyMessage: 'No completed jobs yet'),
-            ],
-          );
-        },
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Error loading jobs: $e')),
-      ),
-    );
-  }
-}
-
-class _JobList extends StatelessWidget {
-  final List<RiderJob> jobs;
-  final String emptyMessage;
-  final bool showAccept;
-
-  const _JobList({required this.jobs, required this.emptyMessage, this.showAccept = false});
-
-  @override
-  Widget build(BuildContext context) {
-    if (jobs.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.local_shipping_outlined, size: 64, color: Colors.grey[400]),
-            const SizedBox(height: 16),
-            Text(emptyMessage, style: TextStyle(color: Colors.grey[600], fontSize: 16)),
-          ],
-        ),
-      );
-    }
-
-    return ListView.builder(
-      padding: const EdgeInsets.all(16),
-      itemCount: jobs.length,
-      itemBuilder: (context, index) => _JobCard(job: jobs[index], showAccept: showAccept),
-    );
-  }
-}
-
-class _JobCard extends StatelessWidget {
-  final RiderJob job;
-  final bool showAccept;
-
-  const _JobCard({required this.job, this.showAccept = false});
-
-  Color _getStatusColor() {
-    switch (job.status) {
-      case 'delivered':
-      case 'completed':
-        return Colors.green;
-      case 'in_progress':
-      case 'picked_up':
-        return Colors.orange;
-      default:
-        return AppTheme.primaryBlue;
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 4)),
+          // Job List
+          jobsAsync.when(
+            data: (jobs) {
+              final filteredJobs = _getFilteredJobs(jobs);
+              if (filteredJobs.isEmpty) {
+                return SliverFillRemaining(
+                  child: _buildEmptyState(),
+                );
+              }
+              return SliverPadding(
+                padding: const EdgeInsets.all(20),
+                sliver: SliverList(
+                  delegate: SliverChildBuilderDelegate(
+                    (context, index) => _ModernJobCard(job: filteredJobs[index]),
+                    childCount: filteredJobs.length,
+                  ),
+                ),
+              );
+            },
+            loading: () => const SliverFillRemaining(child: Center(child: CircularProgressIndicator())),
+            error: (e, _) => SliverFillRemaining(child: Center(child: Text('Console Error: $e', style: const TextStyle(color: Colors.red)))),
+          ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildModeToggle() {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+      padding: const EdgeInsets.all(4),
+      decoration: BoxDecoration(
+        color: AppTheme.surfaceColor,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppTheme.borderBlue),
+      ),
+      child: Row(
+        children: DispatchMode.values.map((mode) {
+          final isActive = _activeMode == mode;
+          return Expanded(
+            child: GestureDetector(
+              onTap: () => setState(() => _activeMode = mode),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 250),
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                decoration: BoxDecoration(
+                  color: isActive ? AppTheme.primaryBlue : Colors.transparent,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Center(
+                  child: Text(
+                    mode.name.toUpperCase(),
+                    style: TextStyle(
+                      color: isActive ? Colors.white : AppTheme.textSecondary,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          );
+        }).toList(),
+      ),
+    );
+  }
+
+  List<RiderJob> _getFilteredJobs(List<RiderJob> jobs) {
+    // For now, filter existing jobs as 'Orders', and return dummy data for Others
+    if (_activeMode == DispatchMode.orders) {
+      return jobs;
+    } else if (_activeMode == DispatchMode.errands) {
+      return [
+        RiderJob(id: 'E-101', pickupAddress: 'Tesco Superstore', deliveryAddress: '22 Baker St', status: 'available', fare: 8.50),
+        RiderJob(id: 'E-102', pickupAddress: 'Asda Pharmacy', deliveryAddress: 'High St Clinic', status: 'available', fare: 12.00),
+      ];
+    } else {
+      return [
+        RiderJob(id: 'R-901', pickupAddress: 'Victoria Station', deliveryAddress: 'Heathrow T5', status: 'available', fare: 45.00),
+      ];
+    }
+  }
+
+  Widget _buildEmptyState() {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Icon(Icons.radar, size: 64, color: AppTheme.borderBlue.withOpacity(0.5)),
+        const SizedBox(height: 16),
+        Text(
+          'SCANNING FOR ${_activeMode.name.toUpperCase()}...',
+          style: GoogleFonts.outfit(color: AppTheme.textSecondary, fontWeight: FontWeight.bold),
+        ),
+      ],
+    );
+  }
+}
+
+class _RadarScanner extends StatelessWidget {
+  final AnimationController controller;
+  const _RadarScanner({required this.controller});
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: controller,
+      builder: (context, child) {
+        return Container(
+          width: 80,
+          height: 80,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            border: Border.all(color: AppTheme.primaryRed.withOpacity(1 - controller.value), width: 2),
+          ),
+          child: Center(
+            child: Container(
+              width: 40 * controller.value,
+              height: 40 * controller.value,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: AppTheme.primaryRed.withOpacity(0.3 * (1 - controller.value)),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _ModernJobCard extends StatelessWidget {
+  final RiderJob job;
+  const _ModernJobCard({required this.job});
+
+  @override
+  Widget build(BuildContext context) {
+    final currency = "£"; // Defaulting to UK theme
+    return Container(
+      margin: const EdgeInsets.only(bottom: 20),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: AppTheme.surfaceColor,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppTheme.borderBlue),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -182,65 +279,120 @@ class _JobCard extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('Job #${job.id}', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
-                  color: _getStatusColor().withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(20),
+                  color: AppTheme.primaryBlue.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
-                  job.status.toUpperCase().replaceAll('_', ' '),
-                  style: TextStyle(color: _getStatusColor(), fontSize: 12, fontWeight: FontWeight.bold),
+                  'ID: #${job.id}',
+                  style: const TextStyle(color: AppTheme.primaryBlue, fontWeight: FontWeight.bold, fontSize: 12),
                 ),
               ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              const Icon(Icons.circle, color: Colors.green, size: 12),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(job.pickupAddress, style: const TextStyle(fontSize: 14), maxLines: 1, overflow: TextOverflow.ellipsis),
+              Text(
+                '$currency${job.fare.toStringAsFixed(2)}',
+                style: GoogleFonts.outfit(fontSize: 24, fontWeight: FontWeight.w900, color: Colors.white),
               ),
             ],
           ),
-          Padding(
-            padding: const EdgeInsets.only(left: 5),
-            child: Container(width: 2, height: 20, color: Colors.grey[300]),
-          ),
+          const SizedBox(height: 20),
+          
+          // Route Visualizer (Styled)
+          _RouteVisualizer(pickup: job.pickupAddress, destination: job.deliveryAddress),
+          
+          const SizedBox(height: 24),
+          
           Row(
             children: [
-              const Icon(Icons.location_on, color: Colors.red, size: 12),
-              const SizedBox(width: 8),
               Expanded(
-                child: Text(job.deliveryAddress, style: const TextStyle(fontSize: 14), maxLines: 1, overflow: TextOverflow.ellipsis),
-              ),
-            ],
-          ),
-          const Divider(height: 24),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text('£${job.fare.toStringAsFixed(2)}', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-              if (showAccept)
-                ElevatedButton(
-                  onPressed: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Job acceptance coming soon!')),
-                    );
-                  },
+                child: ElevatedButton(
+                  onPressed: () {},
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppTheme.primaryBlue,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    padding: const EdgeInsets.symmetric(vertical: 16),
                   ),
-                  child: const Text('Accept', style: TextStyle(color: Colors.white)),
+                  child: const Text('ACCEPT JOB'),
                 ),
+              ),
+              const SizedBox(width: 12),
+              IconButton(
+                onPressed: () {},
+                icon: const Icon(Icons.info_outline, color: Colors.white70),
+                style: IconButton.styleFrom(
+                  backgroundColor: Colors.white.withOpacity(0.05),
+                  padding: const EdgeInsets.all(16),
+                ),
+              ),
             ],
           ),
         ],
       ),
+    );
+  }
+}
+
+class _RouteVisualizer extends StatelessWidget {
+  final String pickup;
+  final String destination;
+
+  const _RouteVisualizer({required this.pickup, required this.destination});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        _RouteNode(icon: Icons.circle, color: AppTheme.successGreen, address: pickup, label: 'PICKUP'),
+        Padding(
+          padding: const EdgeInsets.only(left: 11),
+          child: Container(
+            width: 2,
+            height: 30,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [AppTheme.successGreen, AppTheme.primaryRed],
+              ),
+            ),
+          ),
+        ),
+        _RouteNode(icon: Icons.location_on, color: AppTheme.primaryRed, address: destination, label: 'DESTINATION'),
+      ],
+    );
+  }
+}
+
+class _RouteNode extends StatelessWidget {
+  final IconData icon;
+  final Color color;
+  final String address;
+  final String label;
+
+  const _RouteNode({required this.icon, required this.color, required this.address, required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Icon(icon, color: color, size: 24),
+        const SizedBox(width: 16),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(label, style: TextStyle(color: AppTheme.textSecondary, fontSize: 10, letterSpacing: 1.0)),
+              const SizedBox(height: 4),
+              Text(
+                address,
+                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

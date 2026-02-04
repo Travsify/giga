@@ -199,7 +199,8 @@ class PaymentService {
       });
 
       return {
-        'amount': response.data['amount'],
+        'amount': (response.data['amount'] as num).toDouble(),
+        'new_balance': (response.data['new_balance'] as num).toDouble(),
         'reference': 'GIGA-REDEEM',
       };
     } on DioException catch (e) {
@@ -207,6 +208,76 @@ class PaymentService {
          throw e.response!.data['error'] ?? 'Redemption failed';
       }
       throw 'Network error: ${e.message}';
+    }
+  }
+
+  static Future<bool> fundWithFlutterwave(BuildContext context, double amount, String currency) async {
+    const storage = FlutterSecureStorage();
+    final token = await storage.read(key: 'auth_token');
+    if (token == null) throw 'Authentication token not found';
+
+    final dio = Dio(BaseOptions(
+      baseUrl: kApiBaseUrl,
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      }
+    ));
+
+    try {
+      // 1. Create Flutterwave Session on Backend
+      final response = await dio.post('/wallet/flutterwave/create', data: {
+        'amount': amount,
+        'currency': currency,
+      });
+
+      if (response.data['status'] == 'success') {
+        // In a real app, you'd launch Flutterwave dedicated SDK or WebView here.
+        // For this redesign, we simulate a successful payment flow.
+        debugPrint('Flutterwave: Session created. Ref: ${response.data['reference']}');
+        
+        // 2. Verify with Backend (In real life, this happens after user returns from FW)
+        final verifyRes = await dio.post('/wallet/flutterwave/verify', data: {
+          'transaction_id': response.data['reference'],
+          'amount': amount,
+          'currency': currency,
+        });
+
+        return verifyRes.data['success'] == true;
+      }
+      return false;
+    } catch (e) {
+      debugPrint('Flutterwave Error: $e');
+      return false;
+    }
+  }
+
+  static Future<bool> withdrawFunds(BuildContext context, double amount, String bankAccount, String method) async {
+    const storage = FlutterSecureStorage();
+    final token = await storage.read(key: 'auth_token');
+    if (token == null) throw 'Authentication token not found';
+
+    final dio = Dio(BaseOptions(
+      baseUrl: kApiBaseUrl,
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      }
+    ));
+
+    try {
+      final response = await dio.post('/wallet/withdraw', data: {
+        'amount': amount,
+        'bank_account': bankAccount,
+        'method': method,
+      });
+
+      return response.data['success'] == true;
+    } catch (e) {
+      debugPrint('Withdrawal Error: $e');
+      return false;
     }
   }
 }
