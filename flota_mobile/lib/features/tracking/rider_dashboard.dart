@@ -10,6 +10,7 @@ import 'package:flota_mobile/features/tracking/rider_stats_service.dart';
 import 'package:flota_mobile/features/tracking/rider_earnings_screen.dart';
 import 'package:flota_mobile/features/tracking/rider_jobs_screen.dart';
 import 'package:flota_mobile/features/profile/profile_screen.dart';
+import 'package:flota_mobile/features/profile/verification_screen.dart';
 import 'package:flota_mobile/features/tracking/rider_performance_screen.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:share_plus/share_plus.dart';
@@ -401,8 +402,11 @@ class _ControlCenterHeader extends StatelessWidget {
                     builder: (context) => _buildVehicleSwitcher(context),
                   );
                 } else {
-                  // Navigate to Verification/Add Vehicle
-                  context.push('/profile');
+                  // Navigate to Verification flow directly
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const VerificationScreen()),
+                  );
                 }
               },
               child: Container(

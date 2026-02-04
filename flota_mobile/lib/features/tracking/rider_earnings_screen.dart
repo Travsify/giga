@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flota_mobile/theme/app_theme.dart';
 import 'package:flota_mobile/features/tracking/rider_stats_service.dart';
 import 'package:flota_mobile/core/api_client.dart';
+import 'package:flota_mobile/features/auth/auth_provider.dart';
+import 'package:flota_mobile/features/wallet/wallet_provider.dart';
 
 // 1. MODELS & PROVIDERS
 
@@ -292,19 +295,39 @@ class _RiderEarningsScreenState extends ConsumerState<RiderEarningsScreen> {
   }
 
   Widget _buildTransactionList(AsyncValue<RiderStats> statsAsync) {
+    final walletState = ref.watch(walletProvider);
+    final transactions = walletState.transactions;
+
     return SliverPadding(
-      padding: const EdgeInsets.all(20),
-      sliver: SliverList(
-        delegate: SliverChildBuilderDelegate(
-          (context, index) => _TransactionItem(
-            label: index % 2 == 0 ? 'Delivery Payout' : 'Weekly Bonus',
-            date: 'Oct ${24 - index}, 2024',
-            amount: '£${(15.50 + index).toStringAsFixed(2)}',
-            isPositive: true,
-          ),
-          childCount: 5,
-        ),
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+      sliver: transactions.isEmpty && !walletState.isLoading
+          ? SliverToBoxAdapter(
+              child: Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(40),
+                  child: Text('No recent payouts yet.', style: TextStyle(color: AppTheme.textSecondary.withOpacity(0.5))),
+                ),
+              ),
+            )
+          : SliverList(
+              delegate: SliverChildBuilderDelegate(
+                (context, index) {
+                  final tx = transactions[index];
+                  final amount = (tx['amount'] as num).toDouble();
+                  final date = tx['created_at'] is String 
+                      ? DateFormat('MMM dd, yyyy').format(DateTime.parse(tx['created_at']))
+                      : 'Recently';
+
+                  return _TransactionItem(
+                    label: tx['description'] ?? 'Delivery Payout',
+                    date: date,
+                    amount: '${ref.read(authProvider).currencySymbol}${amount.abs().toStringAsFixed(2)}',
+                    isPositive: amount > 0,
+                  );
+                },
+                childCount: transactions.length > 5 ? 5 : transactions.length,
+              ),
+            ),
     );
   }
 
@@ -417,49 +440,221 @@ class _AddBankSheetState extends ConsumerState<_AddBankSheet> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _numberController = TextEditingController();
-  final _bankController = TextEditingController();
-  final _codeController = TextEditingController();
+  final _bankCodeController = TextEditingController(); // Stores selected bank code or sort code
+  final _searchController = TextEditingController();
+  
   bool _isLoading = false;
+  bool _isResolving = false;
+  List<dynamic> _banks = [];
+  List<dynamic> _filteredBanks = [];
+  Map<String, dynamic>? _selectedBank;
+  late String _region;
+
+  @override
+  void initState() {
+    super.initState();
+    final auth = ref.read(authProvider);
+    _region = (auth.countryCode == 'NG' || auth.countryCode == 'AF') ? 'Africa' : 'UK/Intl';
+    if (_region == 'Africa') {
+      _fetchBanks();
+    }
+  }
+
+  Future<void> _fetchBanks() async {
+    try {
+      final api = ref.read(apiClientProvider);
+      final response = await api.dio.get('banks?country=NG'); 
+      if (mounted) {
+        setState(() {
+          _banks = response.data['data'] ?? [];
+          _filteredBanks = _banks;
+        });
+      }
+    } catch (e) {
+      debugPrint('Error fetching banks: $e');
+    }
+  }
+
+  void _filterBanks(String query) {
+    setState(() {
+      _filteredBanks = _banks.where((b) => 
+        (b['name'] as String).toLowerCase().contains(query.toLowerCase())
+      ).toList();
+    });
+  }
+
+  Future<void> _resolveAccount() async {
+    if (_numberController.text.length != 10 || _selectedBank == null) return;
+    
+    setState(() => _isResolving = true);
+    try {
+      final api = ref.read(apiClientProvider);
+      final response = await api.dio.get('banks/resolve', queryParameters: {
+        'account_number': _numberController.text,
+        'bank_code': _selectedBank!['code'],
+      });
+      
+      if (mounted && response.data['status'] == 'success') {
+        setState(() {
+          _nameController.text = response.data['data']['account_name'] ?? '';
+        });
+      }
+    } catch (e) {
+      debugPrint('Resolve Error: $e');
+    } finally {
+      if (mounted) setState(() => _isResolving = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
+    return Container(
+      height: MediaQuery.of(context).size.height * 0.85,
       padding: EdgeInsets.only(
         bottom: MediaQuery.of(context).viewInsets.bottom,
         left: 24,
         right: 24,
         top: 32,
       ),
+      decoration: const BoxDecoration(
+        color: AppTheme.backgroundColor,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
+      ),
       child: Form(
         key: _formKey,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('LINK BANK ACCOUNT', style: GoogleFonts.outfit(fontSize: 24, fontWeight: FontWeight.w900, color: Colors.white)),
-            const SizedBox(height: 8),
-            const Text('Enter your details for secure payouts.', style: TextStyle(color: AppTheme.textSecondary)),
-            const SizedBox(height: 32),
-            _buildField('Account Holder Name', _nameController, Icons.person_outline),
-            const SizedBox(height: 16),
-            _buildField('Account Number', _numberController, Icons.account_balance_wallet_outlined),
-            const SizedBox(height: 16),
-            _buildField('Bank Name', _bankController, Icons.account_balance_outlined),
-            const SizedBox(height: 16),
-            _buildField('Sort Code / Bank Code', _codeController, Icons.vpn_key_outlined),
-            const SizedBox(height: 32),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: _isLoading ? null : _submit,
-                style: ElevatedButton.styleFrom(backgroundColor: AppTheme.primaryBlue, padding: const EdgeInsets.symmetric(vertical: 20)),
-                child: _isLoading 
-                  ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                  : const Text('SAVE ACCOUNT DETAILS', style: TextStyle(fontWeight: FontWeight.bold)),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('LINK BANK ACCOUNT', style: GoogleFonts.outfit(fontSize: 24, fontWeight: FontWeight.w900, color: Colors.white)),
+              const SizedBox(height: 8),
+              Text('Secure your payouts for ${_region == 'Africa' ? 'African' : 'Intl'} market.', style: const TextStyle(color: AppTheme.textSecondary)),
+              const SizedBox(height: 32),
+              
+              if (_region == 'Africa') ...[
+                Text('Select Bank', style: TextStyle(color: Colors.white70, fontSize: 12)),
+                const SizedBox(height: 8),
+                InkWell(
+                  onTap: () => _showBankPicker(),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+                    decoration: BoxDecoration(
+                      color: AppTheme.surfaceColor,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: AppTheme.borderBlue),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(_selectedBank?['name'] ?? 'Choose your bank...', style: TextStyle(color: _selectedBank == null ? Colors.grey : Colors.white)),
+                        const Icon(Icons.keyboard_arrow_down, color: AppTheme.primaryBlue),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                
+                TextFormField(
+                  controller: _numberController,
+                  keyboardType: TextInputType.number,
+                  maxLength: 10,
+                  onChanged: (v) {
+                    if (v.length == 10) _resolveAccount();
+                  },
+                  style: const TextStyle(color: Colors.white),
+                  decoration: InputDecoration(
+                    labelText: 'Account Number',
+                    suffixIcon: _isResolving ? const Padding(padding: EdgeInsets.all(12), child: CircularProgressIndicator(strokeWidth: 2)) : null,
+                  ),
+                  validator: (v) => v!.length < 10 ? 'Invalid' : null,
+                ),
+              ] else ...[
+                _buildField('Account Holder Name', _nameController, Icons.person_outline),
+                const SizedBox(height: 16),
+                _buildField('Sort Code (XX-XX-XX)', _bankCodeController, Icons.vpn_key_outlined),
+                const SizedBox(height: 16),
+                _buildField('Account Number', _numberController, Icons.account_balance_wallet_outlined),
+              ],
+
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _nameController,
+                readOnly: _region == 'Africa' && _isResolving,
+                style: const TextStyle(color: Colors.white),
+                decoration: const InputDecoration(labelText: 'Account Holder Name'),
+                validator: (v) => v!.isEmpty ? 'Required' : null,
               ),
-            ),
-            const SizedBox(height: 32),
-          ],
+
+              const SizedBox(height: 32),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: _isLoading ? null : _submit,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppTheme.primaryBlue,
+                    padding: const EdgeInsets.symmetric(vertical: 20),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  ),
+                  child: _isLoading 
+                    ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                    : const Text('SAVE ACCOUNT DETAILS', style: TextStyle(fontWeight: FontWeight.bold)),
+                ),
+              ),
+              const SizedBox(height: 32),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showBankPicker() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: AppTheme.backgroundColor,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+      builder: (context) => StatefulBuilder(
+        builder: (context, setModalState) => Container(
+          height: MediaQuery.of(context).size.height * 0.7,
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            children: [
+              TextField(
+                controller: _searchController,
+                style: const TextStyle(color: Colors.white),
+                decoration: InputDecoration(
+                  hintText: 'Search bank...',
+                  prefixIcon: const Icon(Icons.search, color: AppTheme.primaryBlue),
+                  filled: true,
+                  fillColor: AppTheme.surfaceColor,
+                ),
+                onChanged: (v) {
+                  _filterBanks(v);
+                  setModalState(() {});
+                },
+              ),
+              const SizedBox(height: 20),
+              Expanded(
+                child: _banks.isEmpty 
+                  ? const Center(child: CircularProgressIndicator())
+                  : ListView.builder(
+                      itemCount: _filteredBanks.length,
+                      itemBuilder: (context, i) => ListTile(
+                        title: Text(_filteredBanks[i]['name'], style: const TextStyle(color: Colors.white)),
+                        onTap: () {
+                          setState(() {
+                            _selectedBank = _filteredBanks[i];
+                            _resolveAccount();
+                          });
+                          Navigator.pop(context);
+                        },
+                      ),
+                    ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -479,30 +674,33 @@ class _AddBankSheetState extends ConsumerState<_AddBankSheet> {
 
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
+    if (_region == 'Africa' && _selectedBank == null) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please select a bank')));
+      return;
+    }
     
     setState(() => _isLoading = true);
     final api = ref.read(apiClientProvider);
-    final scaffoldMessenger = ScaffoldMessenger.of(context);
+    final sm = ScaffoldMessenger.of(context);
     try {
-      // Determine gateway based on typical number lengths or use a simple logic for demo
-      final gateway = _codeController.text.length == 6 ? 'stripe' : 'flutterwave';
+      final gateway = _region == 'Africa' ? 'flutterwave' : 'stripe';
 
       final response = await api.dio.post('rider/banks', data: {
         'account_name': _nameController.text,
         'account_number': _numberController.text,
-        'bank_name': _bankController.text,
-        'bank_code': gateway == 'flutterwave' ? _codeController.text : null,
-        'sort_code': gateway == 'stripe' ? _codeController.text : null,
+        'bank_name': _region == 'Africa' ? _selectedBank!['name'] : 'UK/Intl Bank',
+        'bank_code': _region == 'Africa' ? _selectedBank!['code'] : null,
+        'sort_code': _region != 'Africa' ? _bankCodeController.text : null,
         'gateway_type': gateway,
       });
 
       if (response.data['status'] == 'success') {
         ref.invalidate(bankAccountsProvider);
         if (mounted) Navigator.pop(context);
-        scaffoldMessenger.showSnackBar(const SnackBar(content: Text('Bank account linked successfully!')));
+        sm.showSnackBar(const SnackBar(content: Text('Bank linked successfully!'), backgroundColor: AppTheme.successGreen));
       }
     } catch (e) {
-      scaffoldMessenger.showSnackBar(SnackBar(content: Text('Error linking bank: ${e.toString()}')));
+      sm.showSnackBar(SnackBar(content: Text('Error: $e')));
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }

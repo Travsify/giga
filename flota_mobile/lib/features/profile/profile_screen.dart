@@ -10,6 +10,7 @@ import 'package:go_router/go_router.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flota_mobile/shared/map_picker_screen.dart';
 import 'package:flota_mobile/features/tracking/rider_stats_service.dart';
+import 'verification_screen.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
@@ -538,8 +539,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   Widget _buildVerificationHub(Map<String, dynamic>? rider) {
     final bool hasVehicle = (rider?['has_vehicle'] as bool?) ?? false || 
         (rider?['vehicle_plate_number'] != null && (rider?['vehicle_plate_number']?.toString() ?? '').isNotEmpty);
-    final bool isVerified = (rider?['vehicle_verified'] as bool?) ?? false;
-    final bool hasLicense = rider?['license_number'] != null && (rider?['license_number']?.toString() ?? '').isNotEmpty;
+    final String status = rider?['verification_status'] ?? 'pending';
+    final bool isVerified = status == 'verified';
+    final bool hasLicense = rider?['driver_license_path'] != null;
+    final bool hasRegistration = rider?['vehicle_registration_path'] != null;
     
     return Container(
       padding: const EdgeInsets.all(8),
@@ -550,25 +553,45 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       ),
       child: Column(
         children: [
-          _buildHubItem('Vehicle Registration', hasVehicle ? 'Verified' : 'Not Submitted', hasVehicle),
+          _buildHubItem(
+            'Vehicle Registration', 
+            hasRegistration ? 'Submitted' : 'Not Submitted', 
+            hasRegistration,
+            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const VerificationScreen())),
+          ),
           Divider(height: 1, indent: 50, color: AppTheme.borderBlue),
-          _buildHubItem('Driver License', hasLicense ? 'On File' : 'Required', hasLicense),
+          _buildHubItem(
+            'Driver License', 
+            hasLicense ? 'On File' : 'Required', 
+            hasLicense,
+            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const VerificationScreen())),
+          ),
           Divider(height: 1, indent: 50, color: AppTheme.borderBlue),
-          _buildHubItem('Account Status', isVerified ? 'Active Partner' : 'Pending Verification', isVerified),
+          _buildHubItem(
+            'Account Status', 
+            isVerified ? 'Active Partner' : (status == 'submitted' ? 'Under Review' : 'Pending Verification'), 
+            isVerified,
+            isPending: status == 'submitted',
+            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const VerificationScreen())),
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildHubItem(String title, String subtitle, bool isVerified) {
+  Widget _buildHubItem(String title, String subtitle, bool isVerified, {required VoidCallback onTap, bool isPending = false}) {
+    Color color = isVerified ? Colors.green : (isPending ? AppTheme.primaryBlue : Colors.orange);
+    IconData icon = isVerified ? Icons.verified_user_rounded : (isPending ? Icons.hourglass_top_rounded : Icons.pending_rounded);
+
     return ListTile(
+      onTap: onTap,
       leading: Container(
         padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(color: (isVerified ? Colors.green : Colors.orange).withOpacity(0.15), shape: BoxShape.circle),
-        child: Icon(isVerified ? Icons.verified_user_rounded : Icons.pending_rounded, color: isVerified ? Colors.green : Colors.orange, size: 18),
+        decoration: BoxDecoration(color: color.withOpacity(0.15), shape: BoxShape.circle),
+        child: Icon(icon, color: color, size: 18),
       ),
       title: Text(title, style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: AppTheme.textPrimary)),
-      subtitle: Text(subtitle, style: TextStyle(fontSize: 12, color: isVerified ? AppTheme.successGreen : Colors.orange)),
+      subtitle: Text(subtitle, style: TextStyle(fontSize: 12, color: color)),
       trailing: Icon(Icons.chevron_right, size: 20, color: AppTheme.textSecondary),
     );
   }
