@@ -7,6 +7,9 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:flota_mobile/theme/app_theme.dart';
+import 'package:flota_mobile/core/error_handler.dart';
+import 'package:intl/intl.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flota_mobile/core/payment_service.dart';
 import 'wallet_provider.dart';
 
@@ -215,7 +218,6 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
         if (mounted) setState(() => _isLoading = false);
       }
     }
-  }
   }
 
   Future<void> _handleWithdraw(AuthState authState) async {
