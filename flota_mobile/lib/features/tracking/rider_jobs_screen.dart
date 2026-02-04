@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:go_router/go_router.dart';
 import 'package:flota_mobile/theme/app_theme.dart';
 import 'package:flota_mobile/core/api_client.dart';
 import 'package:flota_mobile/features/auth/auth_provider.dart';
@@ -9,6 +7,7 @@ import 'package:flota_mobile/features/auth/auth_provider.dart';
 // 1. DATA MODELS & PROVIDERS
 
 enum JobSegment { live, active, history }
+enum DiscoveryMode { orders, errands }
 
 class RiderJob {
   final String id;
@@ -60,10 +59,13 @@ class RiderJob {
 }
 
 // Live Jobs (Radar)
-final riderLiveJobsProvider = FutureProvider<List<RiderJob>>((ref) async {
+final riderLiveJobsProvider = FutureProvider.family<List<RiderJob>, String>((ref, mode) async {
   final api = ref.watch(apiClientProvider);
   try {
-    final response = await api.dio.get('deliveries', queryParameters: {'status': 'pending'});
+    final response = await api.dio.get('deliveries', queryParameters: {
+      'status': 'pending',
+      'parcel_type': mode,
+    });
     final List deliveries = response.data['data'] ?? response.data ?? [];
     return deliveries.map((d) => RiderJob.fromJson(d)).toList();
   } catch (e) {
@@ -108,6 +110,7 @@ class RiderJobsScreen extends ConsumerStatefulWidget {
 
 class _RiderJobsScreenState extends ConsumerState<RiderJobsScreen> with SingleTickerProviderStateMixin {
   JobSegment _activeSegment = JobSegment.live;
+  DiscoveryMode _discoveryMode = DiscoveryMode.orders;
   late AnimationController _radarController;
 
   @override
@@ -244,27 +247,84 @@ class _RiderJobsScreenState extends ConsumerState<RiderJobsScreen> with SingleTi
   }
 
   Widget _buildLiveList() {
-    final liveJobsAsync = ref.watch(riderLiveJobsProvider);
+    final liveJobsAsync = ref.watch(riderLiveJobsProvider(_discoveryMode.name));
     return liveJobsAsync.when(
       data: (jobs) {
-        if (jobs.isEmpty) {
-          return SliverFillRemaining(child: _buildEmptyState('SCANNING FOR ORDERS...'));
-        }
-        return SliverPadding(
-          padding: const EdgeInsets.all(20),
-          sliver: SliverList(
-            delegate: SliverChildBuilderDelegate(
-              (context, index) => _LiveJobCard(
-                job: jobs[index],
-                onAccept: () => _acceptJob(jobs[index]),
+        return SliverList(
+          delegate: SliverChildListDelegate([
+            _buildDiscoveryToggle(),
+            if (jobs.isEmpty)
+              SizedBox(
+                height: 400,
+                child: _buildEmptyState('SCANNING FOR ${_discoveryMode.name.toUpperCase()}...'),
+              )
+            else
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Column(
+                  children: jobs.map((job) => _LiveJobCard(
+                    job: job,
+                    onAccept: () => _acceptJob(job),
+                  )).toList(),
+                ),
               ),
-              childCount: jobs.length,
-            ),
-          ),
+          ]),
         );
       },
       loading: () => const SliverFillRemaining(child: Center(child: CircularProgressIndicator())),
       error: (e, _) => _buildErrorState('Live Jobs'),
+    );
+  }
+
+  Widget _buildDiscoveryToggle() {
+    return Container(
+      margin: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+      padding: const EdgeInsets.all(4),
+      decoration: BoxDecoration(
+        color: AppTheme.surfaceColor.withOpacity(0.5),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppTheme.borderBlue.withOpacity(0.3)),
+      ),
+      child: Row(
+        children: DiscoveryMode.values.map((mode) {
+          final isActive = _discoveryMode == mode;
+          return Expanded(
+            child: GestureDetector(
+              onTap: () => setState(() => _discoveryMode = mode),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                decoration: BoxDecoration(
+                  color: isActive ? AppTheme.primaryBlue.withOpacity(0.2) : Colors.transparent,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Center(
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        mode == DiscoveryMode.orders ? Icons.local_shipping_outlined : Icons.shopping_basket_outlined,
+                        size: 14,
+                        color: isActive ? AppTheme.primaryBlue : AppTheme.textSecondary,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        mode.name.toUpperCase(),
+                        style: TextStyle(
+                          color: isActive ? Colors.white : AppTheme.textSecondary,
+                          fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
+                          fontSize: 10,
+                          letterSpacing: 1.1,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          );
+        }).toList(),
+      ),
     );
   }
 
@@ -293,18 +353,20 @@ class _RiderJobsScreenState extends ConsumerState<RiderJobsScreen> with SingleTi
 
   Future<void> _acceptJob(RiderJob job) async {
     final api = ref.read(apiClientProvider);
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
     try {
       final response = await api.dio.post('deliveries/${job.id}/accept');
       if (response.data['status'] == 'success') {
-        ScaffoldMessenger.of(context).showSnackBar(
+        scaffoldMessenger.showSnackBar(
           const SnackBar(content: Text('Job accepted! Switching to Active view.')),
         );
+        if (!mounted) return;
         setState(() => _activeSegment = JobSegment.active);
-        ref.invalidate(riderLiveJobsProvider);
+        ref.invalidate(riderLiveJobsProvider(_discoveryMode.name));
         ref.invalidate(riderActiveJobProvider);
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
+      scaffoldMessenger.showSnackBar(
         SnackBar(content: Text('Error: ${e.toString()}')),
       );
     }
@@ -312,12 +374,14 @@ class _RiderJobsScreenState extends ConsumerState<RiderJobsScreen> with SingleTi
 
   Future<void> _updateJobStatus(String jobId, String status) async {
     final api = ref.read(apiClientProvider);
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
     try {
       final response = await api.dio.patch('deliveries/$jobId/status', data: {'status': status});
       if (response.data['status'] == 'success') {
-        ScaffoldMessenger.of(context).showSnackBar(
+        scaffoldMessenger.showSnackBar(
           SnackBar(content: Text('Status updated to ${status.replaceAll('_', ' ')}')),
         );
+        if (!mounted) return;
         if (status == 'delivered') {
           setState(() => _activeSegment = JobSegment.history);
           ref.invalidate(riderHistoryJobsProvider);
@@ -325,7 +389,7 @@ class _RiderJobsScreenState extends ConsumerState<RiderJobsScreen> with SingleTi
         ref.invalidate(riderActiveJobProvider);
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
+      scaffoldMessenger.showSnackBar(
         SnackBar(content: Text('Error: ${e.toString()}')),
       );
     }
@@ -392,9 +456,15 @@ class _RiderJobsScreenState extends ConsumerState<RiderJobsScreen> with SingleTi
               const SizedBox(height: 24),
               ElevatedButton.icon(
                 onPressed: () {
-                  if (_activeSegment == JobSegment.live) ref.refresh(riderLiveJobsProvider);
-                  if (_activeSegment == JobSegment.active) ref.refresh(riderActiveJobProvider);
-                  if (_activeSegment == JobSegment.history) ref.refresh(riderHistoryJobsProvider);
+                  if (_activeSegment == JobSegment.live) {
+                    ref.invalidate(riderLiveJobsProvider(_discoveryMode.name));
+                  }
+                  if (_activeSegment == JobSegment.active) {
+                    ref.invalidate(riderActiveJobProvider);
+                  }
+                  if (_activeSegment == JobSegment.history) {
+                    ref.invalidate(riderHistoryJobsProvider);
+                  }
                 },
                 icon: const Icon(Icons.refresh),
                 label: const Text('Retry'),
