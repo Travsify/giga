@@ -51,18 +51,25 @@ class RiderController extends Controller
         // Productivity Tips
         $tips = $this->getProductivityTips($completedJobsToday, $todaysEarnings);
 
-        \Illuminate\Support\Facades\Log::info('Rider Dashboard Stats Fetch', [
-            'user_id' => $user->id,
-            'is_online' => (bool) $user->is_online
-        ]);
+        // Calculate Total Deliveries (Lifetime)
+        $totalDeliveries = Delivery::where('rider_id', $rider->id)
+            ->where('status', 'delivered')
+            ->count();
+
+        // Calculate Average Rating
+        $avgRating = Delivery::where('rider_id', $rider->id)
+            ->whereNotNull('rating')
+            ->avg('rating') ?? 5.0;
 
         return response()->json([
             'status' => 'success',
             'data' => [
                 'todays_earnings' => (float) $todaysEarnings,
                 'completed_jobs_today' => $completedJobsToday,
+                'total_jobs_completed' => $totalDeliveries,
                 'completion_rate' => $completionRate,
-                'shift_goal_target' => 100.00, // Hardcoded for now, could be dynamic in future
+                'rating' => (float)$avgRating,
+                'shift_goal_target' => 100.00,
                 'productivity_tips' => $tips,
                 'currency' => $user->wallet ? $user->wallet->currency : 'GBP',
                 'currency_symbol' => $user->currency_symbol ?? '£',

@@ -11,9 +11,6 @@ use Illuminate\Support\Str;
 
 class ProfileController extends Controller
 {
-    /**
-     * Get the authenticated user's profile.
-     */
     public function show()
     {
         $user = Auth::user();
@@ -24,7 +21,7 @@ class ProfileController extends Controller
             $user->save();
         }
 
-        return response()->json($user);
+        return response()->json($user->load(['rider', 'rider.logisticsCompany']));
     }
 
     /**

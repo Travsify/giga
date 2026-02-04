@@ -14,10 +14,12 @@ class RiderStats {
   final int acceptanceRate;
   final double rating;
   final bool isOnline;
+  final int totalJobsCompleted;
 
   RiderStats({
     required this.todaysEarnings,
     required this.completedJobsToday,
+    required this.totalJobsCompleted,
     required this.completionRate,
     required this.shiftGoalTarget,
     required this.productivityTips,
@@ -34,6 +36,7 @@ class RiderStats {
     return RiderStats(
       todaysEarnings: (data['todays_earnings'] as num?)?.toDouble() ?? 0.0,
       completedJobsToday: data['completed_jobs_today'] as int? ?? 0,
+      totalJobsCompleted: data['total_jobs_completed'] as int? ?? 0,
       completionRate: data['completion_rate'] as int? ?? 0,
       shiftGoalTarget: (data['shift_goal_target'] as num?)?.toDouble() ?? 100.0,
       productivityTips: (data['productivity_tips'] as List?)?.map((e) => e.toString()).toList() ?? [],

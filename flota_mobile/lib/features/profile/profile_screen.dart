@@ -247,6 +247,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final profileState = ref.watch(profileProvider);
     final user = profileState.user;
     final loyalty = profileState.loyalty;
+    final stats = ref.watch(riderStatsProvider).value;
 
     if (profileState.isLoading && user == null) {
       return const Scaffold(
@@ -254,179 +255,159 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       );
     }
 
+    final rider = user?['rider'];
+    final isOnline = user?['is_online'] == true;
+
     return Scaffold(
       backgroundColor: AppTheme.backgroundColor,
       body: CustomScrollView(
         slivers: [
+          // 1. MODERN HEADER (GLASSMORPHISM EFFECT)
           SliverAppBar(
-            expandedHeight: 200,
+            expandedHeight: 280,
             pinned: true,
+            stretch: true,
+            backgroundColor: AppTheme.primaryBlue,
             flexibleSpace: FlexibleSpaceBar(
-              background: Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [theme.primaryColor, theme.primaryColor.withOpacity(0.7)],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                ),
-                child: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const CircleAvatar(
-                        radius: 40,
-                        backgroundColor: Colors.white24,
-                        child: Icon(Icons.person, size: 40, color: Colors.white),
-                      ),
-                      const SizedBox(height: 12),
-                      Text(
-                        user?['name']?.isNotEmpty == true 
-                            ? user!['name'] 
-                            : (user?['email']?.split('@')[0] ?? 'Complete Profile'),
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      if (profileState.subscription?['is_giga_plus'] == true)
-                        Container(
-                          margin: const EdgeInsets.only(top: 4),
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
-                          decoration: BoxDecoration(
-                            color: Colors.yellow[700],
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: const Text(
-                            'GIGA+',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      Text(
-                        user?['email'] ?? '',
-                        style: const TextStyle(
-                          color: Colors.white70,
-                          fontSize: 14,
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      ElevatedButton.icon(
-                        onPressed: _showEditProfile,
-                        icon: const Icon(Icons.edit, size: 16),
-                        label: const Text('Edit Profile'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white12,
-                          foregroundColor: Colors.white,
-                          elevation: 0,
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              stretchModes: const [StretchMode.zoomBackground, StretchMode.blurBackground],
+              background: Stack(
+                fit: StackFit.expand,
                 children: [
-                  // Loyalty Card
-                  _buildLoyaltyCard(loyalty),
-                  const SizedBox(height: 24),
-
-                  _sectionHeader('Membership & Account'),
-                  _buildSavedPlaceTile(
-                    'Giga+ Subscription',
-                    profileState.subscription?['is_giga_plus'] == true 
-                        ? 'Active Membership' 
-                        : 'Explore Premium Benefits',
-                    Icons.star_rounded,
-                    onTap: () => context.push('/giga-plus'),
-                  ),
-                  _buildSavedPlaceTile(
-                    ref.watch(authProvider).role == 'Business' ? 'Manage Business' : 'Join Giga for Business',
-                    ref.watch(authProvider).role == 'Business' ? 'Corporate dashboard & billing' : 'Scale your logistics',
-                    Icons.business_center_rounded,
-                    onTap: () => context.push(ref.watch(authProvider).role == 'Business' ? '/business-dashboard' : '/business-enrollment'),
-                  ),
-                  const SizedBox(height: 12),
-                  
-                  _sectionHeader('Saved Places'),
-                  _buildSavedPlaceTile(
-                    'Home',
-                    user?['home_address'] ?? 'Set Home Address',
-                    Icons.home_outlined,
-                    onTap: _showEditProfile,
-                  ),
-                  _buildSavedPlaceTile(
-                    'Work',
-                    user?['work_address'] ?? 'Set Work Address',
-                    Icons.work_outline,
-                    onTap: _showEditProfile,
-                  ),
-                  
-                  const SizedBox(height: 24),
-                  _sectionHeader('Referral Rewards'),
-                  _buildReferralCard(loyalty),
-                  
-                  const SizedBox(height: 24),
-                  _sectionHeader('Account & Legal'),
-                  _buildSavedPlaceTile(
-                    'Privacy Policy',
-                    'How we handle your data',
-                    Icons.privacy_tip_outlined,
-                    onTap: () => context.push('/privacy'),
-                  ),
-                  _buildSavedPlaceTile(
-                    'Terms & Conditions',
-                    'Standard service agreement',
-                    Icons.description_outlined,
-                    onTap: () => context.push('/terms'),
-                  ),
-                  _buildSavedPlaceTile(
-                    'Logout',
-                    'Securely sign out of your account',
-                    Icons.logout_rounded,
-                    onTap: () => _showLogoutConfirmation(),
-                  ),
-                  
-                  const SizedBox(height: 32),
-                  SizedBox(
-                    width: double.infinity,
-                    child: OutlinedButton.icon(
-                      onPressed: () async {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Refreshing your profile...'), duration: Duration(seconds: 1)),
-                        );
-                        await ref.read(profileProvider.notifier).refresh();
-                      },
-                      icon: const Icon(Icons.refresh),
-                      label: const Text('Refresh Profile'),
-                      style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.all(16),
-                        side: const BorderSide(color: AppTheme.primaryBlue),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
+                   // Gradient Background
+                  Container(
+                    decoration: const BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [AppTheme.primaryBlue, Color(0xFF001A4D)],
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
                       ),
                     ),
                   ),
-                  const SizedBox(height: 16),
+                  // Decorative Circles
+                  Positioned(
+                    top: -50,
+                    right: -50,
+                    child: Container(width: 200, height: 200, decoration: BoxDecoration(color: Colors.white.withOpacity(0.05), shape: BoxShape.circle)),
+                  ),
+                  
+                  // Profile Content
+                  SafeArea(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const SizedBox(height: 20),
+                        Stack(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(4),
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                border: Border.all(color: isOnline ? Colors.greenAccent : Colors.white24, width: 3),
+                              ),
+                              child: const CircleAvatar(
+                                radius: 50,
+                                backgroundColor: Colors.white10,
+                                child: Icon(Icons.person, size: 50, color: Colors.white),
+                              ),
+                            ),
+                            if (isOnline)
+                              Positioned(
+                                bottom: 5,
+                                right: 5,
+                                child: Container(
+                                  width: 20,
+                                  height: 20,
+                                  decoration: BoxDecoration(
+                                    color: Colors.greenAccent,
+                                    shape: BoxShape.circle,
+                                    border: Border.all(color: AppTheme.primaryBlue, width: 3),
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              user?['name'] ?? 'Complete Profile',
+                              style: GoogleFonts.outfit(
+                                color: Colors.white,
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            const Icon(Icons.verified, color: Colors.amber, size: 22),
+                          ],
+                        ),
+                        Text(
+                          'Verified Giga Partner',
+                          style: GoogleFonts.outfit(color: Colors.white70, fontSize: 13, letterSpacing: 1.2, fontWeight: FontWeight.w500),
+                        ),
+                        const SizedBox(height: 16),
+                        ElevatedButton(
+                          onPressed: _showEditProfile,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.white.withOpacity(0.15),
+                            foregroundColor: Colors.white,
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                            padding: const EdgeInsets.symmetric(horizontal: 24),
+                          ),
+                          child: const Text('Edit Profile'),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(20, 24, 20, 40),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // 2. ACTIVITY PILLARS
+                  Row(
+                    children: [
+                      _buildPillar('Rating', '${stats?.rating.toStringAsFixed(1) ?? "5.0"}', Icons.star_rounded, Colors.orange),
+                      const SizedBox(width: 12),
+                      _buildPillar('Deliveries', '${stats?.totalJobsCompleted ?? "0"}', Icons.local_shipping_rounded, AppTheme.primaryBlue),
+                      const SizedBox(width: 12),
+                      _buildPillar('Tier', 'Level 1', Icons.workspace_premium_rounded, Colors.purple),
+                    ],
+                  ),
+                  const SizedBox(height: 32),
+
+                  // 3. VEHICLE ID CARD
+                  _sectionHeader('Active Vehicle'),
+                  _buildVehicleCard(rider),
+                  const SizedBox(height: 32),
+
+                  // 4. VERIFICATION HUB
+                  _sectionHeader('Trust & Verification'),
+                  _buildVerificationHub(rider),
+                  const SizedBox(height: 32),
+
+                  // 5. ACCOUNT ACTIONS
+                  _sectionHeader('Account & Settings'),
+                  _buildActionTile('Giga+ Membership', 'Manage your premium subscription', Icons.auto_awesome, () => context.push('/giga-plus')),
+                  _buildActionTile('Referral Rewards', 'Earn £10 per referral', Icons.card_giftcard, _showReferralDialog),
+                  _buildActionTile('Payout Settings', 'Bank transfers & wallet', Icons.account_balance_wallet_outlined, () => context.push('/wallet')),
+                  _buildActionTile('Help & Support', '24/7 Rider support', Icons.help_outline_rounded, () {}),
+                  const SizedBox(height: 12),
+                  _buildActionTile('Logout', 'Securely sign out', Icons.logout_rounded, _showLogoutConfirmation, isDestructive: true),
+                  
+                  const SizedBox(height: 40),
                   Center(
-                    child: TextButton(
-                      onPressed: _showReferralDialog,
-                      child: const Text('Have a referral code?'),
+                    child: Text(
+                      'App Version 1.2.5 (UK-PRO)',
+                      style: TextStyle(color: Colors.grey[500], fontSize: 12),
                     ),
                   ),
                 ],
@@ -434,6 +415,152 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildPillar(String label, String value, IconData icon, Color color) {
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 4))],
+        ),
+        child: Column(
+          children: [
+            Icon(icon, color: color, size: 24),
+            const SizedBox(height: 8),
+            Text(value, style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold, color: AppTheme.textPrimary)),
+            Text(label, style: GoogleFonts.outfit(fontSize: 12, color: AppTheme.textSecondary)),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildVehicleCard(Map<String, dynamic>? rider) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: const Color(0xFF0F1219),
+        borderRadius: BorderRadius.circular(24),
+        image: DecorationImage(
+          image: const NetworkImage('https://www.transparenttextures.com/patterns/carbon-fibre.png'),
+          opacity: 0.1,
+          repeat: ImageRepeat.repeat,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    rider?['vehicle_type']?.toUpperCase() ?? 'COURIER VEHICLE',
+                    style: TextStyle(color: AppTheme.primaryBlue, fontWeight: FontWeight.bold, letterSpacing: 1.5, fontSize: 12),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Standard Fleet',
+                    style: GoogleFonts.outfit(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
+                ],
+              ),
+              const Icon(Icons.directions_car_filled_rounded, color: Colors.white24, size: 40),
+            ],
+          ),
+          const SizedBox(height: 24),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            decoration: BoxDecoration(
+              color: Colors.amber[400],
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: Colors.black, width: 1.5),
+            ),
+            child: Text(
+              rider?['vehicle_plate_number'] ?? 'GIGA FLEET',
+              style: GoogleFonts.outfit(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 22, letterSpacing: 2),
+            ),
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              const Icon(Icons.check_circle, color: Colors.greenAccent, size: 14),
+              const SizedBox(width: 6),
+              Text('Documents Verified', style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 12)),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildVerificationHub(Map<String, dynamic>? rider) {
+    return Container(
+      padding: const EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+      ),
+      child: Column(
+        children: [
+          _buildHubItem('Driving License', 'Expires 2028', true),
+          const Divider(height: 1, indent: 50),
+          _buildHubItem('Commercial Insurance', 'Verified', true),
+          const Divider(height: 1, indent: 50),
+          _buildHubItem('Background Check', 'Completed', true),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHubItem(String title, String subtitle, bool isVerified) {
+    return ListTile(
+      leading: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(color: Colors.green.withOpacity(0.1), shape: BoxShape.circle),
+        child: const Icon(Icons.verified_user_rounded, color: Colors.green, size: 18),
+      ),
+      title: Text(title, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
+      subtitle: Text(subtitle, style: const TextStyle(fontSize: 12)),
+      trailing: const Icon(Icons.chevron_right, size: 20),
+    );
+  }
+
+  Widget _buildActionTile(String title, String subtitle, IconData icon, VoidCallback onTap, {bool isDestructive = false}) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: ListTile(
+        onTap: onTap,
+        leading: Icon(icon, color: isDestructive ? Colors.red : AppTheme.primaryBlue),
+        title: Text(title, style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15, color: isDestructive ? Colors.red : AppTheme.textPrimary)),
+        subtitle: Text(subtitle, style: const TextStyle(fontSize: 12)),
+        trailing: const Icon(Icons.chevron_right, size: 20),
+      ),
+    );
+  }
+
+  Widget _sectionHeader(String title) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 4, bottom: 16),
+      child: Text(
+        title,
+        style: GoogleFonts.outfit(
+          fontSize: 18,
+          fontWeight: FontWeight.bold,
+          color: AppTheme.textPrimary,
+        ),
       ),
     );
   }
