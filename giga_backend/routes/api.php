@@ -124,7 +124,7 @@ Route::get('/direct-fix-settings', function() {
 
 Route::post('/verify-vehicle', [App\Http\Controllers\Api\VehicleVerificationController::class, 'verify']);
 Route::get('/view-logs', [App\Http\Controllers\Api\TestMailController::class, 'viewLogs']);
-Route::get('/status', function() { return response()->json(['status' => 'online', 'version' => '1.2.2']); });
+Route::get('/status', function() { return response()->json(['status' => 'online', 'version' => '1.2.3']); });
 
 // SECRET: One-time Admin Provisioning Endpoint (Delete after use!)
 Route::get('/provision-admin-giga2026secret', function() {
