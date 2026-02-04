@@ -422,8 +422,9 @@ class PaymentController extends Controller
             $user = $request->user();
             $reference = 'FLW_TOPUP_' . time() . '_' . $user->id;
 
-            // In production, we call Flutterwave API to get a real hosted payment link
-            $secretKey = env('FLW_SECRET_KEY');
+            // Priority: Database Setting -> ENV variable
+            $secretKey = \App\Models\AppSetting::get('flutterwave_secret_key', env('FLW_SECRET_KEY'));
+
             if (!$secretKey) {
                 return response()->json(['error' => 'Flutterwave configuration missing'], 500);
             }

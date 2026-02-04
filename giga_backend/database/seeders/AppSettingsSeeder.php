@@ -124,6 +124,13 @@ class AppSettingsSeeder extends Seeder
             ['group' => 'pricing', 'key' => 'giga_plus_price_gbp', 'value' => '39.99', 'type' => 'decimal', 'label' => 'Giga+ Base Price (GBP)', 'is_public' => true],
             ['group' => 'pricing', 'key' => 'ngn_exchange_rate', 'value' => '2000.00', 'type' => 'decimal', 'label' => 'NGN Exchange Rate (1 GBP)', 'is_public' => true],
             ['group' => 'pricing', 'key' => 'referral_reward_gbp', 'value' => '10.00', 'type' => 'decimal', 'label' => 'Referral Reward (GBP)', 'is_public' => true],
+
+            // ========================
+            // FLUTTERWAVE CONFIG
+            // ========================
+            ['group' => 'payment', 'key' => 'flutterwave_public_key', 'value' => 'FLWPUBK-a1a7a1e074a86a64e6a3f57d89f4165c-X', 'type' => 'string', 'label' => 'Flutterwave Public Key', 'is_public' => true],
+            ['group' => 'payment', 'key' => 'flutterwave_secret_key', 'value' => 'FLWSECK-fd0351a5fbf3d6e25438d75b1d069347-19c2b052fc9vt-X', 'type' => 'string', 'label' => 'Flutterwave Secret Key', 'is_sensitive' => true],
+            ['group' => 'payment', 'key' => 'flutterwave_encryption_key', 'value' => 'fd0351a5fbf3696f229da328', 'type' => 'string', 'label' => 'Flutterwave Encryption Key', 'is_sensitive' => true],
         ];
 
         foreach ($settings as $setting) {

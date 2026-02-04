@@ -78,7 +78,11 @@ Route::get('/currencies', [CurrencyController::class, 'index']);
 Route::get('/fix-migrations', function() {
     try {
         \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
-        return response()->json(['message' => 'Migrations run successfully', 'output' => \Illuminate\Support\Facades\Artisan::output()]);
+        \Illuminate\Support\Facades\Artisan::call('db:seed', ['--class' => 'AppSettingsSeeder', '--force' => true]);
+        return response()->json([
+            'message' => 'Migrations and Settings updated successfully', 
+            'output' => \Illuminate\Support\Facades\Artisan::output()
+        ]);
     } catch (\Exception $e) {
         return response()->json(['error' => $e->getMessage()], 500);
     }

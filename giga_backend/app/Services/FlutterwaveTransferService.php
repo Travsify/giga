@@ -12,7 +12,7 @@ class FlutterwaveTransferService
 
     public function __construct()
     {
-        $this->secretKey = env('FLW_SECRET_KEY');
+        $this->secretKey = \App\Models\AppSetting::get('flutterwave_secret_key', env('FLW_SECRET_KEY'));
     }
 
     /**
