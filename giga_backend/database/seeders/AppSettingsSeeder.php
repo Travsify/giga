@@ -117,6 +117,13 @@ class AppSettingsSeeder extends Seeder
             ]), 'type' => 'json', 'label' => 'Service Areas', 'is_public' => true],
             ['group' => 'operations', 'key' => 'operating_hours_start', 'value' => '08:00', 'type' => 'string', 'label' => 'Operating Hours Start', 'is_public' => true],
             ['group' => 'operations', 'key' => 'operating_hours_end', 'value' => '22:00', 'type' => 'string', 'label' => 'Operating Hours End', 'is_public' => true],
+            
+            // ========================
+            // PRICING & LOCALIZATION
+            // ========================
+            ['group' => 'pricing', 'key' => 'giga_plus_price_gbp', 'value' => '39.99', 'type' => 'decimal', 'label' => 'Giga+ Base Price (GBP)', 'is_public' => true],
+            ['group' => 'pricing', 'key' => 'ngn_exchange_rate', 'value' => '2000.00', 'type' => 'decimal', 'label' => 'NGN Exchange Rate (1 GBP)', 'is_public' => true],
+            ['group' => 'pricing', 'key' => 'referral_reward_gbp', 'value' => '10.00', 'type' => 'decimal', 'label' => 'Referral Reward (GBP)', 'is_public' => true],
         ];
 
         foreach ($settings as $setting) {

@@ -98,8 +98,8 @@ class RiderController extends Controller
                     'completion_rate' => $completionRate,
                     'acceptance_rate' => $acceptanceRate,
                     'cancellation_rate' => $cancellationRate,
-                    'on_time_rate' => 95, 
-                    'total_distance' => $totalDeliveries * 4.2, 
+                    'on_time_rate' => $totalDeliveries > 0 ? 100 : 100, // Placeholder for real calculation
+                    'total_distance' => round($totalDeliveries * 4.2, 1), 
                     'rating' => (float)$avgRating,
                     'shift_goal_target' => 100.00,
                     'activity' => $activity,

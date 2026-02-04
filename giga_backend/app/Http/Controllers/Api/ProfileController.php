@@ -71,7 +71,7 @@ class ProfileController extends Controller
             'loyalty_points' => $user->loyalty_points,
             'referral_code' => $user->referral_code,
             'referral_count' => $user->referrals()->count(),
-            'referral_earnings' => $user->referrals()->count() * 10, // £10 per referral
+            'referral_earnings' => $user->referrals()->count() * \App\Models\AppSetting::get('referral_reward_gbp', 10), 
         ]);
     }
 
