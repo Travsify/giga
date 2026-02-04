@@ -100,8 +100,8 @@ class RiderController extends Controller
                 'fare_earnings' => (float)$todaysEarnings, // Mock for now
                 'tips' => 0.0,
                 'bonuses' => 0.0,
-                'has_vehicle' => !empty($rider->vehicle_plate_number),
-                'is_verified' => !empty($rider->license_number), // Simplistic check
+                'has_vehicle' => (bool)$rider->has_vehicle,
+                'is_verified' => (bool)$rider->vehicle_verified,
             ]
         ]);
     }

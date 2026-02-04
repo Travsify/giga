@@ -37,6 +37,8 @@ class ProfileController extends Controller
             'home_address' => 'sometimes|string|max:255',
             'work_address' => 'sometimes|string|max:255',
             'is_online' => 'sometimes|boolean',
+            'vehicle_plate_number' => 'sometimes|string|max:20',
+            'vehicle_type' => 'sometimes|string|max:50',
         ]);
 
         if ($validator->fails()) {
@@ -45,7 +47,17 @@ class ProfileController extends Controller
 
         $user->update($request->only(['name', 'uk_phone', 'home_address', 'work_address', 'is_online']));
 
-        return response()->json($user);
+        if ($user->rider && ($request->has('vehicle_plate_number') || $request->has('vehicle_type'))) {
+            $user->rider->update($request->only(['vehicle_plate_number', 'vehicle_type']));
+            
+            // Auto-update has_vehicle flag if plate is provided
+            if (!empty($user->rider->vehicle_plate_number)) {
+                $user->rider->has_vehicle = true;
+                $user->rider->save();
+            }
+        }
+
+        return response()->json($user->load('rider'));
     }
 
     /**

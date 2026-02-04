@@ -17,13 +17,17 @@ class Rider extends Model
         'vehicle_plate_number',
         'is_online',
         'current_lat',
-        'current_lng'
+        'current_lng',
+        'has_vehicle',
+        'vehicle_verified'
     ];
 
     protected $casts = [
         'is_online' => 'boolean',
         'current_lat' => 'double',
         'current_lng' => 'double',
+        'has_vehicle' => 'boolean',
+        'vehicle_verified' => 'boolean'
     ];
 
     public function user()

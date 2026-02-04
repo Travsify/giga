@@ -45,6 +45,15 @@ class AuthController extends Controller
                     'currency_code' => $request->currency_code ?? 'GBP',
                 ]);
 
+                if ($request->role === 'Rider') {
+                    \App\Models\Rider::create([
+                        'user_id' => $user->id,
+                        'is_online' => false,
+                        'has_vehicle' => false,
+                        'vehicle_verified' => false,
+                    ]);
+                }
+
                 if ($request->role === 'Company') {
                     \App\Models\LogisticsCompany::create([
                         'user_id' => $user->id,
