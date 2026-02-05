@@ -7,6 +7,7 @@ import 'package:flota_mobile/features/tracking/rider_stats_service.dart';
 import 'package:flota_mobile/core/api_client.dart';
 import 'package:flota_mobile/features/auth/auth_provider.dart';
 import 'package:flota_mobile/features/wallet/wallet_provider.dart';
+import 'package:flota_mobile/features/wallet/withdrawal_screen.dart';
 
 // 1. MODELS & PROVIDERS
 
@@ -60,6 +61,14 @@ class RiderEarningsScreen extends ConsumerStatefulWidget {
 class _RiderEarningsScreenState extends ConsumerState<RiderEarningsScreen> {
   String _selectedPeriod = 'Today';
   bool _isWithdrawing = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(walletProvider.notifier).fetchWalletData();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -143,14 +152,21 @@ class _RiderEarningsScreenState extends ConsumerState<RiderEarningsScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               const SizedBox(height: 48),
+              const SizedBox(height: 48),
               Text(
                 'AVAILABLE BALANCE',
                 style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 12, fontWeight: FontWeight.bold, letterSpacing: 1.0),
               ),
               const SizedBox(height: 8),
-              Text(
-                '${stats.currencySymbol}${stats.todaysEarnings.toStringAsFixed(2)}',
-                style: GoogleFonts.outfit(fontSize: 48, fontWeight: FontWeight.w900, color: Colors.white),
+              Consumer(
+                builder: (context, ref, child) {
+                  final walletState = ref.watch(walletProvider);
+                  final currency = ref.read(authProvider).currencySymbol;
+                  return Text(
+                    '$currency${walletState.balance.toStringAsFixed(2)}',
+                    style: GoogleFonts.outfit(fontSize: 48, fontWeight: FontWeight.w900, color: Colors.white),
+                  );
+                },
               ),
               const SizedBox(height: 16),
               Container(
@@ -313,7 +329,7 @@ class _RiderEarningsScreenState extends ConsumerState<RiderEarningsScreen> {
               delegate: SliverChildBuilderDelegate(
                 (context, index) {
                   final tx = transactions[index];
-                  final amount = (tx['amount'] as num).toDouble();
+                  final amount = double.tryParse(tx['amount']?.toString() ?? '0') ?? 0.0;
                   final date = tx['created_at'] is String 
                       ? DateFormat('MMM dd, yyyy').format(DateTime.parse(tx['created_at']))
                       : 'Recently';
@@ -332,39 +348,7 @@ class _RiderEarningsScreenState extends ConsumerState<RiderEarningsScreen> {
   }
 
   Future<void> _handleWithdrawal(AsyncValue<RiderStats> statsAsync) async {
-    final stats = statsAsync.asData?.value;
-    final banks = ref.read(bankAccountsProvider).asData?.value;
-    final scaffoldMessenger = ScaffoldMessenger.of(context);
-
-    if (stats == null || stats.todaysEarnings <= 0) {
-      scaffoldMessenger.showSnackBar(const SnackBar(content: Text('No funds available for withdrawal.')));
-      return;
-    }
-
-    if (banks == null || banks.isEmpty) {
-      scaffoldMessenger.showSnackBar(const SnackBar(content: Text('Please link a bank account first.')));
-      _showAddBankSheet();
-      return;
-    }
-
-    setState(() => _isWithdrawing = true);
-    final api = ref.read(apiClientProvider);
-    try {
-      final response = await api.dio.post('wallet/withdraw', data: {
-        'amount': stats.todaysEarnings,
-        'bank_account_id': banks[0].id,
-      });
-
-      if (response.data['status'] == 'success') {
-        scaffoldMessenger.showSnackBar(const SnackBar(content: Text('Withdrawal request successful!')));
-        ref.invalidate(riderStatsProvider);
-        ref.invalidate(bankAccountsProvider);
-      }
-    } catch (e) {
-      scaffoldMessenger.showSnackBar(SnackBar(content: Text('Error: ${e.toString()}')));
-    } finally {
-      if (mounted) setState(() => _isWithdrawing = false);
-    }
+    Navigator.push(context, MaterialPageRoute(builder: (_) => const WithdrawalScreen()));
   }
 
   void _showAddBankSheet() {

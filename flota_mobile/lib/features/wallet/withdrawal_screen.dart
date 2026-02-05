@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flota_mobile/features/auth/auth_provider.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:flota_mobile/theme/app_theme.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:go_router/go_router.dart';
+import 'package:flota_mobile/features/auth/auth_provider.dart';
+import 'package:flota_mobile/features/wallet/wallet_provider.dart';
+import 'package:flota_mobile/core/api_client.dart';
+import 'package:flota_mobile/features/tracking/rider_earnings_screen.dart'; // Reuse bank provider
+import 'package:dio/dio.dart';
 import 'package:animate_do/animate_do.dart';
 
 class WithdrawalScreen extends ConsumerStatefulWidget {
@@ -19,163 +19,154 @@ class WithdrawalScreen extends ConsumerStatefulWidget {
 class _WithdrawalScreenState extends ConsumerState<WithdrawalScreen> {
   final _formKey = GlobalKey<FormState>();
   final _amountController = TextEditingController();
-  final _sortCodeController = TextEditingController();
-  final _accountController = TextEditingController();
-  final _nameController = TextEditingController();
   bool _isLoading = false;
-  double _currentBalance = 0.0;
+  BankAccount? _selectedBank;
 
   @override
   void initState() {
     super.initState();
-    _loadBalance();
-  }
-
-  Future<void> _loadBalance() async {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user != null) {
-      final doc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
-      if (mounted) {
-        setState(() {
-          _currentBalance = doc.data()?['wallet_balance'] ?? 0.0;
-        });
-      }
-    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(walletProvider.notifier).fetchWalletData();
+      ref.read(bankAccountsProvider); // Trigger fetch
+    });
   }
 
   Future<void> _processWithdrawal() async {
     if (!_formKey.currentState!.validate()) return;
-
+    
+    final wallet = ref.read(walletProvider);
     final amount = double.tryParse(_amountController.text) ?? 0.0;
     
-    if (amount > _currentBalance) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Insufficient funds'),
-          backgroundColor: AppTheme.errorRed,
-        ),
-      );
+    if (amount > wallet.balance) {
+      _showError('Insufficient funds. You have ${wallet.balance}.');
+      return;
+    }
+
+    if (_selectedBank == null) {
+      _showError('Please select a bank account.');
       return;
     }
 
     setState(() => _isLoading = true);
+    final api = ref.read(apiClientProvider);
 
     try {
-      final user = FirebaseAuth.instance.currentUser;
-      if (user != null) {
-        final userRef = FirebaseFirestore.instance.collection('users').doc(user.uid);
-        
-        await FirebaseFirestore.instance.runTransaction((transaction) async {
-          final snapshot = await transaction.get(userRef);
-          final currentBalance = snapshot.data()?['wallet_balance'] ?? 0.0;
+      final response = await api.dio.post('wallet/withdraw', data: {
+        'amount': amount,
+        'bank_account_id': _selectedBank!.id,
+      });
 
-          if (currentBalance < amount) {
-            throw 'Insufficient funds';
-          }
-
-          transaction.update(userRef, {'wallet_balance': currentBalance - amount});
-          
-          final txRef = userRef.collection('transactions').doc();
-          transaction.set(txRef, {
-            'amount': -amount,
-            'type': 'debit',
-            'reference': 'WITHDRAW_${DateTime.now().millisecondsSinceEpoch}',
-            'created_at': FieldValue.serverTimestamp(),
-            'description': 'Withdrawal to Bank',
-            'status': 'processing',
-            'details': {
-              'sort_code': _sortCodeController.text,
-              'account': '****${_accountController.text.substring(_accountController.text.length - 4)}',
-              'name': _nameController.text,
-            }
-          });
-        });
-
+      if (response.data['status'] == 'success') {
+        ref.read(walletProvider.notifier).fetchWalletData();
         if (mounted) {
-          showDialog(
-            context: context,
-            barrierDismissible: false,
-            builder: (context) => AlertDialog(
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Icon(Icons.check_circle, color: AppTheme.successGreen, size: 60),
-                  const SizedBox(height: 20),
-                  Text(
-                    'Withdrawal Submitted!',
-                    style: GoogleFonts.outfit(fontSize: 20, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 10),
-                  Text(
-                    '${ref.watch(authProvider).currencySymbol}${amount.toStringAsFixed(2)} will arrive in your bank\nwithin 2 hours via Faster Payments.',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(color: Colors.grey[600]),
-                  ),
-                ],
-              ),
-              actions: [
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                      context.pop();
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppTheme.primaryBlue,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                    ),
-                    child: const Text('Done'),
-                  ),
-                ),
-              ],
-            ),
-          );
+           _showSuccessDialog(amount);
         }
       }
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e'), backgroundColor: AppTheme.errorRed),
-        );
+      String msg = 'Withdrawal Failed';
+      if (e is DioException) {
+        msg = e.response?.data['error'] ?? e.response?.data['message'] ?? e.message ?? 'Server connection failed';
+      } else {
+        msg = e.toString();
       }
+      _showError(msg);
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
   }
 
+  void _showError(String message) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message, style: const TextStyle(color: Colors.white)),
+        backgroundColor: AppTheme.primaryRed,
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
+
+  void _showSuccessDialog(double amount) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        backgroundColor: AppTheme.surfaceColor,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20), side: const BorderSide(color: AppTheme.borderBlue)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.check_circle, color: AppTheme.successGreen, size: 60),
+            const SizedBox(height: 20),
+            Text('Withdrawal Submitted!', style: GoogleFonts.outfit(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white)),
+            const SizedBox(height: 10),
+            Text(
+              '${ref.read(authProvider).currencySymbol}${amount.toStringAsFixed(2)} will arrive shortly.', 
+              textAlign: TextAlign.center,
+              style: const TextStyle(color: Colors.white70)
+            ),
+          ],
+        ),
+        actions: [
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: () {
+                Navigator.pop(context); // Close dialog
+                Navigator.pop(context); // Close screen
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppTheme.primaryBlue,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+              child: const Text('Done'),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final wallet = ref.watch(walletProvider);
+    final banksAsync = ref.watch(bankAccountsProvider);
+    final currencySymbol = ref.read(authProvider).currencySymbol;
+
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: AppTheme.backgroundColor,
       appBar: AppBar(
-        title: Text(
-          'Withdraw Funds',
-          style: GoogleFonts.outfit(fontWeight: FontWeight.bold, color: Colors.black),
-        ),
-        backgroundColor: Colors.white,
-        elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.black),
+        title: Text('WITHDRAW FUNDS', style: GoogleFonts.outfit(fontWeight: FontWeight.bold, color: Colors.white, letterSpacing: 1.2)),
         centerTitle: true,
+        backgroundColor: AppTheme.backgroundColor,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () => Navigator.pop(context),
+        ),
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(24),
         child: Form(
           key: _formKey,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Balance Info
+              // Balance Card
               FadeInDown(
                 child: Container(
-                  padding: const EdgeInsets.all(20),
+                  padding: const EdgeInsets.all(24),
                   decoration: BoxDecoration(
                     gradient: const LinearGradient(
                       colors: [AppTheme.primaryBlue, Color(0xFF1E3A5F)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
                     ),
-                    borderRadius: BorderRadius.circular(20),
+                    borderRadius: BorderRadius.circular(24),
+                    boxShadow: [
+                      BoxShadow(color: AppTheme.primaryBlue.withOpacity(0.3), blurRadius: 20, offset: const Offset(0, 8)),
+                    ],
+                    border: Border.all(color: Colors.white.withOpacity(0.1)),
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -183,204 +174,92 @@ class _WithdrawalScreenState extends ConsumerState<WithdrawalScreen> {
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            'Available Balance',
-                            style: GoogleFonts.outfit(color: Colors.white70),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            '${ref.watch(authProvider).currencySymbol}${_currentBalance.toStringAsFixed(2)}',
-                            style: GoogleFonts.outfit(
-                              color: Colors.white,
-                              fontSize: 28,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
+                          Text('Available Balance', style: GoogleFonts.outfit(color: Colors.white70, fontSize: 14)),
+                          const SizedBox(height: 8),
+                          Text('$currencySymbol${wallet.balance.toStringAsFixed(2)}', 
+                               style: GoogleFonts.outfit(color: Colors.white, fontSize: 32, fontWeight: FontWeight.w900)),
                         ],
                       ),
-                      const Icon(Icons.account_balance_wallet, color: Colors.white54, size: 40),
+                      const Icon(Icons.account_balance_wallet, color: Colors.white24, size: 48),
                     ],
                   ),
                 ),
               ),
-              const SizedBox(height: 30),
+              const SizedBox(height: 32),
 
-              // Amount Field
+              // Amount
+              Text('ENTER AMOUNT', style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 12, color: AppTheme.textSecondary, letterSpacing: 1.2)),
+              const SizedBox(height: 12),
               FadeInLeft(
-                delay: const Duration(milliseconds: 100),
-                child: Text('Amount', style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 16)),
-              ),
-              const SizedBox(height: 10),
-              FadeInLeft(
-                delay: const Duration(milliseconds: 150),
                 child: TextFormField(
                   controller: _amountController,
                   keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                  style: GoogleFonts.outfit(fontSize: 24, fontWeight: FontWeight.bold),
+                  style: GoogleFonts.outfit(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
                   decoration: InputDecoration(
-                    prefixText: '${ref.watch(authProvider).currencySymbol} ',
-                    prefixStyle: GoogleFonts.outfit(fontSize: 24, fontWeight: FontWeight.bold),
-                    hintText: '0.00',
+                    prefixText: '$currencySymbol ',
+                    prefixStyle: GoogleFonts.outfit(fontSize: 24, fontWeight: FontWeight.bold, color: AppTheme.primaryBlue),
                     filled: true,
-                    fillColor: Colors.white,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      borderSide: BorderSide.none,
-                    ),
-                    contentPadding: const EdgeInsets.all(20),
+                    fillColor: AppTheme.surfaceColor,
+                    hintText: '0.00',
+                    hintStyle: TextStyle(color: Colors.white.withOpacity(0.3)),
+                    enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: AppTheme.borderBlue)),
+                    focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: AppTheme.primaryBlue, width: 2)),
                   ),
-                  validator: (value) {
-                    final amount = double.tryParse(value ?? '') ?? 0;
-                    if (amount < 10) return 'Minimum withdrawal is ${ref.read(authProvider).currencySymbol}10';
-                    if (amount > _currentBalance) return 'Insufficient funds';
+                  validator: (v) {
+                    final val = double.tryParse(v ?? '') ?? 0;
+                    if (val < 10) return 'Min withdrawal 10';
+                    if (val > wallet.balance) return 'Insufficient funds';
                     return null;
                   },
                 ),
               ),
-              const SizedBox(height: 8),
-              Text(
-                'Minimum withdrawal: ${ref.watch(authProvider).currencySymbol}10',
-                style: TextStyle(color: Colors.grey[500], fontSize: 12),
-              ),
+              
               const SizedBox(height: 24),
 
-              // Bank Details
-              FadeInLeft(
-                delay: const Duration(milliseconds: 200),
-                child: Text('Bank Details', style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 16)),
-              ),
-              const SizedBox(height: 16),
-              FadeInUp(
-                delay: const Duration(milliseconds: 250),
-                child: TextFormField(
-                  controller: _nameController,
-                  decoration: InputDecoration(
-                    labelText: 'Account Holder Name',
-                    filled: true,
-                    fillColor: Colors.white,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      borderSide: BorderSide.none,
+              // Bank Selection
+              Text('PAYOUT DESTINATION', style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 12, color: AppTheme.textSecondary, letterSpacing: 1.2)),
+              const SizedBox(height: 12),
+              FadeInRight(
+                child: banksAsync.when(
+                  data: (banks) => DropdownButtonFormField<BankAccount>(
+                    value: _selectedBank,
+                    items: banks.map((bank) => DropdownMenuItem(
+                      value: bank,
+                      child: Text('${bank.bankName} - ••${bank.accountNumber.substring(bank.accountNumber.length.clamp(2, 10) - 2)}', style: const TextStyle(color: Colors.white)),
+                    )).toList(),
+                    onChanged: (val) => setState(() => _selectedBank = val),
+                    dropdownColor: AppTheme.surfaceColor,
+                    style: const TextStyle(color: Colors.white),
+                    decoration: InputDecoration(
+                      filled: true,
+                      fillColor: AppTheme.surfaceColor,
+                      enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: AppTheme.borderBlue)),
+                      focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: AppTheme.primaryBlue, width: 2)),
                     ),
+                    hint: const Text('Select Bank Account', style: TextStyle(color: Colors.white54)),
                   ),
-                  validator: (value) => value?.isEmpty ?? true ? 'Required' : null,
+                  loading: () => const LinearProgressIndicator(color: AppTheme.primaryBlue),
+                  error: (e, s) => Text('Error loading banks: $e', style: const TextStyle(color: AppTheme.primaryRed)),
                 ),
               ),
-              const SizedBox(height: 16),
-              Row(
-                children: [
-                  Expanded(
-                    flex: 2,
-                    child: FadeInUp(
-                      delay: const Duration(milliseconds: 300),
-                      child: TextFormField(
-                        controller: _sortCodeController,
-                        keyboardType: TextInputType.number,
-                        inputFormatters: [
-                          FilteringTextInputFormatter.digitsOnly,
-                          LengthLimitingTextInputFormatter(6),
-                          _SortCodeFormatter(),
-                        ],
-                        decoration: InputDecoration(
-                          labelText: 'Sort Code',
-                          hintText: '00-00-00',
-                          filled: true,
-                          fillColor: Colors.white,
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(16),
-                            borderSide: BorderSide.none,
-                          ),
-                        ),
-                        validator: (value) {
-                          final digits = value?.replaceAll('-', '') ?? '';
-                          if (digits.length != 6) return 'Invalid';
-                          return null;
-                        },
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    flex: 3,
-                    child: FadeInUp(
-                      delay: const Duration(milliseconds: 350),
-                      child: TextFormField(
-                        controller: _accountController,
-                        keyboardType: TextInputType.number,
-                        inputFormatters: [
-                          FilteringTextInputFormatter.digitsOnly,
-                          LengthLimitingTextInputFormatter(8),
-                        ],
-                        decoration: InputDecoration(
-                          labelText: 'Account Number',
-                          hintText: '12345678',
-                          filled: true,
-                          fillColor: Colors.white,
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(16),
-                            borderSide: BorderSide.none,
-                          ),
-                        ),
-                        validator: (value) {
-                          if ((value?.length ?? 0) != 8) return 'Must be 8 digits';
-                          return null;
-                        },
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 30),
 
-              // Info Banner
+              const SizedBox(height: 40),
               FadeInUp(
-                delay: const Duration(milliseconds: 400),
-                child: Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.blue.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: Colors.blue.withOpacity(0.2)),
-                  ),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.info_outline, color: Colors.blue),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          'Funds usually arrive within 2 hours via Faster Payments.',
-                          style: TextStyle(color: Colors.blue[700]),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 30),
-
-              // Submit Button
-              FadeInUp(
-                delay: const Duration(milliseconds: 450),
                 child: SizedBox(
                   width: double.infinity,
                   height: 56,
                   child: ElevatedButton(
                     onPressed: _isLoading ? null : _processWithdrawal,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppTheme.primaryBlue,
+                      backgroundColor: _isLoading ? Colors.grey : AppTheme.primaryBlue,
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                      disabledBackgroundColor: Colors.grey[300],
+                      padding: const EdgeInsets.symmetric(vertical: 0),
+                      elevation: 8,
+                      shadowColor: AppTheme.primaryBlue.withOpacity(0.5),
                     ),
                     child: _isLoading 
-                        ? const SizedBox(
-                            height: 24,
-                            width: 24,
-                            child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
-                          )
-                        : Text(
-                            'Withdraw Funds',
-                            style: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.bold),
-                          ),
+                      ? const SizedBox(height: 24, width: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)) 
+                      : Text('WITHDRAW FUNDS', style: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.bold, letterSpacing: 1.2)),
                   ),
                 ),
               ),
@@ -388,30 +267,6 @@ class _WithdrawalScreenState extends ConsumerState<WithdrawalScreen> {
           ),
         ),
       ),
-    );
-  }
-}
-
-// Sort Code Formatter (XX-XX-XX)
-class _SortCodeFormatter extends TextInputFormatter {
-  @override
-  TextEditingValue formatEditUpdate(
-    TextEditingValue oldValue,
-    TextEditingValue newValue,
-  ) {
-    final text = newValue.text.replaceAll('-', '');
-    final buffer = StringBuffer();
-    
-    for (int i = 0; i < text.length; i++) {
-      buffer.write(text[i]);
-      if ((i + 1) % 2 == 0 && i != text.length - 1 && i < 5) {
-        buffer.write('-');
-      }
-    }
-    
-    return TextEditingValue(
-      text: buffer.toString(),
-      selection: TextSelection.collapsed(offset: buffer.length),
     );
   }
 }

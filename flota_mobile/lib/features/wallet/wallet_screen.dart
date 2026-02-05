@@ -11,6 +11,7 @@ import 'package:flota_mobile/core/error_handler.dart';
 import 'package:intl/intl.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flota_mobile/core/payment_service.dart';
+import 'package:flota_mobile/features/wallet/withdrawal_screen.dart';
 import 'wallet_provider.dart';
 
 class WalletScreen extends ConsumerStatefulWidget {
@@ -221,104 +222,7 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
   }
 
   Future<void> _handleWithdraw(AuthState authState) async {
-    final banksAsync = ref.read(bankAccountsProvider);
-    final banks = banksAsync.asData?.value ?? [];
-
-    if (banks.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please link a bank account in Earnings Hub first.')));
-      return;
-    }
-
-    final amountController = TextEditingController();
-    final result = await showModalBottomSheet<Map<String, dynamic>>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => Container(
-        padding: EdgeInsets.fromLTRB(24, 24, 24, MediaQuery.of(context).viewInsets.bottom + 24),
-        decoration: const BoxDecoration(
-          color: AppTheme.surfaceColor,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Withdraw Funds', style: GoogleFonts.outfit(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white)),
-            const SizedBox(height: 20),
-            TextField(
-              controller: amountController,
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
-              style: const TextStyle(color: Colors.white),
-              decoration: InputDecoration(
-                labelText: 'Amount (${authState.currencySymbol})',
-                hintText: '0.00',
-                filled: true,
-                fillColor: AppTheme.surfaceColor,
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
-                prefixIcon: const Icon(Icons.account_balance_wallet, color: AppTheme.primaryBlue),
-              ),
-            ),
-            const SizedBox(height: 16),
-            DropdownButtonFormField<String>(
-              dropdownColor: AppTheme.surfaceColor,
-              decoration: InputDecoration(
-                labelText: 'Payout Account',
-                filled: true,
-                fillColor: AppTheme.surfaceColor,
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
-                prefixIcon: const Icon(Icons.account_balance, color: AppTheme.primaryBlue),
-              ),
-              items: banks.map((b) => DropdownMenuItem(
-                value: b.id,
-                child: Text('${b.bankName} (••${b.accountNumber.substring(b.accountNumber.length - 2)})', style: const TextStyle(color: Colors.white)),
-              )).toList(),
-              onChanged: (val) {},
-              value: banks[0].id,
-            ),
-            const SizedBox(height: 24),
-            SizedBox(
-              width: double.infinity,
-              height: 56,
-              child: ElevatedButton(
-                onPressed: () {
-                  final amount = double.tryParse(amountController.text);
-                  if (amount != null) {
-                    Navigator.pop(context, {'amount': amount, 'bank_id': banks[0].id});
-                  }
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppTheme.primaryBlue,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                ),
-                child: const Text('Confirm Withdrawal'),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-
-    if (result != null) {
-      setState(() => _isLoading = true);
-      try {
-        final success = await PaymentService.withdrawFunds(
-          result['amount'], 
-          result['bank_id'], 
-        );
-        
-        if (success) {
-          await ref.read(walletProvider.notifier).fetchWalletData();
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Withdrawal request submitted!'), backgroundColor: AppTheme.successGreen),
-            );
-          }
-        }
-      } finally {
-        if (mounted) setState(() => _isLoading = false);
-      }
-    }
+    Navigator.push(context, MaterialPageRoute(builder: (_) => const WithdrawalScreen()));
   }
 
   Future<void> _sendFunds(AuthState authState) async {
@@ -481,8 +385,15 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
       ),
       body: Stack(
         children: [
-          SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
+          RefreshIndicator(
+            onRefresh: () async {
+              await ref.read(walletProvider.notifier).fetchWalletData();
+            },
+            color: AppTheme.primaryRed,
+            backgroundColor: AppTheme.surfaceColor,
+            child: SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(), // Ensure scroll works even if content is short
+              padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -582,6 +493,7 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
               ],
             ),
           ),
+          ),
           if (_isLoading)
             Container(
               color: Colors.black87,
@@ -654,7 +566,7 @@ class _ModernTransactionTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final amount = (tx['amount'] ?? 0.0).toDouble();
+    final amount = double.tryParse(tx['amount']?.toString() ?? '0') ?? 0.0;
     final isCredit = tx['type'] == 'credit' || amount > 0;
     final status = tx['status'] ?? 'completed';
     

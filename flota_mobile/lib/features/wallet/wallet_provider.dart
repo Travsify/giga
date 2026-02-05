@@ -59,11 +59,11 @@ class WalletNotifier extends StateNotifier<WalletState> {
       
       // Let's fetch /profile (ProfileController@show) which usually loads more data.
       final response = await _dio.get('/profile');
-      final data = response.data['user'];
+      final data = response.data;
       
       // Parse balance
       final wallet = data['wallet'] ?? {};
-      final balance = (wallet['balance'] ?? 0.0).toDouble();
+      final balance = double.tryParse(wallet['balance']?.toString() ?? '0') ?? 0.0;
 
       // Fetch Transactions
       final txResponse = await _dio.get('/wallet/transactions');

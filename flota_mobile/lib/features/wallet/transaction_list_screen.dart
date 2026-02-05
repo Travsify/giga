@@ -78,7 +78,7 @@ class _TransactionTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final amount = (data['amount'] ?? 0.0).toDouble();
+    final amount = double.tryParse(data['amount']?.toString() ?? '0') ?? 0.0;
     final isCredit = data['type'] == 'credit';
     final description = data['description'] ?? 'Transaction';
     final createdAtStr = data['created_at'] as String?;
