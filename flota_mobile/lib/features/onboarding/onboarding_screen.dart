@@ -199,11 +199,4 @@ class OnboardingData {
   OnboardingData({required this.title, required this.description, required this.icon});
 }
 
-class LoginScreen extends StatelessWidget {
-    const LoginScreen({super.key});
-    @override
-    Widget build(BuildContext context) {
-        // Temporary Stub
-        return const Scaffold(body: Center(child: Text("Login Screen")));
-    }
-}
+
