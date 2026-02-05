@@ -285,6 +285,8 @@ class PaymentController extends Controller
             $reference = 'WITHDRAW_' . time() . '_' . $user->id;
 
             // Payout Logic based on gateway
+            Log::info("Processing Withdrawal for User {$user->id} | Amount: {$request->amount} | Gateway: {$bankAccount->gateway_type} | Whitelisted IP: " . request()->ip());
+            
             if ($bankAccount->gateway_type === 'flutterwave') {
                 $flw = new \App\Services\FlutterwaveTransferService();
                 $result = $flw->initiateTransfer([

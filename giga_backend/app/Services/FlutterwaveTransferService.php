@@ -33,6 +33,8 @@ class FlutterwaveTransferService
                     'debit_currency' => $data['currency'] ?? 'NGN',
                 ]);
 
+            Log::info('Flutterwave Transfer Response: ' . $response->body());
+
             if ($response->successful()) {
                 return [
                     'success' => true,
