@@ -2,12 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:flota_mobile/core/api_client.dart';
 import 'package:flota_mobile/features/auth/auth_provider.dart';
-import 'package:flota_mobile/theme/app_theme.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
-import 'package:firebase_auth/firebase_auth.dart' as io;
 
 class EmailVerificationScreen extends ConsumerStatefulWidget {
   final bool isPhone;
@@ -24,7 +23,9 @@ class _EmailVerificationScreenState extends ConsumerState<EmailVerificationScree
   bool _isResending = false;
   bool _isVerified = false;
   String? _errorMessage;
-  String? _phoneVerificationId;
+
+  static const _primaryBlue = Color(0xFF1A3B8C);
+  static const _accentRed = Color(0xFFD32F2F);
 
   @override
   void initState() {
@@ -43,30 +44,43 @@ class _EmailVerificationScreenState extends ConsumerState<EmailVerificationScree
     try {
       final api = ref.read(apiClientProvider);
       if (widget.isPhone && widget.phoneNumber != null) {
-         // Backend Phone OTP
-         await api.dio.post('phone/send-otp', data: {'phone': widget.phoneNumber});
-         if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('SMS code sent!'), backgroundColor: Colors.green),
-            );
-         }
+        await api.dio.post('phone/send-otp', data: {'phone': widget.phoneNumber});
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('SMS code sent!'),
+              backgroundColor: Colors.green,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+          );
+        }
       } else {
-        // Backend Email OTP
         await api.dio.post('email/send-verification');
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Verification code sent to your email!'), backgroundColor: Colors.green),
+            SnackBar(
+              content: Text('Verification code sent to your email!'),
+              backgroundColor: Colors.green,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
           );
         }
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to send code: $e'), backgroundColor: Colors.red),
+          SnackBar(
+            content: Text('Failed to send code'),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          ),
         );
       }
     } finally {
-      if (mounted) setState(() => _isResending = false); // Removed !isPhone check, now relevant for both
+      if (mounted) setState(() => _isResending = false);
     }
   }
 
@@ -85,14 +99,12 @@ class _EmailVerificationScreenState extends ConsumerState<EmailVerificationScree
       final api = ref.read(apiClientProvider);
       
       if (widget.isPhone) {
-        // Backend Phone Verify
         await api.dio.post('phone/verify-otp', data: {
-            'phone': widget.phoneNumber,
-            'code': _codeController.text
+          'phone': widget.phoneNumber,
+          'code': _codeController.text
         });
         await ref.read(authProvider.notifier).markAsVerified();
       } else {
-        // Backend Email Verify
         await api.dio.post('email/verify', data: {'code': _codeController.text});
         await ref.read(authProvider.notifier).markAsVerified();
       }
@@ -117,147 +129,225 @@ class _EmailVerificationScreenState extends ConsumerState<EmailVerificationScree
     if (_isVerified) return _buildSuccessView();
 
     return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () => context.pop(),
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [_primaryBlue, Color(0xFF0D2555)],
+            stops: [0.0, 0.4],
+          ),
         ),
-      ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 32),
-            child: Column(
-              children: [
-                const SizedBox(height: 40),
-                
-                // Header Icon
-                FadeInDown(
-                  child: Container(
+        child: SafeArea(
+          child: Column(
+            children: [
+              // Header
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                child: Row(
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
+                      onPressed: () => context.pop(),
+                    ),
+                  ],
+                ),
+              ),
+
+              // Icon & Title
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: Column(
+                  children: [
+                    FadeInDown(
+                      child: Container(
+                        padding: const EdgeInsets.all(20),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.15),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          widget.isPhone ? Icons.phone_android_rounded : Icons.mark_email_unread_rounded,
+                          size: 48,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    FadeInDown(
+                      delay: const Duration(milliseconds: 100),
+                      child: Text(
+                        widget.isPhone ? "Verify Your Phone" : "Verify Your Email",
+                        style: GoogleFonts.outfit(
+                          fontSize: 28,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    FadeInDown(
+                      delay: const Duration(milliseconds: 200),
+                      child: Text(
+                        widget.isPhone
+                            ? "Enter the 6-digit code sent to ${widget.phoneNumber}"
+                            : "Enter the 6-digit code sent to your email",
+                        style: GoogleFonts.outfit(
+                          fontSize: 16,
+                          color: Colors.white70,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 32),
+
+              // White Section
+              Expanded(
+                child: Container(
+                  width: double.infinity,
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(32),
+                      topRight: Radius.circular(32),
+                    ),
+                  ),
+                  child: SingleChildScrollView(
                     padding: const EdgeInsets.all(24),
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [AppTheme.primaryBlue.withOpacity(0.1), AppTheme.primaryBlue.withOpacity(0.05)],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(Icons.mark_email_unread_rounded, size: 60, color: AppTheme.primaryBlue),
-                  ),
-                ),
-                
-                const SizedBox(height: 32),
-                
-                // Title
-                FadeInDown(
-                  delay: const Duration(milliseconds: 100),
-                  child: Text(
-                    widget.isPhone ? 'Verify Your Phone' : 'Verify Your Email',
-                    style: TextStyle(fontSize: 28, fontWeight: FontWeight.w800, color: Colors.black87),
-                  ),
-                ),
-                
-                const SizedBox(height: 12),
-                
-                // Subtitle
-                FadeInDown(
-                  delay: const Duration(milliseconds: 200),
-                  child: Text(
-                    widget.isPhone 
-                      ? 'We\'ve sent a 6-digit SMS code to ${widget.phoneNumber}.'
-                      : 'We\'ve sent a 6-digit verification code to your email address.',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 16, color: Colors.grey[600]),
-                  ),
-                ),
-                
-                const SizedBox(height: 48),
-                
-                // PIN Code Input
-                FadeInUp(
-                  delay: const Duration(milliseconds: 300),
-                  child: PinCodeTextField(
-                    appContext: context,
-                    controller: _codeController,
-                    length: 6,
-                    keyboardType: TextInputType.number,
-                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                    animationType: AnimationType.fade,
-                    pinTheme: PinTheme(
-                      shape: PinCodeFieldShape.box,
-                      borderRadius: BorderRadius.circular(12),
-                      fieldHeight: 56,
-                      fieldWidth: 48,
-                      activeFillColor: Colors.white,
-                      inactiveFillColor: const Color(0xFFF8FAFC),
-                      selectedFillColor: AppTheme.primaryBlue.withOpacity(0.05),
-                      activeColor: AppTheme.primaryBlue,
-                      inactiveColor: const Color(0xFFE2E8F0),
-                      selectedColor: AppTheme.primaryBlue,
-                    ),
-                    enableActiveFill: true,
-                    onCompleted: (value) => _verifyCode(),
-                    onChanged: (value) => setState(() => _errorMessage = null),
-                  ),
-                ),
-                
-                if (_errorMessage != null) ...[
-                  const SizedBox(height: 16),
-                  Text(_errorMessage!, style: const TextStyle(color: Colors.red, fontWeight: FontWeight.w500)),
-                ],
-                
-                const SizedBox(height: 32),
-                
-                // Verify Button
-                FadeInUp(
-                  delay: const Duration(milliseconds: 400),
-                  child: SizedBox(
-                    width: double.infinity,
-                    height: 56,
-                    child: ElevatedButton(
-                      onPressed: _isLoading ? null : _verifyCode,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppTheme.primaryBlue,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                        elevation: 8,
-                        shadowColor: AppTheme.primaryBlue.withOpacity(0.3),
-                      ),
-                      child: _isLoading
-                          ? const CircularProgressIndicator(color: Colors.white, strokeWidth: 3)
-                        : Text(widget.isPhone ? 'Verify Phone' : 'Verify Email', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700)),
-                    ),
-                  ),
-                ),
-                
-                const SizedBox(height: 24),
-                
-                // Resend Link
-                FadeInUp(
-                  delay: const Duration(milliseconds: 500),
-                  child: TextButton(
-                    onPressed: _isResending ? null : _sendVerificationCode,
-                    child: _isResending
-                        ? Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: AppTheme.primaryBlue)),
-                              const SizedBox(width: 8),
-                              const Text('Sending...'),
-                            ],
-                          )
-                        : Text(
-                            'Didn\'t receive code? Resend',
-                            style: TextStyle(color: AppTheme.primaryBlue, fontWeight: FontWeight.w600, fontSize: 15),
+                    child: Column(
+                      children: [
+                        const SizedBox(height: 32),
+
+                        // PIN Code Input
+                        FadeInUp(
+                          delay: const Duration(milliseconds: 300),
+                          child: PinCodeTextField(
+                            appContext: context,
+                            controller: _codeController,
+                            length: 6,
+                            keyboardType: TextInputType.number,
+                            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                            animationType: AnimationType.fade,
+                            pinTheme: PinTheme(
+                              shape: PinCodeFieldShape.box,
+                              borderRadius: BorderRadius.circular(14),
+                              fieldHeight: 60,
+                              fieldWidth: 50,
+                              activeFillColor: Colors.white,
+                              inactiveFillColor: const Color(0xFFF8FAFC),
+                              selectedFillColor: _primaryBlue.withOpacity(0.05),
+                              activeColor: _primaryBlue,
+                              inactiveColor: const Color(0xFFE2E8F0),
+                              selectedColor: _primaryBlue,
+                              borderWidth: 1.5,
+                            ),
+                            enableActiveFill: true,
+                            textStyle: GoogleFonts.outfit(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              color: _primaryBlue,
+                            ),
+                            onCompleted: (value) => _verifyCode(),
+                            onChanged: (value) => setState(() => _errorMessage = null),
                           ),
+                        ),
+
+                        if (_errorMessage != null) ...[
+                          const SizedBox(height: 16),
+                          FadeIn(
+                            child: Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: Colors.red.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Row(
+                                children: [
+                                  const Icon(Icons.error_outline, color: Colors.red, size: 20),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: Text(
+                                      _errorMessage!,
+                                      style: GoogleFonts.outfit(color: Colors.red, fontSize: 14),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+
+                        const SizedBox(height: 32),
+
+                        // Verify Button
+                        FadeInUp(
+                          delay: const Duration(milliseconds: 400),
+                          child: SizedBox(
+                            width: double.infinity,
+                            height: 56,
+                            child: ElevatedButton(
+                              onPressed: _isLoading ? null : _verifyCode,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: _accentRed,
+                                foregroundColor: Colors.white,
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                                elevation: 2,
+                                shadowColor: _accentRed.withOpacity(0.4),
+                              ),
+                              child: _isLoading
+                                  ? const SizedBox(
+                                      width: 24,
+                                      height: 24,
+                                      child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                                    )
+                                  : Text(
+                                      widget.isPhone ? "Verify Phone" : "Verify Email",
+                                      style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.w600),
+                                    ),
+                            ),
+                          ),
+                        ),
+
+                        const SizedBox(height: 24),
+
+                        // Resend Link
+                        FadeInUp(
+                          delay: const Duration(milliseconds: 500),
+                          child: TextButton(
+                            onPressed: _isResending ? null : _sendVerificationCode,
+                            child: _isResending
+                                ? Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      SizedBox(
+                                        width: 16,
+                                        height: 16,
+                                        child: CircularProgressIndicator(strokeWidth: 2, color: _primaryBlue),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Text('Sending...', style: GoogleFonts.outfit(color: _primaryBlue)),
+                                    ],
+                                  )
+                                : Text(
+                                    "Didn't receive code? Resend",
+                                    style: GoogleFonts.outfit(
+                                      color: _primaryBlue,
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 15,
+                                    ),
+                                  ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-                const SizedBox(height: 20),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
@@ -266,37 +356,51 @@ class _EmailVerificationScreenState extends ConsumerState<EmailVerificationScree
 
   Widget _buildSuccessView() {
     return Scaffold(
-      backgroundColor: Colors.white,
-      body: SafeArea(
-        child: Center(
-          child: FadeIn(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(24),
-                  decoration: BoxDecoration(
-                    color: Colors.green.withOpacity(0.1),
-                    shape: BoxShape.circle,
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [_primaryBlue, Color(0xFF0D2555)],
+          ),
+        ),
+        child: SafeArea(
+          child: Center(
+            child: FadeIn(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(24),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.15),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(Icons.check_circle_rounded, size: 80, color: Colors.white),
                   ),
-                  child: const Icon(Icons.check_circle_rounded, size: 80, color: Colors.green),
-                ),
-                const SizedBox(height: 30),
-                Text(
-                  widget.isPhone ? 'Phone Verified!' : 'Email Verified!',
-                  style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.black87),
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  widget.isPhone 
-                    ? 'Your phone number has been verified successfully.\nRedirecting you...'
-                    : 'Your email has been verified successfully.\nRedirecting you...',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(color: Colors.grey[600], fontSize: 16),
-                ),
-                const SizedBox(height: 40),
-                CircularProgressIndicator(color: AppTheme.primaryBlue),
-              ],
+                  const SizedBox(height: 32),
+                  Text(
+                    widget.isPhone ? "Phone Verified!" : "Email Verified!",
+                    style: GoogleFonts.outfit(
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    "Welcome to Giga!\nRedirecting you...",
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.outfit(
+                      color: Colors.white70,
+                      fontSize: 16,
+                      height: 1.5,
+                    ),
+                  ),
+                  const SizedBox(height: 40),
+                  const CircularProgressIndicator(color: Colors.white),
+                ],
+              ),
             ),
           ),
         ),
