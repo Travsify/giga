@@ -21,7 +21,7 @@ class ProfileController extends Controller
             $user->save();
         }
 
-        return response()->json($user->load(['rider', 'rider.logisticsCompany']));
+        return response()->json($user->load(['rider', 'rider.logisticsCompany', 'wallet']));
     }
 
     /**
