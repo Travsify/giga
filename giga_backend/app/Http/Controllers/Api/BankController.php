@@ -114,13 +114,13 @@ class BankController extends Controller
     public function getBanks(Request $request)
     {
         $country = $request->query('country', 'NG');
-        \Log::info('Fetching supported banks from Flutterwave', ['country' => $country]);
+        \Illuminate\Support\Facades\Log::info('Fetching supported banks from Flutterwave', ['country' => $country]);
         
         $flw = new \App\Services\FlutterwaveTransferService();
         $banks = $flw->getBanks($country);
 
         if (empty($banks)) {
-            \Log::warning('Flutterwave returned empty bank list', ['country' => $country]);
+            \Illuminate\Support\Facades\Log::warning('Flutterwave returned empty bank list', ['country' => $country]);
         }
 
         return response()->json([
@@ -139,7 +139,7 @@ class BankController extends Controller
             'bank_code' => 'required|string',
         ]);
 
-        \Log::info('Resolving bank account', [
+        \Illuminate\Support\Facades\Log::info('Resolving bank account', [
             'account' => $request->account_number,
             'bank_code' => $request->bank_code
         ]);
@@ -154,7 +154,7 @@ class BankController extends Controller
             ]);
         }
 
-        \Log::error('Bank account resolution failed', ['message' => $result['message']]);
+        \Illuminate\Support\Facades\Log::error('Bank account resolution failed', ['message' => $result['message']]);
 
         return response()->json([
             'status' => 'error',

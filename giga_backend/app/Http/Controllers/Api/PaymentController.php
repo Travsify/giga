@@ -525,4 +525,94 @@ class PaymentController extends Controller
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
+
+    /**
+     * Handle Flutterwave payment redirect callback.
+     * This is called by Flutterwave after payment completion via browser redirect.
+     */
+    public function flutterwaveCallback(Request $request)
+    {
+        Log::info('Flutterwave callback received', $request->all());
+
+        $status = $request->query('status');
+        $txRef = $request->query('tx_ref');
+        $transactionId = $request->query('transaction_id');
+
+        if ($status === 'successful' && $transactionId) {
+            // Verify the payment
+            $secretKey = \App\Models\AppSetting::get('flutterwave_secret_key', env('FLW_SECRET_KEY'));
+            
+            try {
+                $response = Http::withToken($secretKey)
+                    ->get("https://api.flutterwave.com/v3/transactions/{$transactionId}/verify");
+
+                if ($response->successful() && $response->json('data.status') === 'successful') {
+                    $amount = $response->json('data.amount');
+                    $currency = $response->json('data.currency');
+                    
+                    // Extract user ID from tx_ref (format: FLW_TOPUP_timestamp_userid)
+                    $parts = explode('_', $txRef);
+                    $userId = end($parts);
+                    
+                    if ($userId) {
+                        $user = \App\Models\User::find($userId);
+                        if ($user && $user->wallet) {
+                            $user->wallet->increment('balance', $amount);
+                            $user->wallet->transactions()->create([
+                                'type' => 'credit',
+                                'amount' => $amount,
+                                'description' => "Wallet funding via Flutterwave",
+                                'reference' => $txRef,
+                            ]);
+                            Log::info('Wallet funded via callback', ['user' => $userId, 'amount' => $amount]);
+                        }
+                    }
+
+                    // Return a success HTML page
+                    return response()->make("
+                        <html>
+                        <head><title>Payment Successful</title>
+                        <meta name='viewport' content='width=device-width, initial-scale=1'>
+                        <style>
+                            body { font-family: system-ui; text-align: center; padding: 40px; background: #0a1929; color: white; }
+                            .icon { font-size: 80px; }
+                            h1 { color: #4caf50; }
+                            p { color: #aaa; }
+                        </style>
+                        </head>
+                        <body>
+                            <div class='icon'>✅</div>
+                            <h1>Payment Successful!</h1>
+                            <p>{$currency} {$amount} has been added to your wallet.</p>
+                            <p>You can now close this window and return to the app.</p>
+                        </body>
+                        </html>
+                    ", 200, ['Content-Type' => 'text/html']);
+                }
+            } catch (\Exception $e) {
+                Log::error('Flutterwave callback verification error: ' . $e->getMessage());
+            }
+        }
+
+        // Payment failed or cancelled
+        return response()->make("
+            <html>
+            <head><title>Payment Status</title>
+            <meta name='viewport' content='width=device-width, initial-scale=1'>
+            <style>
+                body { font-family: system-ui; text-align: center; padding: 40px; background: #0a1929; color: white; }
+                .icon { font-size: 80px; }
+                h1 { color: #f44336; }
+                p { color: #aaa; }
+            </style>
+            </head>
+            <body>
+                <div class='icon'>❌</div>
+                <h1>Payment Not Completed</h1>
+                <p>Your payment was not successful or was cancelled.</p>
+                <p>Please close this window and try again.</p>
+            </body>
+            </html>
+        ", 200, ['Content-Type' => 'text/html']);
+    }
 }

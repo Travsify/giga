@@ -124,7 +124,7 @@ Route::get('/direct-fix-settings', function() {
 
 Route::post('/verify-vehicle', [App\Http\Controllers\Api\VehicleVerificationController::class, 'verify']);
 Route::get('/view-logs', [App\Http\Controllers\Api\TestMailController::class, 'viewLogs']);
-Route::get('/status', function() { return response()->json(['status' => 'online', 'version' => '1.2.7']); });
+Route::get('/status', function() { return response()->json(['status' => 'online', 'version' => '1.2.8']); });
 
 // SECRET: One-time Admin Provisioning Endpoint (Delete after use!)
 Route::get('/provision-admin-giga2026secret', function() {
@@ -172,7 +172,10 @@ Route::get('/banks', function(\Illuminate\Http\Request $request) {
         return response()->json(['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()], 500);
     }
 });
-Route::post('/banks/resolve', [BankController::class, 'resolveAccount']);
+Route::match(['get', 'post'], '/banks/resolve', [BankController::class, 'resolveAccount']);
+
+// Flutterwave callback (public - handles redirect after payment)
+Route::get('/wallet/flutterwave/callback', [App\Http\Controllers\Api\PaymentController::class, 'flutterwaveCallback']);
 
 
 // Protected routes
