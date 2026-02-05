@@ -595,6 +595,11 @@ class PaymentController extends Controller
         }
 
         // Payment failed or cancelled
+        $debugReason = "Status: " . ($status ?? 'N/A') . " | Transaction ID: " . ($transactionId ?? 'None');
+        if (isset($e)) $debugReason .= " | Verification Error: " . $e->getMessage();
+        
+        die("DEBUG INFO (READ THIS): Payment Verification Failed. " . $debugReason);
+
         return response()->make("
             <html>
             <head><title>Payment Status</title>
