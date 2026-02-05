@@ -181,6 +181,35 @@ Route::match(['get', 'post'], '/banks/resolve', [BankController::class, 'resolve
 Route::get('/wallet/flutterwave/callback', [App\Http\Controllers\Api\PaymentController::class, 'flutterwaveCallback']);
 
 
+// Utility Routes for Deployment Diagnostics
+Route::get('/clear-cache', function() {
+    try {
+        \Illuminate\Support\Facades\Artisan::call('optimize:clear');
+        return response()->json([
+            'status' => 'success', 
+            'message' => 'Cache cleared (optimize:clear)',
+            'output' => \Illuminate\Support\Facades\Artisan::output()
+        ]);
+    } catch (\Exception $e) {
+        return response()->json(['error' => $e->getMessage()], 500);
+    }
+});
+
+Route::get('/debug-config', function() {
+    $config = config('mail');
+    // Mask sensitive data
+    if(isset($config['mailers']['smtp']['password'])) $config['mailers']['smtp']['password'] = '***';
+    return response()->json([
+        'mail_defaults' => $config,
+        'env_vars' => [
+            'MAIL_MAILER' => env('MAIL_MAILER'),
+            'MAIL_HOST' => env('MAIL_HOST'),
+            'MAIL_USERNAME' => env('MAIL_USERNAME'),
+        ],
+        'is_cached' => app()->configurationIsCached(),
+    ]);
+});
+
 // Protected routes
 Route::middleware('auth:sanctum')->group(function () {
     // Auth
