@@ -124,7 +124,7 @@ Route::get('/direct-fix-settings', function() {
 
 Route::post('/verify-vehicle', [App\Http\Controllers\Api\VehicleVerificationController::class, 'verify']);
 Route::get('/view-logs', [App\Http\Controllers\Api\TestMailController::class, 'viewLogs']);
-Route::get('/status', function() { return response()->json(['status' => 'online', 'version' => '1.2.3']); });
+Route::get('/status', function() { return response()->json(['status' => 'online', 'version' => '1.2.4']); });
 
 // SECRET: One-time Admin Provisioning Endpoint (Delete after use!)
 Route::get('/provision-admin-giga2026secret', function() {
@@ -145,6 +145,10 @@ Route::post('/signup/verify-email/send', [EmailVerificationController::class, 's
 Route::post('/signup/verify-email/confirm', [EmailVerificationController::class, 'verifySignupCode']);
 Route::post('/phone/send-otp', [App\Http\Controllers\Api\PhoneVerificationController::class, 'sendOtp']);
 Route::post('/phone/verify-otp', [App\Http\Controllers\Api\PhoneVerificationController::class, 'verifyOtp']);
+
+// Public Bank Lookup (for mobile app bank picker)
+Route::get('/banks', [BankController::class, 'getBanks']);
+Route::post('/banks/resolve', [BankController::class, 'resolveAccount']);
 
 
 // Protected routes
