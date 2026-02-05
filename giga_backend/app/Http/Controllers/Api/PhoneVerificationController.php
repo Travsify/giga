@@ -26,8 +26,8 @@ class PhoneVerificationController extends Controller
         $request->validate(['phone' => 'required|string']);
         $phone = $request->phone;
 
-        // Generate 6-digit verification code
-        $code = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+        // Generate 7-digit verification code
+        $code = str_pad(random_int(0, 9999999), 7, '0', STR_PAD_LEFT);
         
         // Store the code with expiry (2 minutes)
         DB::table('phone_verification_codes')->updateOrInsert(
@@ -56,7 +56,7 @@ class PhoneVerificationController extends Controller
     {
         $request->validate([
             'phone' => 'required|string',
-            'code' => 'required|string|size:6',
+            'code' => 'required|string|size:7',
         ]);
 
         $record = DB::table('phone_verification_codes')

@@ -32,8 +32,8 @@ class EmailVerificationController extends Controller
             return response()->json(['message' => 'Email already verified.'], 400);
         }
 
-        // Generate 6-digit verification code
-        $code = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+        // Generate 7-digit verification code
+        $code = str_pad(random_int(0, 9999999), 7, '0', STR_PAD_LEFT);
         
         // Store the code with expiry (15 minutes)
         \DB::table('email_verification_codes')->updateOrInsert(
@@ -64,7 +64,7 @@ class EmailVerificationController extends Controller
     public function verifyCode(Request $request)
     {
         $request->validate([
-            'code' => 'required|string|size:6',
+            'code' => 'required|string|size:7',
         ]);
 
         $user = $request->user();
@@ -126,7 +126,7 @@ class EmailVerificationController extends Controller
             return response()->json(['message' => 'Email already registered.'], 400);
         }
 
-        $code = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+        $code = str_pad(random_int(0, 9999999), 7, '0', STR_PAD_LEFT);
         
         \DB::table('email_verification_codes')->updateOrInsert(
             ['email' => $email], // We'll need to use email instead of user_id for signup codes
@@ -147,7 +147,7 @@ class EmailVerificationController extends Controller
     {
         $request->validate([
             'email' => 'required|email',
-            'code' => 'required|string|size:6',
+            'code' => 'required|string|size:7',
         ]);
 
         $record = \DB::table('email_verification_codes')
