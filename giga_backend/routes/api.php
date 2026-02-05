@@ -19,7 +19,7 @@ use App\Http\Controllers\Api\PromoController;
 use App\Http\Controllers\Api\LockerController;
 use App\Http\Controllers\Api\SustainabilityController;
 use App\Http\Controllers\Api\SettingsController;
-use App\Http\Controllers\Api\CurrencyController;
+// use App\Http\Controllers\Api\CurrencyController; // FIXME: Class does not exist
 use App\Http\Controllers\Api\BankController;
 
 // Rate-limited auth routes (5 attempts per minute per IP)
@@ -124,7 +124,7 @@ Route::get('/direct-fix-settings', function() {
 
 Route::post('/verify-vehicle', [App\Http\Controllers\Api\VehicleVerificationController::class, 'verify']);
 Route::get('/view-logs', [App\Http\Controllers\Api\TestMailController::class, 'viewLogs']);
-Route::get('/status', function() { return response()->json(['status' => 'online', 'version' => '1.2.6']); });
+Route::get('/status', function() { return response()->json(['status' => 'online', 'version' => '1.2.7']); });
 
 // SECRET: One-time Admin Provisioning Endpoint (Delete after use!)
 Route::get('/provision-admin-giga2026secret', function() {
@@ -218,8 +218,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/rider/banks', [BankController::class, 'store']);
     Route::put('/rider/banks/{id}', [BankController::class, 'update']);
     Route::delete('/rider/banks/{id}', [BankController::class, 'destroy']);
-    Route::get('/banks', [BankController::class, 'getBanks']);
-    Route::get('/banks/resolve', [BankController::class, 'resolveAccount']);
+    // Route::get('/banks', [BankController::class, 'getBanks']); // Moved to public routes
+    // Route::get('/banks/resolve', [BankController::class, 'resolveAccount']); // Moved to public routes
 
     // Payments
     Route::post('/create-payment-intent', [App\Http\Controllers\Api\PaymentController::class, 'createPaymentIntent']);
