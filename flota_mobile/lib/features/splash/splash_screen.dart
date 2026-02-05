@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
-import 'package:flota_mobile/features/onboarding/onboarding_screen.dart'; // Will create this next
-import 'package:flota_mobile/main_entry.dart'; // Or wherever main auth check is
+import 'package:flota_mobile/features/onboarding/onboarding_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
