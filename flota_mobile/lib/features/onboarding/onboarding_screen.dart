@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flota_mobile/features/auth/login_screen.dart'; // Assume exists or will be created
+import 'package:flota_mobile/features/auth/presentation/screens/login_screen.dart'; // Assume exists or will be created
 import 'package:google_fonts/google_fonts.dart';
 
 class OnboardingScreen extends StatefulWidget {
