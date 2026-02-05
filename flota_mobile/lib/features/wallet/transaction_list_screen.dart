@@ -5,15 +5,29 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:flota_mobile/theme/app_theme.dart';
 import 'package:flota_mobile/features/auth/auth_provider.dart';
 import 'package:intl/intl.dart';
-import 'package:animate_do/animate_do.dart';
 
-class TransactionListScreen extends ConsumerWidget {
+class TransactionListScreen extends ConsumerStatefulWidget {
   final String userId;
   const TransactionListScreen({super.key, required this.userId});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<TransactionListScreen> createState() => _TransactionListScreenState();
+}
 
+class _TransactionListScreenState extends ConsumerState<TransactionListScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // Fetch data on init
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(walletProvider.notifier).fetchWalletData();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final walletState = ref.watch(walletProvider);
+    
     return Scaffold(
       backgroundColor: Colors.grey[50],
       appBar: AppBar(
@@ -23,45 +37,36 @@ class TransactionListScreen extends ConsumerWidget {
         elevation: 0,
         iconTheme: const IconThemeData(color: Colors.black),
       ),
-      body: Consumer(
-        builder: (context, ref, child) {
-          final walletState = ref.watch(walletProvider);
-          
-          if (walletState.isLoading && walletState.transactions.isEmpty) {
-            return const Center(child: CircularProgressIndicator());
-          }
-
-          final transactions = walletState.transactions;
-          if (transactions.isEmpty) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.history, size: 80, color: Colors.grey[300]),
-                  const SizedBox(height: 16),
-                  Text('No transactions yet', style: GoogleFonts.outfit(fontSize: 18, color: Colors.grey[500])),
-                ],
-              ),
-            );
-          }
-
-          return ListView.separated(
-            padding: const EdgeInsets.all(16),
-            itemCount: transactions.length,
-            separatorBuilder: (_, __) => const SizedBox(height: 12),
-            itemBuilder: (context, index) {
-              final data = transactions[index];
-              return FadeInUp(
-                delay: Duration(milliseconds: index * 50),
-                child: _TransactionTile(
-                  data: data,
-                  currencySymbol: ref.read(authProvider).currencySymbol,
+      body: walletState.isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : walletState.transactions.isEmpty
+              ? Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.history, size: 80, color: Colors.grey[300]),
+                      const SizedBox(height: 16),
+                      Text('No transactions yet', style: GoogleFonts.outfit(fontSize: 18, color: Colors.grey[500])),
+                      if (walletState.error != null)
+                        Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Text(walletState.error!, style: const TextStyle(color: Colors.red), textAlign: TextAlign.center),
+                        )
+                    ],
+                  ),
+                )
+              : ListView.separated(
+                  padding: const EdgeInsets.all(16),
+                  itemCount: walletState.transactions.length,
+                  separatorBuilder: (_, __) => const SizedBox(height: 12),
+                  itemBuilder: (context, index) {
+                    final data = walletState.transactions[index];
+                    return _TransactionTile(
+                      data: data,
+                      currencySymbol: ref.read(authProvider).currencySymbol,
+                    );
+                  },
                 ),
-              );
-            },
-          );
-        },
-      ),
     );
   }
 }

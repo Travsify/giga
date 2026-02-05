@@ -36,7 +36,7 @@ import 'package:flota_mobile/features/profile/giga_plus_screen.dart';
 import 'package:flota_mobile/features/wallet/wallet_screen.dart';
 import 'package:flota_mobile/features/wallet/payment_methods_screen.dart';
 import 'package:flota_mobile/features/wallet/help_support_screen.dart';
-// import 'package:flota_mobile/features/wallet/transaction_list_screen.dart';
+import 'package:flota_mobile/features/wallet/transaction_list_screen.dart';
 import 'package:flota_mobile/features/profile/privacy_policy_screen.dart';
 import 'package:flota_mobile/features/profile/terms_conditions_screen.dart';
 import 'package:flota_mobile/features/business/presentation/screens/business_enrollment_screen.dart';
@@ -334,10 +334,10 @@ final routerProvider = Provider<GoRouter>((ref) {
         ),
         GoRoute(
           path: '/transactions',
-          builder: (context, state) => Scaffold(
-            appBar: AppBar(title: const Text("Transactions")),
-            body: const Center(child: Text("Transaction History coming soon")),
-          ),
+          builder: (context, state) {
+             final userId = ref.read(authProvider).user?.id.toString() ?? '0';
+             return TransactionListScreen(userId: userId);
+          },
         ),
         GoRoute(
           path: '/withdraw',
