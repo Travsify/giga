@@ -53,13 +53,18 @@ class BankController extends Controller
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        $account = $rider->bankAccounts()->create($request->all());
+        try {
+            $account = $rider->bankAccounts()->create($request->all());
 
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Bank account added successfully',
-            'data' => $account
-        ], 201);
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Bank account added successfully',
+                'data' => $account
+            ], 201);
+        } catch (\Exception $e) {
+            Log::error('Add Bank Error: ' . $e->getMessage());
+            return response()->json(['error' => 'Failed to save account: ' . $e->getMessage()], 500);
+        }
     }
 
     /**

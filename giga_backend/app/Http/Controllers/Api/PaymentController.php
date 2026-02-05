@@ -441,7 +441,7 @@ class PaymentController extends Controller
                     'tx_ref' => $reference,
                     'amount' => $request->amount,
                     'currency' => $request->currency,
-                    'redirect_url' => env('APP_URL') . '/api/wallet/flutterwave/callback',
+                    'redirect_url' => request()->root() . '/api/wallet/flutterwave/callback',
                     'customer' => [
                         'email' => $user->email,
                         'name' => $user->name,
