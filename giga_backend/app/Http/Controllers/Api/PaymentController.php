@@ -558,7 +558,9 @@ class PaymentController extends Controller
                     if ($userId) {
                         $user = \App\Models\User::find($userId);
                         if ($user && $user->wallet) {
-                            $user->wallet->increment('balance', $amount);
+                            $user->wallet->balance += $amount;
+                            $user->wallet->save();
+                            
                             $user->wallet->transactions()->create([
                                 'type' => 'credit',
                                 'amount' => $amount,
