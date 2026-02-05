@@ -161,7 +161,7 @@ final routerProvider = Provider<GoRouter>((ref) {
         // If not logged in and on a protected route, go to onboarding/welcome
         if (isLoggingIn || isRegistering || isOnboarding || isSplash || isForgotPassword) {
           // If on splash, move to onboarding (first launch)
-          if (isSplash && !isAuthenticating) return '/onboarding';
+          if (isSplash && !isAuthenticating) return null; // Let Splash Screen handle navigation
           return null;
         }
         // DEFAULT for all other unauthenticated states

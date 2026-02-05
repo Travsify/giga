@@ -1,66 +1,58 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
+import 'package:flota_mobile/features/auth/login_screen.dart'; // Assume exists or will be created
 import 'package:google_fonts/google_fonts.dart';
-import 'package:animate_do/animate_do.dart';
-import 'package:flota_mobile/theme/app_theme.dart';
-import 'package:flota_mobile/core/settings_service.dart';
 
-class OnboardingScreen extends ConsumerStatefulWidget {
+class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
 
   @override
-  ConsumerState<OnboardingScreen> createState() => _OnboardingScreenState();
+  State<OnboardingScreen> createState() => _OnboardingScreenState();
 }
 
-class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
+class _OnboardingScreenState extends State<OnboardingScreen> {
   final PageController _pageController = PageController();
   int _currentPage = 0;
-  List<Map<String, String>> _slides = [];
 
-  @override
-  void initState() {
-    super.initState();
-    _loadSlides();
-  }
+  final List<OnboardingData> _pages = [
+    OnboardingData(
+      title: "Fast & Reliable",
+      description: "From bikes to trucks, we deliver it all across the UK.",
+      icon: Icons.local_shipping_rounded,
+    ),
+    OnboardingData(
+      title: "Welcome to Giga",
+      description: "Your UK-wide logistics partner for seamless delivery.",
+      icon: Icons.public,
+    ),
+    OnboardingData(
+      title: "Track your parcels",
+      description: "Real-time tracking for every mile of the journey.",
+      icon: Icons.map_outlined,
+    ),
+    OnboardingData(
+      title: "Earn with Giga",
+      description: "Join the fleet and start earning today on your schedule.",
+      icon: Icons.savings_outlined,
+    ),
+    OnboardingData(
+      title: "Join the Fleet",
+      description: "Register now and become a Giga Partner.",
+      icon: Icons.group_add_rounded,
+    ),
+  ];
 
-  void _loadSlides() {
-    final settings = ref.read(settingsServiceProvider);
-    final slidesJson = settings.get<String>('onboarding_slides', '');
-    
-    if (slidesJson.isNotEmpty) {
-      try {
-        final List<dynamic> parsed = json.decode(slidesJson);
-        _slides = parsed.map((e) => {
-          'image': e['image']?.toString() ?? '',
-          'title': e['title']?.toString() ?? '',
-          'description': e['description']?.toString() ?? '',
-        }).toList();
-      } catch (e) {
-        print('Error parsing onboarding slides: $e');
-      }
-    }
-
-    // Fallback if empty or valid
-    if (_slides.isEmpty) {
-      _slides = [
-        {
-          'image': 'assets/images/onboarding_1.png',
-          'title': 'Fast Delivery',
-          'description': 'Description 1'
-        },
-        {
-          'image': 'assets/images/onboarding_2.png',
-          'title': 'Track Live',
-          'description': 'Description 2'
-        },
-        {
-          'image': 'assets/images/onboarding_3.png',
-          'title': 'Safe & Secure',
-          'description': 'Description 3'
-        },
-      ];
+  void _onNext() {
+    if (_currentPage < _pages.length - 1) {
+      _pageController.nextPage(
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
+    } else {
+      // Navigate to Login/Auth
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const LoginScreen()), // Placeholder
+      );
     }
   }
 
@@ -68,143 +60,150 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body: LayoutBuilder(
-        builder: (context, constraints) {
-          return Stack(
-            children: [
-              PageView.builder(
+      body: SafeArea(
+        child: Column(
+          children: [
+            // Header: Giga Logo (Small)
+            Padding(
+              padding: const EdgeInsets.only(top: 20, bottom: 0),
+              child: Text(
+                'GIGA',
+                style: GoogleFonts.outfit(
+                  fontSize: 24,
+                  fontWeight: FontWeight.w900,
+                  color: const Color(0xFF003399),
+                  letterSpacing: 2.0,
+                ),
+              ),
+            ),
+
+            Expanded(
+              child: PageView.builder(
                 controller: _pageController,
-                onPageChanged: (value) => setState(() => _currentPage = value),
-                itemCount: _slides.length,
+                onPageChanged: (index) => setState(() => _currentPage = index),
+                itemCount: _pages.length,
                 itemBuilder: (context, index) {
-                  final slide = _slides[index];
-                  // Use SettingsService to resolve URL
-                  final settings = ref.read(settingsServiceProvider);
-                  final imageUrl = settings.getAssetUrl(slide['image'] ?? '');
-                  
-                  final isNetworkImage = imageUrl.startsWith('http');
-                  
-                  return GestureDetector(
-                    onTap: () {
-                      if (_currentPage < _slides.length - 1) {
-                        _pageController.nextPage(
-                          duration: const Duration(milliseconds: 300),
-                          curve: Curves.easeIn,
-                        );
-                      } else {
-                        context.go('/welcome');
-                      }
-                    },
-                    child: Padding(
-                      padding: const EdgeInsets.all(40),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Expanded(
-                            flex: 3,
-                            child: isNetworkImage
-                                ? Image.network(imageUrl, fit: BoxFit.contain,
-                                    errorBuilder: (context, error, stackTrace) => 
-                                      Image.asset('assets/images/onboarding_1.png', fit: BoxFit.contain),
-                                  )
-                                : Image.asset(imageUrl.isNotEmpty ? imageUrl : 'assets/images/onboarding_1.png', fit: BoxFit.contain),
-                          ),
-                          const SizedBox(height: 30),
-                          Text(
-                            slide['title'] ?? '',
-                            style: GoogleFonts.outfit(
-                              fontSize: 28,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black87,
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          Text(
-                            slide['description'] ?? '',
-                            textAlign: TextAlign.center,
-                            style: GoogleFonts.outfit(
-                              fontSize: 16,
-                              color: Colors.black54,
-                            ),
-                          ),
-                          const Spacer(),
-                        ],
-                      ),
-                    ),
-                  );
+                  return _buildPage(_pages[index]);
                 },
               ),
-              
-              // Skip button
-              if (_currentPage < _slides.length - 1)
-                SafeArea(
-                  child: Align(
-                    alignment: Alignment.topRight,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                      child: TextButton(
-                        onPressed: () => context.go('/welcome'),
-                        child: Text(
-                          "Skip",
-                          style: GoogleFonts.outfit(
-                            color: AppTheme.primaryBlue,
-                            fontWeight: FontWeight.bold,
-                          ),
+            ),
+
+            // Footer: Indicators + Button
+            Padding(
+              padding: const EdgeInsets.all(32.0),
+              child: Column(
+                children: [
+                   // Page Indicators
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: List.generate(
+                      _pages.length,
+                      (index) => AnimatedContainer(
+                        duration: const Duration(milliseconds: 300),
+                        margin: const EdgeInsets.symmetric(horizontal: 4),
+                        height: 8,
+                        width: _currentPage == index ? 24 : 8,
+                        decoration: BoxDecoration(
+                          color: _currentPage == index
+                              ? const Color(0xFFD32F2F) // Red Active
+                              : const Color(0xFFE0E0E0), // Grey Inactive
+                          borderRadius: BorderRadius.circular(4),
                         ),
                       ),
                     ),
                   ),
-                ),
-
-              // Navigation Dot Indicator
-              Positioned(
-                bottom: constraints.maxHeight * 0.15,
-                left: 0,
-                right: 0,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: List.generate(
-                    _slides.length,
-                    (index) => AnimatedContainer(
-                      duration: const Duration(milliseconds: 300),
-                      margin: const EdgeInsets.only(right: 8),
-                      height: 8,
-                      width: _currentPage == index ? 24 : 8,
-                      decoration: BoxDecoration(
-                        color: _currentPage == index ? AppTheme.primaryBlue : Colors.black12,
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-
-              // Get Started Button (Last Slide)
-              if (_currentPage == _slides.length - 1)
-                Positioned(
-                  bottom: constraints.maxHeight * 0.05,
-                  left: 20,
-                  right: 20,
-                  child: FadeInUp(
-                    duration: const Duration(milliseconds: 500),
+                  const SizedBox(height: 32),
+                  // Next Button
+                  SizedBox(
+                    width: double.infinity,
+                    height: 56,
                     child: ElevatedButton(
-                      onPressed: () => context.go('/welcome'),
+                      onPressed: _onNext,
                       style: ElevatedButton.styleFrom(
-                        minimumSize: const Size(double.infinity, 56),
-                        backgroundColor: AppTheme.primaryBlue,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                        backgroundColor: const Color(0xFFD32F2F), // Giga Red
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(28),
+                        ),
+                        elevation: 0,
                       ),
                       child: Text(
-                        "Get Started",
-                        style: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.bold),
+                        _currentPage == _pages.length - 1 ? "Get Started" : "Next",
+                        style: GoogleFonts.outfit(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                        ),
                       ),
                     ),
                   ),
-                ),
-            ],
-          );
-        },
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
+
+  Widget _buildPage(OnboardingData data) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        // Image Placeholder (Circle with Icon)
+        Container(
+          width: 280,
+          height: 280,
+          decoration: BoxDecoration(
+            color: const Color(0xFFF5F8FF), // Light Blue tint
+            shape: BoxShape.circle,
+          ),
+          child: Icon(
+            data.icon,
+            size: 120,
+            color: const Color(0xFF003399),
+          ),
+        ),
+        const SizedBox(height: 48),
+        Text(
+          data.title,
+          textAlign: TextAlign.center,
+          style: GoogleFonts.outfit(
+            fontSize: 28,
+            fontWeight: FontWeight.bold,
+            color: const Color(0xFF003399),
+          ),
+        ),
+        const SizedBox(height: 16),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 32.0),
+          child: Text(
+            data.description,
+            textAlign: TextAlign.center,
+            style: GoogleFonts.outfit(
+              fontSize: 16,
+              color: Colors.grey[600],
+              height: 1.5,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class OnboardingData {
+  final String title;
+  final String description;
+  final IconData icon;
+
+  OnboardingData({required this.title, required this.description, required this.icon});
+}
+
+class LoginScreen extends StatelessWidget {
+    const LoginScreen({super.key});
+    @override
+    Widget build(BuildContext context) {
+        // Temporary Stub
+        return const Scaffold(body: Center(child: Text("Login Screen")));
+    }
 }

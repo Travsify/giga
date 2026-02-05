@@ -1,13 +1,8 @@
-import '../../auth_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:animate_do/animate_do.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:flota_mobile/theme/app_theme.dart';
-import 'package:flota_mobile/features/auth/biometric_provider.dart';
-import 'package:flota_mobile/core/api_client.dart';
-import 'package:flota_mobile/core/settings_service.dart';
+import 'package:flota_mobile/features/auth/auth_provider.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -17,630 +12,217 @@ class LoginScreen extends ConsumerStatefulWidget {
 }
 
 class _LoginScreenState extends ConsumerState<LoginScreen> {
-  final _loginController = TextEditingController();
+  final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+  bool _isLoading = false;
   bool _isPasswordVisible = false;
-  bool _isPhoneLogin = false;
-
-  @override
-  void initState() {
-    super.initState();
-    // Defer to next frame to read providers safely if needed, or read directly if not listening.
-    // However, for initialization logic based on settings, we can do it in build 
-    // or use a post-frame callback. 
-    // A better approach is to set initial values if we had settings loaded before.
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final settings = ref.read(settingsServiceProvider);
-      final emailEnabled = settings.get<bool>('auth_email_enabled', true);
-      final phoneEnabled = settings.get<bool>('auth_phone_enabled', true);
-      
-      if (!emailEnabled && phoneEnabled) {
-         setState(() => _isPhoneLogin = true);
-      } else if (emailEnabled && !phoneEnabled) {
-         setState(() => _isPhoneLogin = false);
-      }
-    });
-  }
-
-  @override
-  void dispose() {
-    _loginController.dispose();
-    _passwordController.dispose();
-    super.dispose();
-  }
-
-  Future<void> _loginWithBiometrics(WidgetRef ref) async {
-    final biometricService = ref.read(biometricServiceProvider);
-    final authenticated = await biometricService.authenticate();
-    
-    if (authenticated) {
-      // In a real app, you'd retrieve stored credentials and login
-      // For this demo, we'll ask the user to login manually first if no credentials stored
-      // But we will implement the redirect to OTP flow as requested
-      
-      final email = await ref.read(authProvider.notifier).getStoredEmail();
-      final password = await ref.read(authProvider.notifier).getStoredPassword();
-      
-      if (email != null && password != null) {
-        _loginController.text = email;
-        _passwordController.text = password;
-        _login();
-      } else {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Please login manually first to enable biometrics')),
-          );
-        }
-      }
-    }
-  }
 
   Future<void> _login() async {
-    final identifier = _loginController.text.trim();
-    final password = _passwordController.text.trim();
+    if (!_formKey.currentState!.validate()) return;
 
-    if (identifier.isEmpty || password.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter your credentials')),
-      );
-      return;
-    }
+    setState(() => _isLoading = true);
 
     try {
-      await ref.read(authProvider.notifier).login(identifier, password);
-      // login method in AuthNotifier now handles both email and phone
-      
-      if (mounted) {
-        // Trigger OTP based on identifier type or user record
-        try {
-          final api = ref.read(apiClientProvider);
-          // The backend will know which way to send based on user preference or identifier
-          await api.dio.post('email/send-verification'); 
-          // Note: If it's phone, we might need Firebase verifyPhoneNumber here too
-          // But for now, let's assume the flow is consistent.
-        } catch (e) { }
-        
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Verification code sent!'), backgroundColor: Colors.green),
+      await ref.read(authProvider.notifier).signIn(
+            _emailController.text.trim(),
+            _passwordController.text.trim(),
           );
-          final path = '/verify-email?isPhone=$_isPhoneLogin&phoneNumber=$identifier';
-          context.go(path);
-        }
-      }
+      // Navigation handled by GoRouter redirect
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(e.toString())),
+          SnackBar(
+            content: Text(e.toString().replaceAll('Exception: ', '')),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+          ),
         );
       }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final authState = ref.watch(authProvider);
-    final isLoading = authState.status == AuthStatus.loading;
-
     return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      body: Stack(
-        children: [
-          // Premium Background Design
-          const _BackgroundDecor(),
-          
-          SafeArea(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 28),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: 60),
-                  
-                  // Brand Header
-                  FadeInDown(
-                    duration: const Duration(milliseconds: 800),
-                    child: Center(
-                      child: Column(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                              color: Theme.of(context).cardTheme.color,
-                              shape: BoxShape.circle,
-                              boxShadow: [
-                                BoxShadow(
-                                  color: AppTheme.primaryBlue.withOpacity(0.15),
-                                  blurRadius: 30,
-                                  offset: const Offset(0, 10),
-                                ),
-                              ],
-                            ),
-                            child: Image.asset('assets/images/logo.png', height: 60, width: 60),
-                          ),
-                          const SizedBox(height: 16),
-                          Text(
-                            'GIGA',
-                            style: GoogleFonts.outfit(
-                              fontSize: 32,
-                              fontWeight: FontWeight.w900,
-                              color: AppTheme.primaryBlue,
-                              letterSpacing: 2,
-                            ),
-                          ),
-                        ],
-                      ),
+      backgroundColor: Colors.white,
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 32.0),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 48),
+                // Logo
+                Center(
+                  child: Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF5F8FF),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.local_shipping_rounded,
+                      size: 48,
+                      color: Color(0xFF003399),
                     ),
                   ),
-                  
-                  const SizedBox(height: 50),
-                  
-                  // Welcome Text
-                  FadeInLeft(
-                    duration: const Duration(milliseconds: 600),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Welcome Back',
-                          style: GoogleFonts.outfit(
-                            fontSize: 36,
-                            fontWeight: FontWeight.w800,
-                            color: Theme.of(context).textTheme.bodyLarge?.color,
-                            letterSpacing: -1,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          'Log in to continue your journey',
-                          style: TextStyle(
-                            fontSize: 18,
-                            color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.6),
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ],
-                    ),
+                ),
+                const SizedBox(height: 40),
+                Text(
+                  "Welcome Back",
+                  style: GoogleFonts.outfit(
+                    fontSize: 32,
+                    fontWeight: FontWeight.bold,
+                    color: const Color(0xFF003399),
                   ),
-                  
-                  const SizedBox(height: 30),
-
-                  // Login Type Toggle
-                  Consumer(
-                    builder: (context, ref, child) {
-                      final settings = ref.watch(settingsServiceProvider);
-                      final emailEnabled = settings.get<bool>('auth_email_enabled', true);
-                      final phoneEnabled = settings.get<bool>('auth_phone_enabled', true);
-
-                      // If one is disabled, force the other mode updates automatically if we rebuild state, 
-                      // but here we just hide the toggle.
-                      // We need to ensure _isPhoneLogin matches the enabled state if only one is allowed.
-                      
-                      // Using a post-frame callback or simple logic in build is risky for state changes,
-                      // but for UI rendering it is fine.
-                      
-                      if (!emailEnabled && !phoneEnabled) {
-                        return const Center(child: Text("Login is currently disabled."));
-                      }
-
-                      if (!emailEnabled || !phoneEnabled) {
-                         // Only one enabled, hide toggle and force mode (logic handled in build logic below effectively)
-                         // But we want to ensure the UI reflects the single mode.
-                         return const SizedBox.shrink();
-                      }
-
-                      return FadeInUp(
-                        delay: const Duration(milliseconds: 100),
-                        child: Container(
-                          height: 50,
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFF1F5F9),
-                            borderRadius: BorderRadius.circular(15),
-                          ),
-                          child: Row(
-                            children: [
-                              Expanded(
-                                child: GestureDetector(
-                                  onTap: () => setState(() => _isPhoneLogin = false),
-                                  child: _ToggleTab(label: 'Email', isActive: !_isPhoneLogin),
-                                ),
-                              ),
-                              Expanded(
-                                child: GestureDetector(
-                                  onTap: () => setState(() => _isPhoneLogin = true),
-                                  child: _ToggleTab(label: 'Phone', isActive: _isPhoneLogin),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
-                    },
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  "Sign in to continue delivering excellence.",
+                  style: GoogleFonts.outfit(
+                    fontSize: 16,
+                    color: Colors.grey[600],
                   ),
+                ),
+                const SizedBox(height: 48),
 
-                  const SizedBox(height: 30),
-                  
-                  // Form Fields
-                  FadeInUp(
-                    delay: const Duration(milliseconds: 200),
-                    child: Column(
-                      children: [
-                        _CustomTextField(
-                          controller: _loginController,
-                          label: _isPhoneLogin ? 'Phone Number' : 'Email Address',
-                          hint: _isPhoneLogin ? '+44 7000 000000' : 'your@email.com',
-                          icon: _isPhoneLogin ? Icons.phone_android_rounded : Icons.alternate_email_rounded,
-                        ),
-                        const SizedBox(height: 24),
-                        _CustomTextField(
-                          controller: _passwordController,
-                          label: 'Password',
-                          hint: '••••••••',
-                          isPassword: true,
-                          isPasswordVisible: _isPasswordVisible,
-                          onToggleVisibility: () => setState(() => _isPasswordVisible = !_isPasswordVisible),
-                          icon: Icons.lock_outline_rounded,
-                        ),
-                      ],
-                    ),
-                  ),
-                  
-                  const SizedBox(height: 16),
-                  
-                  // Forgot Password
-                  FadeInUp(
-                    delay: const Duration(milliseconds: 300),
-                    child: Align(
-                      alignment: Alignment.centerRight,
-                      child: TextButton(
-                        onPressed: () => context.push('/forgot-password'),
-                        child: const Text(
-                          'Forgot Password?',
-                          style: TextStyle(
-                            color: AppTheme.primaryRed,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 15,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  
-                  const SizedBox(height: 32),
-                  
-                  // Login Button
-                  FadeInUp(
-                    delay: const Duration(milliseconds: 400),
-                    child: SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: isLoading ? null : _login,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppTheme.primaryBlue,
-                          padding: const EdgeInsets.symmetric(vertical: 20),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(18),
-                          ),
-                          elevation: 10,
-                          shadowColor: AppTheme.primaryBlue.withOpacity(0.4),
-                        ),
-                        child: isLoading
-                            ? const CircularProgressIndicator(color: Colors.white, strokeWidth: 3)
-                            : const Text(
-                                'Sign In',
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w800,
-                                  letterSpacing: 0.5,
-                                ),
-                              ),
-                      ),
-                    ),
-                  ),
-                  
-                  const SizedBox(height: 24),
-                  
-                  // Biometric Login Option
-                  Consumer(
-                    builder: (context, ref, child) {
-                      final isAvailable = ref.watch(isBiometricAvailableProvider);
-                      return isAvailable.when(
-                        data: (available) => available 
-                          ? FadeInUp(
-                              delay: const Duration(milliseconds: 450),
-                              child: Center(
-                                child: InkWell(
-                                  onTap: () => _loginWithBiometrics(ref),
-                                  borderRadius: BorderRadius.circular(50),
-                                  child: Container(
-                                    padding: const EdgeInsets.all(12),
-                                    decoration: BoxDecoration(
-                                      border: Border.all(color: AppTheme.primaryBlue.withOpacity(0.2)),
-                                      shape: BoxShape.circle,
-                                    ),
-                                    child: Icon(Icons.fingerprint_rounded, size: 40, color: AppTheme.primaryBlue),
-                                  ),
-                                ),
-                              ),
-                            )
-                          : const SizedBox.shrink(),
-                        loading: () => const SizedBox.shrink(),
-                        error: (_, __) => const SizedBox.shrink(),
-                      );
-                    },
-                  ),
-                  
-                  const SizedBox(height: 40),
-                  
-                  // Social Login Section
-                  Consumer(
-                    builder: (context, ref, child) {
-                      final settings = ref.watch(settingsServiceProvider);
-                      final googleEnabled = settings.get<bool>('google_auth_enabled', false);
-                      final appleEnabled = settings.get<bool>('apple_auth_enabled', false);
-                      
-                      if (!googleEnabled && !appleEnabled) return const SizedBox.shrink();
+                // Email
+                TextFormField(
+                  controller: _emailController,
+                  keyboardType: TextInputType.emailAddress,
+                  style: GoogleFonts.outfit(),
+                  decoration: _buildInputDecoration("Email", Icons.email_outlined),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) return 'Email is required';
+                    if (!value.contains('@')) return 'Invalid email';
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 24),
 
-                      return FadeInUp(
-                        delay: const Duration(milliseconds: 500),
-                        child: Column(
-                          children: [
-                            Row(
-                              children: [
-                                Expanded(child: Divider(color: Colors.black.withOpacity(0.05))),
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                                  child: Text(
-                                    'Or continue with',
-                                    style: TextStyle(
-                                      color: Colors.black.withOpacity(0.3),
-                                      fontWeight: FontWeight.w600,
-                                      fontSize: 14,
-                                    ),
-                                  ),
-                                ),
-                                Expanded(child: Divider(color: Colors.black.withOpacity(0.05))),
-                              ],
-                            ),
-                            const SizedBox(height: 24),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                if (googleEnabled) ...[
-                                  _SocialButton(icon: Icons.g_mobiledata_rounded, color: AppTheme.primaryRed, onTap: () {}),
-                                  if (appleEnabled) const SizedBox(width: 20),
-                                ],
-                                if (appleEnabled)
-                                  _SocialButton(icon: Icons.apple_rounded, color: Colors.black, onTap: () {}),
-                              ],
-                            ),
-                          ],
-                        ),
-                      );
-                    },
-                  ),
-                  
-                  const SizedBox(height: 48),
-                  
-                  // Create Account Link
-                  FadeInUp(
-                    delay: const Duration(milliseconds: 600),
-                    child: Center(
-                      child: GestureDetector(
-                        onTap: () => context.push('/welcome'),
-                        child: RichText(
-                          text: TextSpan(
-                            style: const TextStyle(fontSize: 16, color: Colors.black54),
-                            children: [
-                              const TextSpan(text: "Don't have an account? "),
-                              TextSpan(
-                                text: "Sign Up",
-                                style: TextStyle(
-                                  color: Theme.of(context).primaryColor,
-                                  fontWeight: FontWeight.w900,
-                                  decoration: TextDecoration.underline,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                   const SizedBox(height: 40),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _BackgroundDecor extends StatelessWidget {
-  const _BackgroundDecor();
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Stack(
-      children: [
-        Positioned(
-          top: -100,
-          right: -100,
-          child: Container(
-            width: 300,
-            height: 300,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: RadialGradient(
-                colors: [
-                  theme.primaryColor.withOpacity(0.12),
-                  theme.primaryColor.withOpacity(0.01),
-                ],
-              ),
-            ),
-          ),
-        ),
-        Positioned(
-          bottom: -50,
-          left: -100,
-          child: Container(
-            width: 400,
-            height: 400,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: RadialGradient(
-                colors: [
-                  theme.colorScheme.secondary.withOpacity(0.08),
-                  theme.colorScheme.secondary.withOpacity(0),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _CustomTextField extends StatelessWidget {
-  final TextEditingController controller;
-  final String label;
-  final String hint;
-  final IconData icon;
-  final bool isPassword;
-  final bool? isPasswordVisible;
-  final VoidCallback? onToggleVisibility;
-
-  const _CustomTextField({
-    required this.controller,
-    required this.label,
-    required this.hint,
-    required this.icon,
-    this.isPassword = false,
-    this.isPasswordVisible,
-    this.onToggleVisibility,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(left: 4, bottom: 10),
-          child: Text(
-            label,
-            style: TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.w700,
-              color: theme.textTheme.bodyLarge?.color?.withOpacity(0.8),
-            ),
-          ),
-        ),
-        Container(
-          decoration: BoxDecoration(
-            color: theme.inputDecorationTheme.fillColor,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: theme.colorScheme.primary.withOpacity(0.2)),
-          ),
-          child: TextField(
-            controller: controller,
-            obscureText: isPassword && !(isPasswordVisible ?? false),
-            style: TextStyle(
-              fontWeight: FontWeight.w600, 
-              fontSize: 16,
-              color: theme.textTheme.bodyLarge?.color,
-            ),
-            decoration: InputDecoration(
-              hintText: hint,
-              hintStyle: TextStyle(color: theme.textTheme.bodyMedium?.color?.withOpacity(0.3)),
-              prefixIcon: Icon(icon, color: theme.primaryColor, size: 22),
-              suffixIcon: isPassword
-                  ? IconButton(
+                // Password
+                TextFormField(
+                  controller: _passwordController,
+                  obscureText: !_isPasswordVisible,
+                  style: GoogleFonts.outfit(),
+                  decoration: _buildInputDecoration("Password", Icons.lock_outline).copyWith(
+                    suffixIcon: IconButton(
                       icon: Icon(
-                        (isPasswordVisible ?? false) ? Icons.visibility_rounded : Icons.visibility_off_rounded,
-                        color: theme.textTheme.bodyMedium?.color?.withOpacity(0.4),
-                        size: 20,
+                        _isPasswordVisible ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+                        color: Colors.grey,
                       ),
-                      onPressed: onToggleVisibility,
-                    )
-                  : null,
-              border: InputBorder.none,
-              enabledBorder: InputBorder.none,
-              focusedBorder: InputBorder.none,
-              contentPadding: const EdgeInsets.symmetric(vertical: 18, horizontal: 16),
+                      onPressed: () => setState(() => _isPasswordVisible = !_isPasswordVisible),
+                    ),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) return 'Password is required';
+                    return null;
+                  },
+                ),
+
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton(
+                    onPressed: () => context.push('/forgot-password'),
+                    child: Text(
+                      "Forgot Password?",
+                      style: GoogleFonts.outfit(
+                        color: const Color(0xFF003399),
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 32),
+
+                // Login Button
+                SizedBox(
+                  width: double.infinity,
+                  height: 56,
+                  child: ElevatedButton(
+                    onPressed: _isLoading ? null : _login,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFD32F2F), // Giga Red
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(28),
+                      ),
+                      elevation: 0,
+                    ),
+                    child: _isLoading
+                        ? const SizedBox(
+                            width: 24,
+                            height: 24,
+                            child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                          )
+                        : Text(
+                            "Log In",
+                            style: GoogleFonts.outfit(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                  ),
+                ),
+
+                const SizedBox(height: 24),
+
+                // Sign Up Link
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      "Don't have an account? ",
+                      style: GoogleFonts.outfit(color: Colors.grey[600]),
+                    ),
+                    GestureDetector(
+                      onTap: () => context.push('/register'),
+                      child: Text(
+                        "Sign Up",
+                        style: GoogleFonts.outfit(
+                          color: const Color(0xFF003399),
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
           ),
         ),
-      ],
-    );
-  }
-}
-
-class _SocialButton extends StatelessWidget {
-  final IconData icon;
-  final Color color;
-  final VoidCallback onTap;
-
-  const _SocialButton({required this.icon, required this.color, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        height: 60,
-        width: 80,
-        decoration: BoxDecoration(
-          color: theme.cardTheme.color,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: theme.colorScheme.primary.withOpacity(0.1)),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.2),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Icon(icon, color: color, size: 32),
       ),
     );
   }
-}
 
-class _ToggleTab extends StatelessWidget {
-  final String label;
-  final bool isActive;
-
-  const _ToggleTab({required this.label, required this.isActive});
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 250),
-      margin: const EdgeInsets.all(4),
-      decoration: BoxDecoration(
-        color: isActive ? theme.primaryColor : Colors.transparent,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: isActive
-            ? [BoxShadow(color: theme.primaryColor.withOpacity(0.3), blurRadius: 10, offset: const Offset(0, 4))]
-            : [],
+  InputDecoration _buildInputDecoration(String label, IconData icon) {
+    return InputDecoration(
+      labelText: label,
+      labelStyle: const TextStyle(color: Colors.grey),
+      prefixIcon: Icon(icon, color: const Color(0xFF003399)),
+      filled: true,
+      fillColor: const Color(0xFFF5F8FF),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: BorderSide.none,
       ),
-      alignment: Alignment.center,
-      child: Text(
-        label,
-        style: TextStyle(
-          color: isActive ? Colors.white : theme.textTheme.bodyMedium?.color?.withOpacity(0.5),
-          fontWeight: isActive ? FontWeight.w900 : FontWeight.w600,
-          fontSize: 14,
-        ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: BorderSide.none,
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: const BorderSide(color: Color(0xFF003399), width: 1.5),
+      ),
+      errorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: const BorderSide(color: Colors.red, width: 1),
       ),
     );
   }
