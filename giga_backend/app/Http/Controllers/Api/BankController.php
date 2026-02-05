@@ -50,6 +50,7 @@ class BankController extends Controller
         ]);
 
         if ($validator->fails()) {
+            \Illuminate\Support\Facades\Log::error('Bank Validation Failed', $validator->errors()->toArray());
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
