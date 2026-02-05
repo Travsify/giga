@@ -537,8 +537,9 @@ class PaymentController extends Controller
         $status = $request->query('status');
         $txRef = $request->query('tx_ref');
         $transactionId = $request->query('transaction_id');
-
-        if ($status === 'successful' && $transactionId) {
+        
+        // RELAXED CHECK: Accept 'successful' OR 'completed'
+        if (in_array($status, ['successful', 'completed']) && $transactionId) {
             // Verify the payment
             $secretKey = \App\Models\AppSetting::get('flutterwave_secret_key', env('FLW_SECRET_KEY'));
             
