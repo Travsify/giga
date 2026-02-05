@@ -46,11 +46,14 @@ class EmailVerificationController extends Controller
         );
 
         // Send email via Resend
-        $html = "<h3>Verify Your Email</h3><p>Hello {$user->name},</p><p>Your verification code is: <strong>{$code}</strong></p><p>This code will expire in 15 minutes.</p>";
+        $html = "<h3>Verify Your Email</h3><p>Hello {$user->name},</p><p>Your verification code is: <strong>{$code}</strong></p><p>This code will expire in 2 minutes.</p>";
         $sent = $this->resend->sendEmail($user->email, 'Verify Your Email - GIGA LOGISTICS', $html);
 
         if (!$sent) {
             \Log::error("Failed to send verification email to {$user->email}");
+            return response()->json([
+                'message' => 'Failed to send verification code. Please try again.',
+            ], 500);
         }
 
         return response()->json([
