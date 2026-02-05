@@ -36,12 +36,12 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
     setState(() => _isLoading = true);
 
     try {
-      await ref.read(authProvider.notifier).signUp(
+      await ref.read(authProvider.notifier).register(
             email: _emailController.text.trim(),
             password: _passwordController.text.trim(),
             role: _selectedRole,
-            fullName: _nameController.text.trim(),
-            phoneNumber: _phoneController.text.trim(),
+            name: _nameController.text.trim(),
+            ukPhone: _phoneController.text.trim(),
           );
       // Navigation handled by GoRouter redirect or Auth Provider
     } catch (e) {
