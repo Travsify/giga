@@ -138,7 +138,8 @@ class AuthNotifier extends StateNotifier<AuthState> {
       await _storage.write(key: 'saved_password', value: password);
 
       final isVerified = user['email_verified_at'] != null;
-      await _storage.write(key: 'is_email_verified', value: isVerified.toString());
+      // Always require OTP verification on login
+      await _storage.write(key: 'is_email_verified', value: 'false');
 
       state = state.copyWith(
         status: AuthStatus.authenticated,
@@ -149,7 +150,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
         userId: user['id'].toString(),
         referralCode: user['referral_code'],
         businessId: user['business_id']?.toString(),
-        isEmailVerified: isVerified,
+        isEmailVerified: false, // Force OTP on every login
         countryCode: user['country_code'],
         currencyCode: user['currency_code'],
       );
@@ -196,7 +197,8 @@ class AuthNotifier extends StateNotifier<AuthState> {
       await _storage.write(key: 'user_currency_code', value: user['currency_code']);
 
       final isVerified = user['email_verified_at'] != null;
-      await _storage.write(key: 'is_email_verified', value: isVerified.toString());
+      // Always require OTP verification on signup
+      await _storage.write(key: 'is_email_verified', value: 'false');
 
       state = state.copyWith(
         status: AuthStatus.authenticated,
@@ -206,7 +208,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
         userName: user['name'],
         userId: user['id'].toString(),
         businessId: user['business_id']?.toString(),
-        isEmailVerified: isVerified,
+        isEmailVerified: false, // Force OTP on every signup
         countryCode: user['country_code'],
         currencyCode: user['currency_code'],
       );

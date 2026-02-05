@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flota_mobile/features/onboarding/onboarding_screen.dart';
+import 'package:flota_mobile/features/onboarding/welcome_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -12,12 +14,22 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    // Zero delay - navigate immediately after first frame
+    _checkOnboardingStatus();
+  }
+
+  Future<void> _checkOnboardingStatus() async {
+    final prefs = await SharedPreferences.getInstance();
+    final hasSeenOnboarding = prefs.getBool('has_seen_onboarding') ?? false;
+    
+    if (!mounted) return;
+    
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Navigator.pushReplacement(
         context,
         PageRouteBuilder(
-          pageBuilder: (_, __, ___) => const OnboardingScreen(),
+          pageBuilder: (_, __, ___) => hasSeenOnboarding 
+              ? const WelcomeScreen() 
+              : const OnboardingScreen(),
           transitionDuration: Duration.zero,
         ),
       );

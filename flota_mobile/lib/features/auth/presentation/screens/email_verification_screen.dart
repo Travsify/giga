@@ -11,7 +11,14 @@ import 'package:pin_code_fields/pin_code_fields.dart';
 class EmailVerificationScreen extends ConsumerStatefulWidget {
   final bool isPhone;
   final String? phoneNumber;
-  const EmailVerificationScreen({super.key, this.isPhone = false, this.phoneNumber});
+  final bool isLoginVerification; // New: flag to indicate if coming from login
+  
+  const EmailVerificationScreen({
+    super.key, 
+    this.isPhone = false, 
+    this.phoneNumber,
+    this.isLoginVerification = false,
+  });
 
   @override
   ConsumerState<EmailVerificationScreen> createState() => _EmailVerificationScreenState();
@@ -26,6 +33,7 @@ class _EmailVerificationScreenState extends ConsumerState<EmailVerificationScree
 
   static const _primaryBlue = Color(0xFF1A3B8C);
   static const _accentRed = Color(0xFFD32F2F);
+  static const int _otpLength = 7; // Updated to 7 digits
 
   @override
   void initState() {
@@ -60,7 +68,7 @@ class _EmailVerificationScreenState extends ConsumerState<EmailVerificationScree
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Verification code sent to your email!'),
+              content: Text('7-digit verification code sent to your email!'),
               backgroundColor: Colors.green,
               behavior: SnackBarBehavior.floating,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -85,8 +93,8 @@ class _EmailVerificationScreenState extends ConsumerState<EmailVerificationScree
   }
 
   Future<void> _verifyCode() async {
-    if (_codeController.text.length != 6) {
-      setState(() => _errorMessage = 'Please enter the complete 6-digit code');
+    if (_codeController.text.length != _otpLength) {
+      setState(() => _errorMessage = 'Please enter the complete $_otpLength-digit code');
       return;
     }
 
@@ -115,7 +123,15 @@ class _EmailVerificationScreenState extends ConsumerState<EmailVerificationScree
       });
 
       await Future.delayed(const Duration(seconds: 2));
-      if (mounted) context.go('/marketplace');
+      if (mounted) {
+        // Navigate based on user role
+        final role = ref.read(authProvider).role;
+        if (role == 'Rider') {
+          context.go('/rider-dashboard');
+        } else {
+          context.go('/marketplace');
+        }
+      }
     } catch (e) {
       setState(() {
         _isLoading = false;
@@ -190,8 +206,8 @@ class _EmailVerificationScreenState extends ConsumerState<EmailVerificationScree
                       delay: const Duration(milliseconds: 200),
                       child: Text(
                         widget.isPhone
-                            ? "Enter the 6-digit code sent to ${widget.phoneNumber}"
-                            : "Enter the 6-digit code sent to your email",
+                            ? "Enter the $_otpLength-digit code sent to ${widget.phoneNumber}"
+                            : "Enter the $_otpLength-digit code sent to your email",
                         style: GoogleFonts.outfit(
                           fontSize: 16,
                           color: Colors.white70,
@@ -199,6 +215,27 @@ class _EmailVerificationScreenState extends ConsumerState<EmailVerificationScree
                         textAlign: TextAlign.center,
                       ),
                     ),
+                    if (widget.isLoginVerification)
+                      FadeInDown(
+                        delay: const Duration(milliseconds: 300),
+                        child: Padding(
+                          padding: const EdgeInsets.only(top: 8),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.2),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Text(
+                              "Login verification required",
+                              style: GoogleFonts.outfit(
+                                fontSize: 12,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
                   ],
                 ),
               ),
@@ -222,21 +259,21 @@ class _EmailVerificationScreenState extends ConsumerState<EmailVerificationScree
                       children: [
                         const SizedBox(height: 32),
 
-                        // PIN Code Input
+                        // PIN Code Input - 7 digits
                         FadeInUp(
                           delay: const Duration(milliseconds: 300),
                           child: PinCodeTextField(
                             appContext: context,
                             controller: _codeController,
-                            length: 6,
+                            length: _otpLength,
                             keyboardType: TextInputType.number,
                             inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                             animationType: AnimationType.fade,
                             pinTheme: PinTheme(
                               shape: PinCodeFieldShape.box,
-                              borderRadius: BorderRadius.circular(14),
-                              fieldHeight: 60,
-                              fieldWidth: 50,
+                              borderRadius: BorderRadius.circular(12),
+                              fieldHeight: 52,
+                              fieldWidth: 42,
                               activeFillColor: Colors.white,
                               inactiveFillColor: const Color(0xFFF8FAFC),
                               selectedFillColor: _primaryBlue.withOpacity(0.05),
@@ -247,7 +284,7 @@ class _EmailVerificationScreenState extends ConsumerState<EmailVerificationScree
                             ),
                             enableActiveFill: true,
                             textStyle: GoogleFonts.outfit(
-                              fontSize: 24,
+                              fontSize: 20,
                               fontWeight: FontWeight.bold,
                               color: _primaryBlue,
                             ),
