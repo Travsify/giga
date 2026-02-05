@@ -9,6 +9,7 @@ class ResendService
 {
     protected string $apiKey;
     protected string $baseUrl = 'https://api.resend.com';
+    protected ?string $lastError = null;
 
     public function __construct()
     {
@@ -16,12 +17,23 @@ class ResendService
     }
 
     /**
+     * Get the last error message
+     */
+    public function getLastError(): ?string
+    {
+        return $this->lastError;
+    }
+
+    /**
      * Send an email using Resend API.
      */
     public function sendEmail(string $to, string $subject, string $html): bool
     {
+        $this->lastError = null;
+        
         if (empty($this->apiKey)) {
-            Log::error('Resend API key missing. Please set RESEND_API_KEY in .env');
+            $this->lastError = 'Resend API key missing. Please set RESEND_API_KEY in .env';
+            Log::error($this->lastError);
             return false;
         }
 
@@ -44,11 +56,13 @@ class ResendService
                 return true;
             }
 
-            Log::error("Resend API Error [{$response->status()}]: " . $response->body());
+            $this->lastError = "Resend API Error [{$response->status()}]: " . $response->body();
+            Log::error($this->lastError);
             return false;
 
         } catch (\Exception $e) {
-            Log::error("Resend Service Exception: " . $e->getMessage());
+            $this->lastError = "Resend Service Exception: " . $e->getMessage();
+            Log::error($this->lastError);
             return false;
         }
     }

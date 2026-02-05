@@ -271,7 +271,8 @@ class TestMailController extends Controller
                 $results['message'] = "Email sent successfully to {$to}";
             } else {
                 $results['status'] = 'FAILED';
-                $results['message'] = 'ResendService returned false. Check laravel.log for details.';
+                $results['api_error'] = $resendService->getLastError();
+                $results['message'] = 'Email sending failed. See api_error for details.';
             }
         } catch (\Throwable $e) {
             $results['status'] = 'ERROR';
