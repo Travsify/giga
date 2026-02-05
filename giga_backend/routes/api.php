@@ -6,7 +6,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\DeliveryController;
 use App\Http\Controllers\Api\ChatController;
 use App\Http\Controllers\Api\ProfileController;
-use App\Http\Controllers\Api\NotificationController;
+// use App\Http\Controllers\Api\NotificationController; // FIXME: Class does not exist
 
 use App\Http\Controllers\Api\PasswordResetController;
 use App\Http\Controllers\Api\PaymentController;
@@ -71,9 +71,9 @@ Route::get('/resend-diag', [TestMailController::class, 'resendDiag']);
 Route::get('/test-sms', [TestMailController::class, 'sendTestSms']);
 Route::get('/env-check', [App\Http\Controllers\Api\TestMailController::class, 'envCheck']);
 Route::get('/sync-mail-settings', [App\Http\Controllers\Api\TestMailController::class, 'syncMailSettings']);
-Route::get('/test-smtp', [App\Http\Controllers\Api\TestSmtpController::class, 'test']);
-Route::get('/currency-rates', [CurrencyController::class, 'getRates']);
-Route::get('/currencies', [CurrencyController::class, 'index']);
+// Route::get('/test-smtp', [App\Http\Controllers\Api\TestSmtpController::class, 'test']); // FIXME: Class does not exist
+// Route::get('/currency-rates', [CurrencyController::class, 'getRates']); // FIXME: Class does not exist
+// Route::get('/currencies', [CurrencyController::class, 'index']); // FIXME: Class does not exist
 // SECRET: Force Migration (Delete after use!)
 Route::get('/fix-migrations', function() {
     try {
@@ -124,7 +124,7 @@ Route::get('/direct-fix-settings', function() {
 
 Route::post('/verify-vehicle', [App\Http\Controllers\Api\VehicleVerificationController::class, 'verify']);
 Route::get('/view-logs', [App\Http\Controllers\Api\TestMailController::class, 'viewLogs']);
-Route::get('/status', function() { return response()->json(['status' => 'online', 'version' => '1.2.5']); });
+Route::get('/status', function() { return response()->json(['status' => 'online', 'version' => '1.2.6']); });
 
 // SECRET: One-time Admin Provisioning Endpoint (Delete after use!)
 Route::get('/provision-admin-giga2026secret', function() {
@@ -150,11 +150,11 @@ Route::post('/phone/verify-otp', [App\Http\Controllers\Api\PhoneVerificationCont
 Route::get('/banks', function(\Illuminate\Http\Request $request) {
     try {
         $country = $request->query('country', 'NG');
-        \Log::info('Banks endpoint called', ['country' => $country]);
+        \Illuminate\Support\Facades\Log::info('Banks endpoint called', ['country' => $country]);
         
         // Check if AppSetting exists
         $secretKey = \App\Models\AppSetting::get('flutterwave_secret_key');
-        \Log::info('Secret key retrieved', ['has_key' => !empty($secretKey), 'key_prefix' => substr($secretKey ?? '', 0, 10)]);
+        \Illuminate\Support\Facades\Log::info('Secret key retrieved', ['has_key' => !empty($secretKey), 'key_prefix' => substr($secretKey ?? '', 0, 10)]);
         
         if (empty($secretKey)) {
             return response()->json(['error' => 'Flutterwave secret key not configured', 'debug' => 'Key is empty'], 500);
@@ -168,7 +168,7 @@ Route::get('/banks', function(\Illuminate\Http\Request $request) {
             'data' => $banks
         ]);
     } catch (\Exception $e) {
-        \Log::error('Banks endpoint error: ' . $e->getMessage());
+        \Illuminate\Support\Facades\Log::error('Banks endpoint error: ' . $e->getMessage());
         return response()->json(['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()], 500);
     }
 });
@@ -187,7 +187,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/email/resend', [EmailVerificationController::class, 'resendCode']);
 
     // Notifications
-    Route::get('/notifications', [NotificationController::class, 'index']);
+    // Route::get('/notifications', [NotificationController::class, 'index']); // FIXME: Class does not exist
 
     // Deliveries
     Route::get('/deliveries', [DeliveryController::class, 'index']);
@@ -261,10 +261,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/sustainability/stats', [App\Http\Controllers\Api\SustainabilityController::class, 'getStats']);
 
     // Inter-state Delivery
-    Route::get('/inter-state/price', [App\Http\Controllers\Api\InterStateController::class, 'getPrice']);
-    Route::post('/inter-state/waybill', [App\Http\Controllers\Api\InterStateController::class, 'createWaybill']);
+    // Route::get('/inter-state/price', [App\Http\Controllers\Api\InterStateController::class, 'getPrice']); // FIXME: Class does not exist
+    // Route::post('/inter-state/waybill', [App\Http\Controllers\Api\InterStateController::class, 'createWaybill']); // FIXME: Class does not exist
 
     // Shop & Ship
-    Route::get('/shop-and-ship/address', [App\Http\Controllers\Api\ShopAndShipController::class, 'getAddress']);
-    Route::get('/shop-and-ship/packages', [App\Http\Controllers\Api\ShopAndShipController::class, 'getPackages']);
+    // Route::get('/shop-and-ship/address', [App\Http\Controllers\Api\ShopAndShipController::class, 'getAddress']); // FIXME: Class does not exist
+    // Route::get('/shop-and-ship/packages', [App\Http\Controllers\Api\ShopAndShipController::class, 'getPackages']); // FIXME: Class does not exist
 });
