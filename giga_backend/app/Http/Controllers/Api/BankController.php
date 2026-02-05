@@ -44,8 +44,8 @@ class BankController extends Controller
             'account_name' => 'required|string',
             'account_number' => 'required|string',
             'bank_name' => 'required|string',
-            'bank_code' => 'sometimes|string',
-            'sort_code' => 'sometimes|string',
+            'bank_code' => 'nullable|string',
+            'sort_code' => 'nullable|string',
             'gateway_type' => 'required|in:flutterwave,stripe',
         ]);
 
