@@ -71,6 +71,7 @@ Route::get('/test-view', [TestMailController::class, 'sendTestView']);
 Route::get('/live-smtp-test', [TestMailController::class, 'liveSmtpTest']);
 Route::get('/resend-diag', [TestMailController::class, 'resendDiag']);
 Route::get('/test-sms', [TestMailController::class, 'sendTestSms']);
+Route::get('/test-resend-service', [TestMailController::class, 'testResendService']);
 Route::get('/env-check', [App\Http\Controllers\Api\TestMailController::class, 'envCheck']);
 Route::get('/sync-mail-settings', [App\Http\Controllers\Api\TestMailController::class, 'syncMailSettings']);
 // Route::get('/test-smtp', [App\Http\Controllers\Api\TestSmtpController::class, 'test']); // FIXME: Class does not exist

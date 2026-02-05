@@ -243,4 +243,42 @@ class TestMailController extends Controller
             'content' => $lines
         ]);
     }
+
+    /**
+     * Test the custom ResendService (direct HTTP API)
+     */
+    public function testResendService(Request $request)
+    {
+        $to = $request->query('email', 'info@usegiga.site');
+        
+        $results = [
+            'service' => 'ResendService (Direct HTTP API)',
+            'to' => $to,
+            'config' => [
+                'RESEND_API_KEY_EXISTS' => config('services.resend.key') ? 'YES' : (env('RESEND_API_KEY') ? 'YES (from env)' : 'NO'),
+                'RESEND_FROM_EMAIL' => env('RESEND_FROM_EMAIL', 'onboarding@resend.dev'),
+                'RESEND_FROM_NAME' => env('RESEND_FROM_NAME', 'Giga Logistics'),
+            ],
+        ];
+        
+        try {
+            $resendService = app(\App\Services\ResendService::class);
+            $html = "<h3>Test Email</h3><p>This is a test email from GIGA's custom ResendService.</p><p>Time: " . now() . "</p>";
+            $sent = $resendService->sendEmail($to, 'GIGA ResendService Test', $html);
+            
+            if ($sent) {
+                $results['status'] = 'SUCCESS';
+                $results['message'] = "Email sent successfully to {$to}";
+            } else {
+                $results['status'] = 'FAILED';
+                $results['message'] = 'ResendService returned false. Check laravel.log for details.';
+            }
+        } catch (\Throwable $e) {
+            $results['status'] = 'ERROR';
+            $results['error'] = $e->getMessage();
+            $results['error_type'] = get_class($e);
+        }
+        
+        return response()->json($results);
+    }
 }
