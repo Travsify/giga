@@ -22,6 +22,8 @@ use App\Http\Controllers\Api\SettingsController;
 // use App\Http\Controllers\Api\CurrencyController; // FIXME: Class does not exist
 use App\Http\Controllers\Api\BankController;
 
+\Illuminate\Support\Facades\Log::info('REQUEST: ' . request()->method() . ' ' . request()->fullUrl(), request()->all());
+
 // Rate-limited auth routes (5 attempts per minute per IP)
 Route::middleware('throttle:5,1')->group(function () {
     Route::post('/register', [AuthController::class, 'register']);
