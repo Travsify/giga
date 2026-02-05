@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flota_mobile/features/auth/presentation/screens/login_screen.dart'; // Assume exists or will be created
+import 'package:flota_mobile/features/auth/presentation/screens/login_screen.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class OnboardingScreen extends StatefulWidget {
@@ -13,31 +13,43 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   final PageController _pageController = PageController();
   int _currentPage = 0;
 
+  // 5 Onboarding Screens - Global Messaging
   final List<OnboardingData> _pages = [
     OnboardingData(
-      title: "Fast & Reliable",
-      description: "From bikes to trucks, we deliver it all across the UK.",
-      icon: Icons.local_shipping_rounded,
-    ),
-    OnboardingData(
       title: "Welcome to Giga",
-      description: "Your UK-wide logistics partner for seamless delivery.",
-      icon: Icons.public,
+      subtitle: "Your global logistics partner",
+      description: "Delivering across continents - from Lagos to London, we've got you covered.",
+      icon: Icons.local_shipping_rounded,
+      hasBlueHeader: true,
     ),
     OnboardingData(
       title: "Track your parcels",
-      description: "Real-time tracking for every mile of the journey.",
+      subtitle: "in real-time",
+      description: "Know exactly where your package is, every step of the way.",
       icon: Icons.map_outlined,
+      hasBlueHeader: true,
     ),
     OnboardingData(
       title: "Earn with Giga",
-      description: "Join the fleet and start earning today on your schedule.",
+      subtitle: "Join our fleet and start earning today",
+      description: "Whether you ride a bike, scooter, or drive a truck - earn on your schedule.",
       icon: Icons.savings_outlined,
+      hasBlueHeader: true,
     ),
     OnboardingData(
-      title: "Join the Fleet",
-      description: "Register now and become a Giga Partner.",
-      icon: Icons.group_add_rounded,
+      title: "Fast & Reliable",
+      subtitle: "From bikes to trucks",
+      description: "Multiple delivery options to suit every need and budget.",
+      icon: Icons.speed_rounded,
+      hasBlueHeader: false,
+    ),
+    OnboardingData(
+      title: "Ready to move?",
+      subtitle: "Let's go!",
+      description: "Sign up now and experience seamless delivery.",
+      icon: Icons.touch_app_rounded,
+      hasBlueHeader: false,
+      isLastPage: true,
     ),
   ];
 
@@ -48,35 +60,50 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         curve: Curves.easeInOut,
       );
     } else {
-      // Navigate to Login/Auth
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (_) => const LoginScreen()), // Placeholder
+        MaterialPageRoute(builder: (_) => const LoginScreen()),
       );
     }
+  }
+
+  void _skip() {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (_) => const LoginScreen()),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: _pages[_currentPage].hasBlueHeader 
+          ? const Color(0xFF1A3B8C) 
+          : Colors.white,
       body: SafeArea(
         child: Column(
           children: [
-            // Header: Giga Logo (Small)
-            Padding(
-              padding: const EdgeInsets.only(top: 20, bottom: 0),
-              child: Text(
-                'GIGA',
-                style: GoogleFonts.outfit(
-                  fontSize: 24,
-                  fontWeight: FontWeight.w900,
-                  color: const Color(0xFF003399),
-                  letterSpacing: 2.0,
+            // Skip Button
+            Align(
+              alignment: Alignment.topRight,
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: TextButton(
+                  onPressed: _skip,
+                  child: Text(
+                    'Skip',
+                    style: GoogleFonts.outfit(
+                      fontSize: 16,
+                      color: _pages[_currentPage].hasBlueHeader 
+                          ? Colors.white70 
+                          : Colors.grey,
+                    ),
+                  ),
                 ),
               ),
             ),
 
+            // Page Content
             Expanded(
               child: PageView.builder(
                 controller: _pageController,
@@ -88,12 +115,22 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               ),
             ),
 
-            // Footer: Indicators + Button
-            Padding(
+            // Footer
+            Container(
               padding: const EdgeInsets.all(32.0),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: _pages[_currentPage].hasBlueHeader
+                    ? const BorderRadius.only(
+                        topLeft: Radius.circular(32),
+                        topRight: Radius.circular(32),
+                      )
+                    : null,
+              ),
               child: Column(
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                   // Page Indicators
+                  // Page Indicators
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: List.generate(
@@ -105,22 +142,23 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         width: _currentPage == index ? 24 : 8,
                         decoration: BoxDecoration(
                           color: _currentPage == index
-                              ? const Color(0xFFD32F2F) // Red Active
-                              : const Color(0xFFE0E0E0), // Grey Inactive
+                              ? const Color(0xFFD32F2F)
+                              : const Color(0xFFE0E0E0),
                           borderRadius: BorderRadius.circular(4),
                         ),
                       ),
                     ),
                   ),
-                  const SizedBox(height: 32),
-                  // Next Button
+                  const SizedBox(height: 24),
+                  
+                  // Action Button
                   SizedBox(
                     width: double.infinity,
                     height: 56,
                     child: ElevatedButton(
                       onPressed: _onNext,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFD32F2F), // Giga Red
+                        backgroundColor: const Color(0xFFD32F2F),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(28),
                         ),
@@ -146,57 +184,189 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   Widget _buildPage(OnboardingData data) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        // Image Placeholder (Circle with Icon)
-        Container(
-          width: 280,
-          height: 280,
-          decoration: BoxDecoration(
-            color: const Color(0xFFF5F8FF), // Light Blue tint
-            shape: BoxShape.circle,
-          ),
-          child: Icon(
-            data.icon,
-            size: 120,
-            color: const Color(0xFF003399),
-          ),
-        ),
-        const SizedBox(height: 48),
-        Text(
-          data.title,
-          textAlign: TextAlign.center,
-          style: GoogleFonts.outfit(
-            fontSize: 28,
-            fontWeight: FontWeight.bold,
-            color: const Color(0xFF003399),
-          ),
-        ),
-        const SizedBox(height: 16),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 32.0),
-          child: Text(
-            data.description,
-            textAlign: TextAlign.center,
-            style: GoogleFonts.outfit(
-              fontSize: 16,
-              color: Colors.grey[600],
-              height: 1.5,
+    if (data.hasBlueHeader) {
+      // Blue Header Layout (like reference images 1, 2, 3)
+      return Column(
+        children: [
+          // Blue Section with Illustration
+          Expanded(
+            flex: 3,
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    data.title,
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.outfit(
+                      fontSize: 32,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                  if (data.subtitle.isNotEmpty) ...[
+                    const SizedBox(height: 8),
+                    Text(
+                      data.subtitle,
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.outfit(
+                        fontSize: 20,
+                        color: Colors.white70,
+                      ),
+                    ),
+                  ],
+                  const SizedBox(height: 40),
+                  // Illustration Container
+                  Container(
+                    width: 200,
+                    height: 200,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.15),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      data.icon,
+                      size: 100,
+                      color: Colors.white,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
+          // White Footer Section
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(32),
+                topRight: Radius.circular(32),
+              ),
+            ),
+            child: Text(
+              data.description,
+              textAlign: TextAlign.center,
+              style: GoogleFonts.outfit(
+                fontSize: 16,
+                color: Colors.grey[700],
+                height: 1.5,
+              ),
+            ),
+          ),
+        ],
+      );
+    } else {
+      // White Background Layout (like reference images 4, 5)
+      return Container(
+        color: Colors.white,
+        padding: const EdgeInsets.symmetric(horizontal: 32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // Logo at top
+            Text(
+              'Giga',
+              style: GoogleFonts.outfit(
+                fontSize: 28,
+                fontWeight: FontWeight.bold,
+                color: const Color(0xFF1A3B8C),
+              ),
+            ),
+            const SizedBox(height: 32),
+            // Title
+            Text(
+              data.title,
+              textAlign: TextAlign.center,
+              style: GoogleFonts.outfit(
+                fontSize: 28,
+                fontWeight: FontWeight.bold,
+                color: const Color(0xFF1A3B8C),
+              ),
+            ),
+            Text(
+              data.subtitle,
+              textAlign: TextAlign.center,
+              style: GoogleFonts.outfit(
+                fontSize: 28,
+                fontWeight: FontWeight.bold,
+                color: const Color(0xFF1A3B8C),
+              ),
+            ),
+            const SizedBox(height: 40),
+            // Central Illustration
+            Container(
+              width: 180,
+              height: 180,
+              decoration: BoxDecoration(
+                color: const Color(0xFFF5F8FF),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                data.icon,
+                size: 90,
+                color: const Color(0xFF1A3B8C),
+              ),
+            ),
+            const SizedBox(height: 24),
+            // Delivery Icons Row (for last screens)
+            if (data.isLastPage) ...[
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  _buildSmallIcon(Icons.inventory_2_outlined),
+                  _buildSmallIcon(Icons.two_wheeler),
+                  _buildSmallIcon(Icons.local_shipping),
+                ],
+              ),
+            ],
+            const SizedBox(height: 24),
+            Text(
+              data.description,
+              textAlign: TextAlign.center,
+              style: GoogleFonts.outfit(
+                fontSize: 16,
+                color: Colors.grey[600],
+                height: 1.5,
+              ),
+            ),
+          ],
         ),
-      ],
+      );
+    }
+  }
+
+  Widget _buildSmallIcon(IconData icon) {
+    return Container(
+      width: 60,
+      height: 60,
+      decoration: BoxDecoration(
+        color: const Color(0xFFFFF5F5),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Icon(
+        icon,
+        size: 32,
+        color: const Color(0xFFD32F2F),
+      ),
     );
   }
 }
 
 class OnboardingData {
   final String title;
+  final String subtitle;
   final String description;
   final IconData icon;
+  final bool hasBlueHeader;
+  final bool isLastPage;
 
-  OnboardingData({required this.title, required this.description, required this.icon});
+  OnboardingData({
+    required this.title,
+    this.subtitle = "",
+    required this.description,
+    required this.icon,
+    this.hasBlueHeader = true,
+    this.isLastPage = false,
+  });
 }
-
-
