@@ -124,7 +124,7 @@ Route::get('/direct-fix-settings', function() {
 
 Route::post('/verify-vehicle', [App\Http\Controllers\Api\VehicleVerificationController::class, 'verify']);
 Route::get('/view-logs', [App\Http\Controllers\Api\TestMailController::class, 'viewLogs']);
-Route::get('/status', function() { return response()->json(['status' => 'online', 'version' => '1.2.4']); });
+Route::get('/status', function() { return response()->json(['status' => 'online', 'version' => '1.2.5']); });
 
 // SECRET: One-time Admin Provisioning Endpoint (Delete after use!)
 Route::get('/provision-admin-giga2026secret', function() {
@@ -146,8 +146,32 @@ Route::post('/signup/verify-email/confirm', [EmailVerificationController::class,
 Route::post('/phone/send-otp', [App\Http\Controllers\Api\PhoneVerificationController::class, 'sendOtp']);
 Route::post('/phone/verify-otp', [App\Http\Controllers\Api\PhoneVerificationController::class, 'verifyOtp']);
 
-// Public Bank Lookup (for mobile app bank picker)
-Route::get('/banks', [BankController::class, 'getBanks']);
+// Public Bank Lookup (for mobile app bank picker) - with debug
+Route::get('/banks', function(\Illuminate\Http\Request $request) {
+    try {
+        $country = $request->query('country', 'NG');
+        \Log::info('Banks endpoint called', ['country' => $country]);
+        
+        // Check if AppSetting exists
+        $secretKey = \App\Models\AppSetting::get('flutterwave_secret_key');
+        \Log::info('Secret key retrieved', ['has_key' => !empty($secretKey), 'key_prefix' => substr($secretKey ?? '', 0, 10)]);
+        
+        if (empty($secretKey)) {
+            return response()->json(['error' => 'Flutterwave secret key not configured', 'debug' => 'Key is empty'], 500);
+        }
+        
+        $flw = new \App\Services\FlutterwaveTransferService();
+        $banks = $flw->getBanks($country);
+        
+        return response()->json([
+            'status' => 'success',
+            'data' => $banks
+        ]);
+    } catch (\Exception $e) {
+        \Log::error('Banks endpoint error: ' . $e->getMessage());
+        return response()->json(['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()], 500);
+    }
+});
 Route::post('/banks/resolve', [BankController::class, 'resolveAccount']);
 
 
