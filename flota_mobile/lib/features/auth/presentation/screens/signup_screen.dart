@@ -37,10 +37,10 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
 
     try {
       await ref.read(authProvider.notifier).register(
-            email: _emailController.text.trim(),
-            password: _passwordController.text.trim(),
-            role: _selectedRole,
-            name: _nameController.text.trim(),
+            _nameController.text.trim(),
+            _emailController.text.trim(),
+            _passwordController.text.trim(),
+            _selectedRole,
             ukPhone: _phoneController.text.trim(),
           );
       // Navigation handled by GoRouter redirect or Auth Provider
