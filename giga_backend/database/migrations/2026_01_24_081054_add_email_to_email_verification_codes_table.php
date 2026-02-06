@@ -11,11 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // Check if email column already exists (skip if manually added)
+        if (Schema::hasColumn('email_verification_codes', 'email')) {
+            return; // Already done, skip this migration
+        }
+        
         Schema::table('email_verification_codes', function (Blueprint $table) {
             $table->unsignedBigInteger('user_id')->nullable()->change();
-            if (!Schema::hasColumn('email_verification_codes', 'email')) {
-                $table->string('email')->nullable()->after('user_id')->index();
-            }
+            $table->string('email')->nullable()->after('user_id')->index();
         });
     }
 
