@@ -132,10 +132,12 @@ Route::get('/force-skip-migration', function() {
     try {
         $migrationName = '2026_01_24_081054_add_email_to_email_verification_codes_table';
         
-        // Check if already marked as run
+        // Step 1: Check if already marked as run
         $exists = \Illuminate\Support\Facades\DB::table('migrations')
             ->where('migration', $migrationName)
             ->exists();
+        
+        $status = ['migration' => $migrationName, 'already_in_table' => $exists];
             
         if (!$exists) {
             // Get the max batch number
@@ -146,21 +148,35 @@ Route::get('/force-skip-migration', function() {
                 'migration' => $migrationName,
                 'batch' => $maxBatch + 1
             ]);
+            $status['action'] = 'inserted';
+        } else {
+            $status['action'] = 'already_exists';
         }
         
-        // Now run remaining migrations
+        // Step 2: List all pending migrations (What would migrate run?)
+        $allMigrations = \Illuminate\Support\Facades\DB::table('migrations')->pluck('migration')->toArray();
+        $status['migrations_in_db'] = count($allMigrations);
+        
+        // Step 3: Now run remaining migrations
         \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
+        $output = \Illuminate\Support\Facades\Artisan::output();
+        
+        // Step 4: Seed settings
         \Illuminate\Support\Facades\Artisan::call('db:seed', ['--class' => 'AppSettingsSeeder', '--force' => true]);
         
         return response()->json([
-            'message' => 'Skipped problematic migration and ran remaining!',
-            'skipped' => $migrationName,
-            'output' => \Illuminate\Support\Facades\Artisan::output()
+            'message' => 'Completed!',
+            'status' => $status,
+            'migrate_output' => $output
         ]);
     } catch (\Exception $e) {
-        return response()->json(['error' => $e->getMessage()], 500);
+        return response()->json([
+            'error' => $e->getMessage(),
+            'trace' => $e->getTraceAsString()
+        ], 500);
     }
 });
+
 
 
 Route::get('/fix-schema-manual', function() {
