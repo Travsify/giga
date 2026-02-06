@@ -205,6 +205,10 @@ Route::get('/debug-config', function() {
             'MAIL_MAILER' => env('MAIL_MAILER'),
             'MAIL_HOST' => env('MAIL_HOST'),
             'MAIL_USERNAME' => env('MAIL_USERNAME'),
+            'RESEND_API_KEY_SET' => !empty(env('RESEND_API_KEY')),
+        ],
+        'services_config' => [
+            'resend_key_configured' => !empty(config('services.resend.key')),
         ],
         'is_cached' => app()->configurationIsCached(),
     ]);
