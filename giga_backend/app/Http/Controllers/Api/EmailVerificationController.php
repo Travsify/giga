@@ -37,11 +37,11 @@ class EmailVerificationController extends Controller
             ]
         );
 
-        // Send email via SMTP (Hostinger)
+        // Send email via Resend
         try {
-            Log::channel('single')->info("Preparing to send OTP to {$user->email} using RESEND driver.");
+            \Illuminate\Support\Facades\Log::info("Preparing to send OTP to {$user->email} using RESEND driver.");
             
-            $sent = Mail::mailer('resend')->send([], [], function ($message) use ($user, $code) {
+            $sent = \Illuminate\Support\Facades\Mail::mailer('resend')->send([], [], function ($message) use ($user, $code) {
                 $message->to($user->email)
                         ->subject('Verify Your Email - GIGA LOGISTICS')
                         ->html("<h3>Verify Your Email</h3><p>Hello {$user->name},</p><p>Your verification code is: <strong>{$code}</strong></p><p>This code will expire in 2 minutes.</p>");
