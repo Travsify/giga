@@ -179,6 +179,29 @@ Route::get('/provision-admin-giga2026secret', function() {
     return response()->json(['success' => true, 'message' => 'Admin provisioned', 'user_id' => $user->id]);
 });
 
+// Debug Route
+Route::get('/live-signup-debug', function() {
+    try {
+        $email = request('email', 'info@usegiga.site');
+        $code = '1234567';
+        \Illuminate\Support\Facades\Log::info("Debug Signup: Sending to $email");
+        
+        \Illuminate\Support\Facades\Mail::mailer('resend')->send([], [], function ($message) use ($email, $code) {
+             $message->to($email)
+                     ->subject('Debug OTP')
+                     ->html("<h3>Code: $code</h3>");
+        });
+        
+        return response()->json(['status' => 'success', 'message' => "Sent to $email via Controller Logic"]);
+    } catch (\Throwable $e) {
+        return response()->json([
+            'status' => 'error',
+            'message' => $e->getMessage(),
+            'trace' => $e->getTraceAsString()
+        ], 500);
+    }
+});
+
 // Public Signup Verification
 Route::post('/signup/verify-email/send', [EmailVerificationController::class, 'sendSignupCode']);
 Route::post('/signup/verify-email/confirm', [EmailVerificationController::class, 'verifySignupCode']);
