@@ -39,28 +39,26 @@ class EmailVerificationController extends Controller
 
         // Send email via SMTP (Hostinger)
         try {
-            Log::channel('single')->info("Preparing to send OTP to {$user->email} using SMTP driver.");
+            Log::channel('single')->info("Preparing to send OTP to {$user->email} using RESEND driver.");
             
-            $sent = Mail::mailer('smtp')->send([], [], function ($message) use ($user, $code) {
+            $sent = Mail::mailer('resend')->send([], [], function ($message) use ($user, $code) {
                 $message->to($user->email)
                         ->subject('Verify Your Email - GIGA LOGISTICS')
                         ->html("<h3>Verify Your Email</h3><p>Hello {$user->name},</p><p>Your verification code is: <strong>{$code}</strong></p><p>This code will expire in 2 minutes.</p>");
             });
             
             if ($sent) {
-                Log::channel('single')->info("OTP email successfully accepted by SMTP server for: {$user->email}");
+                Log::channel('single')->info("OTP email successfully accepted by RESEND for: {$user->email}");
             } else {
-                Log::channel('single')->warning("OTP email reported sent but might have failed silently for: {$user->email}");
+                Log::channel('single')->warning("OTP email reported sent but might have failed silently (Resend) for: {$user->email}");
             }
 
-            // DEBUG BYPASS: Return token in response unconditionally for testing
             return response()->json([
                 'status' => 'success',
-                'message' => 'Verification code sent',
-                'debug_otp' => $code 
+                'message' => 'Verification code sent to your email.'
             ]);
         } catch (\Exception $e) {
-            Log::channel('single')->error("CRITICAL: Failed to send OTP email to {$user->email}. Error: " . $e->getMessage());
+            Log::channel('single')->error("CRITICAL: Failed to send OTP email via Resend to {$user->email}. Error: " . $e->getMessage());
             Log::channel('single')->error("Trace: " . $e->getTraceAsString());
             
             return response()->json([
