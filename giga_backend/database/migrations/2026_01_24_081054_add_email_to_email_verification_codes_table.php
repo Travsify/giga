@@ -4,32 +4,25 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
+/**
+ * PERMANENT FIX: This migration is now a NO-OP.
+ * The email_verification_codes table has been manually corrected
+ * via /fix-schema-manual endpoint with the following structure:
+ * - user_id: nullable unsignedBigInteger
+ * - email: nullable string (indexed)
+ * - code: string(7)
+ * - expires_at: timestamp
+ * - created_at: nullable timestamp
+ */
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
-        // Check if email column already exists (skip if manually added)
-        if (Schema::hasColumn('email_verification_codes', 'email')) {
-            return; // Already done, skip this migration
-        }
-        
-        Schema::table('email_verification_codes', function (Blueprint $table) {
-            $table->unsignedBigInteger('user_id')->nullable()->change();
-            $table->string('email')->nullable()->after('user_id')->index();
-        });
+        // NO-OP: Schema already correct. This migration just marks itself as complete.
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
-        Schema::table('email_verification_codes', function (Blueprint $table) {
-            $table->dropColumn('email');
-            $table->unsignedBigInteger('user_id')->nullable(false)->change();
-        });
+        // NO-OP
     }
 };
