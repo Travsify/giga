@@ -48,6 +48,9 @@ class AuthController extends Controller
                 if ($request->role === 'Rider') {
                     \App\Models\Rider::create([
                         'user_id' => $user->id,
+                        'license_number' => 'PENDING-' . $user->id . '-' . time(),
+                        'vehicle_plate_number' => 'PENDING-' . $user->id . '-' . time(),
+                        'vehicle_type' => 'bike',
                         'is_online' => false,
                         'has_vehicle' => false,
                         'vehicle_verified' => false,
