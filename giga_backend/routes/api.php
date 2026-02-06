@@ -76,6 +76,16 @@ Route::get('/env-check', [App\Http\Controllers\Api\TestMailController::class, 'e
 Route::get('/sync-mail-settings', [App\Http\Controllers\Api\TestMailController::class, 'syncMailSettings']);
 
 Route::get('/live-resend-test', function() {
+    $debug = [
+        'mailers_resend' => config('mail.mailers.resend'),
+        'services_resend' => config('services.resend'),
+        'driver_class' => class_exists('Resend\Laravel\Transport\ResendTransportFactory'),
+    ];
+
+    if (empty($debug['mailers_resend'])) {
+        return response()->json(['status' => 'error', 'message' => 'Resend Mailer Config Missing', 'debug' => $debug], 500);
+    }
+    
     try {
         $to = request('email', 'info@usegiga.site'); 
         
@@ -86,13 +96,16 @@ Route::get('/live-resend-test', function() {
 
         return response()->json([
             'status' => 'success', 
-            'message' => "Email sent to $to via Resend"
+            'message' => "Email sent to $to via Resend",
+            'debug' => $debug
         ]);
-    } catch (\Exception $e) {
+    } catch (\Throwable $e) {
         return response()->json([
             'status' => 'error',
             'message' => $e->getMessage(),
-            'trace' => $e->getTraceAsString()
+            'file' => $e->getFile(),
+            'line' => $e->getLine(),
+            'debug' => $debug
         ], 500);
     }
 });
