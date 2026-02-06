@@ -37,39 +37,37 @@ class EmailVerificationController extends Controller
             ]
         );
 
-        // Send email via Resend
+        // Send email via ResendService (direct HTTP API)
         try {
-            \Illuminate\Support\Facades\Log::info("Preparing to send OTP to {$user->email} using RESEND driver.");
+            Log::info("Preparing to send OTP to {$user->email} using ResendService.");
             
-            $sent = \Illuminate\Support\Facades\Mail::mailer('resend')->send([], [], function ($message) use ($user, $code) {
-                $message->to($user->email)
-                        ->subject('Verify Your Email - GIGA LOGISTICS')
-                        ->html("<h3>Verify Your Email</h3><p>Hello {$user->name},</p><p>Your verification code is: <strong>{$code}</strong></p><p>This code will expire in 2 minutes.</p>");
-            });
+            $resendService = app(\App\Services\ResendService::class);
+            $html = "<h3>Verify Your Email</h3><p>Hello {$user->name},</p><p>Your verification code is: <strong>{$code}</strong></p><p>This code will expire in 2 minutes.</p>";
+            
+            $sent = $resendService->sendEmail($user->email, 'Verify Your Email - GIGA LOGISTICS', $html);
             
             if ($sent) {
-                Log::channel('single')->info("OTP email successfully accepted by RESEND for: {$user->email}");
+                Log::info("OTP email successfully sent via ResendService to: {$user->email}");
+                return response()->json([
+                    'status' => 'success',
+                    'message' => 'Verification code sent to your email.'
+                ]);
             } else {
-                Log::channel('single')->warning("OTP email reported sent but might have failed silently (Resend) for: {$user->email}");
+                $error = $resendService->getLastError();
+                Log::error("Failed to send OTP email via ResendService to {$user->email}. Error: {$error}");
+                return response()->json([
+                    'message' => 'Failed to send verification code.',
+                    'debug_error' => $error,
+                ], 500);
             }
-
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Verification code sent to your email.'
-            ]);
         } catch (\Exception $e) {
-            Log::channel('single')->error("CRITICAL: Failed to send OTP email via Resend to {$user->email}. Error: " . $e->getMessage());
-            Log::channel('single')->error("Trace: " . $e->getTraceAsString());
+            Log::error("CRITICAL: Exception sending OTP email to {$user->email}. Error: " . $e->getMessage());
             
             return response()->json([
                 'message' => 'Failed to send verification code. Server Error: ' . $e->getMessage(),
                 'debug_error' => $e->getMessage(),
             ], 500);
         }
-
-        return response()->json([
-            'message' => 'Verification code sent to your email.',
-        ]);
     }
 
     /**
@@ -149,28 +147,34 @@ class EmailVerificationController extends Controller
             ]
         );
 
-        // Send email via Resend
+        // Send email via ResendService (direct HTTP API)
         try {
-            Log::info("Preparing to send Signup OTP to {$email} using RESEND driver.");
+            Log::info("Preparing to send Signup OTP to {$email} using ResendService.");
 
-            Mail::mailer('resend')->send([], [], function ($message) use ($email, $code) {
-                $message->to($email)
-                        ->subject('Verify Your Email - GIGA LOGISTICS')
-                        ->html("<h3>Welcome to Giga!</h3><p>Your signup verification code is: <strong>{$code}</strong></p><p>This code will expire in 2 minutes.</p>");
-            });
+            $resendService = app(\App\Services\ResendService::class);
+            $html = "<h3>Welcome to Giga!</h3><p>Your signup verification code is: <strong>{$code}</strong></p><p>This code will expire in 2 minutes.</p>";
             
-            Log::info("Signup OTP email successfully accepted by RESEND for: {$email}");
+            $sent = $resendService->sendEmail($email, 'Verify Your Email - GIGA LOGISTICS', $html);
+            
+            if ($sent) {
+                Log::info("Signup OTP email successfully sent via ResendService to: {$email}");
+                return response()->json(['message' => 'Verification code sent.']);
+            } else {
+                $error = $resendService->getLastError();
+                Log::error("Failed to send signup OTP email via ResendService to {$email}. Error: {$error}");
+                return response()->json([
+                    'message' => 'Failed to send verification code.',
+                    'debug_error' => $error,
+                ], 500);
+            }
         } catch (\Exception $e) {
             Log::error("CRITICAL: Failed to send signup OTP email to {$email}. Error: " . $e->getMessage());
-            Log::error("Trace: " . $e->getTraceAsString());
             
             return response()->json([
                 'message' => 'Failed to send verification code. Server Error: ' . $e->getMessage(),
                 'debug_error' => $e->getMessage(),
             ], 500);
         }
-
-        return response()->json(['message' => 'Verification code sent.']);
     }
 
     public function verifySignupCode(Request $request)
