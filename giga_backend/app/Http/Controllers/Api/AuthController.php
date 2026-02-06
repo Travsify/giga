@@ -88,8 +88,15 @@ class AuthController extends Controller
 
                 $token = $user->createToken('auth_token')->plainTextToken;
 
+                // Load appropriate relationships based on role
+                if ($request->role === 'Company') {
+                    $user->load('company');
+                } elseif ($request->role === 'Rider') {
+                    $user->load('rider');
+                }
+
                 return response()->json([
-                    'user' => $user->load('company'),
+                    'user' => $user,
                     'token' => $token,
                 ], 201);
             });
@@ -103,6 +110,7 @@ class AuthController extends Controller
             return response()->json([
                 'error' => 'Server error occurred during registration.',
                 'message' => $e->getMessage(),
+                'debug' => config('app.debug') ? $e->getFile() . ':' . $e->getLine() : null,
             ], 500);
         }
     }
