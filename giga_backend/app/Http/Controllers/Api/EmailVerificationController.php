@@ -41,13 +41,24 @@ class EmailVerificationController extends Controller
         try {
             Log::info("Preparing to send OTP to {$user->email} using SMTP driver.");
             
-            Mail::mailer('smtp')->send([], [], function ($message) use ($user, $code) {
+            $sent = Mail::mailer('smtp')->send([], [], function ($message) use ($user, $code) {
                 $message->to($user->email)
                         ->subject('Verify Your Email - GIGA LOGISTICS')
                         ->html("<h3>Verify Your Email</h3><p>Hello {$user->name},</p><p>Your verification code is: <strong>{$code}</strong></p><p>This code will expire in 2 minutes.</p>");
             });
             
-            Log::info("OTP email successfully accepted by SMTP server for: {$user->email}");
+            if ($sent) {
+                Log::info("OTP email successfully accepted by SMTP server for: {$user->email}");
+            } else {
+                Log::warning("OTP email reported sent but might have failed silently for: {$user->email}");
+            }
+
+            // DEBUG BYPASS: Return token in response unconditionally for testing
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Verification code sent',
+                'debug_otp' => $code 
+            ]);
         } catch (\Exception $e) {
             Log::error("CRITICAL: Failed to send OTP email to {$user->email}. Error: " . $e->getMessage());
             Log::error("Trace: " . $e->getTraceAsString());
