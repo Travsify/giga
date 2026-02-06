@@ -186,13 +186,23 @@ Route::get('/live-signup-debug', function() {
         $code = '1234567';
         \Illuminate\Support\Facades\Log::info("Debug Signup: Sending to $email");
         
+        // TEST DB INSERT (This causes crash if user_id is not nullable)
+        \Illuminate\Support\Facades\DB::table('email_verification_codes')->updateOrInsert(
+            ['email' => $email],
+            [
+                'code' => $code,
+                'expires_at' => now()->addMinutes(10),
+                'created_at' => now(),
+            ]
+        );
+
         \Illuminate\Support\Facades\Mail::mailer('resend')->send([], [], function ($message) use ($email, $code) {
              $message->to($email)
                      ->subject('Debug OTP')
                      ->html("<h3>Code: $code</h3>");
         });
         
-        return response()->json(['status' => 'success', 'message' => "Sent to $email via Controller Logic"]);
+        return response()->json(['status' => 'success', 'message' => "Sent to $email via Controller Logic (DB+Mail)"]);
     } catch (\Throwable $e) {
         return response()->json([
             'status' => 'error',
