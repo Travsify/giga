@@ -74,6 +74,29 @@ Route::get('/test-sms', [TestMailController::class, 'sendTestSms']);
 Route::get('/test-resend-service', [TestMailController::class, 'testResendService']);
 Route::get('/env-check', [App\Http\Controllers\Api\TestMailController::class, 'envCheck']);
 Route::get('/sync-mail-settings', [App\Http\Controllers\Api\TestMailController::class, 'syncMailSettings']);
+
+Route::get('/live-resend-test', function() {
+    try {
+        $to = request('email', 'info@usegiga.site'); 
+        
+        \Illuminate\Support\Facades\Mail::mailer('resend')->raw('Live Resend Test', function ($message) use ($to) {
+            $message->to($to)
+                    ->subject('GIGA Live Resend Test');
+        });
+
+        return response()->json([
+            'status' => 'success', 
+            'message' => "Email sent to $to via Resend"
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'status' => 'error',
+            'message' => $e->getMessage(),
+            'trace' => $e->getTraceAsString()
+        ], 500);
+    }
+});
+
 // Route::get('/test-smtp', [App\Http\Controllers\Api\TestSmtpController::class, 'test']); // FIXME: Class does not exist
 // Route::get('/currency-rates', [CurrencyController::class, 'getRates']); // FIXME: Class does not exist
 // Route::get('/currencies', [CurrencyController::class, 'index']); // FIXME: Class does not exist
