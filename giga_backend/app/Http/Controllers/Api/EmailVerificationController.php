@@ -149,17 +149,17 @@ class EmailVerificationController extends Controller
             ]
         );
 
-        // Send email via SMTP (Hostinger)
+        // Send email via Resend
         try {
-            Log::info("Preparing to send Signup OTP to {$email} using SMTP driver.");
+            Log::info("Preparing to send Signup OTP to {$email} using RESEND driver.");
 
-            Mail::mailer('smtp')->send([], [], function ($message) use ($email, $code) {
+            Mail::mailer('resend')->send([], [], function ($message) use ($email, $code) {
                 $message->to($email)
                         ->subject('Verify Your Email - GIGA LOGISTICS')
                         ->html("<h3>Welcome to Giga!</h3><p>Your signup verification code is: <strong>{$code}</strong></p><p>This code will expire in 2 minutes.</p>");
             });
             
-            Log::info("Signup OTP email successfully accepted by SMTP server for: {$email}");
+            Log::info("Signup OTP email successfully accepted by RESEND for: {$email}");
         } catch (\Exception $e) {
             Log::error("CRITICAL: Failed to send signup OTP email to {$email}. Error: " . $e->getMessage());
             Log::error("Trace: " . $e->getTraceAsString());
