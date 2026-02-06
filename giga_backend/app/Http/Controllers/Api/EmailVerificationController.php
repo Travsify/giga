@@ -39,7 +39,7 @@ class EmailVerificationController extends Controller
 
         // Send email via SMTP (Hostinger)
         try {
-            Log::info("Preparing to send OTP to {$user->email} using SMTP driver.");
+            Log::channel('single')->info("Preparing to send OTP to {$user->email} using SMTP driver.");
             
             $sent = Mail::mailer('smtp')->send([], [], function ($message) use ($user, $code) {
                 $message->to($user->email)
@@ -48,9 +48,9 @@ class EmailVerificationController extends Controller
             });
             
             if ($sent) {
-                Log::info("OTP email successfully accepted by SMTP server for: {$user->email}");
+                Log::channel('single')->info("OTP email successfully accepted by SMTP server for: {$user->email}");
             } else {
-                Log::warning("OTP email reported sent but might have failed silently for: {$user->email}");
+                Log::channel('single')->warning("OTP email reported sent but might have failed silently for: {$user->email}");
             }
 
             // DEBUG BYPASS: Return token in response unconditionally for testing
@@ -60,8 +60,8 @@ class EmailVerificationController extends Controller
                 'debug_otp' => $code 
             ]);
         } catch (\Exception $e) {
-            Log::error("CRITICAL: Failed to send OTP email to {$user->email}. Error: " . $e->getMessage());
-            Log::error("Trace: " . $e->getTraceAsString());
+            Log::channel('single')->error("CRITICAL: Failed to send OTP email to {$user->email}. Error: " . $e->getMessage());
+            Log::channel('single')->error("Trace: " . $e->getTraceAsString());
             
             return response()->json([
                 'message' => 'Failed to send verification code. Server Error: ' . $e->getMessage(),
