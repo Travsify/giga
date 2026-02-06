@@ -114,14 +114,20 @@ Route::get('/live-resend-test', function() {
 // Route::get('/currency-rates', [CurrencyController::class, 'getRates']); // FIXME: Class does not exist
 // Route::get('/currencies', [CurrencyController::class, 'index']); // FIXME: Class does not exist
 // SECRET: Force Migration (Delete after use!)
-Route::get('/fix-migrations', function() {
+Route::get('/fix-schema-manual', function() {
     try {
-        \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
-        \Illuminate\Support\Facades\Artisan::call('db:seed', ['--class' => 'AppSettingsSeeder', '--force' => true]);
-        return response()->json([
-            'message' => 'Migrations and Settings updated successfully', 
-            'output' => \Illuminate\Support\Facades\Artisan::output()
-        ]);
+        \Illuminate\Support\Facades\Schema::dropIfExists('email_verification_codes');
+        
+        \Illuminate\Support\Facades\Schema::create('email_verification_codes', function (\Illuminate\Database\Schema\Blueprint $table) {
+            $table->id();
+            $table->unsignedBigInteger('user_id')->nullable(); // Correctly Nullable
+            $table->string('email')->nullable()->index();
+            $table->string('code', 7); // 7 digits
+            $table->timestamp('expires_at');
+            $table->timestamp('created_at')->nullable();
+        });
+
+        return response()->json(['message' => 'Table dropped and recreated successfully!']);
     } catch (\Exception $e) {
         return response()->json(['error' => $e->getMessage()], 500);
     }
