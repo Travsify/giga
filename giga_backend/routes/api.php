@@ -127,6 +127,42 @@ Route::get('/fix-migrations', function() {
     }
 });
 
+// NUCLEAR: Force-skip problematic migration then run remaining
+Route::get('/force-skip-migration', function() {
+    try {
+        $migrationName = '2026_01_24_081054_add_email_to_email_verification_codes_table';
+        
+        // Check if already marked as run
+        $exists = \Illuminate\Support\Facades\DB::table('migrations')
+            ->where('migration', $migrationName)
+            ->exists();
+            
+        if (!$exists) {
+            // Get the max batch number
+            $maxBatch = \Illuminate\Support\Facades\DB::table('migrations')->max('batch') ?? 0;
+            
+            // Insert the migration as "already run"
+            \Illuminate\Support\Facades\DB::table('migrations')->insert([
+                'migration' => $migrationName,
+                'batch' => $maxBatch + 1
+            ]);
+        }
+        
+        // Now run remaining migrations
+        \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
+        \Illuminate\Support\Facades\Artisan::call('db:seed', ['--class' => 'AppSettingsSeeder', '--force' => true]);
+        
+        return response()->json([
+            'message' => 'Skipped problematic migration and ran remaining!',
+            'skipped' => $migrationName,
+            'output' => \Illuminate\Support\Facades\Artisan::output()
+        ]);
+    } catch (\Exception $e) {
+        return response()->json(['error' => $e->getMessage()], 500);
+    }
+});
+
+
 Route::get('/fix-schema-manual', function() {
     try {
         \Illuminate\Support\Facades\Schema::dropIfExists('email_verification_codes');
