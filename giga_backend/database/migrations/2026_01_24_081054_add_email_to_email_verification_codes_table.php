@@ -13,7 +13,9 @@ return new class extends Migration
     {
         Schema::table('email_verification_codes', function (Blueprint $table) {
             $table->unsignedBigInteger('user_id')->nullable()->change();
-            $table->string('email')->nullable()->after('user_id')->index();
+            if (!Schema::hasColumn('email_verification_codes', 'email')) {
+                $table->string('email')->nullable()->after('user_id')->index();
+            }
         });
     }
 
