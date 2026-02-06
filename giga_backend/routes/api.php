@@ -47,6 +47,78 @@ Route::get('/v2/test', function() {
     ]);
 });
 
+// Debug: Test registration without rate limiting
+Route::post('/test-register', function(\Illuminate\Http\Request $request) {
+    try {
+        \Illuminate\Support\Facades\Log::info('TEST-REGISTER: Starting', $request->all());
+        
+        // Step 1: Validate
+        $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users',
+            'password' => 'required|string|min:8',
+            'role' => 'required|in:Customer,Rider,Company',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['step' => 'validation', 'errors' => $validator->errors()], 422);
+        }
+
+        // Step 2: Create user
+        $user = \App\Models\User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => \Illuminate\Support\Facades\Hash::make($request->password),
+            'role' => $request->role,
+            'uk_phone' => $request->uk_phone ?? null,
+            'country_code' => $request->country_code ?? 'GB',
+            'currency_code' => $request->currency_code ?? 'GBP',
+        ]);
+        \Illuminate\Support\Facades\Log::info('TEST-REGISTER: User created', ['user_id' => $user->id]);
+
+        // Step 3: Create rider if Rider role
+        if ($request->role === 'Rider') {
+            \App\Models\Rider::create([
+                'user_id' => $user->id,
+                'is_online' => false,
+                'has_vehicle' => false,
+                'vehicle_verified' => false,
+            ]);
+            \Illuminate\Support\Facades\Log::info('TEST-REGISTER: Rider created');
+        }
+
+        // Step 4: Create wallet
+        \App\Models\Wallet::create([
+            'user_id' => $user->id,
+            'balance' => 0.00,
+            'currency' => $user->currency_code ?? 'GBP',
+        ]);
+        \Illuminate\Support\Facades\Log::info('TEST-REGISTER: Wallet created');
+
+        // Step 5: Create token
+        $token = $user->createToken('auth_token')->plainTextToken;
+        \Illuminate\Support\Facades\Log::info('TEST-REGISTER: Token created');
+
+        return response()->json([
+            'status' => 'success',
+            'user' => $user,
+            'token' => $token,
+        ], 201);
+    } catch (\Throwable $e) {
+        \Illuminate\Support\Facades\Log::error('TEST-REGISTER Error: ' . $e->getMessage(), [
+            'file' => $e->getFile(),
+            'line' => $e->getLine(),
+        ]);
+        return response()->json([
+            'status' => 'error',
+            'step' => 'exception',
+            'message' => $e->getMessage(),
+            'file' => $e->getFile(),
+            'line' => $e->getLine(),
+        ], 500);
+    }
+});
+
 Route::get('/db-debug', function() {
     return response()->json([
         'settings' => \App\Models\AppSetting::all(),
