@@ -89,6 +89,30 @@ class _BillPaymentScreenState extends ConsumerState<BillPaymentScreen> {
       if (mounted) {
         setState(() {
           _allBillers = billers.where((b) => b['country'] == 'NG').toList();
+          
+          // Discover available categories from API
+          final availableCategories = _allBillers
+              .map((b) => _getCategoryForBiller(Map<String, dynamic>.from(b)))
+              .where((c) => c != null)
+              .toSet();
+
+          // Dynamically filter sections
+          final Map<String, List<Map<String, dynamic>>> activeSections = {};
+          
+          _sections.forEach((title, items) {
+            final filteredItems = items.where((item) {
+              return availableCategories.contains(item['id']);
+            }).toList();
+            
+            if (filteredItems.isNotEmpty) {
+              activeSections[title] = filteredItems;
+            }
+          });
+
+          // Update sections with only active ones
+          _sections.clear();
+          _sections.addAll(activeSections);
+
           _filterBillers();
           _isLoading = false;
         });
@@ -105,21 +129,15 @@ class _BillPaymentScreenState extends ConsumerState<BillPaymentScreen> {
     final q = (query ?? _searchController.text).toLowerCase();
     setState(() {
       _filteredBillers = _allBillers.where((b) {
-        final name = b['name'].toString().toLowerCase();
-        final shortName = b['short_name'].toString().toLowerCase();
-        final billerName = b['biller_name'].toString().toUpperCase();
+        final name = (b['name'] ?? '').toString().toLowerCase();
+        final shortName = (b['short_name'] ?? '').toString().toLowerCase();
         
-        final matchesQuery = name.contains(q) || shortName.contains(q);
+        final matchesQuery = q.isEmpty || name.contains(q) || shortName.contains(q);
         
         bool matchesCategory = true;
         if (_selectedCategory != null) {
-          // Robust category matching
-          if (_selectedCategory == 'AIRTIME' || _selectedCategory == 'DATA_BUNDLE') {
-            matchesCategory = billerName.contains(_selectedCategory!);
-          } else {
-            // General match for UTILITY, CABLE, etc.
-            matchesCategory = billerName.contains(_selectedCategory!) || name.contains(_selectedCategory!.replaceAll('_', ' '));
-          }
+          final billerCategory = _getCategoryForBiller(b);
+          matchesCategory = billerCategory == _selectedCategory;
         }
         
         return matchesQuery && matchesCategory;
@@ -127,14 +145,35 @@ class _BillPaymentScreenState extends ConsumerState<BillPaymentScreen> {
     });
   }
 
+  String? _getCategoryForBiller(Map<String, dynamic> biller) {
+    if (biller['is_airtime'] == true) return 'AIRTIME';
+    
+    final String itemCode = (biller['item_code'] ?? '').toString().toUpperCase();
+    
+    if (itemCode.startsWith('MD')) return 'DATA_BUNDLE';
+    if (itemCode.startsWith('CB')) return 'CABLE_PAY';
+    if (itemCode.startsWith('UB')) return 'UTILITY_BILL';
+    if (itemCode.startsWith('IS')) return 'INTERNET_SERVICE';
+    if (itemCode.startsWith('SP')) return 'SCHOOL_FEES';
+    if (itemCode.startsWith('RI')) return 'RELIGIOUS_INSTITUTIONS';
+    if (itemCode.startsWith('BT')) return 'BETTING';
+    if (itemCode.startsWith('TP') || itemCode.startsWith('TX')) return 'TAX_PAYMENT';
+    if (itemCode.startsWith('OT')) return 'GOVERNMENT_PAYMENT';
+    if (itemCode.startsWith('TL')) return 'LOGISTICS';
+    if (itemCode.startsWith('DP')) return 'DEALERS';
+    
+    return null;
+  }
+
   void _selectCategory(String? categoryId, String? exactName) {
     setState(() {
       if (_selectedCategory == categoryId && exactName == null) {
         _selectedCategory = null;
+        _searchController.clear();
       } else {
         _selectedCategory = categoryId;
         if (exactName != null) {
-          _searchController.text = exactName.split(' ')[0]; // Search by prefix (e.g. "MTN")
+          _searchController.text = exactName.split(' ')[0];
         }
       }
       _filterBillers();

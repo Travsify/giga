@@ -83,6 +83,8 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
     String? workAddress,
     String? vehiclePlate,
     String? vehicleType,
+    String? companyName,
+    String? registrationNumber,
   }) async {
     state = state.copyWith(isLoading: true);
     try {
@@ -93,6 +95,8 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
       if (workAddress != null) data['work_address'] = workAddress;
       if (vehiclePlate != null) data['vehicle_plate_number'] = vehiclePlate;
       if (vehicleType != null) data['vehicle_type'] = vehicleType;
+      if (companyName != null) data['company_name'] = companyName;
+      if (registrationNumber != null) data['registration_number'] = registrationNumber;
 
       final updatedUser = await _repository.updateProfile(data);
       state = state.copyWith(user: updatedUser, isLoading: false);

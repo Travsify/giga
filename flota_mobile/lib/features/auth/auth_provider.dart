@@ -1,6 +1,11 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flota_mobile/features/auth/data/auth_repository.dart';
+import 'package:flota_mobile/features/profile/profile_provider.dart';
+import 'package:flota_mobile/features/wallet/wallet_provider.dart';
+import 'package:flota_mobile/features/business/business_provider.dart';
+import 'package:flota_mobile/features/marketplace/delivery_provider.dart';
+import 'package:flota_mobile/features/promos/promo_provider.dart';
 
 enum AuthStatus { authenticated, unauthenticated, loading }
 
@@ -75,9 +80,10 @@ class AuthState {
 
 class AuthNotifier extends StateNotifier<AuthState> {
   final AuthRepository _repository;
+  final Ref _ref;
   final _storage = const FlutterSecureStorage();
 
-  AuthNotifier(this._repository) : super(AuthState()) {
+  AuthNotifier(this._repository, this._ref) : super(AuthState()) {
     _init();
   }
 
@@ -141,7 +147,6 @@ class AuthNotifier extends StateNotifier<AuthState> {
       await _storage.write(key: 'saved_email', value: login);
       await _storage.write(key: 'saved_password', value: password);
 
-      final isVerified = user['email_verified_at'] != null;
       // Always require OTP verification on login
       await _storage.write(key: 'is_email_verified', value: 'false');
 
@@ -209,7 +214,6 @@ class AuthNotifier extends StateNotifier<AuthState> {
       await _storage.write(key: 'user_country_code', value: user['country_code']);
       await _storage.write(key: 'user_currency_code', value: user['currency_code']);
 
-      final isVerified = user['email_verified_at'] != null;
       // Always require OTP verification on signup
       await _storage.write(key: 'is_email_verified', value: 'false');
 
@@ -262,6 +266,13 @@ class AuthNotifier extends StateNotifier<AuthState> {
       if (savedEmail != null) await _storage.write(key: 'saved_email', value: savedEmail);
       if (savedPassword != null) await _storage.write(key: 'saved_password', value: savedPassword);
       
+      // Invalidate all session-dependent providers
+      _ref.invalidate(profileProvider);
+      _ref.invalidate(walletProvider);
+      _ref.invalidate(businessProvider);
+      _ref.invalidate(deliveryProvider);
+      _ref.invalidate(promoProvider);
+      
       state = AuthState(status: AuthStatus.unauthenticated);
     }
   }
@@ -290,5 +301,5 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
 final authProvider = StateNotifierProvider<AuthNotifier, AuthState>((ref) {
   final repository = ref.watch(authRepositoryProvider);
-  return AuthNotifier(repository);
+  return AuthNotifier(repository, ref);
 });

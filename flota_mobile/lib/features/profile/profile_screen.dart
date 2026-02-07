@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flota_mobile/features/profile/profile_provider.dart';
 import '../auth/auth_provider.dart';
 import 'package:flota_mobile/theme/app_theme.dart';
-import 'package:share_plus/share_plus.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flota_mobile/shared/map_picker_screen.dart';
@@ -40,12 +38,19 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
   void _showEditProfile() {
     final user = ref.read(profileProvider).user;
+    final role = user?['role'] ?? ref.read(authProvider).role ?? 'Customer';
+    
     if (user != null) {
       _nameController.text = user['name'] ?? '';
       _phoneController.text = user['uk_phone'] ?? '';
       _homeController.text = user['home_address'] ?? '';
       _workController.text = user['work_address'] ?? '';
+      _plateController.text = user['vehicle_plate_number'] ?? '';
+      _vehicleTypeController.text = user['vehicle_type'] ?? '';
     }
+
+    final _companyNameController = TextEditingController(text: user?['company_name'] ?? '');
+    final _regNumberController = TextEditingController(text: user?['registration_number'] ?? '');
 
     showModalBottomSheet(
       context: context,
@@ -157,48 +162,68 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               ),
             ),
             const SizedBox(height: 16),
-            TextField(
-              controller: _plateController,
-              decoration: const InputDecoration(
-                labelText: 'Vehicle Plate Number',
-                prefixIcon: Icon(Icons.numbers),
-                hintText: 'e.g. ABJ-123',
-              ),
-              textCapitalization: TextCapitalization.characters,
-            ),
-            const SizedBox(height: 16),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text('Vehicle Type', style: TextStyle(color: AppTheme.textSecondary, fontSize: 13)),
-                const SizedBox(height: 8),
-                Wrap(
-                  spacing: 8,
-                  children: ['Bike', 'Car', 'Truck', 'Sedan', 'SUV'].map((type) {
-                    final bool isSelected = _vehicleTypeController.text == type;
-                    return ChoiceChip(
-                      label: Text(type),
-                      selected: isSelected,
-                      onSelected: (val) {
-                        setState(() {
-                          _vehicleTypeController.text = type;
-                        });
-                      },
-                      selectedColor: AppTheme.primaryBlue.withOpacity(0.2),
-                      labelStyle: TextStyle(
-                        color: isSelected ? AppTheme.primaryBlue : AppTheme.textSecondary,
-                        fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                      ),
-                      backgroundColor: AppTheme.surfaceColor,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        side: BorderSide(color: isSelected ? AppTheme.primaryBlue : AppTheme.borderBlue),
-                      ),
-                    );
-                  }).toList(),
+            if (role == 'Business') ...[
+              TextField(
+                controller: _companyNameController,
+                decoration: const InputDecoration(
+                  labelText: 'Company Name',
+                  prefixIcon: Icon(Icons.business),
                 ),
-              ],
-            ),
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: _regNumberController,
+                decoration: const InputDecoration(
+                  labelText: 'Registration Number',
+                  prefixIcon: Icon(Icons.numbers),
+                ),
+              ),
+              const SizedBox(height: 16),
+            ],
+            if (role == 'Rider') ...[
+              TextField(
+                controller: _plateController,
+                decoration: const InputDecoration(
+                  labelText: 'Vehicle Plate Number',
+                  prefixIcon: Icon(Icons.numbers),
+                  hintText: 'e.g. ABJ-123',
+                ),
+                textCapitalization: TextCapitalization.characters,
+              ),
+              const SizedBox(height: 16),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('Vehicle Type', style: TextStyle(color: AppTheme.textSecondary, fontSize: 13)),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    children: ['Bike', 'Car', 'Truck', 'Sedan', 'SUV'].map((type) {
+                      final bool isSelected = _vehicleTypeController.text == type;
+                      return ChoiceChip(
+                        label: Text(type),
+                        selected: isSelected,
+                        onSelected: (val) {
+                          setState(() {
+                            _vehicleTypeController.text = type;
+                          });
+                        },
+                        selectedColor: AppTheme.primaryBlue.withOpacity(0.2),
+                        labelStyle: TextStyle(
+                          color: isSelected ? AppTheme.primaryBlue : AppTheme.textSecondary,
+                          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                        ),
+                        backgroundColor: AppTheme.surfaceColor,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          side: BorderSide(color: isSelected ? AppTheme.primaryBlue : AppTheme.borderBlue),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ],
+              ),
+            ],
             const SizedBox(height: 24),
             SizedBox(
               width: double.infinity,
@@ -211,6 +236,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     workAddress: _workController.text,
                     vehiclePlate: _plateController.text,
                     vehicleType: _vehicleTypeController.text,
+                    companyName: role == 'Business' ? _companyNameController.text : null,
+                    registrationNumber: role == 'Business' ? _regNumberController.text : null,
                   );
                   // Update Rider specific info
                   final user = ref.read(profileProvider).user;
@@ -303,10 +330,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final theme = Theme.of(context);
     final profileState = ref.watch(profileProvider);
     final user = profileState.user;
-    final loyalty = profileState.loyalty;
     final stats = ref.watch(riderStatsProvider).value;
     final authState = ref.watch(authProvider);
-    final isNG = authState.countryCode == 'NG';
+    
+    final String role = user?['role'] ?? authState.role ?? 'Customer';
+    final bool isRider = role == 'Rider';
+    final bool isBusiness = role == 'Business';
+    final bool isNG = authState.countryCode == 'NG';
+    final bool isOnline = user?['is_online'] == true;
 
     if (profileState.isLoading && user == null) {
       return const Scaffold(
@@ -315,7 +346,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     }
 
     final rider = user?['rider'];
-    final isOnline = user?['is_online'] == true;
 
     return Scaffold(
       backgroundColor: AppTheme.backgroundColor,
@@ -402,7 +432,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                           ],
                         ),
                         Text(
-                          'Verified Giga Partner',
+                          isRider ? 'Verified Giga Partner' : (isBusiness ? 'Verified Business' : 'Giga Member'),
                           style: GoogleFonts.outfit(color: Colors.white70, fontSize: 13, letterSpacing: 1.2, fontWeight: FontWeight.w500),
                         ),
                         const SizedBox(height: 16),
@@ -431,27 +461,33 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // 2. ACTIVITY PILLARS
-                  Row(
-                    children: [
-                      _buildPillar('Rating', '${stats?.rating.toStringAsFixed(1) ?? "5.0"}', Icons.star_rounded, Colors.orange),
-                      const SizedBox(width: 12),
-                      _buildPillar('Deliveries', '${stats?.totalJobsCompleted ?? 0}', Icons.local_shipping_rounded, AppTheme.accentCyan),
-                      const SizedBox(width: 12),
-                      _buildPillar('On-Time', '${stats?.onTimeRate ?? 100}%', Icons.timer_rounded, AppTheme.successGreen),
-                    ],
-                  ),
-                  const SizedBox(height: 32),
+                  // 2. ACTIVITY PILLARS (Rider Only)
+                  if (isRider) ...[
+                    Row(
+                      children: [
+                        _buildPillar('Rating', stats?.rating.toStringAsFixed(1) ?? "5.0", Icons.star_rounded, Colors.orange),
+                        const SizedBox(width: 12),
+                        _buildPillar('Deliveries', '${stats?.totalJobsCompleted ?? 0}', Icons.local_shipping_rounded, AppTheme.accentCyan),
+                        const SizedBox(width: 12),
+                        _buildPillar('On-Time', '${stats?.onTimeRate ?? 100}%', Icons.timer_rounded, AppTheme.successGreen),
+                      ],
+                    ),
+                    const SizedBox(height: 32),
+                  ],
 
-                  // 3. VEHICLE ID CARD
-                  _sectionHeader('Active Vehicle'),
-                  _buildVehicleCard(rider),
-                  const SizedBox(height: 32),
+                  // 3. VEHICLE ID CARD (Rider Only)
+                  if (isRider) ...[
+                    _sectionHeader('Active Vehicle'),
+                    _buildVehicleCard(rider),
+                    const SizedBox(height: 32),
+                  ],
 
-                  // 4. VERIFICATION HUB
-                  _sectionHeader('Trust & Verification'),
-                  _buildVerificationHub(rider),
-                  const SizedBox(height: 32),
+                  // 4. VERIFICATION HUB (Rider Only)
+                  if (isRider) ...[
+                    _sectionHeader('Trust & Verification'),
+                    _buildVerificationHub(rider),
+                    const SizedBox(height: 32),
+                  ],
 
                   // 5. ACCOUNT ACTIONS
                   _sectionHeader('Account & Settings'),
@@ -593,8 +629,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   }
 
   Widget _buildVerificationHub(Map<String, dynamic>? rider) {
-    final bool hasVehicle = (rider?['has_vehicle'] as bool?) ?? false || 
-        (rider?['vehicle_plate_number'] != null && (rider?['vehicle_plate_number']?.toString() ?? '').isNotEmpty);
     final String status = rider?['verification_status'] ?? 'pending';
     final bool isVerified = status == 'verified';
     final bool hasLicense = rider?['driver_license_path'] != null;
@@ -685,206 +719,4 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   }
 
 
-  Widget _buildLoyaltyCard(Map<String, dynamic>? loyalty) {
-    return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFF6366F1), Color(0xFF4F46E5)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFF4F46E5).withOpacity(0.3),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
-          ),
-        ],
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Giga Points',
-                style: TextStyle(color: Colors.white70, fontSize: 14),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                '${ref.watch(authProvider).currencySymbol}${loyalty?['loyalty_points'] ?? '0.00'}',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 32,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
-          ),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            decoration: BoxDecoration(
-              color: Colors.white24,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: const Row(
-              children: [
-                Icon(Icons.stars, color: Colors.white, size: 20),
-                SizedBox(width: 8),
-                Text(
-                  'Premium',
-                  style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSavedPlaceTile(String title, String subtitle, IconData icon, {VoidCallback? onTap}) {
-    final theme = Theme.of(context);
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      decoration: BoxDecoration(
-        color: theme.cardTheme.color,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: theme.primaryColor.withOpacity(0.1)),
-        boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.2), blurRadius: 10, offset: const Offset(0, 4)),
-        ],
-      ),
-      child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        leading: Container(
-          padding: const EdgeInsets.all(10),
-          decoration: BoxDecoration(
-            color: theme.primaryColor.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(10),
-          ),
-          child: Icon(icon, color: theme.primaryColor, size: 20),
-        ),
-        title: Text(title, style: GoogleFonts.outfit(fontWeight: FontWeight.w600, fontSize: 16, color: theme.textTheme.bodyLarge?.color)),
-        subtitle: Text(subtitle, style: TextStyle(color: theme.textTheme.bodyMedium?.color?.withOpacity(0.6), fontSize: 13), maxLines: 1, overflow: TextOverflow.ellipsis),
-        trailing: Icon(Icons.chevron_right, color: theme.textTheme.bodyMedium?.color?.withOpacity(0.3), size: 20),
-        onTap: onTap,
-      ),
-    );
-  }
-
-  Widget _buildReferralCard(Map<String, dynamic>? loyalty) {
-    final code = loyalty?['referral_code'] ?? 'GENERATING...';
-    
-    final theme = Theme.of(context);
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: theme.cardTheme.color,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: theme.primaryColor.withOpacity(0.1)),
-      ),
-      child: Column(
-        children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: theme.primaryColor.withOpacity(0.1),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(Icons.card_giftcard, color: theme.primaryColor),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Refer & Earn ${ref.watch(authProvider).currencySymbol}10',
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                    ),
-                    Text(
-                      'Share your code with friends',
-                      style: TextStyle(color: AppTheme.textSecondary, fontSize: 13),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 20),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            decoration: BoxDecoration(
-              color: const Color(0xFF0F1219),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: theme.primaryColor.withOpacity(0.2)),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  code,
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 2,
-                    color: theme.primaryColor,
-                  ),
-                ),
-                Row(
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.copy, size: 20),
-                      onPressed: () {
-                        Clipboard.setData(ClipboardData(text: code));
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Code copied to clipboard')),
-                        );
-                      },
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.share, size: 20),
-                      onPressed: () {
-                        Share.share('Use my Giga code $code to get £10 off your first delivery! Download now.');
-                      },
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 16),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              _infoItem(loyalty?['referral_count']?.toString() ?? '0', 'Referrals'),
-              Container(width: 1, height: 30, color: Colors.grey[200]),
-              _infoItem('${ref.watch(authProvider).currencySymbol}${loyalty?['referral_earnings'] ?? '0'}', 'Earned'),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _infoItem(String value, String label) {
-    return Column(
-      children: [
-        Text(
-          value,
-          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-        ),
-        Text(
-          label,
-          style: const TextStyle(color: AppTheme.textSecondary, fontSize: 12),
-        ),
-      ],
-    );
-  }
 }
