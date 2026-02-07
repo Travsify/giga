@@ -667,8 +667,9 @@ class PaymentController extends Controller
                 $card = \App\Models\GiftCard::create([
                     'code' => $code,
                     'amount' => $amount,
-                    'currency_code' => $request->currency, // Check DB column name! Usually currency or currency_code
-                    'creator_id' => $user->id,
+                    'balance' => $amount,
+                    'currency_code' => $request->currency,
+                    'user_id' => $user->id,
                     'is_active' => true,
                     'max_uses' => 1,
                     'current_uses' => 0,
