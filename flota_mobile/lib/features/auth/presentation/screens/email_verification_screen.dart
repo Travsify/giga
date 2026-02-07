@@ -127,7 +127,9 @@ class _EmailVerificationScreenState extends ConsumerState<EmailVerificationScree
         // Navigate based on user role
         final role = ref.read(authProvider).role;
         if (role == 'Rider') {
-          context.go('/rider-dashboard');
+          context.go('/rider');
+        } else if (role == 'Business' || role == 'Company') {
+          context.go('/business');
         } else {
           context.go('/marketplace');
         }

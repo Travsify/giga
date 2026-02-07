@@ -33,18 +33,23 @@ class AuthRepository {
     String? currencyCode,
   }) async {
     try {
-      final response = await _dio.post('register', data: {
+      // Build data map - only include optional fields if they have values
+      final data = <String, dynamic>{
         'name': name,
         'email': email,
         'password': password,
         'role': role,
-        'uk_phone': ukPhone,
-        'company_name': companyName,
-        'registration_number': registrationNumber,
-        'company_type': companyType,
-        'country_code': countryCode,
-        'currency_code': currencyCode,
-      });
+      };
+      
+      // Only add optional fields if they're not null and not empty
+      if (ukPhone != null && ukPhone.isNotEmpty) data['uk_phone'] = ukPhone;
+      if (companyName != null && companyName.isNotEmpty) data['company_name'] = companyName;
+      if (registrationNumber != null && registrationNumber.isNotEmpty) data['registration_number'] = registrationNumber;
+      if (companyType != null && companyType.isNotEmpty) data['company_type'] = companyType;
+      if (countryCode != null && countryCode.isNotEmpty) data['country_code'] = countryCode;
+      if (currencyCode != null && currencyCode.isNotEmpty) data['currency_code'] = currencyCode;
+      
+      final response = await _dio.post('register', data: data);
       return response.data;
     } on DioException catch (e) {
       throw _handleError(e);
@@ -73,6 +78,15 @@ class AuthRepository {
     if (data != null) {
       // Show full error details for debugging
       if (data is Map) {
+        // Handle validation errors (Laravel returns 'errors' object)
+        if (data['errors'] != null && data['errors'] is Map) {
+          final errors = data['errors'] as Map;
+          final firstError = errors.values.first;
+          if (firstError is List && firstError.isNotEmpty) {
+            return firstError.first.toString();
+          }
+          return errors.values.first.toString();
+        }
         if (data['error'] != null) {
           return data['error'].toString();
         }

@@ -168,7 +168,8 @@ class AuthNotifier extends StateNotifier<AuthState> {
     String? countryCode,
     String? currencyCode,
   }) async {
-    state = state.copyWith(status: AuthStatus.loading);
+    // NOTE: Don't set AuthStatus.loading here - it triggers router redirect to /loading
+    // The signup screen handles its own loading state via _isLoading
     try {
       final response = await _repository.register(
         name: name,
@@ -183,6 +184,14 @@ class AuthNotifier extends StateNotifier<AuthState> {
         currencyCode: currencyCode,
       );
       
+      // DEBUG: Check for bypassed OTP
+      if (response['debug_otp'] != null) {
+        print('------------------------------------------------');
+        print('🚨 DEBUG OTP RECEIVED: ${response['debug_otp']} 🚨');
+        print('Use this code to verify email immediately.');
+        print('------------------------------------------------');
+      }
+
       final token = response['token'];
       final user = response['user'];
 

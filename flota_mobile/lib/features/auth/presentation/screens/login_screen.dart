@@ -134,7 +134,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           TextFormField(
                             controller: _emailController,
                             keyboardType: TextInputType.emailAddress,
-                            style: GoogleFonts.outfit(fontSize: 16),
+                            style: GoogleFonts.outfit(fontSize: 16, color: Colors.black87),
                             decoration: _buildInputDecoration(
                               hint: "Enter your email",
                               icon: Icons.email_outlined,
@@ -160,7 +160,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           TextFormField(
                             controller: _passwordController,
                             obscureText: !_isPasswordVisible,
-                            style: GoogleFonts.outfit(fontSize: 16),
+                            style: GoogleFonts.outfit(fontSize: 16, color: Colors.black87),
                             decoration: _buildInputDecoration(
                               hint: "Enter your password",
                               icon: Icons.lock_outline,
@@ -284,26 +284,30 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   InputDecoration _buildInputDecoration({required String hint, required IconData icon}) {
     return InputDecoration(
       hintText: hint,
-      hintStyle: GoogleFonts.outfit(color: Colors.grey[400]),
+      hintStyle: GoogleFonts.outfit(color: Colors.grey[500], fontSize: 16),
       prefixIcon: Icon(icon, color: _primaryBlue, size: 22),
       filled: true,
-      fillColor: const Color(0xFFF8FAFC),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      fillColor: Colors.white,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
-        borderSide: BorderSide(color: Colors.grey[200]!),
+        borderSide: BorderSide(color: Colors.grey[300]!, width: 1),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
-        borderSide: BorderSide(color: Colors.grey[200]!),
+        borderSide: BorderSide(color: Colors.grey[300]!, width: 1),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
-        borderSide: const BorderSide(color: _primaryBlue, width: 1.5),
+        borderSide: const BorderSide(color: _primaryBlue, width: 2),
       ),
       errorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
         borderSide: const BorderSide(color: Colors.red, width: 1),
+      ),
+      focusedErrorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14),
+        borderSide: const BorderSide(color: Colors.red, width: 2),
       ),
     );
   }

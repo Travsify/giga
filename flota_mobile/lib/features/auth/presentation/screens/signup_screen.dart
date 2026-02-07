@@ -23,6 +23,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
   bool _isLoading = false;
   bool _isPasswordVisible = false;
   late String _selectedRole;
+  String _selectedCountry = 'GB'; // Default to UK
 
   static const _primaryBlue = Color(0xFF1A3B8C);
   static const _accentRed = Color(0xFFD32F2F);
@@ -39,13 +40,27 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
     setState(() => _isLoading = true);
 
     try {
+      // Map frontend role names to backend validation values
+      // Backend accepts: Customer, Rider, Company
+      String roleForBackend = _selectedRole;
+      if (_selectedRole == 'Business') roleForBackend = 'Company';
+      if (_selectedRole == 'Individual') roleForBackend = 'Customer';
+      
+      final currencyCode = _selectedCountry == 'NG' ? 'NGN' : 'GBP';
+      
       await ref.read(authProvider.notifier).register(
             _nameController.text.trim(),
             _emailController.text.trim(),
             _passwordController.text.trim(),
-            _selectedRole,
+            roleForBackend,
             ukPhone: _phoneController.text.trim(),
+            countryCode: _selectedCountry,
+            currencyCode: currencyCode,
           );
+
+      if (mounted) {
+        context.push('/verify-email');
+      }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -169,12 +184,23 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                           ),
                           const SizedBox(height: 24),
 
+                          // Country Selector
+                          _buildLabel("Select Your Country"),
+                          const SizedBox(height: 12),
+                          Row(
+                            children: [
+                              _buildCountryCard('GB', '🇬🇧', 'UK', 'GBP'),
+                              const SizedBox(width: 16),
+                              _buildCountryCard('NG', '🇳🇬', 'Nigeria', 'NGN'),
+                            ],
+                          ),
+                          const SizedBox(height: 24),
                           // Name
                           _buildLabel("Full Name"),
                           const SizedBox(height: 8),
                           TextFormField(
                             controller: _nameController,
-                            style: GoogleFonts.outfit(fontSize: 16),
+                            style: GoogleFonts.outfit(fontSize: 16, color: Colors.black87),
                             textCapitalization: TextCapitalization.words,
                             decoration: _buildInputDecoration("Enter your name", Icons.person_outline),
                             validator: (value) {
@@ -190,7 +216,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                           TextFormField(
                             controller: _emailController,
                             keyboardType: TextInputType.emailAddress,
-                            style: GoogleFonts.outfit(fontSize: 16),
+                            style: GoogleFonts.outfit(fontSize: 16, color: Colors.black87),
                             decoration: _buildInputDecoration("Enter your email", Icons.email_outlined),
                             validator: (value) {
                               if (value == null || value.isEmpty) return 'Email is required';
@@ -206,8 +232,30 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                           TextFormField(
                             controller: _phoneController,
                             keyboardType: TextInputType.phone,
-                            style: GoogleFonts.outfit(fontSize: 16),
-                            decoration: _buildInputDecoration("Enter phone number", Icons.phone_outlined),
+                            style: GoogleFonts.outfit(fontSize: 16, color: Colors.black87),
+                            decoration: _buildInputDecoration("Enter phone number", Icons.phone_outlined).copyWith(
+                              prefixIcon: Container(
+                                margin: const EdgeInsets.only(right: 8),
+                                width: 90,
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(Icons.phone_outlined, color: Colors.grey[500]),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      _selectedCountry == 'NG' ? '+234' : '+44',
+                                      style: GoogleFonts.outfit(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w600,
+                                        color: Colors.black87
+                                      ),
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Container(height: 20, width: 1, color: Colors.grey[300]),
+                                  ],
+                                ),
+                              ),
+                            ),
                             validator: (value) {
                               if (value == null || value.isEmpty) return 'Phone is required';
                               return null;
@@ -221,7 +269,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                           TextFormField(
                             controller: _passwordController,
                             obscureText: !_isPasswordVisible,
-                            style: GoogleFonts.outfit(fontSize: 16),
+                            style: GoogleFonts.outfit(fontSize: 16, color: Colors.black87),
                             decoration: _buildInputDecoration("Create a password", Icons.lock_outline).copyWith(
                               suffixIcon: IconButton(
                                 icon: Icon(
@@ -358,29 +406,87 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
     );
   }
 
+  Widget _buildCountryCard(String code, String flag, String name, String currency) {
+    final isSelected = _selectedCountry == code;
+    return Expanded(
+      child: GestureDetector(
+        onTap: () => setState(() => _selectedCountry = code),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+          decoration: BoxDecoration(
+            color: isSelected ? _primaryBlue : const Color(0xFFF8FAFC),
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(
+              color: isSelected ? _primaryBlue : Colors.grey[200]!,
+              width: 1.5,
+            ),
+            boxShadow: isSelected
+                ? [BoxShadow(color: _primaryBlue.withOpacity(0.3), blurRadius: 8, offset: const Offset(0, 4))]
+                : null,
+          ),
+          child: Column(
+            children: [
+              Text(flag, style: const TextStyle(fontSize: 32)),
+              const SizedBox(height: 8),
+              Text(
+                name,
+                style: GoogleFonts.outfit(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: isSelected ? Colors.white : _primaryBlue,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                decoration: BoxDecoration(
+                  color: isSelected ? Colors.white.withOpacity(0.2) : _primaryBlue.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  currency,
+                  style: GoogleFonts.outfit(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w500,
+                    color: isSelected ? Colors.white70 : _primaryBlue.withOpacity(0.7),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   InputDecoration _buildInputDecoration(String hint, IconData icon) {
     return InputDecoration(
       hintText: hint,
-      hintStyle: GoogleFonts.outfit(color: Colors.grey[400]),
+      hintStyle: GoogleFonts.outfit(color: Colors.grey[500], fontSize: 16),
       prefixIcon: Icon(icon, color: _primaryBlue, size: 22),
       filled: true,
-      fillColor: const Color(0xFFF8FAFC),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      fillColor: Colors.white,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
-        borderSide: BorderSide(color: Colors.grey[200]!),
+        borderSide: BorderSide(color: Colors.grey[300]!, width: 1),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
-        borderSide: BorderSide(color: Colors.grey[200]!),
+        borderSide: BorderSide(color: Colors.grey[300]!, width: 1),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
-        borderSide: const BorderSide(color: _primaryBlue, width: 1.5),
+        borderSide: const BorderSide(color: _primaryBlue, width: 2),
       ),
       errorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
         borderSide: const BorderSide(color: Colors.red, width: 1),
+      ),
+      focusedErrorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14),
+        borderSide: const BorderSide(color: Colors.red, width: 2),
       ),
     );
   }

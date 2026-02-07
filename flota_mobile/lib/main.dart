@@ -154,15 +154,21 @@ final routerProvider = Provider<GoRouter>((ref) {
       final isAuthenticating = authState.status == AuthStatus.loading;
       final isVerified = authState.isEmailVerified;
 
+      // Global Loading State
+      if (isAuthenticating) {
+        if (state.matchedLocation == '/loading') return null;
+        return '/loading';
+      }
+
       // While checking auth status at splash, don't redirect yet
-      if (isAuthenticating && isSplash) return null;
+      if (isSplash) return null;
 
       if (!isAuthenticated) {
         // If not logged in and on a protected route, go to onboarding/welcome
+        if (state.matchedLocation == '/loading') return '/welcome'; // Recovery
+
         if (isLoggingIn || isRegistering || isOnboarding || isSplash || isForgotPassword) {
-          // If on splash, move to onboarding (first launch)
-          if (isSplash && !isAuthenticating) return null; // Let Splash Screen handle navigation
-          return null;
+           return null;
         }
         // DEFAULT for all other unauthenticated states
         return '/welcome';
@@ -176,7 +182,10 @@ final routerProvider = Provider<GoRouter>((ref) {
 
       // 2. If authenticated AND VERIFIED, NEVER stay on auth/onboarding/splash/verify pages
       final isVerifyPage = state.matchedLocation == '/verify-email';
-      if (isLoggingIn || isRegistering || isSplash || isOnboarding || isVerifyPage) {
+      // Also prevent staying on loading
+      final isLoadingPage = state.matchedLocation == '/loading';
+      
+      if (isLoggingIn || isRegistering || isSplash || isOnboarding || isVerifyPage || isLoadingPage) {
         if (authState.role == 'Rider') return '/rider';
         if (authState.role == 'Business' || authState.role == 'Company') return '/business';
         return '/marketplace';
@@ -193,6 +202,12 @@ final routerProvider = Provider<GoRouter>((ref) {
       return null;
     },
     routes: [
+      GoRoute(
+        path: '/loading',
+        builder: (context, state) => const Scaffold(
+          body: Center(child: CircularProgressIndicator()),
+        ),
+      ),
       GoRoute(
         path: '/splash',
         builder: (context, state) => const SplashScreen(),
