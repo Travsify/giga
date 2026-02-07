@@ -180,7 +180,7 @@ class _BillPaymentScreenState extends ConsumerState<BillPaymentScreen> {
         slivers: [
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 26.0, vertical: 8.0),
+              padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 8.0),
               child: TextField(
                 controller: _searchController,
                 onChanged: (v) => _filterBillers(v),
@@ -207,7 +207,7 @@ class _BillPaymentScreenState extends ConsumerState<BillPaymentScreen> {
             for (var entry in _sections.entries) ...[
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(26, 24, 26, 16),
+                  padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
                   child: Text(
                     entry.key,
                     style: GoogleFonts.outfit(
@@ -219,7 +219,7 @@ class _BillPaymentScreenState extends ConsumerState<BillPaymentScreen> {
                 ),
               ),
               SliverPadding(
-                padding: const EdgeInsets.symmetric(horizontal: 26),
+                padding: const EdgeInsets.symmetric(horizontal: 24),
                 sliver: SliverGrid(
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 4,
@@ -323,15 +323,15 @@ class _ServiceGridItem extends StatelessWidget {
             clipBehavior: Clip.none,
             children: [
               Container(
-                width: 56,
-                height: 56,
+                width: 50,
+                height: 50,
                 decoration: BoxDecoration(
                   color: AppTheme.surfaceColor,
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(color: Colors.white.withOpacity(0.05)),
                 ),
                 child: Center(
-                  child: Icon(icon, color: AppTheme.accentCyan, size: 28),
+                  child: Icon(icon, color: AppTheme.accentCyan, size: 24),
                 ),
               ),
               if (badge != null)
@@ -526,6 +526,7 @@ class _BillPaymentSheetState extends ConsumerState<_BillPaymentSheet> {
             const SizedBox(height: 12),
             if (showGrid) ...[
               GridView.builder(
+                padding: EdgeInsets.zero,
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
