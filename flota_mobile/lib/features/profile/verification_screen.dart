@@ -74,8 +74,63 @@ class _VerificationScreenState extends ConsumerState<VerificationScreen> {
             const SizedBox(height: 48),
             if (status == 'pending' || status == 'rejected')
               _buildInfoBanner(),
+            if (status == 'rejected' && rider?['rejection_reason'] != null)
+              _buildRejectionDetails(rider!),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildRejectionDetails(Map<String, dynamic> rider) {
+    final errors = rider['verification_errors'] as Map<String, dynamic>? ?? {};
+    if (errors.isEmpty && rider['rejection_reason'] == null) return const SizedBox.shrink();
+
+    return Container(
+      margin: const EdgeInsets.only(top: 24),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: AppTheme.primaryRed.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppTheme.primaryRed.withOpacity(0.3)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.warning_amber_rounded, color: AppTheme.primaryRed),
+              const SizedBox(width: 8),
+              Text('REJECTION DETAILS', style: GoogleFonts.outfit(color: AppTheme.primaryRed, fontWeight: FontWeight.bold, fontSize: 13, letterSpacing: 1.2)),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Text(rider['rejection_reason'] ?? 'One or more of your documents could not be verified.', style: const TextStyle(color: Colors.white, fontSize: 14)),
+          if (errors.isNotEmpty) ...[
+            const SizedBox(height: 16),
+            const Divider(color: Colors.white10),
+            const SizedBox(height: 8),
+            ...errors.entries.map((e) => Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('• ', style: TextStyle(color: AppTheme.primaryRed, fontSize: 16, fontWeight: FontWeight.bold)),
+                  Expanded(
+                    child: RichText(
+                      text: TextSpan(
+                        children: [
+                          TextSpan(text: '${e.key.replaceAll('_', ' ').toUpperCase()}: ', style: const TextStyle(color: Colors.white70, fontWeight: FontWeight.bold, fontSize: 12)),
+                          TextSpan(text: e.value.toString(), style: const TextStyle(color: Colors.white, fontSize: 12)),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            )),
+          ],
+        ],
       ),
     );
   }
@@ -225,12 +280,14 @@ class _VerificationScreenState extends ConsumerState<VerificationScreen> {
   Widget _buildDocTile(VerificationDoc doc, Map<String, dynamic>? rider) {
     final isSubmitted = _isDocSubmitted(doc.id, rider);
     final isOptional = doc.status == DocStatus.optional;
+    final errors = rider?['verification_errors'] as Map<String, dynamic>? ?? {};
+    final hasError = errors.containsKey(doc.id);
 
     return Container(
       decoration: BoxDecoration(
         color: AppTheme.surfaceColor,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppTheme.borderBlue),
+        border: Border.all(color: hasError ? AppTheme.primaryRed : AppTheme.borderBlue),
       ),
       child: ListTile(
         onTap: () => _uploadDoc(context, doc.id),
@@ -238,10 +295,10 @@ class _VerificationScreenState extends ConsumerState<VerificationScreen> {
         leading: Container(
           padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
-            color: (isSubmitted ? AppTheme.successGreen : AppTheme.primaryBlue).withOpacity(0.1),
+            color: (hasError ? AppTheme.primaryRed : (isSubmitted ? AppTheme.successGreen : AppTheme.primaryBlue)).withOpacity(0.1),
             borderRadius: BorderRadius.circular(12),
           ),
-          child: Icon(doc.icon, color: isSubmitted ? AppTheme.successGreen : AppTheme.primaryBlue),
+          child: Icon(doc.icon, color: hasError ? AppTheme.primaryRed : (isSubmitted ? AppTheme.successGreen : AppTheme.primaryBlue)),
         ),
         title: Row(
           children: [
@@ -256,16 +313,16 @@ class _VerificationScreenState extends ConsumerState<VerificationScreen> {
             ],
           ],
         ),
-        subtitle: Text(doc.description, style: TextStyle(color: AppTheme.textSecondary, fontSize: 12)),
+        subtitle: Text(hasError ? errors[doc.id].toString() : doc.description, style: TextStyle(color: hasError ? AppTheme.primaryRed.withOpacity(0.8) : AppTheme.textSecondary, fontSize: 12)),
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              isSubmitted ? 'Submitted' : (isOptional ? 'Add' : 'Required'),
-              style: TextStyle(color: isSubmitted ? AppTheme.successGreen : (isOptional ? AppTheme.textSecondary : Colors.orange), fontSize: 11, fontWeight: FontWeight.w600),
+              hasError ? 'Fix' : (isSubmitted ? 'Submitted' : (isOptional ? 'Add' : 'Required')),
+              style: TextStyle(color: hasError ? AppTheme.primaryRed : (isSubmitted ? AppTheme.successGreen : (isOptional ? AppTheme.textSecondary : Colors.orange)), fontSize: 11, fontWeight: FontWeight.w600),
             ),
             const SizedBox(width: 8),
-            Icon(Icons.chevron_right, color: AppTheme.textSecondary, size: 20),
+            Icon(Icons.chevron_right, color: hasError ? AppTheme.primaryRed : AppTheme.textSecondary, size: 20),
           ],
         ),
       ),
@@ -287,6 +344,7 @@ class _VerificationScreenState extends ConsumerState<VerificationScreen> {
       case 'passport': return 'passport_path';
       case 'passport_photo': return 'passport_photo_path';
       case 'brp': return 'brp_path';
+      case 'selfie_id': return 'selfie_id_path';
       default: return '${docId}_path';
     }
   }

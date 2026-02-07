@@ -55,4 +55,15 @@ class Delivery extends Model
     {
         return $this->hasMany(DeliveryStop::class)->orderBy('stop_order');
     }
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($delivery) {
+            if (empty($delivery->security_code)) {
+                $delivery->security_code = str_pad(rand(0, 9999), 4, '0', STR_PAD_LEFT);
+            }
+        });
+    }
 }

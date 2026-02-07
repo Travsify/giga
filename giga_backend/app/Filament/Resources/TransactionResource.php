@@ -88,6 +88,9 @@ class TransactionResource extends Resource
                     ->searchable()
                     ->copyable()
                     ->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\TextColumn::make('description')
+                    ->searchable()
+                    ->limit(30),
                 Tables\Columns\TextColumn::make('status')
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {

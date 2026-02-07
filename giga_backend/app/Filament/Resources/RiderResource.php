@@ -24,25 +24,95 @@ class RiderResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\Select::make('user_id')
-                    ->relationship('user', 'name')
-                    ->required()
-                    ->searchable(),
-                Forms\Components\Select::make('vehicle_type')
-                    ->options([
-                        'bike' => 'Bike',
-                        'van' => 'Van',
-                        'truck' => 'Truck',
-                    ])
-                    ->required(),
-                Forms\Components\Toggle::make('is_online')
-                    ->required(),
-                Forms\Components\Toggle::make('is_verified')
-                    ->required(),
-                Forms\Components\TextInput::make('current_lat')
-                    ->numeric(),
-                Forms\Components\TextInput::make('current_lng')
-                    ->numeric(),
+                Forms\Components\Tabs::make('Rider Details')
+                    ->tabs([
+                        Forms\Components\Tabs\Tab::make('Basic Information')
+                            ->schema([
+                                Forms\Components\Grid::make(2)
+                                    ->schema([
+                                        Forms\Components\Select::make('user_id')
+                                            ->relationship('user', 'name')
+                                            ->required()
+                                            ->searchable(),
+                                        Forms\Components\Select::make('logistics_company_id')
+                                            ->relationship('logisticsCompany', 'name')
+                                            ->searchable(),
+                                        Forms\Components\Select::make('vehicle_type')
+                                            ->options([
+                                                'bike' => 'Bike',
+                                                'van' => 'Van',
+                                                'truck' => 'Truck',
+                                            ])
+                                            ->required(),
+                                        Forms\Components\TextInput::make('vehicle_plate_number'),
+                                        Forms\Components\TextInput::make('license_number'),
+                                    ]),
+                                Forms\Components\Section::make('Location & Status')
+                                    ->schema([
+                                        Forms\Components\Grid::make(2)
+                                            ->schema([
+                                                Forms\Components\Toggle::make('is_online')
+                                                    ->required(),
+                                                Forms\Components\Toggle::make('vehicle_verified')
+                                                    ->label('Vehicle Verified'),
+                                                Forms\Components\TextInput::make('current_lat')
+                                                    ->numeric(),
+                                                Forms\Components\TextInput::make('current_lng')
+                                                    ->numeric(),
+                                            ]),
+                                    ])->compact(),
+                            ]),
+                        
+                        Forms\Components\Tabs\Tab::make('Verification Documents')
+                            ->schema([
+                                Forms\Components\Section::make('Automated Verification Result')
+                                    ->schema([
+                                        Forms\Components\Select::make('verification_status')
+                                            ->options([
+                                                'pending' => 'Pending',
+                                                'submitted' => 'Submitted',
+                                                'verified' => 'Verified',
+                                                'rejected' => 'Rejected',
+                                            ])
+                                            ->required()
+                                            ->native(false),
+                                        Forms\Components\Textarea::make('rejection_reason')
+                                            ->columnSpanFull(),
+                                        Forms\Components\KeyValue::make('verification_errors')
+                                            ->label('System Errors')
+                                            ->columnSpanFull(),
+                                    ])->columns(1),
+                                
+                                Forms\Components\Grid::make(2)
+                                    ->schema([
+                                        Forms\Components\FileUpload::make('driver_license_path')
+                                            ->label('Driver License')
+                                            ->image()
+                                            ->directory('riders/documents'),
+                                        Forms\Components\FileUpload::make('vehicle_license_path')
+                                            ->label('Vehicle License')
+                                            ->image()
+                                            ->directory('riders/documents'),
+                                        Forms\Components\FileUpload::make('passport_photo_path')
+                                            ->label('Passport Photo')
+                                            ->image()
+                                            ->directory('riders/documents'),
+                                        Forms\Components\FileUpload::make('selfie_id_path')
+                                            ->label('Verification Selfie')
+                                            ->image()
+                                            ->previewable(true)
+                                            ->directory('riders/documents'),
+                                        Forms\Components\FileUpload::make('nin_path')
+                                            ->label('NIN Slip')
+                                            ->image()
+                                            ->directory('riders/documents'),
+                                        Forms\Components\FileUpload::make('intl_passport_path')
+                                            ->label('International Passport')
+                                            ->image()
+                                            ->directory('riders/documents'),
+                                    ]),
+                            ]),
+                    ])->columnSpanFull(),
             ]);
     }
 
@@ -51,22 +121,69 @@ class RiderResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('user.name')
+                    ->label('Rider Name')
+                    ->description(fn (Rider $record): string => $record->user->email ?? '')
                     ->searchable(),
+                Tables\Columns\TextColumn::make('verification_status')
+                    ->badge()
+                    ->color(fn (string $state): string => match ($state) {
+                        'verified' => 'success',
+                        'submitted' => 'warning',
+                        'rejected' => 'danger',
+                        default => 'gray',
+                    })
+                    ->formatStateUsing(fn (string $state): string => ucfirst($state)),
                 Tables\Columns\TextColumn::make('vehicle_type')
-                    ->sortable(),
+                    ->icon(fn (string $state): string => match ($state) {
+                        'bike' => 'heroicon-m-sparkles',
+                        'van' => 'heroicon-m-truck',
+                        'truck' => 'heroicon-m-shield-check',
+                        default => 'heroicon-m-user',
+                    }),
                 Tables\Columns\IconColumn::make('is_online')
+                    ->label('Online')
                     ->boolean(),
-                Tables\Columns\IconColumn::make('is_verified')
-                    ->boolean(),
-                Tables\Columns\TextColumn::make('current_lat'),
-                Tables\Columns\TextColumn::make('current_lng'),
+                Tables\Columns\TextColumn::make('logisticsCompany.name')
+                    ->label('Company')
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('created_at')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
+                Tables\Filters\SelectFilter::make('verification_status')
+                    ->options([
+                        'pending' => 'Pending',
+                        'submitted' => 'Submitted',
+                        'verified' => 'Verified',
+                        'rejected' => 'Rejected',
+                    ]),
                 Tables\Filters\TernaryFilter::make('is_online'),
-                Tables\Filters\TernaryFilter::make('is_verified'),
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\ActionGroup::make([
+                    Tables\Actions\ViewAction::make(),
+                    Tables\Actions\EditAction::make(),
+                    Tables\Actions\Action::make('verify')
+                        ->label('Approve Rider')
+                        ->icon('heroicon-m-check-badge')
+                        ->color('success')
+                        ->action(fn (Rider $record) => $record->update(['verification_status' => 'verified', 'vehicle_verified' => true])),
+                    Tables\Actions\Action::make('reject')
+                        ->label('Reject Rider')
+                        ->icon('heroicon-m-x-circle')
+                        ->color('danger')
+                        ->form([
+                            Forms\Components\Textarea::make('reason')
+                                ->required()
+                                ->label('Rejection Reason'),
+                        ])
+                        ->action(fn (Rider $record, array $data) => $record->update([
+                            'verification_status' => 'rejected',
+                            'rejection_reason' => $data['reason']
+                        ])),
+                ]),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

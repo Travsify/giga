@@ -20,19 +20,21 @@ class FlutterwaveBillService
      */
     public function getBillCategories()
     {
-        try {
-            $response = Http::withToken($this->secretKey)
-                ->get("{$this->baseUrl}/bill-categories");
+        return \Illuminate\Support\Facades\Cache::remember('flw_bill_categories', 3600, function () {
+            try {
+                $response = Http::withToken($this->secretKey)
+                    ->get("{$this->baseUrl}/bill-categories");
 
-            if ($response->successful()) {
-                return $response->json('data');
+                if ($response->successful()) {
+                    return $response->json('data');
+                }
+
+                return [];
+            } catch (\Exception $e) {
+                Log::error('Flutterwave GetBillCategories Error: ' . $e->getMessage());
+                return [];
             }
-
-            return [];
-        } catch (\Exception $e) {
-            Log::error('Flutterwave GetBillCategories Error: ' . $e->getMessage());
-            return [];
-        }
+        });
     }
 
     /**
@@ -54,6 +56,7 @@ class FlutterwaveBillService
                 ];
             }
 
+            Log::warning('Flutterwave Bill Validation Failed: ' . $response->body());
             return [
                 'success' => false,
                 'message' => $response->json('message') ?? 'Validation failed',
@@ -86,21 +89,21 @@ class FlutterwaveBillService
             $response = Http::withToken($this->secretKey)
                 ->post("{$this->baseUrl}/bills", $payload);
 
-            Log::info('Flutterwave PayBill Response: ' . $response->body());
-
             if ($response->successful() && $response->json('status') === 'success') {
+                Log::info('Flutterwave Bill Payment Success: ' . $data['reference']);
                 return [
                     'success' => true,
                     'data' => $response->json('data'),
                 ];
             }
 
+            Log::error('Flutterwave Bill Payment Failed: ' . $response->body());
             return [
                 'success' => false,
                 'message' => $response->json('message') ?? 'Payment failed',
             ];
         } catch (\Exception $e) {
-            Log::error('Flutterwave PayBill Error: ' . $e->getMessage());
+            Log::error('Flutterwave PayBill Exception: ' . $e->getMessage());
             return [
                 'success' => false,
                 'message' => 'An unexpected error occurred during bill payment',

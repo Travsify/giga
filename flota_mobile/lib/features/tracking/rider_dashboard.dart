@@ -252,7 +252,25 @@ class _RiderHomeTabState extends ConsumerState<_RiderHomeTab> {
             child: _ControlCenterHeader(
               isOnline: state.isOnline,
               stats: stats,
-              onToggleStatus: (val) => controller.toggleOnlineStatus(val),
+              onToggleStatus: (val) {
+                controller.toggleOnlineStatus(val);
+                if (state.error == "VERIFICATION_REQUIRED") {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: const Text("Trust & Verification required to go online"),
+                      backgroundColor: AppTheme.primaryRed,
+                      action: SnackBarAction(
+                        label: "VERIFY",
+                        textColor: Colors.white,
+                        onPressed: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const VerificationScreen()),
+                        ),
+                      ),
+                    ),
+                  );
+                }
+              },
             ),
           ),
 
@@ -301,7 +319,25 @@ class _RiderHomeTabState extends ConsumerState<_RiderHomeTab> {
             child: Center(
               child: _StatusPill(
                 isOnline: state.isOnline,
-                onToggle: () => controller.toggleOnlineStatus(!state.isOnline),
+                onToggle: () {
+                  controller.toggleOnlineStatus(!state.isOnline);
+                  if (state.error == "VERIFICATION_REQUIRED") {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: const Text("Trust & Verification required to go online"),
+                        backgroundColor: AppTheme.primaryRed,
+                        action: SnackBarAction(
+                          label: "VERIFY",
+                          textColor: Colors.white,
+                          onPressed: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => const VerificationScreen()),
+                          ),
+                        ),
+                      ),
+                    );
+                  }
+                },
               ),
             ),
           ),

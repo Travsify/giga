@@ -19,17 +19,22 @@ class BillPaymentService {
         '/bills/categories',
         options: Options(headers: {'Authorization': 'Bearer $token'}),
       );
-      return response.data['data'];
+      if (response.data['data'] != null) {
+        return response.data['data'];
+      }
+      return [];
+    } on DioException catch (e) {
+      debugPrint('GetCategories Error: ${e.response?.data}');
+      throw e.response?.data['message'] ?? 'Failed to load bill categories';
     } catch (e) {
-      debugPrint('GetCategories Error: $e');
-      throw 'Failed to load bill categories';
+      debugPrint('GetCategories unexpected error: $e');
+      throw 'An unexpected error occurred';
     }
   }
 
   static Future<Map<String, dynamic>> validateCustomer(String itemCode, String code, String customer) async {
     try {
       final token = await _storage.read(key: 'auth_token');
-      debugPrint('Validating Bill: itemCode=$itemCode, code=$code, customer=$customer');
       final response = await _dio.post(
         '/bills/validate',
         data: {
@@ -42,10 +47,10 @@ class BillPaymentService {
       return response.data['data'];
     } on DioException catch (e) {
       debugPrint('Validation Error: ${e.response?.data}');
-      if (e.response != null) {
-        throw e.response!.data['message'] ?? 'Validation failed';
-      }
-      throw 'Network error during validation';
+      throw e.response?.data['message'] ?? 'Validation failed';
+    } catch (e) {
+      debugPrint('Validation unexpected error: $e');
+      throw 'An unexpected error occurred during validation';
     }
   }
 
@@ -72,10 +77,10 @@ class BillPaymentService {
       return response.data;
     } on DioException catch (e) {
       debugPrint('PayBill Error: ${e.response?.data}');
-      if (e.response != null) {
-        throw e.response!.data['error'] ?? 'Payment failed';
-      }
-      throw 'Network error during payment';
+      throw e.response?.data['error'] ?? e.response?.data['message'] ?? 'Payment failed';
+    } catch (e) {
+      debugPrint('PayBill unexpected error: $e');
+      throw 'An unexpected error occurred during payment';
     }
   }
 }

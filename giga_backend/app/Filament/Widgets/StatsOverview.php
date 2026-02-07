@@ -34,8 +34,14 @@ class StatsOverview extends BaseWidget
         // Active deliveries
         $activeDeliveries = Delivery::whereNotIn('status', ['delivered', 'cancelled'])->count();
         
-        // Pending Incidents
-        $pendingIncidents = \App\Models\Incident::where('status', 'pending')->count();
+        // Pending Verifications
+        $pendingVerifications = \App\Models\Rider::where('verification_status', 'submitted')->count();
+
+        // Bill Payments Today
+        $billPaymentsVolume = \App\Models\Transaction::where('status', 'completed')
+            ->where('category', 'bill_payment')
+            ->whereDate('created_at', today())
+            ->sum('amount');
 
         return [
             Stat::make("Today's Revenue", '£' . number_format($todayRevenue, 2))
@@ -44,15 +50,20 @@ class StatsOverview extends BaseWidget
                 ->color($revenueTrend >= 0 ? 'primary' : 'danger')
                 ->chart([$yesterdayRevenue, $todayRevenue]),
                 
+            Stat::make('Bill Payments', '£' . number_format($billPaymentsVolume, 2))
+                ->description('Total volume today')
+                ->descriptionIcon('heroicon-m-banknotes')
+                ->color('success'),
+
+            Stat::make('Pending Verifications', $pendingVerifications)
+                ->description($pendingVerifications > 0 ? 'Riders awaiting review' : 'All up to date')
+                ->descriptionIcon('heroicon-m-user-plus')
+                ->color($pendingVerifications > 0 ? 'warning' : 'success'),
+
             Stat::make('Active Deliveries', $activeDeliveries)
-                ->description('Orders currently in progress')
-                ->color('success')
+                ->description('Orders in progress')
+                ->color('primary')
                 ->descriptionIcon('heroicon-m-truck'),
-                
-            Stat::make('Safety Incidents', $pendingIncidents)
-                ->description($pendingIncidents > 0 ? 'Requires urgent attention' : 'All clear')
-                ->descriptionIcon('heroicon-m-shield-exclamation')
-                ->color($pendingIncidents > 0 ? 'danger' : 'success'),
         ];
     }
 }

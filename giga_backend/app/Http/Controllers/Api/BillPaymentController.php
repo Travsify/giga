@@ -111,7 +111,12 @@ class BillPaymentController extends Controller
                     'reference' => $reference,
                     'status' => 'completed',
                     'currency' => $wallet->currency,
-                    'category' => 'bill_payment'
+                    'category' => 'bill_payment',
+                    'meta' => [
+                        'customer' => $request->customer,
+                        'biller_type' => $request->type,
+                        'flw_ref' => $result['data']['tx_ref'] ?? null,
+                    ]
                 ]);
 
                 // Send Notification

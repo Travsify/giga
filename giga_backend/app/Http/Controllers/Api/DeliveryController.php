@@ -278,6 +278,16 @@ class DeliveryController extends Controller
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
+        // Security Code validation for 'delivered' status
+        if ($request->status === 'delivered') {
+            if (!$request->has('security_code')) {
+                return response()->json(['error' => 'Security code is required to complete delivery'], 422);
+            }
+            if ($request->security_code !== $delivery->security_code) {
+                return response()->json(['error' => 'Incorrect security code'], 422);
+            }
+        }
+
         $delivery->status = $request->status;
 
         if ($request->has('contactless_delivery')) {

@@ -79,6 +79,11 @@ class RiderDashboardController extends StateNotifier<RiderDashboardState> {
   }
 
   Future<void> toggleOnlineStatus(bool value) async {
+    if (value && state.stats?.isVerified != true) {
+      state = state.copyWith(error: "VERIFICATION_REQUIRED");
+      return;
+    }
+
     // Optimistic update
     final previousStatus = state.isOnline;
     state = state.copyWith(isOnline: value);

@@ -5,6 +5,7 @@ import 'package:flota_mobile/theme/app_theme.dart';
 import 'package:flota_mobile/core/api_client.dart';
 import 'package:flota_mobile/features/auth/auth_provider.dart';
 import 'package:flota_mobile/features/shared/widgets/service_mode_toggle.dart';
+import 'package:flota_mobile/features/tracking/chat_screen.dart';
 
 // 1. DATA MODELS & PROVIDERS
 
@@ -24,6 +25,8 @@ class RiderJob {
   final Map<String, dynamic>? payoutBreakdown;
   final Map<String, dynamic>? customer;
   final List<dynamic>? stops;
+  final String? securityCode;
+  final bool contactlessDelivery;
 
   RiderJob({
     required this.id,
@@ -38,6 +41,8 @@ class RiderJob {
     this.payoutBreakdown,
     this.customer,
     this.stops,
+    this.securityCode,
+    this.contactlessDelivery = false,
   });
 
   bool get isErrand => parcelType.toLowerCase() == 'errand';
@@ -56,6 +61,8 @@ class RiderJob {
       payoutBreakdown: json['payout_breakdown'],
       customer: json['customer'],
       stops: json['stops'],
+      securityCode: json['security_code']?.toString(),
+      contactlessDelivery: json['contactless_delivery'] == 1 || json['contactless_delivery'] == true,
     );
   }
 }
@@ -338,10 +345,22 @@ class _RiderJobsScreenState extends ConsumerState<RiderJobsScreen> with SingleTi
   }
 
   Future<void> _updateJobStatus(String jobId, String status) async {
+    // If status is delivered, we need to ask for security code
+    String? securityCode;
+    if (status == 'delivered') {
+      securityCode = await _showSecurityCodeDialog();
+      if (securityCode == null) return; // User cancelled
+    }
+
     final api = ref.read(apiClientProvider);
     final scaffoldMessenger = ScaffoldMessenger.of(context);
     try {
-      final response = await api.dio.patch('deliveries/$jobId/status', data: {'status': status});
+      final data = {'status': status};
+      if (securityCode != null) {
+        data['security_code'] = securityCode;
+      }
+      
+      final response = await api.dio.patch('deliveries/$jobId/status', data: data);
       if (response.data['status'] == 'success') {
         scaffoldMessenger.showSnackBar(
           SnackBar(content: Text('Status updated to ${status.replaceAll('_', ' ')}')),
@@ -354,10 +373,61 @@ class _RiderJobsScreenState extends ConsumerState<RiderJobsScreen> with SingleTi
         ref.invalidate(riderActiveJobProvider);
       }
     } catch (e) {
+      String errorMessage = e.toString();
+      if (e is DioException && e.response?.data['error'] != null) {
+        errorMessage = e.response?.data['error'];
+      }
       scaffoldMessenger.showSnackBar(
-        SnackBar(content: Text('Error: ${e.toString()}')),
+        SnackBar(content: Text('Error: $errorMessage')),
       );
     }
+  }
+
+  Future<String?> _showSecurityCodeDialog() async {
+    final TextEditingController codeController = TextEditingController();
+    return showDialog<String>(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        backgroundColor: AppTheme.surfaceColor,
+        title: Text('Verification Required', style: GoogleFonts.outfit(color: Colors.white)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('Enter the 4-digit security code from the customer to complete this delivery.', 
+              style: TextStyle(color: Colors.white70)),
+            const SizedBox(height: 20),
+            TextField(
+              controller: codeController,
+              keyboardType: TextInputType.number,
+              maxLength: 4,
+              style: const TextStyle(color: Colors.white, fontSize: 24, letterSpacing: 10),
+              textAlign: TextAlign.center,
+              decoration: InputDecoration(
+                counterText: '',
+                enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: AppTheme.borderBlue)),
+                focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: AppTheme.primaryBlue)),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('CANCEL', style: TextStyle(color: Colors.grey)),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              if (codeController.text.length == 4) {
+                Navigator.pop(context, codeController.text);
+              }
+            },
+            style: ElevatedButton.styleFrom(backgroundColor: AppTheme.primaryBlue),
+            child: const Text('VERIFY & COMPLETE'),
+          ),
+        ],
+      ),
+    );
   }
 
   void _navigateToMap(RiderJob job) {
@@ -566,6 +636,28 @@ class _ActiveJobCard extends StatelessWidget {
                       job.status == 'picked_up' ? 'Parcel Securely Loaded' : 'In Transit to Destination',
                       style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
                     ),
+                    if (job.contactlessDelivery) ...[
+                      const SizedBox(height: 4),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: Colors.amber.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(4),
+                          border: Border.all(color: Colors.amber.withOpacity(0.5)),
+                        ),
+                        child: const Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.do_not_touch, size: 12, color: Colors.amber),
+                            SizedBox(width: 4),
+                            Text(
+                              'CONTACTLESS REQUESTED',
+                              style: TextStyle(color: Colors.amber, fontSize: 9, fontWeight: FontWeight.bold),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ],
                 ),
               ),
@@ -578,7 +670,14 @@ class _ActiveJobCard extends StatelessWidget {
             children: [
               Expanded(
                 child: OutlinedButton.icon(
-                  onPressed: () {}, // Chat logic in next phase
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ChatScreen(deliveryId: job.id),
+                      ),
+                    );
+                  },
                   icon: const Icon(Icons.chat_bubble_outline, size: 18),
                   label: const Text('CHAT'),
                   style: OutlinedButton.styleFrom(

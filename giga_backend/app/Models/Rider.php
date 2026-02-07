@@ -33,6 +33,9 @@ class Rider extends Model
         'dvla_license_path',
         'brp_path',
         'identity_doc_type',
+        'selfie_id_path',
+        'rejection_reason',
+        'verification_errors',
     ];
 
     protected $casts = [
@@ -40,7 +43,8 @@ class Rider extends Model
         'current_lat' => 'double',
         'current_lng' => 'double',
         'has_vehicle' => 'boolean',
-        'vehicle_verified' => 'boolean'
+        'vehicle_verified' => 'boolean',
+        'verification_errors' => 'array',
     ];
 
     public function user()

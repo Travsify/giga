@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -16,27 +17,61 @@ class ChatScreen extends ConsumerStatefulWidget {
 
 class _ChatScreenState extends ConsumerState<ChatScreen> {
   final TextEditingController _controller = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
   final List<Map<String, dynamic>> _messages = [];
   bool _isLoading = true;
+  Timer? _pollingTimer;
 
   @override
   void initState() {
     super.initState();
     _fetchMessages();
+    _startPolling();
   }
 
-  Future<void> _fetchMessages() async {
+  @override
+  void dispose() {
+    _pollingTimer?.cancel();
+    _controller.dispose();
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _startPolling() {
+    _pollingTimer = Timer.periodic(const Duration(seconds: 5), (_) => _fetchMessages(isPolling: true));
+  }
+
+  Future<void> _fetchMessages({bool isPolling = false}) async {
     try {
       final dio = ref.read(apiClientProvider).dio;
       final response = await dio.get('/deliveries/${widget.deliveryId}/messages');
-      setState(() {
-        _messages.clear();
-        _messages.addAll(List<Map<String, dynamic>>.from(response.data));
-        _isLoading = false;
-      });
+      final newMessages = List<Map<String, dynamic>>.from(response.data);
+      
+      if (newMessages.length != _messages.length) {
+        setState(() {
+          _messages.clear();
+          _messages.addAll(newMessages);
+          _isLoading = false;
+        });
+        _scrollToBottom();
+      } else {
+        if (!isPolling) setState(() => _isLoading = false);
+      }
     } catch (e) {
-      setState(() => _isLoading = false);
+      if (!isPolling) setState(() => _isLoading = false);
     }
+  }
+
+  void _scrollToBottom() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_scrollController.hasClients) {
+        _scrollController.animateTo(
+          _scrollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
+      }
+    });
   }
 
   Future<void> _sendMessage() async {
@@ -55,6 +90,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       setState(() {
         _messages.add(Map<String, dynamic>.from(response.data));
       });
+      _scrollToBottom();
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Failed to send message: $e')),
@@ -67,7 +103,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     final authState = ref.watch(authProvider);
     return Scaffold(
       appBar: AppBar(
-        title: Text('Chat with Rider', style: GoogleFonts.outfit()),
+        title: Text('Chat', style: GoogleFonts.outfit()),
         backgroundColor: AppTheme.primaryBlue,
       ),
       body: Column(
@@ -76,6 +112,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
             child: _isLoading 
               ? const Center(child: CircularProgressIndicator())
               : ListView.builder(
+                  controller: _scrollController,
                   padding: const EdgeInsets.all(16),
                   itemCount: _messages.length,
                   itemBuilder: (context, index) {
@@ -109,6 +146,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                 Expanded(
                   child: TextField(
                     controller: _controller,
+                    onSubmitted: (_) => _sendMessage(),
                     decoration: InputDecoration(
                       hintText: 'Type a message...',
                       border: OutlineInputBorder(

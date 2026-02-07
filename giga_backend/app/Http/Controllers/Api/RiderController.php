@@ -81,12 +81,12 @@ class RiderController extends Controller
             $hasVehicle = false;
             $isVerified = false;
             try {
-                $hasVehicle = (bool)($rider->has_vehicle ?? !empty($rider->vehicle_plate_number));
-                $isVerified = (bool)($rider->vehicle_verified ?? !empty($rider->license_number));
+                $hasVehicle = (bool)($rider->has_vehicle || $rider->vehicle_plate_number);
+                // Strict verification: Admin must have marked as verified AND they must have a license
+                $isVerified = $rider->verification_status === 'verified';
             } catch (\Exception $e) {
-                // Fallback if columns don't exist
-                $hasVehicle = !empty($rider->vehicle_plate_number);
-                $isVerified = !empty($rider->license_number);
+                // Fallback
+                $isVerified = false;
             }
 
             return response()->json([

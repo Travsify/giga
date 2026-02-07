@@ -35,4 +35,9 @@ return [
         ],
     ],
 
+    'prembly' => [
+        'key' => env('PREMBLY_API_KEY', 'live_sk_2a238fff60994964b3f8d9a5a6178d23'),
+        'base_url' => env('PREMBLY_BASE_URL', 'https://api.prembly.com'),
+    ],
+
 ];

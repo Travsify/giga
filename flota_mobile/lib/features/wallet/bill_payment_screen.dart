@@ -21,60 +21,28 @@ class _BillPaymentScreenState extends ConsumerState<BillPaymentScreen> {
 
   final Map<String, List<Map<String, dynamic>>> _sections = {
     'Airtime & Data': [
-      {'id': 'AIRTIME', 'name': 'MTN Airtime', 'icon': Icons.phone_android, 'badge': 'HOT'},
-      {'id': 'DATA_BUNDLE', 'name': 'MTN Data', 'icon': Icons.wifi, 'badge': null},
-      {'id': 'AIRTIME', 'name': 'Airtel Airtime', 'icon': Icons.phone_android, 'badge': null},
-      {'id': 'DATA_BUNDLE', 'name': 'Airtel Data', 'icon': Icons.wifi, 'badge': null},
-      {'id': 'AIRTIME', 'name': 'Glo Airtime', 'icon': Icons.phone_android, 'badge': null},
-      {'id': 'DATA_BUNDLE', 'name': 'Glo Data', 'icon': Icons.wifi, 'badge': null},
-      {'id': 'AIRTIME', 'name': '9Mobile Airtime', 'icon': Icons.phone_android, 'badge': null},
-      {'id': 'DATA_BUNDLE', 'name': '9Mobile Data', 'icon': Icons.wifi, 'badge': null},
+      {'id': 'AIRTIME', 'name': 'Airtime', 'icon': Icons.phone_android, 'badge': 'HOT'},
+      {'id': 'DATA_BUNDLE', 'name': 'Mobile Data', 'icon': Icons.wifi, 'badge': null},
     ],
-    'Cable TV': [
-      {'id': 'CABLE_PAY', 'name': 'DSTV', 'icon': Icons.tv, 'badge': null},
-      {'id': 'CABLE_PAY', 'name': 'GOTV', 'icon': Icons.tv, 'badge': null},
-      {'id': 'CABLE_PAY', 'name': 'StarTimes', 'icon': Icons.tv, 'badge': null},
+    'Entertainment': [
+      {'id': 'CABLE_PAY', 'name': 'Cable TV', 'icon': Icons.tv, 'badge': null},
       {'id': 'SHOWMAX', 'name': 'Showmax', 'icon': Icons.live_tv, 'badge': 'NEW'},
+      {'id': 'BETTING', 'name': 'Sport Betting', 'icon': Icons.sports_soccer_outlined, 'badge': 'HOT'},
     ],
-    'Electricity': [
-      {'id': 'UTILITY_BILL', 'name': 'Ikeja Electric', 'icon': Icons.lightbulb_outline, 'badge': 'HOT'},
-      {'id': 'UTILITY_BILL', 'name': 'Eko Electric', 'icon': Icons.lightbulb_outline, 'badge': null},
-      {'id': 'UTILITY_BILL', 'name': 'Abuja Electric', 'icon': Icons.lightbulb_outline, 'badge': null},
+    'Utilities': [
+      {'id': 'UTILITY_BILL', 'name': 'Electricity', 'icon': Icons.lightbulb_outline, 'badge': 'HOT'},
       {'id': 'SOLAR', 'name': 'Solar Energy', 'icon': Icons.wb_sunny_outlined, 'badge': null},
     ],
-    'Internet Services': [
-      {'id': 'INTERNET_SERVICE', 'name': 'Smile', 'icon': Icons.language, 'badge': null},
-      {'id': 'INTERNET_SERVICE', 'name': 'Spectranet', 'icon': Icons.language, 'badge': null},
-      {'id': 'INTERNET_SERVICE', 'name': 'Swift', 'icon': Icons.language, 'badge': null},
-      {'id': 'INTERNET_SERVICE', 'name': 'ipNX', 'icon': Icons.language, 'badge': null},
-    ],
-    'E-commerce & Lifestyle': [
-      {'id': 'CHOWDECK', 'name': 'Chowdeck', 'icon': Icons.delivery_dining_outlined, 'badge': 'HOT'},
-      {'id': 'ALIEXPRESS', 'name': 'AliExpress', 'icon': Icons.shopping_cart_outlined, 'badge': 'NEW'},
-      {'id': 'ORAIMO', 'name': 'oraimo', 'icon': Icons.shopping_bag_outlined, 'badge': null},
+    'Internet & More': [
+      {'id': 'INTERNET_SERVICE', 'name': 'Home Internet', 'icon': Icons.language, 'badge': null},
       {'id': 'GIFT_CARDS', 'name': 'Gift Cards', 'icon': Icons.card_giftcard, 'badge': null},
     ],
-    'Financial Services': [
-      {'id': 'ACCOUNT_VERIFICATION', 'name': 'Insurance', 'icon': Icons.verified_user_outlined, 'badge': null},
-      {'id': 'PENSION', 'name': 'Pension', 'icon': Icons.account_balance_wallet_outlined, 'badge': null},
-      {'id': 'WALLET', 'name': 'Wallet Funding', 'icon': Icons.add_card, 'badge': null},
-    ],
-    'Education & Exams': [
-      {'id': 'SCHOOL_FEES', 'name': 'WAEC', 'icon': Icons.school_outlined, 'badge': null},
-      {'id': 'SCHOOL_FEES', 'name': 'JAMB', 'icon': Icons.school_outlined, 'badge': null},
-    ],
-    'Government & Taxes': [
+    'Financials & Tax': [
       {'id': 'TAX_PAYMENT', 'name': 'LIRS Taxes', 'icon': Icons.receipt_long_outlined, 'badge': null},
       {'id': 'GOVERNMENT_PAYMENT', 'name': 'Govt Payment', 'icon': Icons.account_balance_outlined, 'badge': null},
+      {'id': 'SCHOOL_FEES', 'name': 'Edu & Exams', 'icon': Icons.school_outlined, 'badge': null},
     ],
-    'Religious & NGOs': [
-      {'id': 'RELIGIOUS_INSTITUTIONS', 'name': 'Tithe/Offerings', 'icon': Icons.church_outlined, 'badge': null},
-      {'id': 'NGO', 'name': 'Donations', 'icon': Icons.volunteer_activism_outlined, 'badge': null},
-    ],
-    'Events & Betting': [
-      {'id': 'BETTING', 'name': 'SportyBet', 'icon': Icons.sports_soccer_outlined, 'badge': null},
-      {'id': 'BETTING', 'name': 'Bet9ja', 'icon': Icons.sports_soccer_outlined, 'badge': null},
-    ],
+  };
   };
 
   @override
@@ -149,18 +117,19 @@ class _BillPaymentScreenState extends ConsumerState<BillPaymentScreen> {
     if (biller['is_airtime'] == true) return 'AIRTIME';
     
     final String itemCode = (biller['item_code'] ?? '').toString().toUpperCase();
+    final String billerName = (biller['biller_name'] ?? '').toString().toUpperCase();
     
-    if (itemCode.startsWith('MD')) return 'DATA_BUNDLE';
-    if (itemCode.startsWith('CB')) return 'CABLE_PAY';
-    if (itemCode.startsWith('UB')) return 'UTILITY_BILL';
-    if (itemCode.startsWith('IS')) return 'INTERNET_SERVICE';
-    if (itemCode.startsWith('SP')) return 'SCHOOL_FEES';
-    if (itemCode.startsWith('RI')) return 'RELIGIOUS_INSTITUTIONS';
-    if (itemCode.startsWith('BT')) return 'BETTING';
-    if (itemCode.startsWith('TP') || itemCode.startsWith('TX')) return 'TAX_PAYMENT';
-    if (itemCode.startsWith('OT')) return 'GOVERNMENT_PAYMENT';
-    if (itemCode.startsWith('TL')) return 'LOGISTICS';
-    if (itemCode.startsWith('DP')) return 'DEALERS';
+    if (itemCode.startsWith('MD') || billerName.contains('DATA')) return 'DATA_BUNDLE';
+    if (itemCode.startsWith('CB') || billerName.contains('CABLE') || billerName.contains('DSTV') || billerName.contains('GOTV')) return 'CABLE_PAY';
+    if (itemCode.startsWith('UB') || billerName.contains('ELECTRIC') || billerName.contains('POWER')) return 'UTILITY_BILL';
+    if (itemCode.startsWith('IS') || billerName.contains('INTERNET') || billerName.contains('SMILE') || billerName.contains('SPECTRANET')) return 'INTERNET_SERVICE';
+    if (itemCode.startsWith('SP') || billerName.contains('SCHOOL') || billerName.contains('EXAM') || billerName.contains('JAMB') || billerName.contains('WAEC')) return 'SCHOOL_FEES';
+    if (itemCode.startsWith('RI') || billerName.contains('RELIGIOUS') || billerName.contains('CHURCH') || billerName.contains('MOSQUE')) return 'RELIGIOUS_INSTITUTIONS';
+    if (itemCode.startsWith('BT') || billerName.contains('BETTING') || billerName.contains('BET9JA') || billerName.contains('SPORTYBET')) return 'BETTING';
+    if (itemCode.startsWith('TP') || itemCode.startsWith('TX') || billerName.contains('TAX')) return 'TAX_PAYMENT';
+    if (itemCode.startsWith('OT') || billerName.contains('GOVERNMENT') || billerName.contains('PHCN')) return 'GOVERNMENT_PAYMENT';
+    if (itemCode.startsWith('TL') || billerName.contains('LOGISTICS')) return 'LOGISTICS';
+    if (itemCode.startsWith('DP') || billerName.contains('DEALER')) return 'DEALERS';
     
     return null;
   }
@@ -544,9 +513,14 @@ class _BillPaymentSheetState extends ConsumerState<_BillPaymentSheet> {
             TextField(
               controller: _customerController,
               style: const TextStyle(color: Colors.white),
+              onChanged: (v) {
+                if (v.length > 5 && (isAirtime || isData)) {
+                   // Auto-validate or similar? Maybe just leave manual
+                }
+              },
               decoration: InputDecoration(
-                labelText: widget.biller['label_name'] ?? 'Beneficiary ID',
-                hintText: isAirtime || isData ? 'Phone Number' : 'Meter/Smartcard Number',
+                labelText: _getLabelForBiller(),
+                hintText: _getHintForBiller(),
                 labelStyle: const TextStyle(color: Colors.grey),
                 filled: true,
                 fillColor: AppTheme.surfaceColor,
@@ -633,12 +607,33 @@ class _BillPaymentSheetState extends ConsumerState<_BillPaymentSheet> {
     );
   }
 
+  String _getLabelForBiller() {
+    final type = widget.biller['biller_name'].toString().toUpperCase();
+    if (type.contains('AIRTIME') || type.contains('DATA')) return 'Phone Number';
+    if (type.contains('CABLE') || type.contains('DSTV') || type.contains('GOTV')) return 'Smartcard Number';
+    if (type.contains('UTILITY') || type.contains('ELECTRIC') || type.contains('POWER')) return 'Meter Number';
+    if (type.contains('BETTING')) return 'User/Account ID';
+    if (type.contains('INTERNET')) return 'Account ID';
+    return widget.biller['label_name'] ?? 'Beneficiary ID';
+  }
+
+  String _getHintForBiller() {
+    final type = widget.biller['biller_name'].toString().toUpperCase();
+    if (type.contains('AIRTIME') || type.contains('DATA')) return 'e.g. 08012345678';
+    if (type.contains('CABLE')) return 'e.g. 1234567890';
+    if (type.contains('UTILITY')) return 'e.g. 010123456789';
+    return 'Enter ID here';
+  }
+
   IconData _getIconForSheet(String? billerType) {
     if (billerType == null) return Icons.payment;
     final type = billerType.toUpperCase();
     if (type.contains('AIRTIME')) return Icons.phone_android;
     if (type.contains('DATA')) return Icons.wifi;
     if (type.contains('CABLE')) return Icons.tv;
+    if (type.contains('UTILITY') || type.contains('ELECTRIC')) return Icons.lightbulb_outline;
+    if (type.contains('BETTING')) return Icons.sports_soccer_outlined;
+    if (type.contains('INTERNET')) return Icons.language;
     return Icons.payment;
   }
 }

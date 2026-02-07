@@ -56,6 +56,13 @@ class VerificationRequirements {
         icon: Icons.photo_camera_outlined,
         status: DocStatus.required,
       ),
+      VerificationDoc(
+        id: 'selfie_id',
+        label: 'Selfie with ID',
+        description: 'Photo of you holding your ID card next to your face',
+        icon: Icons.face_retouching_natural_outlined,
+        status: DocStatus.required,
+      ),
     ],
     'UK': [
       VerificationDoc(
@@ -77,6 +84,13 @@ class VerificationRequirements {
         label: 'Passport Photo',
         description: 'Clear headshot photo for your profile',
         icon: Icons.photo_camera_outlined,
+        status: DocStatus.required,
+      ),
+      VerificationDoc(
+        id: 'selfie_id',
+        label: 'Selfie with ID',
+        description: 'Photo of you holding your ID card next to your face',
+        icon: Icons.face_retouching_natural_outlined,
         status: DocStatus.required,
       ),
       VerificationDoc(

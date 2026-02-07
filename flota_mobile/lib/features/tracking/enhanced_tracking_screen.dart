@@ -313,6 +313,65 @@ class _EnhancedTrackingScreenState extends ConsumerState<EnhancedTrackingScreen>
 
                       // Delivery Status
                       _DeliveryStatusCard(status: status),
+
+                      const SizedBox(height: 20),
+
+                      // Security Code for Verification
+                      if (status != 'delivered' && status != 'cancelled')
+                        Container(
+                          padding: const EdgeInsets.all(20),
+                          decoration: BoxDecoration(
+                            color: AppTheme.primaryBlue.withOpacity(0.05),
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(color: AppTheme.primaryBlue.withOpacity(0.2)),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  const Icon(Icons.shield_outlined, color: AppTheme.primaryBlue, size: 20),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    'Delivery Verification Code',
+                                    style: GoogleFonts.outfit(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                                  const Spacer(),
+                                  Tooltip(
+                                    message: 'Give this code to the rider when they arrive to securely complete your delivery.',
+                                    child: Icon(Icons.info_outline, color: Colors.grey[400], size: 18),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 12),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    data['security_code']?.toString() ?? '....',
+                                    style: GoogleFonts.outfit(
+                                      fontSize: 32,
+                                      fontWeight: FontWeight.w900,
+                                      letterSpacing: 8,
+                                      color: AppTheme.primaryBlue,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 8),
+                              const Center(
+                                child: Text(
+                                  'Share this code ONLY with your rider at the point of delivery',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(fontSize: 11, color: Colors.grey),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                     ],
                   ),
                 ),
