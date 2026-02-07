@@ -19,7 +19,7 @@ class CountryResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-globe-alt';
 
-    protected static ?string $navigationGroup = 'Operations';
+    protected static ?string $navigationGroup = 'Management';
 
     protected static ?string $navigationLabel = 'Countries & Pricing';
 

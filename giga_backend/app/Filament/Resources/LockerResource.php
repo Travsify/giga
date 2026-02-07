@@ -14,9 +14,9 @@ class LockerResource extends Resource
 {
     protected static ?string $model = Locker::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-archive-box';
+    protected static ?string $navigationIcon = 'heroicon-o-cube';
 
-    protected static ?string $navigationGroup = 'Settings';
+    protected static ?string $navigationGroup = 'Logistic Hub';
 
     public static function form(Form $form): Form
     {

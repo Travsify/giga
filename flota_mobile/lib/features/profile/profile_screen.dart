@@ -91,7 +91,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
   void _showEditProfile() {
     final user = ref.read(profileProvider).user;
-    final role = user?['role'] ?? ref.read(authProvider).role ?? 'Customer';
+    final authState = ref.read(authProvider);
+    final role = user?['role'] ?? authState.role ?? 'Customer';
     
     if (user != null) {
       _nameController.text = user['name'] ?? '';
@@ -168,7 +169,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               },
             ),
             const SizedBox(height: 16),
-            GooglePlacesFlutter(
+            GooglePlaceAutoCompleteTextField(
               googleAPIKey: "AIzaSyDVqP4CjWp_fcFim7d_E0kAL35Ie2gWMzE",
               textEditingController: _homeController,
               inputDecoration: InputDecoration(
@@ -196,7 +197,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               },
             ),
             const SizedBox(height: 16),
-            GooglePlacesFlutter(
+            GooglePlaceAutoCompleteTextField(
               googleAPIKey: "AIzaSyDVqP4CjWp_fcFim7d_E0kAL35Ie2gWMzE",
               textEditingController: _workController,
               inputDecoration: InputDecoration(

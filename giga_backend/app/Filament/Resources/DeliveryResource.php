@@ -16,7 +16,14 @@ class DeliveryResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-truck';
 
-    protected static ?string $navigationGroup = 'Operations';
+    protected static ?string $navigationGroup = 'Logistic Hub';
+
+    protected static ?string $recordTitleAttribute = 'id';
+
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['id', 'customer.name', 'rider.user.name', 'parcel_type'];
+    }
 
     public static function form(Form $form): Form
     {

@@ -14,9 +14,9 @@ class RiderResource extends Resource
 {
     protected static ?string $model = Rider::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-user-circle';
+    protected static ?string $navigationIcon = 'heroicon-o-user-group';
 
-    protected static ?string $navigationGroup = 'Operations';
+    protected static ?string $navigationGroup = 'Logistic Hub';
 
     protected static ?string $navigationLabel = 'Drivers';
 
@@ -111,9 +111,31 @@ class RiderResource extends Resource
                                             ->image()
                                             ->directory('riders/documents'),
                                     ]),
+                                Forms\Components\Section::make('Vehicle Photos')
+                                    ->schema([
+                                        Forms\Components\FileUpload::make('vehicle_front_path')
+                                            ->label('Vehicle Front')
+                                            ->image()
+                                            ->directory('riders/vehicles'),
+                                        Forms\Components\FileUpload::make('vehicle_side_path')
+                                            ->label('Vehicle Side')
+                                            ->image()
+                                            ->directory('riders/vehicles'),
+                                        Forms\Components\FileUpload::make('vehicle_interior_path')
+                                            ->label('Vehicle Interior')
+                                            ->image()
+                                            ->directory('riders/vehicles'),
+                                    ])->columns(3),
                             ]),
                     ])->columnSpanFull(),
             ]);
+    }
+
+    protected static ?string $recordTitleAttribute = 'user.name';
+
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['user.name', 'user.email', 'vehicle_plate_number'];
     }
 
     public static function table(Table $table): Table

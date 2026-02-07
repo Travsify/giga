@@ -14,9 +14,9 @@ class LogisticsCompanyResource extends Resource
 {
     protected static ?string $model = LogisticsCompany::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-building-office-2';
+    protected static ?string $navigationIcon = 'heroicon-o-building-office';
 
-    protected static ?string $navigationGroup = 'Management';
+    protected static ?string $navigationGroup = 'Logistic Hub';
 
     public static function form(Form $form): Form
     {

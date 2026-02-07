@@ -17,7 +17,8 @@ class GiftCardResource extends Resource
 {
     protected static ?string $model = GiftCard::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-ticket';
+    protected static ?string $navigationGroup = 'Financials';
 
     public static function form(Form $form): Form
     {

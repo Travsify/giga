@@ -1,168 +1,172 @@
-/* Premium Logistics Admin Theme - Giga V2 */
+/* Neon Logistics Admin Theme - Giga V3 */
 
 :root {
-    --giga-sidebar-bg: #0B0F19; /* Ultra Dark Navy */
-    --giga-sidebar-text: #94A3B8;
-    --giga-sidebar-active-bg: rgba(0, 242, 255, 0.08);
-    --giga-accent-cyan: #00F2FF;
-    --giga-accent-green: #00FF85;
-    --giga-accent-red: #FF0055;
-    --giga-main-bg: #05070A; /* Deep Space Black */
-    --giga-card-bg: rgba(30, 41, 59, 0.7); /* Translucent Slate */
-    --giga-primary-cyan: #00F2FF;
-    --giga-text-light: #F8FAFC;
-    --giga-border: rgba(0, 242, 255, 0.1);
+    /* Core Palette - High Contrast */
+    --giga-neon-cyan: #00F2FF;
+    --giga-neon-green: #39FF14;
+    --giga-neon-red: #FF0033;
+    --giga-midnight-pro: #020617; /* Deepest Midnight */
+    --giga-surface-dark: #0F172A;
+    --giga-glass-border: rgba(0, 242, 255, 0.15);
+    --giga-text-primary: #F1F5F9;
+    --giga-text-secondary: #94A3B8;
 }
 
-/* Base Body Styling */
+/* Smooth Base Flow */
 .fi-body {
-    background-color: var(--giga-main-bg) !important;
-    background-image: radial-gradient(circle at 50% 0%, rgba(0, 242, 255, 0.05) 0%, transparent 50%),
-                      radial-gradient(circle at 100% 100%, rgba(0, 255, 133, 0.03) 0%, transparent 50%);
+    background-color: var(--giga-midnight-pro);
+    background-image: 
+        radial-gradient(circle at 100% 0%, rgba(0, 242, 255, 0.07) 0%, transparent 40%),
+        radial-gradient(circle at 0% 100%, rgba(57, 255, 20, 0.05) 0%, transparent 40%);
     background-attachment: fixed;
+    color: var(--giga-text-primary);
 }
 
-/* Sidebar Styling */
+/* Sidebar - Modern & Vibrant */
 .fi-sidebar {
-    background-color: var(--giga-sidebar-bg) !important;
-    border-right: 1px solid var(--giga-border) !important;
+    background-color: #0A0F1E !important;
+    border-right: 1px solid var(--giga-glass-border) !important;
     backdrop-filter: blur(12px);
 }
 
+.fi-sidebar-item-button {
+    border-radius: 12px !important;
+    margin: 4px 8px !important;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
 .fi-sidebar-active {
-    background-color: var(--giga-sidebar-active-bg) !important;
-    border-left: 3px solid var(--giga-accent-cyan) !important;
-    border-radius: 0 12px 12px 0;
+    background-color: rgba(0, 242, 255, 0.08) !important;
+    box-shadow: inset 4px 0 0 var(--giga-neon-cyan) !important;
 }
 
-/* Sidebar Menu Text & Icons */
-.fi-sidebar-item-label,
-.fi-sidebar-item-icon,
-.fi-sidebar-group-label {
-    color: var(--giga-sidebar-text) !important;
-    transition: all 0.2s ease;
+.fi-sidebar-item-label, .fi-sidebar-item-icon {
+    color: var(--giga-text-secondary) !important;
 }
 
-.fi-sidebar-item-active .fi-sidebar-item-label,
+.fi-sidebar-item-active .fi-sidebar-item-label, 
 .fi-sidebar-item-active .fi-sidebar-item-icon {
-    color: var(--giga-accent-cyan) !important;
-    font-weight: 600 !important;
-    text-shadow: 0 0 10px rgba(0, 242, 255, 0.3);
+    color: var(--giga-neon-cyan) !important;
+    font-weight: 700 !important;
+    filter: drop-shadow(0 0 5px rgba(0, 242, 255, 0.4));
 }
 
-/* Clean Glassmorphic Cards */
-.fi-section, 
-.fi-wi-stats-overview-stat,
-.fi-ta-ctn {
-    background-color: var(--giga-card-bg) !important;
-    border: 1px solid var(--giga-border) !important;
-    backdrop-filter: blur(16px) saturate(180%);
+/* Neon Glassmorphic Cards */
+.fi-section, .fi-wi-stats-overview-stat, .fi-ta-ctn {
+    background-color: var(--giga-surface-dark) !important;
+    border: 1px solid var(--giga-glass-border) !important;
+    backdrop-filter: blur(20px) saturate(160%);
     border-radius: 20px !important;
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37) !important;
-    overflow: hidden;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
 }
 
-/* Table Header Refinement */
-.fi-ta-header-ctn {
-    background: transparent !important;
-    border-bottom: 1px solid var(--giga-border) !important;
-}
-
-/* Stat Widgets */
+/* Stat Widgets - Punchy Numbers */
 .fi-wi-stats-overview-stat-value {
     color: #FFFFFF !important;
-    font-weight: 900 !important;
-    letter-spacing: -1px;
+    font-size: 1.875rem !important;
+    font-weight: 800 !important;
+    letter-spacing: -0.05em;
+    filter: drop-shadow(0 0 15px rgba(255,255,255,0.1));
 }
 
 .fi-wi-stats-overview-stat-label {
-    color: var(--giga-sidebar-text) !important;
+    color: var(--giga-neon-cyan) !important;
     text-transform: uppercase;
-    font-size: 0.75rem !important;
-    letter-spacing: 1px;
+    font-size: 0.7rem !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.1em;
 }
 
-/* Primary Action Buttons */
-.fi-btn-primary, 
-.fi-btn-color-primary {
-    background: linear-gradient(135deg, #00F2FF 0%, #00D1DB 100%) !important;
+/* Buttons - Neon Core */
+.fi-btn-primary, .fi-btn-color-primary {
+    background: linear-gradient(135deg, var(--giga-neon-cyan) 0%, #00B4D8 100%) !important;
     color: #000000 !important;
-    font-weight: 700 !important;
     border-radius: 14px !important;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    font-weight: 800 !important;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: 0 4px 15px rgba(0, 242, 255, 0.3) !important;
     border: none !important;
-    padding: 10px 24px !important;
 }
 
 .fi-btn-primary:hover {
-    transform: translateY(-2px) scale(1.02);
     box-shadow: 0 0 25px rgba(0, 242, 255, 0.6) !important;
+    transform: scale(1.02);
 }
 
-/* Inputs & Forms */
-.fi-fo-text-input input, 
-.fi-fo-select select,
-.fi-fo-textarea textarea {
-    background-color: rgba(15, 23, 42, 0.5) !important;
-    border: 1px solid var(--giga-border) !important;
+/* Form Controls - Minimal & Sharp */
+.fi-fo-text-input input, .fi-fo-select select, .fi-fo-textarea textarea {
+    background: rgba(0, 0, 0, 0.2) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
     border-radius: 12px !important;
-    color: white !important;
+    color: #FFFFFF !important;
+    transition: all 0.2s ease !important;
 }
 
-.fi-fo-text-input input:focus, 
-.fi-fo-select select:focus,
-.fi-fo-textarea textarea:focus {
-    border-color: var(--giga-accent-cyan) !important;
-    outline: none !important;
-    box-shadow: 0 0 0 2px rgba(0, 242, 255, 0.2) !important;
+.fi-fo-text-input input:focus {
+    border-color: var(--giga-neon-cyan) !important;
+    box-shadow: 0 0 0 3px rgba(0, 242, 255, 0.1) !important;
 }
 
-/* Custom Scrollbar */
+/* Navigation & Tabs */
+.fi-tabs {
+    border-bottom: 1px solid var(--giga-glass-border) !important;
+}
+
+.fi-tabs-item-active {
+    color: var(--giga-neon-cyan) !important;
+    border-bottom-color: var(--giga-neon-cyan) !important;
+}
+
+/* Tables - High Contrast Rows */
+.fi-ta-header-cell-label {
+    color: var(--giga-neon-cyan) !important;
+    text-transform: uppercase;
+    font-size: 0.75rem !important;
+    font-weight: 700 !important;
+}
+
+.fi-ta-row:hover {
+    background-color: rgba(255, 255, 255, 0.02) !important;
+}
+
+/* Global Search - Command Hub */
+.fi-global-search-field input {
+    background: var(--giga-surface-dark) !important;
+    border: 1px solid var(--giga-glass-border) !important;
+    border-radius: 30px !important;
+    padding-left: 2.5rem !important;
+}
+
+/* Scrollbar - Neon Pulse */
 ::-webkit-scrollbar {
-    width: 8px;
+    width: 6px;
 }
 
 ::-webkit-scrollbar-track {
-    background: var(--giga-main-bg);
+    background: var(--giga-midnight-pro);
 }
 
 ::-webkit-scrollbar-thumb {
-    background: linear-gradient(to bottom, var(--giga-accent-cyan), var(--giga-accent-green));
-    border-radius: 20px;
-    border: 2px solid var(--giga-main-bg);
+    background: var(--giga-neon-cyan);
+    border-radius: 10px;
+    box-shadow: 0 0 10px var(--giga-neon-cyan);
 }
 
-/* Auth / Login Page Enhancements */
+/* Auth Pages - Cinematic Neon */
 .fi-simple-main {
-    background: radial-gradient(circle at center, rgba(0, 242, 255, 0.08) 0%, transparent 70%) !important;
+    background: radial-gradient(circle at center, rgba(0, 242, 255, 0.1) 0%, transparent 80%) !important;
 }
 
 .fi-simple-card {
-    background: rgba(15, 23, 42, 0.6) !important;
-    backdrop-filter: blur(24px) saturate(200%) !important;
-    border: 1px solid rgba(0, 242, 255, 0.15) !important;
-    border-radius: 24px !important;
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5) !important;
+    background: rgba(15, 23, 42, 0.7) !important;
+    backdrop-filter: blur(32px) !important;
+    border: 1px solid var(--giga-glass-border) !important;
+    border-radius: 30px !important;
 }
 
 .fi-simple-header-heading {
-    color: white !important;
-    font-weight: 800 !important;
-    letter-spacing: -0.5px;
-    text-shadow: 0 0 15px rgba(0, 242, 255, 0.4);
-}
-
-/* Targeting the specific 'Sign in' heading if custom */
-.fi-simple-header {
-    margin-bottom: 2rem !important;
-}
-
-/* Form refinement for auth */
-.fi-simple-main .fi-fo-text-input input {
-    background-color: rgba(0, 0, 0, 0.3) !important;
-}
-
-/* Branding link visibility */
-.fi-logo {
-    filter: drop-shadow(0 0 8px rgba(0, 242, 255, 0.5));
+    color: #FFFFFF !important;
+    font-weight: 900 !important;
+    filter: drop-shadow(0 0 20px var(--giga-neon-cyan));
 }

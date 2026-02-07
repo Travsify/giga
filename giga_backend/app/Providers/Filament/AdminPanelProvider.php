@@ -30,10 +30,10 @@ class AdminPanelProvider extends PanelProvider
             ->brandName('Giga Admin')
             ->darkMode(true)
             ->colors([
-                'primary' => Color::hex('#00F2FF'), // Giga Cyan
-                'success' => Color::hex('#00FF85'), // Giga Green
-                'danger' => Color::hex('#FF0055'),  // Giga Red
-                'warning' => Color::Amber,
+                'primary' => Color::hex('#00F2FF'), // Neon Cyan
+                'success' => Color::hex('#39FF14'), // Neon Green
+                'danger' => Color::hex('#FF003F'),  // Neon Red
+                'warning' => Color::hex('#FFFF00'), // Neon Yellow
                 'gray' => Color::Slate,
             ])
             ->font('Outfit')
@@ -41,8 +41,12 @@ class AdminPanelProvider extends PanelProvider
             ->sidebarCollapsibleOnDesktop()
             ->sidebarFullyCollapsibleOnDesktop()
             ->maxContentWidth('full')
+            ->globalSearch(true)
+            ->globalSearchKeyBindings(['command+k', 'ctrl+k'])
             ->navigationGroups([
+                'Logistic Hub',
                 'Operations',
+                'Financials',
                 'Management',
                 'Settings',
             ])
