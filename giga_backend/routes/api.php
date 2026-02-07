@@ -469,6 +469,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/rider/dashboard-stats', [App\Http\Controllers\Api\RiderController::class, 'getDashboardStats']);
     Route::get('/rider/history', [App\Http\Controllers\Api\RiderController::class, 'getHistory']);
     Route::get('/rider/active-job', [App\Http\Controllers\Api\RiderController::class, 'getActiveJob']);
+    
+    // Vehicles
+    Route::apiResource('vehicles', App\Http\Controllers\Api\VehicleController::class);
+    Route::post('/vehicles/{id}/activate', [App\Http\Controllers\Api\VehicleController::class, 'activate']);
 
     // Banks
     Route::get('/rider/banks', [BankController::class, 'index']);

@@ -55,6 +55,9 @@ class ProfileController extends Controller
                 $user->rider->has_vehicle = true;
                 $user->rider->save();
             }
+            
+            // Sync to active vehicle
+            $user->rider->syncToActiveVehicle();
         }
 
         return response()->json($user->load('rider'));

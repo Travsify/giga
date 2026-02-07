@@ -221,6 +221,7 @@ class VehicleVerificationController extends Controller
             }
 
             $rider->save();
+            $rider->syncToActiveVehicle();
 
             // Automated Verification Flow
             $this->triggerAutomatedVerification($rider, $type);
@@ -301,6 +302,7 @@ class VehicleVerificationController extends Controller
         }
 
         $rider->save();
+        $rider->syncToActiveVehicle();
     }
 
     private function getDocPathByType($rider, $type)

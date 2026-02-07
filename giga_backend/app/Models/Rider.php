@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Vehicle;
 
 class Rider extends Model
 {
@@ -39,6 +40,7 @@ class Rider extends Model
         'vehicle_front_path',
         'vehicle_side_path',
         'vehicle_interior_path',
+        'active_vehicle_id',
     ];
 
     protected $casts = [
@@ -60,6 +62,16 @@ class Rider extends Model
         return $this->belongsTo(LogisticsCompany::class);
     }
 
+    public function vehicles()
+    {
+        return $this->hasMany(Vehicle::class);
+    }
+
+    public function activeVehicle()
+    {
+        return $this->belongsTo(Vehicle::class, 'active_vehicle_id');
+    }
+
     public function deliveries()
     {
         return $this->hasMany(Delivery::class);
@@ -68,5 +80,32 @@ class Rider extends Model
     public function bankAccounts()
     {
         return $this->hasMany(BankAccount::class);
+    }
+
+    /**
+     * Sync legacy columns to the active vehicle.
+     */
+    public function syncToActiveVehicle()
+    {
+        if ($this->active_vehicle_id) {
+            $vehicle = $this->activeVehicle;
+            if ($vehicle) {
+                // Sync relevant fields from Rider to Vehicle
+                $vehicle->update([
+                    'vehicle_type' => $this->vehicle_type,
+                    'vehicle_plate_number' => $this->vehicle_plate_number,
+                    'is_verified' => $this->verification_status === 'verified',
+                    'verification_status' => $this->verification_status,
+                    'verification_errors' => $this->verification_errors,
+                    // Documents
+                    'vehicle_license_path' => $this->vehicle_license_path,
+                    'vehicle_registration_path' => $this->vehicle_registration_path,
+                    'insurance_certificate_path' => $this->insurance_certificate_path,
+                    'vehicle_front_path' => $this->vehicle_front_path,
+                    'vehicle_side_path' => $this->vehicle_side_path,
+                    'vehicle_interior_path' => $this->vehicle_interior_path,
+                ]);
+            }
+        }
     }
 }
