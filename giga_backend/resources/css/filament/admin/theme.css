@@ -131,3 +131,38 @@
     border-radius: 20px;
     border: 2px solid var(--giga-main-bg);
 }
+
+/* Auth / Login Page Enhancements */
+.fi-simple-main {
+    background: radial-gradient(circle at center, rgba(0, 242, 255, 0.08) 0%, transparent 70%) !important;
+}
+
+.fi-simple-card {
+    background: rgba(15, 23, 42, 0.6) !important;
+    backdrop-filter: blur(24px) saturate(200%) !important;
+    border: 1px solid rgba(0, 242, 255, 0.15) !important;
+    border-radius: 24px !important;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5) !important;
+}
+
+.fi-simple-header-heading {
+    color: white !important;
+    font-weight: 800 !important;
+    letter-spacing: -0.5px;
+    text-shadow: 0 0 15px rgba(0, 242, 255, 0.4);
+}
+
+/* Targeting the specific 'Sign in' heading if custom */
+.fi-simple-header {
+    margin-bottom: 2rem !important;
+}
+
+/* Form refinement for auth */
+.fi-simple-main .fi-fo-text-input input {
+    background-color: rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Branding link visibility */
+.fi-logo {
+    filter: drop-shadow(0 0 8px rgba(0, 242, 255, 0.5));
+}
