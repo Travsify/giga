@@ -92,6 +92,16 @@ class UserResource extends Resource
                     ->label('Giga+'),
                 Tables\Columns\TextColumn::make('uk_phone')
                     ->searchable(),
+                Tables\Columns\TextColumn::make('rider.verification_status')
+                    ->label('Rider Status')
+                    ->badge()
+                    ->color(fn (?string $state): string => match ($state) {
+                        'verified' => 'success',
+                        'submitted' => 'warning',
+                        'rejected' => 'danger',
+                        default => 'gray',
+                    })
+                    ->visible(fn ($record) => $record->role === 'Rider'),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
@@ -101,6 +111,12 @@ class UserResource extends Resource
                 Tables\Filters\SelectFilter::make('role'),
             ])
             ->actions([
+                Tables\Actions\Action::make('review_rider')
+                    ->label('Review Rider')
+                    ->icon('heroicon-o-shield-check')
+                    ->color('info')
+                    ->url(fn ($record) => $record->rider ? route('filament.admin.resources.riders.edit', $record->rider) : null)
+                    ->visible(fn ($record) => $record->role === 'Rider' && $record->rider),
                 Tables\Actions\EditAction::make(),
             ])
             ->bulkActions([

@@ -88,27 +88,33 @@ class RiderResource extends Resource
                                         Forms\Components\FileUpload::make('driver_license_path')
                                             ->label('Driver License')
                                             ->image()
+                                            ->downloadable()
                                             ->directory('riders/documents'),
                                         Forms\Components\FileUpload::make('vehicle_license_path')
                                             ->label('Vehicle License')
                                             ->image()
+                                            ->downloadable()
                                             ->directory('riders/documents'),
                                         Forms\Components\FileUpload::make('passport_photo_path')
                                             ->label('Passport Photo')
                                             ->image()
+                                            ->downloadable()
                                             ->directory('riders/documents'),
                                         Forms\Components\FileUpload::make('selfie_id_path')
                                             ->label('Verification Selfie')
                                             ->image()
                                             ->previewable(true)
+                                            ->downloadable()
                                             ->directory('riders/documents'),
                                         Forms\Components\FileUpload::make('nin_path')
                                             ->label('NIN Slip')
                                             ->image()
+                                            ->downloadable()
                                             ->directory('riders/documents'),
                                         Forms\Components\FileUpload::make('intl_passport_path')
                                             ->label('International Passport')
                                             ->image()
+                                            ->downloadable()
                                             ->directory('riders/documents'),
                                     ]),
                                 Forms\Components\Section::make('Vehicle Photos')
@@ -116,14 +122,17 @@ class RiderResource extends Resource
                                         Forms\Components\FileUpload::make('vehicle_front_path')
                                             ->label('Vehicle Front')
                                             ->image()
+                                            ->downloadable()
                                             ->directory('riders/vehicles'),
                                         Forms\Components\FileUpload::make('vehicle_side_path')
                                             ->label('Vehicle Side')
                                             ->image()
+                                            ->downloadable()
                                             ->directory('riders/vehicles'),
                                         Forms\Components\FileUpload::make('vehicle_interior_path')
                                             ->label('Vehicle Interior')
                                             ->image()
+                                            ->downloadable()
                                             ->directory('riders/vehicles'),
                                     ])->columns(3),
                             ]),
