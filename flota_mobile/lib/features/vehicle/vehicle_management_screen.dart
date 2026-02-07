@@ -17,7 +17,7 @@ class VehicleManagementScreen extends ConsumerWidget {
     final activeVehicleId = userState.user?['rider']?['active_vehicle_id'];
 
     return Scaffold(
-      backgroundColor: AppTheme.scaffoldBackgroundColor,
+      backgroundColor: AppTheme.backgroundColor,
       appBar: AppBar(
         title: Text('Manage Vehicles', style: GoogleFonts.outfit(color: Colors.white)),
         backgroundColor: Colors.transparent,

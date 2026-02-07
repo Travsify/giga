@@ -67,7 +67,7 @@ class _AddVehicleScreenState extends ConsumerState<AddVehicleScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.scaffoldBackgroundColor,
+      backgroundColor: AppTheme.backgroundColor,
       appBar: AppBar(
         title: Text('Add New Vehicle', style: GoogleFonts.outfit(color: Colors.white)),
         backgroundColor: Colors.transparent,
