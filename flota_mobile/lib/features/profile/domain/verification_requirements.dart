@@ -63,6 +63,27 @@ class VerificationRequirements {
         icon: Icons.face_retouching_natural_outlined,
         status: DocStatus.required,
       ),
+      VerificationDoc(
+        id: 'vehicle_front',
+        label: 'Vehicle Front View',
+        description: 'Clear photo of the front of your vehicle',
+        icon: Icons.directions_car_outlined,
+        status: DocStatus.required,
+      ),
+      VerificationDoc(
+        id: 'vehicle_side',
+        label: 'Vehicle Side View',
+        description: 'Clear photo of the side of your vehicle',
+        icon: Icons.directions_car_outlined,
+        status: DocStatus.required,
+      ),
+      VerificationDoc(
+        id: 'vehicle_interior',
+        label: 'Vehicle Interior',
+        description: 'Clear photo of the interior/cargo space',
+        icon: Icons.airline_seat_recline_normal_outlined,
+        status: DocStatus.required,
+      ),
     ],
     'UK': [
       VerificationDoc(
@@ -99,6 +120,27 @@ class VerificationRequirements {
         description: 'Biometric Residence Permit for non-UK nationals',
         icon: Icons.fingerprint,
         status: DocStatus.optional,
+      ),
+      VerificationDoc(
+        id: 'vehicle_front',
+        label: 'Vehicle Front View',
+        description: 'Clear photo of the front of your vehicle',
+        icon: Icons.directions_car_outlined,
+        status: DocStatus.required,
+      ),
+      VerificationDoc(
+        id: 'vehicle_side',
+        label: 'Vehicle Side View',
+        description: 'Clear photo of the side of your vehicle',
+        icon: Icons.directions_car_outlined,
+        status: DocStatus.required,
+      ),
+      VerificationDoc(
+        id: 'vehicle_interior',
+        label: 'Vehicle Interior',
+        description: 'Clear photo of the interior/cargo space',
+        icon: Icons.airline_seat_recline_normal_outlined,
+        status: DocStatus.required,
       ),
     ],
   };

@@ -8,7 +8,13 @@ import 'package:go_router/go_router.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flota_mobile/shared/map_picker_screen.dart';
 import 'package:flota_mobile/features/tracking/rider_stats_service.dart';
+import 'package:intl_phone_field/intl_phone_field.dart';
+import 'package:google_places_flutter/google_places_flutter.dart';
+import 'package:google_places_flutter/model/prediction.dart';
+import 'package:country_picker/country_picker.dart';
 import 'verification_screen.dart';
+import 'document_upload_screen.dart';
+import 'package:image_picker/image_picker.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
@@ -24,6 +30,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   final _workController = TextEditingController();
   final _plateController = TextEditingController();
   final _vehicleTypeController = TextEditingController();
+  bool _isVerifyingPlate = false;
 
   @override
   void dispose() {
@@ -34,6 +41,52 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     _plateController.dispose();
     _vehicleTypeController.dispose();
     super.dispose();
+  }
+
+  Future<void> _pickProfileImage() async {
+    final picker = ImagePicker();
+    final image = await picker.pickImage(source: ImageSource.gallery, imageQuality: 70);
+    
+    if (image != null) {
+      // Navigate to upload screen using the existing flow
+      if (mounted) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => DocumentUploadScreen(documentType: 'passport_photo'),
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _verifyPlate() async {
+    final plate = _plateController.text.trim();
+    if (plate.isEmpty) return;
+
+    setState(() => _isVerifyingPlate = true);
+    
+    try {
+      final country = ref.read(authProvider).countryCode ?? 'NG';
+      final res = await ref.read(profileProvider.notifier).verifyPlate(plate, country);
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Vehicle Verified: ${res['data']['make']} ${res['data']['model']}'),
+            backgroundColor: AppTheme.successGreen,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Verification Failed: $e'), backgroundColor: AppTheme.primaryRed),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isVerifyingPlate = false);
+    }
   }
 
   void _showEditProfile() {
@@ -102,64 +155,73 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               textCapitalization: TextCapitalization.words,
             ),
             const SizedBox(height: 16),
-            TextField(
+            IntlPhoneField(
               controller: _phoneController,
               decoration: const InputDecoration(
-                labelText: 'UK Phone Number',
+                labelText: 'Phone Number',
                 prefixIcon: Icon(Icons.phone_android),
-                hintText: '+44 7... ',
+                hintText: 'Enter phone number',
               ),
-              keyboardType: TextInputType.phone,
+              initialCountryCode: authState.countryCode ?? 'NG',
+              onChanged: (phone) {
+                // _phoneController is already updated by the widget
+              },
             ),
             const SizedBox(height: 16),
-            TextField(
-              controller: _homeController,
-              decoration: InputDecoration(
+            GooglePlacesFlutter(
+              googleAPIKey: "AIzaSyDVqP4CjWp_fcFim7d_E0kAL35Ie2gWMzE",
+              textEditingController: _homeController,
+              inputDecoration: InputDecoration(
                 labelText: 'Home Address',
                 prefixIcon: const Icon(Icons.home),
-                hintText: 'Enter your home address',
+                hintText: 'Search home address',
                 suffixIcon: IconButton(
                   icon: const Icon(Icons.map_outlined, color: AppTheme.primaryBlue),
                   onPressed: () async {
                     final result = await Navigator.push(
                       context,
-                      MaterialPageRoute(
-                        builder: (context) => const MapPickerScreen(title: 'Home Location'),
-                      ),
+                      MaterialPageRoute(builder: (context) => const MapPickerScreen(title: 'Home Location')),
                     );
                     if (result != null && result is Map) {
-                      setState(() {
-                        _homeController.text = result['address'];
-                      });
+                      setState(() => _homeController.text = result['address']);
                     }
                   },
                 ),
               ),
+              debounceTime: 600,
+              isLatLngRequired: false,
+              itemClick: (Prediction prediction) {
+                _homeController.text = prediction.description ?? "";
+                _homeController.selection = TextSelection.fromPosition(TextPosition(offset: prediction.description?.length ?? 0));
+              },
             ),
             const SizedBox(height: 16),
-            TextField(
-              controller: _workController,
-              decoration: InputDecoration(
+            GooglePlacesFlutter(
+              googleAPIKey: "AIzaSyDVqP4CjWp_fcFim7d_E0kAL35Ie2gWMzE",
+              textEditingController: _workController,
+              inputDecoration: InputDecoration(
                 labelText: 'Work Address',
                 prefixIcon: const Icon(Icons.work),
-                hintText: 'Enter your work address',
+                hintText: 'Search work address',
                 suffixIcon: IconButton(
                   icon: const Icon(Icons.map_outlined, color: AppTheme.primaryBlue),
                   onPressed: () async {
                     final result = await Navigator.push(
                       context,
-                      MaterialPageRoute(
-                        builder: (context) => const MapPickerScreen(title: 'Work Location'),
-                      ),
+                      MaterialPageRoute(builder: (context) => const MapPickerScreen(title: 'Work Location')),
                     );
                     if (result != null && result is Map) {
-                      setState(() {
-                        _workController.text = result['address'];
-                      });
+                      setState(() => _workController.text = result['address']);
                     }
                   },
                 ),
               ),
+              debounceTime: 600,
+              isLatLngRequired: false,
+              itemClick: (Prediction prediction) {
+                _workController.text = prediction.description ?? "";
+                _workController.selection = TextSelection.fromPosition(TextPosition(offset: prediction.description?.length ?? 0));
+              },
             ),
             const SizedBox(height: 16),
             if (role == 'Business') ...[
@@ -183,10 +245,16 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             if (role == 'Rider') ...[
               TextField(
                 controller: _plateController,
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   labelText: 'Vehicle Plate Number',
-                  prefixIcon: Icon(Icons.numbers),
+                  prefixIcon: const Icon(Icons.numbers),
                   hintText: 'e.g. ABJ-123',
+                  suffixIcon: _isVerifyingPlate 
+                    ? const SizedBox(height: 20, width: 20, child: Padding(padding: EdgeInsets.all(12), child: CircularProgressIndicator(strokeWidth: 2)))
+                    : TextButton(
+                        onPressed: _verifyPlate,
+                        child: const Text('VERIFY', style: TextStyle(color: AppTheme.primaryBlue, fontWeight: FontWeight.bold, fontSize: 12)),
+                      ),
                 ),
                 textCapitalization: TextCapitalization.characters,
               ),
@@ -385,35 +453,34 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         const SizedBox(height: 20),
-                        Stack(
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(4),
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                border: Border.all(color: isOnline ? Colors.greenAccent : Colors.white24, width: 3),
-                              ),
-                              child: const CircleAvatar(
-                                radius: 50,
-                                backgroundColor: Colors.white10,
-                                child: Icon(Icons.person, size: 50, color: Colors.white),
-                              ),
-                            ),
-                            if (isOnline)
-                              Positioned(
-                                bottom: 5,
-                                right: 5,
-                                child: Container(
-                                  width: 20,
-                                  height: 20,
-                                  decoration: BoxDecoration(
-                                    color: Colors.greenAccent,
-                                    shape: BoxShape.circle,
-                                    border: Border.all(color: AppTheme.primaryBlue, width: 3),
-                                  ),
+                        GestureDetector(
+                          onTap: _pickProfileImage,
+                          child: Stack(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(4),
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  border: Border.all(color: isOnline ? Colors.greenAccent : Colors.white24, width: 3),
+                                ),
+                                child: CircleAvatar(
+                                  radius: 50,
+                                  backgroundColor: Colors.white10,
+                                  backgroundImage: user?['avatar_url'] != null ? NetworkImage(user!['avatar_url']) : null,
+                                  child: user?['avatar_url'] == null ? const Icon(Icons.person, size: 50, color: Colors.white) : null,
                                 ),
                               ),
-                          ],
+                              Positioned(
+                                bottom: 0,
+                                right: 0,
+                                child: Container(
+                                  padding: const EdgeInsets.all(6),
+                                  decoration: const BoxDecoration(color: AppTheme.primaryBlue, shape: BoxShape.circle),
+                                  child: const Icon(Icons.camera_alt, size: 16, color: Colors.black),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                         const SizedBox(height: 16),
                         Row(
@@ -427,12 +494,16 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                            const SizedBox(width: 8),
-                            const Icon(Icons.verified, color: Colors.amber, size: 22),
+                            if (rider?['verification_status'] == 'verified') ...[
+                              const SizedBox(width: 8),
+                              const Icon(Icons.verified, color: Colors.amber, size: 22),
+                            ],
                           ],
                         ),
                         Text(
-                          isRider ? 'Verified Giga Partner' : (isBusiness ? 'Verified Business' : 'Giga Member'),
+                          rider?['verification_status'] == 'verified' 
+                            ? 'Verified Giga Partner' 
+                            : (isRider ? 'Pending Verification' : (isBusiness ? 'Verified Business' : 'Giga Member')),
                           style: GoogleFonts.outfit(color: Colors.white70, fontSize: 13, letterSpacing: 1.2, fontWeight: FontWeight.w500),
                         ),
                         const SizedBox(height: 16),
@@ -654,6 +725,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             'Driver License', 
             hasLicense ? 'On File' : 'Required', 
             hasLicense,
+            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const VerificationScreen())),
+          ),
+          Divider(height: 1, indent: 50, color: AppTheme.borderBlue),
+          _buildHubItem(
+            'Vehicle Photos', 
+            (rider?['vehicle_front_path'] != null && rider?['vehicle_side_path'] != null) ? 'Submitted' : 'Pending', 
+            rider?['vehicle_front_path'] != null && rider?['vehicle_side_path'] != null,
             onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const VerificationScreen())),
           ),
           Divider(height: 1, indent: 50, color: AppTheme.borderBlue),

@@ -345,6 +345,9 @@ class _VerificationScreenState extends ConsumerState<VerificationScreen> {
       case 'passport_photo': return 'passport_photo_path';
       case 'brp': return 'brp_path';
       case 'selfie_id': return 'selfie_id_path';
+      case 'vehicle_front': return 'vehicle_front_path';
+      case 'vehicle_side': return 'vehicle_side_path';
+      case 'vehicle_interior': return 'vehicle_interior_path';
       default: return '${docId}_path';
     }
   }

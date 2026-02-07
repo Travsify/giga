@@ -25,6 +25,18 @@ class ProfileRepository {
     }
   }
 
+  Future<Map<String, dynamic>> verifyPlate(String plateNumber, String countryCode) async {
+    try {
+      final response = await _dio.post('/vehicle/verify', data: {
+        'plate_number': plateNumber,
+        'country_code': countryCode,
+      });
+      return response.data;
+    } on DioException catch (e) {
+      throw _handleError(e);
+    }
+  }
+
   Future<Map<String, dynamic>> getLoyaltyInfo() async {
     try {
       final response = await _dio.get('/loyalty');

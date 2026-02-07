@@ -105,6 +105,18 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
     }
   }
 
+  Future<Map<String, dynamic>> verifyPlate(String plateNumber, String countryCode) async {
+    state = state.copyWith(isLoading: true);
+    try {
+      final res = await _repository.verifyPlate(plateNumber, countryCode);
+      state = state.copyWith(isLoading: false);
+      return res;
+    } catch (e) {
+      state = state.copyWith(error: e.toString(), isLoading: false);
+      rethrow;
+    }
+  }
+
   Future<void> submitReferral(String code) async {
     state = state.copyWith(isLoading: true);
     try {
