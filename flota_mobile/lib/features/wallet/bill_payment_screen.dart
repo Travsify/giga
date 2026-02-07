@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flota_mobile/theme/app_theme.dart';
 import 'package:flota_mobile/core/bill_payment_service.dart';
+import 'package:flota_mobile/features/profile/profile_provider.dart';
 
 class BillPaymentScreen extends ConsumerStatefulWidget {
   const BillPaymentScreen({super.key});
@@ -19,25 +20,60 @@ class _BillPaymentScreenState extends ConsumerState<BillPaymentScreen> {
   final TextEditingController _searchController = TextEditingController();
 
   final Map<String, List<Map<String, dynamic>>> _sections = {
-    'E-commerce': [
-      {'id': 'ORAIMO', 'name': 'oraimo', 'icon': Icons.shopping_bag_outlined, 'badge': null},
-      {'id': 'ALIEXPRESS', 'name': 'AliExpress', 'icon': Icons.shopping_cart_outlined, 'badge': 'NEW'},
-      {'id': 'GIFT_CARDS', 'name': 'Gift Cards', 'icon': Icons.card_giftcard, 'badge': null},
-      {'id': 'CHOWDECK', 'name': 'Chowdeck', 'icon': Icons.delivery_dining_outlined, 'badge': 'HOT'},
+    'Airtime & Data': [
+      {'id': 'AIRTIME', 'name': 'MTN Airtime', 'icon': Icons.phone_android, 'badge': 'HOT'},
+      {'id': 'DATA_BUNDLE', 'name': 'MTN Data', 'icon': Icons.wifi, 'badge': null},
+      {'id': 'AIRTIME', 'name': 'Airtel Airtime', 'icon': Icons.phone_android, 'badge': null},
+      {'id': 'DATA_BUNDLE', 'name': 'Airtel Data', 'icon': Icons.wifi, 'badge': null},
+      {'id': 'AIRTIME', 'name': 'Glo Airtime', 'icon': Icons.phone_android, 'badge': null},
+      {'id': 'DATA_BUNDLE', 'name': 'Glo Data', 'icon': Icons.wifi, 'badge': null},
+      {'id': 'AIRTIME', 'name': '9Mobile Airtime', 'icon': Icons.phone_android, 'badge': null},
+      {'id': 'DATA_BUNDLE', 'name': '9Mobile Data', 'icon': Icons.wifi, 'badge': null},
     ],
-    'Bills Payment': [
-      {'id': 'UTILITY_BILL', 'name': 'Electricity', 'icon': Icons.lightbulb_outline, 'badge': 'HOT'},
-      {'id': 'SOLAR', 'name': 'Solar', 'icon': Icons.wb_sunny_outlined, 'badge': null},
-      {'id': 'AIRTIME', 'name': 'Airtime', 'icon': Icons.phone_android, 'badge': null},
-      {'id': 'DATA_BUNDLE', 'name': 'Data', 'icon': Icons.wifi, 'badge': null},
-      {'id': 'CABLE_PAY', 'name': 'TV', 'icon': Icons.tv, 'badge': null},
-      {'id': 'INTERNET_SERVICE', 'name': 'Internet', 'icon': Icons.language, 'badge': null},
-      {'id': 'ACCOUNT_VERIFICATION', 'name': 'Financial', 'icon': Icons.account_balance_wallet_outlined, 'badge': null},
-      {'id': 'GOVERNMENT_PAYMENT', 'name': 'Government', 'icon': Icons.account_balance_outlined, 'badge': null},
-      {'id': 'TAX_PAYMENT', 'name': 'Taxes', 'icon': Icons.receipt_long_outlined, 'badge': null},
-      {'id': 'RELIGIOUS_INSTITUTIONS', 'name': 'Religious', 'icon': Icons.church_outlined, 'badge': null},
-      {'id': 'SCHOOL_FEES', 'name': 'School/Exam', 'icon': Icons.school_outlined, 'badge': null},
-      {'id': 'INSURANCE', 'name': 'Insurance', 'icon': Icons.verified_user_outlined, 'badge': null},
+    'Cable TV': [
+      {'id': 'CABLE_PAY', 'name': 'DSTV', 'icon': Icons.tv, 'badge': null},
+      {'id': 'CABLE_PAY', 'name': 'GOTV', 'icon': Icons.tv, 'badge': null},
+      {'id': 'CABLE_PAY', 'name': 'StarTimes', 'icon': Icons.tv, 'badge': null},
+      {'id': 'SHOWMAX', 'name': 'Showmax', 'icon': Icons.live_tv, 'badge': 'NEW'},
+    ],
+    'Electricity': [
+      {'id': 'UTILITY_BILL', 'name': 'Ikeja Electric', 'icon': Icons.lightbulb_outline, 'badge': 'HOT'},
+      {'id': 'UTILITY_BILL', 'name': 'Eko Electric', 'icon': Icons.lightbulb_outline, 'badge': null},
+      {'id': 'UTILITY_BILL', 'name': 'Abuja Electric', 'icon': Icons.lightbulb_outline, 'badge': null},
+      {'id': 'SOLAR', 'name': 'Solar Energy', 'icon': Icons.wb_sunny_outlined, 'badge': null},
+    ],
+    'Internet Services': [
+      {'id': 'INTERNET_SERVICE', 'name': 'Smile', 'icon': Icons.language, 'badge': null},
+      {'id': 'INTERNET_SERVICE', 'name': 'Spectranet', 'icon': Icons.language, 'badge': null},
+      {'id': 'INTERNET_SERVICE', 'name': 'Swift', 'icon': Icons.language, 'badge': null},
+      {'id': 'INTERNET_SERVICE', 'name': 'ipNX', 'icon': Icons.language, 'badge': null},
+    ],
+    'E-commerce & Lifestyle': [
+      {'id': 'CHOWDECK', 'name': 'Chowdeck', 'icon': Icons.delivery_dining_outlined, 'badge': 'HOT'},
+      {'id': 'ALIEXPRESS', 'name': 'AliExpress', 'icon': Icons.shopping_cart_outlined, 'badge': 'NEW'},
+      {'id': 'ORAIMO', 'name': 'oraimo', 'icon': Icons.shopping_bag_outlined, 'badge': null},
+      {'id': 'GIFT_CARDS', 'name': 'Gift Cards', 'icon': Icons.card_giftcard, 'badge': null},
+    ],
+    'Financial Services': [
+      {'id': 'ACCOUNT_VERIFICATION', 'name': 'Insurance', 'icon': Icons.verified_user_outlined, 'badge': null},
+      {'id': 'PENSION', 'name': 'Pension', 'icon': Icons.account_balance_wallet_outlined, 'badge': null},
+      {'id': 'WALLET', 'name': 'Wallet Funding', 'icon': Icons.add_card, 'badge': null},
+    ],
+    'Education & Exams': [
+      {'id': 'SCHOOL_FEES', 'name': 'WAEC', 'icon': Icons.school_outlined, 'badge': null},
+      {'id': 'SCHOOL_FEES', 'name': 'JAMB', 'icon': Icons.school_outlined, 'badge': null},
+    ],
+    'Government & Taxes': [
+      {'id': 'TAX_PAYMENT', 'name': 'LIRS Taxes', 'icon': Icons.receipt_long_outlined, 'badge': null},
+      {'id': 'GOVERNMENT_PAYMENT', 'name': 'Govt Payment', 'icon': Icons.account_balance_outlined, 'badge': null},
+    ],
+    'Religious & NGOs': [
+      {'id': 'RELIGIOUS_INSTITUTIONS', 'name': 'Tithe/Offerings', 'icon': Icons.church_outlined, 'badge': null},
+      {'id': 'NGO', 'name': 'Donations', 'icon': Icons.volunteer_activism_outlined, 'badge': null},
+    ],
+    'Events & Betting': [
+      {'id': 'BETTING', 'name': 'SportyBet', 'icon': Icons.sports_soccer_outlined, 'badge': null},
+      {'id': 'BETTING', 'name': 'Bet9ja', 'icon': Icons.sports_soccer_outlined, 'badge': null},
     ],
   };
 
@@ -69,13 +105,21 @@ class _BillPaymentScreenState extends ConsumerState<BillPaymentScreen> {
     final q = (query ?? _searchController.text).toLowerCase();
     setState(() {
       _filteredBillers = _allBillers.where((b) {
-        final matchesQuery = b['name'].toString().toLowerCase().contains(q) || 
-                           b['short_name'].toString().toLowerCase().contains(q);
+        final name = b['name'].toString().toLowerCase();
+        final shortName = b['short_name'].toString().toLowerCase();
+        final billerName = b['biller_name'].toString().toUpperCase();
+        
+        final matchesQuery = name.contains(q) || shortName.contains(q);
         
         bool matchesCategory = true;
         if (_selectedCategory != null) {
-          final billerName = b['biller_name'].toString().toUpperCase();
-          matchesCategory = billerName.contains(_selectedCategory!);
+          // Robust category matching
+          if (_selectedCategory == 'AIRTIME' || _selectedCategory == 'DATA_BUNDLE') {
+            matchesCategory = billerName.contains(_selectedCategory!);
+          } else {
+            // General match for UTILITY, CABLE, etc.
+            matchesCategory = billerName.contains(_selectedCategory!) || name.contains(_selectedCategory!.replaceAll('_', ' '));
+          }
         }
         
         return matchesQuery && matchesCategory;
@@ -83,12 +127,15 @@ class _BillPaymentScreenState extends ConsumerState<BillPaymentScreen> {
     });
   }
 
-  void _selectCategory(String? categoryId) {
+  void _selectCategory(String? categoryId, String? exactName) {
     setState(() {
-      if (_selectedCategory == categoryId) {
+      if (_selectedCategory == categoryId && exactName == null) {
         _selectedCategory = null;
       } else {
         _selectedCategory = categoryId;
+        if (exactName != null) {
+          _searchController.text = exactName.split(' ')[0]; // Search by prefix (e.g. "MTN")
+        }
       }
       _filterBillers();
     });
@@ -116,10 +163,17 @@ class _BillPaymentScreenState extends ConsumerState<BillPaymentScreen> {
           onPressed: () => Navigator.pop(context),
         ),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.search, color: Colors.white),
-            onPressed: () {}, // Handled by text field below in this refactor, but kept icon for style
-          ),
+          if (_selectedCategory != null || _searchController.text.isNotEmpty)
+            IconButton(
+              icon: const Icon(Icons.close, color: Colors.white),
+              onPressed: () {
+                setState(() {
+                  _selectedCategory = null;
+                  _searchController.clear();
+                  _filterBillers();
+                });
+              },
+            ),
         ],
       ),
       body: CustomScrollView(
@@ -153,7 +207,7 @@ class _BillPaymentScreenState extends ConsumerState<BillPaymentScreen> {
             for (var entry in _sections.entries) ...[
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 24, 20, 16),
+                  padding: const EdgeInsets.fromLTRB(26, 24, 26, 16),
                   child: Text(
                     entry.key,
                     style: GoogleFonts.outfit(
@@ -180,7 +234,7 @@ class _BillPaymentScreenState extends ConsumerState<BillPaymentScreen> {
                         name: item['name'],
                         icon: item['icon'],
                         badge: item['badge'],
-                        onTap: () => _selectCategory(item['id']),
+                        onTap: () => _selectCategory(item['id'], item['name']),
                       );
                     },
                     childCount: entry.value.length,
@@ -210,9 +264,10 @@ class _BillPaymentScreenState extends ConsumerState<BillPaymentScreen> {
                             shape: BoxShape.circle,
                           ),
                           child: Center(
-                            child: Text(
-                              biller['short_name']?[0] ?? 'B',
-                              style: const TextStyle(color: AppTheme.accentCyan, fontWeight: FontWeight.bold, fontSize: 18),
+                            child: Icon(
+                              _getIconForBiller(biller['biller_name']),
+                              color: AppTheme.accentCyan,
+                              size: 20,
                             ),
                           ),
                         ),
@@ -231,6 +286,17 @@ class _BillPaymentScreenState extends ConsumerState<BillPaymentScreen> {
         ],
       ),
     );
+  }
+
+  IconData _getIconForBiller(String? billerType) {
+    if (billerType == null) return Icons.payment;
+    final type = billerType.toUpperCase();
+    if (type.contains('AIRTIME')) return Icons.phone_android;
+    if (type.contains('DATA')) return Icons.wifi;
+    if (type.contains('CABLE')) return Icons.tv;
+    if (type.contains('UTILITY')) return Icons.lightbulb_outline;
+    if (type.contains('INTERNET')) return Icons.language;
+    return Icons.payment;
   }
 }
 
@@ -311,20 +377,22 @@ class _ServiceGridItem extends StatelessWidget {
   }
 }
 
-class _BillPaymentSheet extends StatefulWidget {
+class _BillPaymentSheet extends ConsumerStatefulWidget {
   final dynamic biller;
   const _BillPaymentSheet({required this.biller});
 
   @override
-  State<_BillPaymentSheet> createState() => _BillPaymentSheetState();
+  ConsumerState<_BillPaymentSheet> createState() => _BillPaymentSheetState();
 }
 
-class _BillPaymentSheetState extends State<_BillPaymentSheet> {
+class _BillPaymentSheetState extends ConsumerState<_BillPaymentSheet> {
   final _customerController = TextEditingController();
   final _amountController = TextEditingController();
   bool _isLoading = false;
   String? _customerName;
   String? _validationError;
+
+  final List<double> _quickAmounts = [100, 200, 500, 1000, 2000, 5000];
 
   @override
   void initState() {
@@ -335,6 +403,7 @@ class _BillPaymentSheetState extends State<_BillPaymentSheet> {
   }
 
   Future<void> _validate() async {
+    if (_customerController.text.isEmpty) return;
     setState(() { _isLoading = true; _validationError = null; });
     try {
       final res = await BillPaymentService.validateCustomer(
@@ -355,11 +424,22 @@ class _BillPaymentSheetState extends State<_BillPaymentSheet> {
     final amount = double.tryParse(_amountController.text);
     if (amount == null || amount <= 0) return;
 
+    final profile = ref.read(profileProvider);
+    final wallet = profile.user?['wallet'];
+    final balance = (wallet?['balance'] ?? 0).toDouble();
+
+    if (balance < amount) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Insufficient wallet balance'), backgroundColor: AppTheme.primaryRed),
+      );
+      return;
+    }
+
     setState(() => _isLoading = true);
     try {
       await BillPaymentService.payBill(
         amount: amount,
-        type: widget.biller['biller_name'], // Should ideally be item_code or biller_name depending on API requirement. Using biller_name as generic type.
+        type: widget.biller['biller_name'],
         customer: _customerController.text,
         country: widget.biller['country'],
         billerName: widget.biller['name'],
@@ -367,7 +447,6 @@ class _BillPaymentSheetState extends State<_BillPaymentSheet> {
       
       if (mounted) {
         Navigator.pop(context); // Close sheet
-        Navigator.pop(context); // Close screen (optional)
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Payment Successful!'), backgroundColor: AppTheme.successGreen));
       }
     } catch (e) {
@@ -380,76 +459,146 @@ class _BillPaymentSheetState extends State<_BillPaymentSheet> {
 
   @override
   Widget build(BuildContext context) {
-    // Determine if validation is needed based on label_name or biller type? 
-    // Usually validation is needed for TV and Power. Airtime might not support validation.
-    // Logic: If user enters ID, show "Verify" button. If verified or not supported, show "Pay".
-    // For simplicity, we assume validation is optional/supported if user wants to check name.
-    
+    final isAirtime = widget.biller['biller_name'].toString().toUpperCase().contains('AIRTIME');
+    final isData = widget.biller['biller_name'].toString().toUpperCase().contains('DATA');
+    final showGrid = isAirtime || isData;
+
     return Container(
       padding: EdgeInsets.fromLTRB(24, 24, 24, MediaQuery.of(context).viewInsets.bottom + 24),
       decoration: const BoxDecoration(
         color: AppTheme.backgroundColor,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
+        border: Border(top: BorderSide(color: Colors.white10)),
       ),
       child: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(widget.biller['name'], style: GoogleFonts.outfit(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white)),
-            const SizedBox(height: 20),
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(color: Colors.white24, borderRadius: BorderRadius.circular(2)),
+              ),
+            ),
+            const SizedBox(height: 24),
+            Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(widget.biller['name'], style: GoogleFonts.outfit(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white)),
+                      Text(widget.biller['biller_name'] ?? 'Bill Payment', style: TextStyle(color: Colors.white.withOpacity(0.5))),
+                    ],
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(color: AppTheme.accentCyan.withOpacity(0.1), shape: BoxShape.circle),
+                  child: Icon(_getIconForSheet(widget.biller['biller_name']), color: AppTheme.accentCyan),
+                ),
+              ],
+            ),
+            const SizedBox(height: 24),
             TextField(
               controller: _customerController,
               style: const TextStyle(color: Colors.white),
               decoration: InputDecoration(
-                labelText: widget.biller['label_name'] ?? 'Customer ID',
+                labelText: widget.biller['label_name'] ?? 'Beneficiary ID',
+                hintText: isAirtime || isData ? 'Phone Number' : 'Meter/Smartcard Number',
                 labelStyle: const TextStyle(color: Colors.grey),
                 filled: true,
                 fillColor: AppTheme.surfaceColor,
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                 suffixIcon: IconButton(
                   icon: const Icon(Icons.check_circle, color: AppTheme.accentCyan),
                   onPressed: _validate,
-                  tooltip: 'Verify Customer',
                 ),
               ),
             ),
-            if (_isLoading && _customerName == null) const LinearProgressIndicator(),
-            if (_validationError != null)
-              Padding(padding: const EdgeInsets.only(top: 8), child: Text(_validationError!, style: const TextStyle(color: AppTheme.primaryRed))),
-            if (_customerName != null)
-              Padding(padding: const EdgeInsets.only(top: 8), child: Text('Verfied: $_customerName', style: const TextStyle(color: AppTheme.successGreen))),
+            if (_isLoading && _customerName == null) const Padding(padding: EdgeInsets.symmetric(vertical: 8), child: LinearProgressIndicator(color: AppTheme.accentCyan)),
+            if (_validationError != null) Padding(padding: const EdgeInsets.only(top: 8), child: Text(_validationError!, style: const TextStyle(color: AppTheme.primaryRed, fontSize: 12))),
+            if (_customerName != null) Padding(padding: const EdgeInsets.only(top: 8), child: Text('Verified: $_customerName', style: const TextStyle(color: AppTheme.successGreen, fontWeight: FontWeight.bold))),
             
-            const SizedBox(height: 16),
+            const SizedBox(height: 24),
+            Text('Select Amount', style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.w600)),
+            const SizedBox(height: 12),
+            if (showGrid) ...[
+              GridView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 3,
+                  mainAxisSpacing: 10,
+                  crossAxisSpacing: 10,
+                  childAspectRatio: 2.2,
+                ),
+                itemCount: _quickAmounts.length,
+                itemBuilder: (context, index) {
+                  final amount = _quickAmounts[index];
+                  final isSelected = _amountController.text == amount.toString();
+                  return GestureDetector(
+                    onTap: () => setState(() => _amountController.text = amount.toString()),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: isSelected ? AppTheme.accentCyan.withOpacity(0.2) : AppTheme.surfaceColor,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: isSelected ? AppTheme.accentCyan : Colors.white10),
+                      ),
+                      child: Center(
+                        child: Text(
+                          '₦${amount.toInt()}',
+                          style: TextStyle(color: isSelected ? AppTheme.accentCyan : Colors.white, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
+              const SizedBox(height: 16),
+            ],
+            
             TextField(
               controller: _amountController,
               readOnly: widget.biller['amount'] > 0,
               keyboardType: const TextInputType.numberWithOptions(decimal: true),
               style: const TextStyle(color: Colors.white),
               decoration: InputDecoration(
-                labelText: 'Amount',
+                labelText: 'Manual Amount',
+                prefixText: '₦ ',
+                prefixStyle: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                 labelStyle: const TextStyle(color: Colors.grey),
                 filled: true,
                 fillColor: AppTheme.surfaceColor,
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
               ),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 32),
             SizedBox(
               width: double.infinity,
               height: 56,
               child: ElevatedButton(
                 onPressed: _isLoading ? null : _pay,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppTheme.primaryBlue,
+                  backgroundColor: AppTheme.accentCyan,
+                  foregroundColor: Colors.black,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                 ),
-                child: _isLoading ? const CircularProgressIndicator() : const Text('Pay Bill', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                child: _isLoading ? const CircularProgressIndicator(color: Colors.black) : const Text('Pay Bill Now', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
               ),
             ),
           ],
         ),
       ),
     );
+  }
+
+  IconData _getIconForSheet(String? billerType) {
+    if (billerType == null) return Icons.payment;
+    final type = billerType.toUpperCase();
+    if (type.contains('AIRTIME')) return Icons.phone_android;
+    if (type.contains('DATA')) return Icons.wifi;
+    if (type.contains('CABLE')) return Icons.tv;
+    return Icons.payment;
   }
 }
