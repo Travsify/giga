@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flota_mobile/features/tracking/rider_dashboard_controller.dart';
 import 'package:flota_mobile/features/tracking/rider_stats_service.dart';
+import 'package:flota_mobile/features/vehicle/vehicle_management_screen.dart';
 import 'package:flota_mobile/features/tracking/rider_earnings_screen.dart';
 import 'package:flota_mobile/features/tracking/rider_jobs_screen.dart';
 import 'package:flota_mobile/features/profile/profile_screen.dart';
@@ -449,9 +450,9 @@ class _ControlCenterHeader extends StatelessWidget {
                 return GestureDetector(
                   onTap: () {
                     if (isReady) {
-                      showModalBottomSheet(
-                        context: context,
-                        builder: (context) => _buildVehicleSwitcher(context),
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const VehicleManagementScreen()),
                       );
                     } else if (!hasVehicle) {
                       // Navigate to profile to add vehicle

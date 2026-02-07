@@ -7,7 +7,9 @@ import 'package:flota_mobile/theme/app_theme.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flota_mobile/shared/map_picker_screen.dart';
+import 'package:flota_mobile/shared/map_picker_screen.dart';
 import 'package:flota_mobile/features/tracking/rider_stats_service.dart';
+import 'package:flota_mobile/features/vehicle/vehicle_management_screen.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
 import 'package:google_places_flutter/google_places_flutter.dart';
 import 'package:google_places_flutter/model/prediction.dart';
@@ -639,70 +641,78 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       );
     }
 
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: const Color(0xFF0F1219),
-        borderRadius: BorderRadius.circular(24),
-        image: DecorationImage(
-          image: const NetworkImage('https://www.transparenttextures.com/patterns/carbon-fibre.png'),
-          opacity: 0.1,
-          repeat: ImageRepeat.repeat,
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const VehicleManagementScreen()),
+        );
+      },
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: const Color(0xFF0F1219),
+          borderRadius: BorderRadius.circular(24),
+          image: DecorationImage(
+            image: const NetworkImage('https://www.transparenttextures.com/patterns/carbon-fibre.png'),
+            opacity: 0.1,
+            repeat: ImageRepeat.repeat,
+          ),
         ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    rider?['vehicle_type']?.toUpperCase() ?? 'COURIER VEHICLE',
-                    style: TextStyle(color: AppTheme.primaryBlue, fontWeight: FontWeight.bold, letterSpacing: 1.5, fontSize: 12),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Active Vehicle',
-                    style: GoogleFonts.outfit(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
-                  ),
-                ],
-              ),
-              const Icon(Icons.directions_car_filled_rounded, color: Colors.white24, size: 40),
-            ],
-          ),
-          const SizedBox(height: 24),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            decoration: BoxDecoration(
-              color: Colors.amber[400],
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: Colors.black, width: 1.5),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      rider?['vehicle_type']?.toUpperCase() ?? 'COURIER VEHICLE',
+                      style: TextStyle(color: AppTheme.primaryBlue, fontWeight: FontWeight.bold, letterSpacing: 1.5, fontSize: 12),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Active Vehicle',
+                      style: GoogleFonts.outfit(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+                    ),
+                  ],
+                ),
+                const Icon(Icons.directions_car_filled_rounded, color: Colors.white24, size: 40),
+              ],
             ),
-            child: Text(
-              rider?['vehicle_plate_number'] ?? 'ACTIVE VEHICLE',
-              style: GoogleFonts.outfit(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 22, letterSpacing: 2),
+            const SizedBox(height: 24),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              decoration: BoxDecoration(
+                color: Colors.amber[400],
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.black, width: 1.5),
+              ),
+              child: Text(
+                rider?['vehicle_plate_number'] ?? 'ACTIVE VEHICLE',
+                style: GoogleFonts.outfit(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 22, letterSpacing: 2),
+              ),
             ),
-          ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              Icon(
-                rider?['verification_status'] == 'verified' ? Icons.verified : Icons.error_outline, 
-                color: rider?['verification_status'] == 'verified' ? Colors.greenAccent : Colors.orangeAccent, 
-                size: 14
-              ),
-              const SizedBox(width: 6),
-              Text(
-                rider?['verification_status'] == 'verified' ? 'Documents Verified' : 'Pending Verification', 
-                style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 12)
-              ),
-            ],
-          ),
-        ],
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Icon(
+                  rider?['verification_status'] == 'verified' ? Icons.verified : Icons.error_outline, 
+                  color: rider?['verification_status'] == 'verified' ? Colors.greenAccent : Colors.orangeAccent, 
+                  size: 14
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  rider?['verification_status'] == 'verified' ? 'Documents Verified' : 'Pending Verification', 
+                  style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 12)
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
