@@ -200,8 +200,8 @@ class PaymentService {
       });
 
       return {
-        'amount': (response.data['amount'] as num).toDouble(),
-        'new_balance': (response.data['new_balance'] as num).toDouble(),
+        'amount': double.tryParse(response.data['amount']?.toString() ?? '0') ?? 0.0,
+        'new_balance': double.tryParse(response.data['new_balance']?.toString() ?? '0') ?? 0.0,
         'reference': 'GIGA-REDEEM',
       };
     } on DioException catch (e) {

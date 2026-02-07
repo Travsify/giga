@@ -11,6 +11,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flota_mobile/core/payment_service.dart';
 import 'package:flota_mobile/features/wallet/withdrawal_screen.dart';
 import 'package:flota_mobile/features/wallet/buy_giga_cards_screen.dart';
+import 'package:flota_mobile/features/wallet/bill_payment_screen.dart';
 import 'wallet_provider.dart';
 
 class WalletScreen extends ConsumerStatefulWidget {
@@ -52,42 +53,44 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
           color: AppTheme.surfaceColor,
           borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
         ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Redeem Giga Card', style: GoogleFonts.outfit(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white)),
-            const SizedBox(height: 12),
-            Text('Enter your card PIN to claim credit', style: TextStyle(color: AppTheme.textSecondary)),
-            const SizedBox(height: 20),
-            TextField(
-              controller: pinController,
-              autofocus: true,
-              textCapitalization: TextCapitalization.characters,
-              style: GoogleFonts.robotoMono(color: Colors.white, fontSize: 18, letterSpacing: 2),
-              decoration: InputDecoration(
-                hintText: 'GIGA-XXXX-XXXX',
-                hintStyle: TextStyle(color: Colors.white.withOpacity(0.3)),
-                filled: true,
-                fillColor: AppTheme.backgroundColor,
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
-                prefixIcon: const Icon(Icons.vpn_key, color: AppTheme.primaryRed),
-              ),
-            ),
-            const SizedBox(height: 24),
-            SizedBox(
-              width: double.infinity,
-              height: 56,
-              child: ElevatedButton(
-                onPressed: () => Navigator.pop(context, pinController.text),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppTheme.primaryRed,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Redeem Giga Card', style: GoogleFonts.outfit(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white)),
+              const SizedBox(height: 12),
+              Text('Enter your card PIN to claim credit', style: TextStyle(color: AppTheme.textSecondary)),
+              const SizedBox(height: 20),
+              TextField(
+                controller: pinController,
+                autofocus: true,
+                textCapitalization: TextCapitalization.characters,
+                style: GoogleFonts.robotoMono(color: Colors.white, fontSize: 18, letterSpacing: 2),
+                decoration: InputDecoration(
+                  hintText: 'GIGA-XXXX-XXXX',
+                  hintStyle: TextStyle(color: Colors.white.withOpacity(0.3)),
+                  filled: true,
+                  fillColor: AppTheme.backgroundColor,
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
+                  prefixIcon: const Icon(Icons.vpn_key, color: AppTheme.primaryRed),
                 ),
-                child: const Text('Redeem Now', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
               ),
-            ),
-          ],
+              const SizedBox(height: 24),
+              SizedBox(
+                width: double.infinity,
+                height: 56,
+                child: ElevatedButton(
+                  onPressed: () => Navigator.pop(context, pinController.text),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppTheme.primaryRed,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  ),
+                  child: const Text('Redeem Now', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -130,48 +133,50 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
           color: AppTheme.surfaceColor,
           borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
         ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text('Fund Wallet', style: GoogleFonts.outfit(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white)),
-                IconButton(onPressed: () => Navigator.pop(context), icon: const Icon(Icons.close, color: Colors.white)),
-              ],
-            ),
-            const SizedBox(height: 20),
-            TextField(
-              controller: amountController,
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
-              autofocus: true,
-              style: GoogleFonts.outfit(fontSize: 32, fontWeight: FontWeight.bold, color: Colors.white),
-              decoration: InputDecoration(
-                prefixText: '${ref.watch(authProvider).currencySymbol} ',
-                prefixStyle: GoogleFonts.outfit(fontSize: 32, fontWeight: FontWeight.bold, color: AppTheme.primaryBlue),
-                hintText: '0.00',
-                hintStyle: TextStyle(color: Colors.grey[700]),
-                border: InputBorder.none,
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text('Fund Wallet', style: GoogleFonts.outfit(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white)),
+                  IconButton(onPressed: () => Navigator.pop(context), icon: const Icon(Icons.close, color: Colors.white)),
+                ],
               ),
-            ),
-            const SizedBox(height: 24),
-            SizedBox(
-              width: double.infinity,
-              height: 56,
-              child: ElevatedButton(
-                onPressed: () {
-                  final val = double.tryParse(amountController.text);
-                  Navigator.pop(context, val);
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppTheme.primaryBlue,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              const SizedBox(height: 20),
+              TextField(
+                controller: amountController,
+                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                autofocus: true,
+                style: GoogleFonts.outfit(fontSize: 32, fontWeight: FontWeight.bold, color: Colors.white),
+                decoration: InputDecoration(
+                  prefixText: '${ref.watch(authProvider).currencySymbol} ',
+                  prefixStyle: GoogleFonts.outfit(fontSize: 32, fontWeight: FontWeight.bold, color: AppTheme.primaryBlue),
+                  hintText: '0.00',
+                  hintStyle: TextStyle(color: Colors.grey[700]),
+                  border: InputBorder.none,
                 ),
-                child: Text('Add Funds via ${_region == 'Africa' ? 'Flutterwave' : 'Stripe'}', style: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.bold)),
               ),
-            ),
-          ],
+              const SizedBox(height: 24),
+              SizedBox(
+                width: double.infinity,
+                height: 56,
+                child: ElevatedButton(
+                  onPressed: () {
+                    final val = double.tryParse(amountController.text);
+                    Navigator.pop(context, val);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppTheme.primaryBlue,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  ),
+                  child: Text('Add Funds via ${_region == 'Africa' ? 'Flutterwave' : 'Stripe'}', style: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.bold)),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -221,86 +226,88 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
           color: AppTheme.surfaceColor,
           borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
         ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text('Send Funds', style: GoogleFonts.outfit(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white)),
-                IconButton(onPressed: () => Navigator.pop(context), icon: const Icon(Icons.close, color: Colors.white)),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Text('Available: ${authState.currencySymbol}${walletState.balance.toStringAsFixed(2)}', style: TextStyle(color: AppTheme.textSecondary)),
-            const SizedBox(height: 20),
-            TextField(
-              controller: emailController,
-              keyboardType: TextInputType.emailAddress,
-              style: const TextStyle(color: Colors.white),
-              decoration: InputDecoration(
-                labelText: "Recipient's Email",
-                labelStyle: TextStyle(color: AppTheme.textSecondary),
-                hintText: "Enter recipient email",
-                hintStyle: TextStyle(color: Colors.white.withOpacity(0.3)),
-                filled: true,
-                fillColor: AppTheme.backgroundColor,
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
-                prefixIcon: const Icon(Icons.alternate_email, color: AppTheme.accentCyan),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text('Send Funds', style: GoogleFonts.outfit(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white)),
+                  IconButton(onPressed: () => Navigator.pop(context), icon: const Icon(Icons.close, color: Colors.white)),
+                ],
               ),
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: amountController,
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
-              style: GoogleFonts.outfit(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
-              decoration: InputDecoration(
-                labelText: "Amount",
-                labelStyle: TextStyle(color: AppTheme.textSecondary),
-                prefixText: '${authState.currencySymbol} ',
-                prefixStyle: GoogleFonts.outfit(fontSize: 24, fontWeight: FontWeight.bold, color: AppTheme.accentCyan),
-                hintText: "0.00",
-                hintStyle: TextStyle(color: Colors.white.withOpacity(0.3)),
-                filled: true,
-                fillColor: AppTheme.backgroundColor,
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
-              ),
-            ),
-            const SizedBox(height: 24),
-            SizedBox(
-              width: double.infinity,
-              height: 56,
-              child: ElevatedButton.icon(
-                onPressed: () {
-                  final amount = double.tryParse(amountController.text);
-                  if (emailController.text.trim().isEmpty) {
-                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Enter recipient email')));
-                    return;
-                  }
-                  if (amount == null || amount <= 0) {
-                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Enter valid amount')));
-                    return;
-                  }
-                  if (amount > walletState.balance) {
-                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Insufficient balance'), backgroundColor: AppTheme.primaryRed));
-                    return;
-                  }
-                  Navigator.pop(context, {
-                    'email': emailController.text.trim(),
-                    'amount': amount,
-                  });
-                },
-                icon: const Icon(Icons.send),
-                label: const Text('Continue'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppTheme.accentCyan,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              const SizedBox(height: 8),
+              Text('Available: ${authState.currencySymbol}${walletState.balance.toStringAsFixed(2)}', style: TextStyle(color: AppTheme.textSecondary)),
+              const SizedBox(height: 20),
+              TextField(
+                controller: emailController,
+                keyboardType: TextInputType.emailAddress,
+                style: const TextStyle(color: Colors.white),
+                decoration: InputDecoration(
+                  labelText: "Recipient's Email",
+                  labelStyle: TextStyle(color: AppTheme.textSecondary),
+                  hintText: "Enter recipient email",
+                  hintStyle: TextStyle(color: Colors.white.withOpacity(0.3)),
+                  filled: true,
+                  fillColor: AppTheme.backgroundColor,
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
+                  prefixIcon: const Icon(Icons.alternate_email, color: AppTheme.accentCyan),
                 ),
               ),
-            ),
-          ],
+              const SizedBox(height: 16),
+              TextField(
+                controller: amountController,
+                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                style: GoogleFonts.outfit(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
+                decoration: InputDecoration(
+                  labelText: "Amount",
+                  labelStyle: TextStyle(color: AppTheme.textSecondary),
+                  prefixText: '${authState.currencySymbol} ',
+                  prefixStyle: GoogleFonts.outfit(fontSize: 24, fontWeight: FontWeight.bold, color: AppTheme.accentCyan),
+                  hintText: "0.00",
+                  hintStyle: TextStyle(color: Colors.white.withOpacity(0.3)),
+                  filled: true,
+                  fillColor: AppTheme.backgroundColor,
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
+                ),
+              ),
+              const SizedBox(height: 24),
+              SizedBox(
+                width: double.infinity,
+                height: 56,
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    final amount = double.tryParse(amountController.text);
+                    if (emailController.text.trim().isEmpty) {
+                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Enter recipient email')));
+                      return;
+                    }
+                    if (amount == null || amount <= 0) {
+                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Enter valid amount')));
+                      return;
+                    }
+                    if (amount > walletState.balance) {
+                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Insufficient balance'), backgroundColor: AppTheme.primaryRed));
+                      return;
+                    }
+                    Navigator.pop(context, {
+                      'email': emailController.text.trim(),
+                      'amount': amount,
+                    });
+                  },
+                  icon: const Icon(Icons.send),
+                  label: const Text('Continue'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppTheme.accentCyan,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -559,6 +566,12 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
               child: const Center(child: CircularProgressIndicator(color: AppTheme.primaryRed)),
             ),
         ],
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const BillPaymentScreen())),
+        backgroundColor: AppTheme.accentCyan,
+        icon: const Icon(Icons.receipt_long, color: Colors.white),
+        label: const Text('Pay Bills', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
       ),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
