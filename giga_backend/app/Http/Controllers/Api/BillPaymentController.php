@@ -5,16 +5,19 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Services\FlutterwaveBillService;
+use App\Services\SecurityNotificationService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class BillPaymentController extends Controller
 {
-    protected $billService;
+    protected FlutterwaveBillService $billService;
+    protected SecurityNotificationService $notifications;
 
-    public function __construct(FlutterwaveBillService $billService)
+    public function __construct(FlutterwaveBillService $billService, SecurityNotificationService $notifications)
     {
         $this->billService = $billService;
+        $this->notifications = $notifications;
     }
 
     /**
@@ -101,7 +104,7 @@ class BillPaymentController extends Controller
                 }
 
                 // Record Transaction
-                $wallet->transactions()->create([
+                $transaction = $wallet->transactions()->create([
                     'amount' => -$amount,
                     'type' => 'debit',
                     'description' => 'Bill Payment: ' . ($request->biller_name ?? $request->type) . ' (' . $request->customer . ')',
@@ -110,6 +113,9 @@ class BillPaymentController extends Controller
                     'currency' => $wallet->currency,
                     'category' => 'bill_payment'
                 ]);
+
+                // Send Notification
+                $this->notifications->notifyTransaction($transaction);
 
                 return response()->json([
                     'status' => 'success',

@@ -28,6 +28,7 @@ class NotificationSettings extends Page
             'chat_notifications' => AppSetting::get('chat_notifications', true),
             'resend_api_key' => AppSetting::get('resend_api_key', ''),
             'resend_from_email' => AppSetting::get('resend_from_email', 'noreply@giga.com'),
+            'admin_alert_email' => AppSetting::get('admin_alert_email', ''),
         ]);
     }
 
@@ -73,6 +74,11 @@ class NotificationSettings extends Page
                             ->label('From Email')
                             ->email()
                             ->placeholder('noreply@giga.com'),
+                        Forms\Components\TextInput::make('admin_alert_email')
+                            ->label('Admin Alert Email')
+                            ->email()
+                            ->placeholder('admin@giga.com')
+                            ->helperText('Main email address for security and transaction alerts'),
                     ])->columns(2),
             ])
             ->statePath('data');

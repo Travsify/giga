@@ -13,6 +13,13 @@ use Illuminate\Support\Facades\DB;
 
 class AuthController extends Controller
 {
+    protected \App\Services\SecurityNotificationService $notifications;
+
+    public function __construct(\App\Services\SecurityNotificationService $notifications)
+    {
+        $this->notifications = $notifications;
+    }
+
     public function register(Request $request)
     {
         try {
@@ -91,6 +98,9 @@ class AuthController extends Controller
 
                 $token = $user->createToken('auth_token')->plainTextToken;
 
+                // Send Security Alert
+                $this->notifications->notifyAuthEvent($user, 'signup');
+
                 // Load appropriate relationships based on role
                 if ($request->role === 'Company') {
                     $user->load('company');
@@ -139,6 +149,9 @@ class AuthController extends Controller
         }
 
         $token = $user->createToken('auth_token')->plainTextToken;
+
+        // Send Security Alert
+        $this->notifications->notifyAuthEvent($user, 'login');
 
         return response()->json([
             'user' => $user,

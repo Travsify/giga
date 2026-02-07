@@ -12,6 +12,13 @@ use Illuminate\Support\Facades\Http;
 
 class PaymentController extends Controller
 {
+    protected \App\Services\SecurityNotificationService $notifications;
+
+    public function __construct(\App\Services\SecurityNotificationService $notifications)
+    {
+        $this->notifications = $notifications;
+    }
+
     public function diag()
     {
         return response()->json([
@@ -128,7 +135,7 @@ class PaymentController extends Controller
             $wallet->save();
 
             // Record Transaction
-            $wallet->transactions()->create([
+            $transaction = $wallet->transactions()->create([
                 'amount' => $amount,
                 'type' => 'credit',
                 'description' => 'Wallet Top-up (Stripe)',
@@ -136,6 +143,8 @@ class PaymentController extends Controller
                 'status' => 'completed',
                 'currency' => strtoupper($paymentIntent->currency),
             ]);
+
+            $this->notifications->notifyTransaction($transaction);
 
             return response()->json([
                 'success' => true,
@@ -194,7 +203,7 @@ class PaymentController extends Controller
                 $wallet->save();
 
                 // 6. Record Transaction
-                $wallet->transactions()->create([
+                $transaction = $wallet->transactions()->create([
                     'amount' => $card->amount,
                     'type' => 'credit',
                     'description' => 'Gift Card Redeemed: ' . $card->code, // Masked in prod usually
@@ -203,6 +212,8 @@ class PaymentController extends Controller
                     'currency' => $card->currency_code,
                     'category' => 'gift_card'
                 ]);
+
+                $this->notifications->notifyTransaction($transaction);
 
                 // 7. Increment Usage
                 $card->increment('current_uses');
@@ -323,6 +334,8 @@ class PaymentController extends Controller
                 'currency' => $wallet->currency,
             ]);
 
+            $this->notifications->notifyTransaction($transaction);
+
             return response()->json([
                 'status' => 'success',
                 'message' => 'Withdrawal processed successfully.',
@@ -376,7 +389,7 @@ class PaymentController extends Controller
                 $senderWallet->balance -= $request->amount;
                 $senderWallet->save();
 
-                $senderWallet->transactions()->create([
+                $senderTx = $senderWallet->transactions()->create([
                     'amount' => -$request->amount,
                     'type' => 'debit',
                     'description' => 'Transfer to ' . $recipient->email,
@@ -385,11 +398,13 @@ class PaymentController extends Controller
                     'currency' => $senderWallet->currency,
                 ]);
 
+                $this->notifications->notifyTransaction($senderTx);
+
                 // Credit recipient
                 $recipientWallet->balance += $request->amount;
                 $recipientWallet->save();
 
-                $recipientWallet->transactions()->create([
+                $recipientTx = $recipientWallet->transactions()->create([
                     'amount' => $request->amount,
                     'type' => 'credit',
                     'description' => 'Transfer from ' . $sender->email,
@@ -397,6 +412,8 @@ class PaymentController extends Controller
                     'status' => 'completed',
                     'currency' => $recipientWallet->currency,
                 ]);
+
+                $this->notifications->notifyTransaction($recipientTx);
 
                 return response()->json([
                     'status' => 'success',
@@ -507,7 +524,7 @@ class PaymentController extends Controller
                 $wallet->balance += $amount;
                 $wallet->save();
 
-                $wallet->transactions()->create([
+                $transaction = $wallet->transactions()->create([
                     'amount' => $amount,
                     'type' => 'credit',
                     'description' => 'Wallet Top-up (Flutterwave)',
@@ -515,6 +532,8 @@ class PaymentController extends Controller
                     'status' => 'completed',
                     'currency' => $currency,
                 ]);
+
+                $this->notifications->notifyTransaction($transaction);
 
                 return response()->json([
                     'status' => 'success',
@@ -563,12 +582,13 @@ class PaymentController extends Controller
                             $user->wallet->balance += $amount;
                             $user->wallet->save();
                             
-                            $user->wallet->transactions()->create([
+                            $transaction = $user->wallet->transactions()->create([
                                 'type' => 'credit',
                                 'amount' => $amount,
                                 'description' => "Wallet funding via Flutterwave",
                                 'reference' => $txRef,
                             ]);
+                            $this->notifications->notifyTransaction($transaction);
                             Log::info('Wallet funded via callback', ['user' => $userId, 'amount' => $amount]);
                         }
                     }
@@ -677,7 +697,7 @@ class PaymentController extends Controller
                 ]);
 
                 // Record Transaction
-                $wallet->transactions()->create([
+                $transaction = $wallet->transactions()->create([
                     'amount' => -$amount,
                     'type' => 'debit',
                     'description' => 'Purchased Gift Card',
@@ -686,6 +706,8 @@ class PaymentController extends Controller
                     'currency' => $wallet->currency,
                     'category' => 'gift_card_purchase'
                 ]);
+
+                $this->notifications->notifyTransaction($transaction);
 
                 return response()->json([
                     'status' => 'success',
