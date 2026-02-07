@@ -12,6 +12,7 @@ import 'package:flota_mobile/features/marketplace/home_widgets.dart';
 import 'package:flota_mobile/features/sustainability/carbon_dashboard_screen.dart';
 import 'package:flota_mobile/features/location/ulez_service.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:flota_mobile/features/wallet/bill_payment_screen.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -587,6 +588,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           
           const SliverPadding(padding: EdgeInsets.only(bottom: 150)),
         ],
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const BillPaymentScreen())),
+        backgroundColor: AppTheme.accentCyan,
+        icon: const Icon(Icons.receipt_long, color: Colors.white),
+        label: const Text('Pay Bills', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
       ),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(

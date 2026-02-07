@@ -16,6 +16,7 @@ import 'package:flota_mobile/features/safety/report_incident_screen.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:flota_mobile/features/shared/widgets/service_mode_toggle.dart';
+import 'package:flota_mobile/features/wallet/bill_payment_screen.dart';
 
 
 class RiderDashboard extends ConsumerStatefulWidget {
@@ -280,6 +281,13 @@ class _RiderHomeTabState extends ConsumerState<_RiderHomeTab> {
                   backgroundColor: Colors.white,
                   child: const Icon(Icons.account_balance_wallet, color: AppTheme.primaryBlue),
                   onPressed: () => context.push('/wallet'),
+                ),
+                const SizedBox(height: 10),
+                FloatingActionButton.small(
+                  heroTag: 'bill_pay_fab',
+                  backgroundColor: AppTheme.accentCyan,
+                  child: const Icon(Icons.receipt_long, color: Colors.white),
+                  onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const BillPaymentScreen())),
                 ),
               ],
             ),

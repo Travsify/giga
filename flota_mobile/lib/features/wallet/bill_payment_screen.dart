@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../core/app_theme.dart';
-import '../../core/bill_payment_service.dart';
-import '../auth/auth_provider.dart';
+import 'package:flota_mobile/theme/app_theme.dart';
+import 'package:flota_mobile/core/bill_payment_service.dart';
 
 class BillPaymentScreen extends ConsumerStatefulWidget {
   const BillPaymentScreen({super.key});
@@ -16,8 +15,31 @@ class _BillPaymentScreenState extends ConsumerState<BillPaymentScreen> {
   List<dynamic> _allBillers = [];
   List<dynamic> _filteredBillers = [];
   bool _isLoading = true;
-  String _searchQuery = '';
+  String? _selectedCategory;
   final TextEditingController _searchController = TextEditingController();
+
+  final Map<String, List<Map<String, dynamic>>> _sections = {
+    'E-commerce': [
+      {'id': 'ORAIMO', 'name': 'oraimo', 'icon': Icons.shopping_bag_outlined, 'badge': null},
+      {'id': 'ALIEXPRESS', 'name': 'AliExpress', 'icon': Icons.shopping_cart_outlined, 'badge': 'NEW'},
+      {'id': 'GIFT_CARDS', 'name': 'Gift Cards', 'icon': Icons.card_giftcard, 'badge': null},
+      {'id': 'CHOWDECK', 'name': 'Chowdeck', 'icon': Icons.delivery_dining_outlined, 'badge': 'HOT'},
+    ],
+    'Bills Payment': [
+      {'id': 'UTILITY_BILL', 'name': 'Electricity', 'icon': Icons.lightbulb_outline, 'badge': 'HOT'},
+      {'id': 'SOLAR', 'name': 'Solar', 'icon': Icons.wb_sunny_outlined, 'badge': null},
+      {'id': 'AIRTIME', 'name': 'Airtime', 'icon': Icons.phone_android, 'badge': null},
+      {'id': 'DATA_BUNDLE', 'name': 'Data', 'icon': Icons.wifi, 'badge': null},
+      {'id': 'CABLE_PAY', 'name': 'TV', 'icon': Icons.tv, 'badge': null},
+      {'id': 'INTERNET_SERVICE', 'name': 'Internet', 'icon': Icons.language, 'badge': null},
+      {'id': 'ACCOUNT_VERIFICATION', 'name': 'Financial', 'icon': Icons.account_balance_wallet_outlined, 'badge': null},
+      {'id': 'GOVERNMENT_PAYMENT', 'name': 'Government', 'icon': Icons.account_balance_outlined, 'badge': null},
+      {'id': 'TAX_PAYMENT', 'name': 'Taxes', 'icon': Icons.receipt_long_outlined, 'badge': null},
+      {'id': 'RELIGIOUS_INSTITUTIONS', 'name': 'Religious', 'icon': Icons.church_outlined, 'badge': null},
+      {'id': 'SCHOOL_FEES', 'name': 'School/Exam', 'icon': Icons.school_outlined, 'badge': null},
+      {'id': 'INSURANCE', 'name': 'Insurance', 'icon': Icons.verified_user_outlined, 'badge': null},
+    ],
+  };
 
   @override
   void initState() {
@@ -30,10 +52,8 @@ class _BillPaymentScreenState extends ConsumerState<BillPaymentScreen> {
       final billers = await BillPaymentService.getCategories();
       if (mounted) {
         setState(() {
-          // Filter for NG for now, or use user's country code if available
-          // API returns country code like "NG", "GH", "KE"
           _allBillers = billers.where((b) => b['country'] == 'NG').toList();
-          _filteredBillers = _allBillers;
+          _filterBillers();
           _isLoading = false;
         });
       }
@@ -45,14 +65,32 @@ class _BillPaymentScreenState extends ConsumerState<BillPaymentScreen> {
     }
   }
 
-  void _filterBillers(String query) {
+  void _filterBillers([String? query]) {
+    final q = (query ?? _searchController.text).toLowerCase();
     setState(() {
-      _searchQuery = query;
       _filteredBillers = _allBillers.where((b) {
-        final name = b['name'].toString().toLowerCase();
-        final shortName = b['short_name'].toString().toLowerCase();
-        return name.contains(query.toLowerCase()) || shortName.contains(query.toLowerCase());
+        final matchesQuery = b['name'].toString().toLowerCase().contains(q) || 
+                           b['short_name'].toString().toLowerCase().contains(q);
+        
+        bool matchesCategory = true;
+        if (_selectedCategory != null) {
+          final billerName = b['biller_name'].toString().toUpperCase();
+          matchesCategory = billerName.contains(_selectedCategory!);
+        }
+        
+        return matchesQuery && matchesCategory;
       }).toList();
+    });
+  }
+
+  void _selectCategory(String? categoryId) {
+    setState(() {
+      if (_selectedCategory == categoryId) {
+        _selectedCategory = null;
+      } else {
+        _selectedCategory = categoryId;
+      }
+      _filterBillers();
     });
   }
 
@@ -72,55 +110,200 @@ class _BillPaymentScreenState extends ConsumerState<BillPaymentScreen> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        title: Text('Pay Bills', style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold)),
+        title: Text('All Service', style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold)),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => Navigator.pop(context),
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.search, color: Colors.white),
+            onPressed: () {}, // Handled by text field below in this refactor, but kept icon for style
+          ),
+        ],
       ),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: TextField(
-              controller: _searchController,
-              onChanged: _filterBillers,
-              style: const TextStyle(color: Colors.white),
-              decoration: InputDecoration(
-                hintText: 'Search for Airtime, Data, TV...',
-                hintStyle: TextStyle(color: Colors.white.withOpacity(0.5)),
-                prefixIcon: const Icon(Icons.search, color: AppTheme.accentCyan),
-                filled: true,
-                fillColor: AppTheme.surfaceColor,
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+      body: CustomScrollView(
+        slivers: [
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+              child: TextField(
+                controller: _searchController,
+                onChanged: (v) => _filterBillers(v),
+                style: const TextStyle(color: Colors.white),
+                decoration: InputDecoration(
+                  hintText: 'Search for services...',
+                  hintStyle: TextStyle(color: Colors.white.withOpacity(0.3)),
+                  prefixIcon: const Icon(Icons.search, color: AppTheme.accentCyan),
+                  filled: true,
+                  fillColor: AppTheme.surfaceColor,
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
+                ),
               ),
             ),
           ),
-          Expanded(
-            child: _isLoading
-                ? const Center(child: CircularProgressIndicator(color: AppTheme.accentCyan))
-                : ListView.builder(
-                    itemCount: _filteredBillers.length,
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    itemBuilder: (context, index) {
-                      final biller = _filteredBillers[index];
-                      return Card(
-                        color: AppTheme.surfaceColor,
-                        margin: const EdgeInsets.only(bottom: 12),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                        child: ListTile(
-                          leading: CircleAvatar(
-                            backgroundColor: AppTheme.primaryBlue.withOpacity(0.2),
-                            child: Text(biller['short_name']?[0] ?? 'B', style: const TextStyle(color: AppTheme.primaryBlue, fontWeight: FontWeight.bold)),
-                          ),
-                          title: Text(biller['name'], style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                          subtitle: Text(biller['label_name'] ?? 'Enter details', style: TextStyle(color: Colors.white.withOpacity(0.6))),
-                          trailing: const Icon(Icons.chevron_right, color: Colors.white54),
-                          onTap: () => _showPaymentSheet(biller),
-                        ),
+          
+          if (_isLoading)
+            const SliverFillRemaining(
+              child: Center(
+                child: CircularProgressIndicator(color: AppTheme.accentCyan),
+              ),
+            )
+          else if (_selectedCategory == null && _searchController.text.isEmpty) ...[
+            for (var entry in _sections.entries) ...[
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 24, 20, 16),
+                  child: Text(
+                    entry.key,
+                    style: GoogleFonts.outfit(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+              SliverPadding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                sliver: SliverGrid(
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 4,
+                    mainAxisSpacing: 16,
+                    crossAxisSpacing: 12,
+                    childAspectRatio: 0.8,
+                  ),
+                  delegate: SliverChildBuilderDelegate(
+                    (context, index) {
+                      final item = entry.value[index];
+                      return _ServiceGridItem(
+                        name: item['name'],
+                        icon: item['icon'],
+                        badge: item['badge'],
+                        onTap: () => _selectCategory(item['id']),
                       );
                     },
+                    childCount: entry.value.length,
                   ),
+                ),
+              ),
+            ],
+            const SliverToBoxAdapter(child: SizedBox(height: 40)),
+          ] else ...[
+            // Filtered List View
+            SliverPadding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+              sliver: SliverList(
+                delegate: SliverChildBuilderDelegate(
+                  (context, index) {
+                    final biller = _filteredBillers[index];
+                    return Card(
+                      color: AppTheme.surfaceColor,
+                      margin: const EdgeInsets.only(bottom: 12),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      child: ListTile(
+                        leading: Container(
+                          width: 44,
+                          height: 44,
+                          decoration: BoxDecoration(
+                            color: AppTheme.accentCyan.withOpacity(0.1),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Center(
+                            child: Text(
+                              biller['short_name']?[0] ?? 'B',
+                              style: const TextStyle(color: AppTheme.accentCyan, fontWeight: FontWeight.bold, fontSize: 18),
+                            ),
+                          ),
+                        ),
+                        title: Text(biller['name'], style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                        subtitle: Text(biller['label_name'] ?? 'Ready to pay', style: TextStyle(color: Colors.white.withOpacity(0.5))),
+                        trailing: const Icon(Icons.arrow_forward_ios, size: 14, color: Colors.white24),
+                        onTap: () => _showPaymentSheet(biller),
+                      ),
+                    );
+                  },
+                  childCount: _filteredBillers.length,
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _ServiceGridItem extends StatelessWidget {
+  final String name;
+  final IconData icon;
+  final String? badge;
+  final VoidCallback onTap;
+
+  const _ServiceGridItem({
+    required this.name,
+    required this.icon,
+    this.badge,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Column(
+        children: [
+          Stack(
+            clipBehavior: Clip.none,
+            children: [
+              Container(
+                width: 56,
+                height: 56,
+                decoration: BoxDecoration(
+                  color: AppTheme.surfaceColor,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: Colors.white.withOpacity(0.05)),
+                ),
+                child: Center(
+                  child: Icon(icon, color: AppTheme.accentCyan, size: 28),
+                ),
+              ),
+              if (badge != null)
+                Positioned(
+                  top: -8,
+                  right: -8,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: badge == 'HOT' ? AppTheme.primaryRed : AppTheme.successGreen,
+                      borderRadius: BorderRadius.circular(8),
+                      boxShadow: [
+                        BoxShadow(
+                          color: (badge == 'HOT' ? AppTheme.primaryRed : AppTheme.successGreen).withOpacity(0.4),
+                          blurRadius: 4,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: Text(
+                      badge!,
+                      style: const TextStyle(color: Colors.white, fontSize: 8, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            name,
+            textAlign: TextAlign.center,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: GoogleFonts.outfit(
+              color: Colors.white.withOpacity(0.7),
+              fontSize: 11,
+              fontWeight: FontWeight.w500,
+            ),
           ),
         ],
       ),
@@ -174,7 +357,7 @@ class _BillPaymentSheetState extends State<_BillPaymentSheet> {
 
     setState(() => _isLoading = true);
     try {
-      final res = await BillPaymentService.payBill(
+      await BillPaymentService.payBill(
         amount: amount,
         type: widget.biller['biller_name'], // Should ideally be item_code or biller_name depending on API requirement. Using biller_name as generic type.
         customer: _customerController.text,
