@@ -24,7 +24,15 @@ class Rider extends Model
         'vehicle_license_path',
         'vehicle_registration_path',
         'insurance_certificate_path',
-        'verification_status'
+        'verification_status',
+        // New verification fields
+        'country',
+        'passport_photo_path',
+        'nin_path',
+        'intl_passport_path',
+        'dvla_license_path',
+        'brp_path',
+        'identity_doc_type',
     ];
 
     protected $casts = [

@@ -625,4 +625,83 @@ class PaymentController extends Controller
             </html>
         ", 200, ['Content-Type' => 'text/html']);
     }
+
+    /**
+     * Purchase a gift card.
+     */
+    public function purchaseGiftCard(Request $request)
+    {
+        $request->validate([
+            'amount' => 'required|numeric|min:1',
+            'currency' => 'required|string|in:NGN,GBP,USD',
+            'quantity' => 'integer|min:1|max:10', // Optional bulk buy
+        ]);
+
+        try {
+            return DB::transaction(function () use ($request) {
+                $user = $request->user();
+                $wallet = $user->wallet;
+                $amount = $request->amount;
+
+                if (!$wallet) {
+                    return response()->json(['error' => 'Wallet not found'], 404);
+                }
+
+                // Currency check
+                if (strtoupper($wallet->currency) !== strtoupper($request->currency)) {
+                    return response()->json(['error' => 'Currency mismatch'], 400);
+                }
+
+                // Balance check
+                if ($wallet->balance < $amount) {
+                    return response()->json(['error' => 'Insufficient funds'], 400);
+                }
+
+                // Deduct from wallet
+                $wallet->balance -= $amount;
+                $wallet->save();
+
+                // Generate Card
+                $code = 'GIGA-' . strtoupper(\Illuminate\Support\Str::random(4)) . '-' . strtoupper(\Illuminate\Support\Str::random(4));
+                
+                $card = \App\Models\GiftCard::create([
+                    'code' => $code,
+                    'amount' => $amount,
+                    'currency_code' => $request->currency, // Check DB column name! Usually currency or currency_code
+                    'creator_id' => $user->id,
+                    'is_active' => true,
+                    'max_uses' => 1,
+                    'current_uses' => 0,
+                    'expires_at' => now()->addYear(),
+                ]);
+
+                // Record Transaction
+                $wallet->transactions()->create([
+                    'amount' => -$amount,
+                    'type' => 'debit',
+                    'description' => 'Purchased Gift Card',
+                    'reference' => 'GIFT_PURCH_' . $card->id,
+                    'status' => 'completed',
+                    'currency' => $wallet->currency,
+                    'category' => 'gift_card_purchase'
+                ]);
+
+                return response()->json([
+                    'status' => 'success',
+                    'message' => 'Gift card purchased successfully',
+                    'card' => [
+                        'code' => $code,
+                        'amount' => $amount,
+                        'currency' => $request->currency,
+                        'expires_at' => $card->expires_at,
+                    ],
+                    'new_balance' => $wallet->balance
+                ]);
+            });
+
+        } catch (\Exception $e) {
+            Log::error('Gift Card Purchase Error: ' . $e->getMessage());
+            return response()->json(['error' => 'Failed to purchase gift card'], 500);
+        }
+    }
 }

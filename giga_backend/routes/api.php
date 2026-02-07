@@ -452,6 +452,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/deliveries/{id}/accept', [DeliveryController::class, 'accept']);
     Route::get('/riders/nearby', [DeliveryController::class, 'getNearbyRiders']);
 
+    // Incident Reporting
+    Route::post('/incidents', [App\Http\Controllers\Api\IncidentController::class, 'store']);
+
     // Chat
     Route::get('/deliveries/{id}/messages', [ChatController::class, 'index']);
     Route::post('/deliveries/{id}/messages', [ChatController::class, 'store']);
@@ -484,6 +487,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/wallet/flutterwave/create', [App\Http\Controllers\Api\PaymentController::class, 'createFlutterwavePayment']);
     Route::post('/wallet/flutterwave/verify', [App\Http\Controllers\Api\PaymentController::class, 'verifyFlutterwavePayment']);
     Route::post('/wallet/transfer', [App\Http\Controllers\Api\PaymentController::class, 'transfer']);
+    Route::post('/wallet/giftcard/purchase', [App\Http\Controllers\Api\PaymentController::class, 'purchaseGiftCard']);
 
     // Subscriptions
     Route::get('/subscription/status', [App\Http\Controllers\Api\SubscriptionController::class, 'status']);
