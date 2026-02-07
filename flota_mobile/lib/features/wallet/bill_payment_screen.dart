@@ -43,7 +43,6 @@ class _BillPaymentScreenState extends ConsumerState<BillPaymentScreen> {
       {'id': 'SCHOOL_FEES', 'name': 'Edu & Exams', 'icon': Icons.school_outlined, 'badge': null},
     ],
   };
-  };
 
   @override
   void initState() {
