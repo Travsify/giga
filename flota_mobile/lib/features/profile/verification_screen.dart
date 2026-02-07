@@ -3,21 +3,43 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flota_mobile/theme/app_theme.dart';
 import 'package:flota_mobile/features/profile/profile_provider.dart';
+import 'package:flota_mobile/features/profile/domain/verification_requirements.dart';
 import 'document_upload_screen.dart';
 
-class VerificationScreen extends ConsumerWidget {
+class VerificationScreen extends ConsumerStatefulWidget {
   const VerificationScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<VerificationScreen> createState() => _VerificationScreenState();
+}
+
+class _VerificationScreenState extends ConsumerState<VerificationScreen> {
+  String? _selectedCountry;
+  String? _selectedIdentityDoc; // For NG: 'nin' or 'intl_passport'
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final rider = ref.read(profileProvider).user?['rider'];
+      if (rider != null) {
+        setState(() {
+          _selectedCountry = rider['country'];
+          _selectedIdentityDoc = rider['identity_doc_type'];
+        });
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final profileState = ref.watch(profileProvider);
     final user = profileState.user;
     final rider = user?['rider'];
-
     final status = rider?['verification_status'] ?? 'pending';
-    final hasLicense = rider?['driver_license_path'] != null;
-    final hasRegistration = rider?['vehicle_registration_path'] != null;
-    final isPlateVerified = rider?['vehicle_verified'] == true;
+
+    // Use rider's country if set, else use selected
+    final country = _selectedCountry ?? rider?['country'];
 
     return Scaffold(
       backgroundColor: AppTheme.backgroundColor,
@@ -34,68 +56,239 @@ class VerificationScreen extends ConsumerWidget {
           children: [
             _buildStatusHeader(status),
             const SizedBox(height: 32),
-            Text('REQUIRED DOCUMENTS', style: GoogleFonts.outfit(color: Colors.white70, fontSize: 13, letterSpacing: 1.5, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 16),
-            _buildDocTile(
-              context,
-              'Driver License',
-              'Valid state-issued driving permit',
-              Icons.badge_outlined,
-              hasLicense ? 'Submitted' : 'Required',
-              hasLicense,
-              () => _uploadDoc(context, 'driver_license'),
-            ),
-            const SizedBox(height: 12),
-            _buildDocTile(
-              context,
-              'Vehicle Registration',
-              'Proof of ownership (V5C or logbook)',
-              Icons.description_outlined,
-              hasRegistration ? 'Submitted' : 'Required',
-              hasRegistration,
-              () => _uploadDoc(context, 'vehicle_registration'),
-            ),
-            const SizedBox(height: 32),
-            Text('VEHICLE VERIFICATION', style: GoogleFonts.outfit(color: Colors.white70, fontSize: 13, letterSpacing: 1.5, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 16),
-             _buildDocTile(
-              context,
-              'Plate Number Check',
-              'Verification via national database',
-              Icons.numbers_outlined,
-              isPlateVerified ? 'Verified' : 'Pending Check',
-              isPlateVerified,
-              () {
-                // If not verified, we could show a plate input dialog
-              },
-              showChevron: !isPlateVerified,
-            ),
+
+            // Country Selector
+            if (country == null) ...[
+              Text('SELECT YOUR COUNTRY', style: GoogleFonts.outfit(color: Colors.white70, fontSize: 13, letterSpacing: 1.5, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 16),
+              _buildCountrySelector(),
+              const SizedBox(height: 32),
+            ] else ...[
+              _buildCountryBadge(country),
+              const SizedBox(height: 24),
+              Text('REQUIRED DOCUMENTS', style: GoogleFonts.outfit(color: Colors.white70, fontSize: 13, letterSpacing: 1.5, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 16),
+              _buildDocumentList(country, rider),
+            ],
+
             const SizedBox(height: 48),
             if (status == 'pending' || status == 'rejected')
-              Container(
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: AppTheme.primaryBlue.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: AppTheme.primaryBlue.withOpacity(0.3)),
-                ),
-                child: Row(
-                  children: [
-                    const Icon(Icons.info_outline, color: AppTheme.primaryBlue),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: Text(
-                        'Upload all required documents to begin accepting delivery requests.',
-                        style: TextStyle(color: Colors.white.withOpacity(0.8), fontSize: 13),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+              _buildInfoBanner(),
           ],
         ),
       ),
     );
+  }
+
+  Widget _buildCountrySelector() {
+    return Column(
+      children: VerificationRequirements.supportedCountries.map((c) {
+        final isSelected = _selectedCountry == c['code'];
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 12),
+          child: InkWell(
+            onTap: () => setState(() => _selectedCountry = c['code']),
+            borderRadius: BorderRadius.circular(16),
+            child: Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: isSelected ? AppTheme.primaryBlue.withOpacity(0.15) : AppTheme.surfaceColor,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: isSelected ? AppTheme.primaryBlue : AppTheme.borderBlue, width: isSelected ? 2 : 1),
+              ),
+              child: Row(
+                children: [
+                  Text(c['flag']!, style: const TextStyle(fontSize: 32)),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Text(c['name']!, style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: isSelected ? FontWeight.bold : FontWeight.normal)),
+                  ),
+                  if (isSelected) const Icon(Icons.check_circle, color: AppTheme.primaryBlue),
+                ],
+              ),
+            ),
+          ),
+        );
+      }).toList(),
+    );
+  }
+
+  Widget _buildCountryBadge(String country) {
+    final countryData = VerificationRequirements.supportedCountries.firstWhere((c) => c['code'] == country, orElse: () => {'flag': '🌍', 'name': country});
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      decoration: BoxDecoration(
+        color: AppTheme.primaryBlue.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(30),
+        border: Border.all(color: AppTheme.primaryBlue.withOpacity(0.3)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(countryData['flag']!, style: const TextStyle(fontSize: 20)),
+          const SizedBox(width: 8),
+          Text(countryData['name']!, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDocumentList(String country, Map<String, dynamic>? rider) {
+    final docs = VerificationRequirements.getForCountry(country);
+    final List<Widget> widgets = [];
+
+    // Group choice docs
+    final identityDocs = docs.where((d) => d.choiceGroupId == 'identity').toList();
+    final otherDocs = docs.where((d) => d.choiceGroupId == null).toList();
+
+    // Identity choice group (for Nigeria)
+    if (identityDocs.isNotEmpty) {
+      widgets.add(
+        Padding(
+          padding: const EdgeInsets.only(bottom: 8),
+          child: Text('Choose one for identity verification:', style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 13)),
+        ),
+      );
+      widgets.add(_buildChoiceGroup(identityDocs, rider));
+      widgets.add(const SizedBox(height: 24));
+    }
+
+    // Other required/optional docs
+    for (final doc in otherDocs) {
+      widgets.add(_buildDocTile(doc, rider));
+      widgets.add(const SizedBox(height: 12));
+    }
+
+    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: widgets);
+  }
+
+  Widget _buildChoiceGroup(List<VerificationDoc> docs, Map<String, dynamic>? rider) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppTheme.surfaceColor,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppTheme.borderBlue),
+      ),
+      child: Column(
+        children: docs.map((doc) {
+          final isSelected = _selectedIdentityDoc == doc.id;
+          final isSubmitted = _isDocSubmitted(doc.id, rider);
+          return Padding(
+            padding: const EdgeInsets.symmetric(vertical: 6),
+            child: InkWell(
+              onTap: () {
+                setState(() => _selectedIdentityDoc = doc.id);
+                _uploadDoc(context, doc.id);
+              },
+              borderRadius: BorderRadius.circular(12),
+              child: Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: isSelected ? AppTheme.primaryBlue.withOpacity(0.1) : Colors.transparent,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: isSelected ? AppTheme.primaryBlue : Colors.transparent),
+                ),
+                child: Row(
+                  children: [
+                    Radio<String>(
+                      value: doc.id,
+                      groupValue: _selectedIdentityDoc,
+                      onChanged: (v) {
+                        setState(() => _selectedIdentityDoc = v);
+                        _uploadDoc(context, doc.id);
+                      },
+                      activeColor: AppTheme.primaryBlue,
+                    ),
+                    Icon(doc.icon, color: isSubmitted ? AppTheme.successGreen : AppTheme.primaryBlue),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(doc.label, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                          Text(doc.description, style: TextStyle(color: AppTheme.textSecondary, fontSize: 11)),
+                        ],
+                      ),
+                    ),
+                    if (isSubmitted) const Icon(Icons.check_circle, color: AppTheme.successGreen, size: 20),
+                  ],
+                ),
+              ),
+            ),
+          );
+        }).toList(),
+      ),
+    );
+  }
+
+  Widget _buildDocTile(VerificationDoc doc, Map<String, dynamic>? rider) {
+    final isSubmitted = _isDocSubmitted(doc.id, rider);
+    final isOptional = doc.status == DocStatus.optional;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: AppTheme.surfaceColor,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppTheme.borderBlue),
+      ),
+      child: ListTile(
+        onTap: () => _uploadDoc(context, doc.id),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        leading: Container(
+          padding: const EdgeInsets.all(10),
+          decoration: BoxDecoration(
+            color: (isSubmitted ? AppTheme.successGreen : AppTheme.primaryBlue).withOpacity(0.1),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Icon(doc.icon, color: isSubmitted ? AppTheme.successGreen : AppTheme.primaryBlue),
+        ),
+        title: Row(
+          children: [
+            Text(doc.label, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15)),
+            if (isOptional) ...[
+              const SizedBox(width: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                decoration: BoxDecoration(color: Colors.orange.withOpacity(0.2), borderRadius: BorderRadius.circular(6)),
+                child: const Text('Optional', style: TextStyle(color: Colors.orange, fontSize: 10, fontWeight: FontWeight.bold)),
+              ),
+            ],
+          ],
+        ),
+        subtitle: Text(doc.description, style: TextStyle(color: AppTheme.textSecondary, fontSize: 12)),
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              isSubmitted ? 'Submitted' : (isOptional ? 'Add' : 'Required'),
+              style: TextStyle(color: isSubmitted ? AppTheme.successGreen : (isOptional ? AppTheme.textSecondary : Colors.orange), fontSize: 11, fontWeight: FontWeight.w600),
+            ),
+            const SizedBox(width: 8),
+            Icon(Icons.chevron_right, color: AppTheme.textSecondary, size: 20),
+          ],
+        ),
+      ),
+    );
+  }
+
+  bool _isDocSubmitted(String docId, Map<String, dynamic>? rider) {
+    if (rider == null) return false;
+    final pathKey = _getPathKey(docId);
+    return rider[pathKey] != null && rider[pathKey].toString().isNotEmpty;
+  }
+
+  String _getPathKey(String docId) {
+    switch (docId) {
+      case 'nin': return 'nin_path';
+      case 'intl_passport': return 'intl_passport_path';
+      case 'driver_license': return 'driver_license_path';
+      case 'dvla_license': return 'dvla_license_path';
+      case 'passport': return 'passport_path';
+      case 'passport_photo': return 'passport_photo_path';
+      case 'brp': return 'brp_path';
+      default: return '${docId}_path';
+    }
   }
 
   void _uploadDoc(BuildContext context, String type) {
@@ -141,9 +334,9 @@ class VerificationScreen extends ConsumerWidget {
           Text(text.toUpperCase(), style: GoogleFonts.outfit(color: color, fontSize: 18, fontWeight: FontWeight.w900, letterSpacing: 1)),
           const SizedBox(height: 8),
           Text(
-            status == 'submitted' 
-              ? 'Our team is currently reviewing your documents. This usually takes 24-48 hours.'
-              : 'Keep your documents updated to maintain your Giga Partner status.',
+            status == 'submitted'
+                ? 'Our team is currently reviewing your documents. This usually takes 24-48 hours.'
+                : 'Keep your documents updated to maintain your Giga Partner status.',
             textAlign: TextAlign.center,
             style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 13),
           ),
@@ -152,33 +345,25 @@ class VerificationScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildDocTile(BuildContext context, String title, String subtitle, IconData icon, String statusText, bool isDone, VoidCallback onTap, {bool showChevron = true}) {
+  Widget _buildInfoBanner() {
     return Container(
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: AppTheme.surfaceColor,
+        color: AppTheme.primaryBlue.withOpacity(0.1),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppTheme.borderBlue),
+        border: Border.all(color: AppTheme.primaryBlue.withOpacity(0.3)),
       ),
-      child: ListTile(
-        onTap: onTap,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        leading: Container(
-          padding: const EdgeInsets.all(10),
-          decoration: BoxDecoration(color: (isDone ? AppTheme.successGreen : AppTheme.primaryBlue).withOpacity(0.1), borderRadius: BorderRadius.circular(12)),
-          child: Icon(icon, color: isDone ? AppTheme.successGreen : AppTheme.primaryBlue),
-        ),
-        title: Text(title, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15)),
-        subtitle: Text(subtitle, style: TextStyle(color: AppTheme.textSecondary, fontSize: 12)),
-        trailing: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(statusText, style: TextStyle(color: isDone ? AppTheme.successGreen : Colors.orange, fontSize: 11, fontWeight: FontWeight.w600)),
-            if (showChevron) ...[
-              const SizedBox(width: 8),
-              Icon(Icons.chevron_right, color: AppTheme.textSecondary, size: 20),
-            ],
-          ],
-        ),
+      child: Row(
+        children: [
+          const Icon(Icons.info_outline, color: AppTheme.primaryBlue),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Text(
+              'Upload all required documents to begin accepting delivery requests.',
+              style: TextStyle(color: Colors.white.withOpacity(0.8), fontSize: 13),
+            ),
+          ),
+        ],
       ),
     );
   }

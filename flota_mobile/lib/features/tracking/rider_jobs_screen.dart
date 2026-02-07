@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:flota_mobile/theme/app_theme.dart';
 import 'package:flota_mobile/core/api_client.dart';
 import 'package:flota_mobile/features/auth/auth_provider.dart';
+import 'package:flota_mobile/features/shared/widgets/service_mode_toggle.dart';
 
 // 1. DATA MODELS & PROVIDERS
 
@@ -248,7 +249,14 @@ class _RiderJobsScreenState extends ConsumerState<RiderJobsScreen> with SingleTi
   }
 
   Widget _buildLiveList() {
-    final liveJobsAsync = ref.watch(riderLiveJobsProvider(_discoveryMode.name));
+    final mode = ref.watch(authProvider).serviceMode;
+    // Map service mode to API parameter (delivery -> orders, errand -> errands)
+    // Assuming backend expects 'orders' or 'errands' or similar. 
+    // The previous code used _discoveryMode.name which was 'orders' or 'errands'.
+    // The ServiceMode is 'delivery' or 'errand'.
+    final apiMode = mode == 'delivery' ? 'orders' : 'errands';
+    
+    final liveJobsAsync = ref.watch(riderLiveJobsProvider(apiMode));
     return liveJobsAsync.when(
       data: (jobs) {
         return SliverList(
@@ -278,54 +286,10 @@ class _RiderJobsScreenState extends ConsumerState<RiderJobsScreen> with SingleTi
   }
 
   Widget _buildDiscoveryToggle() {
-    return Container(
-      margin: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-      padding: const EdgeInsets.all(4),
-      decoration: BoxDecoration(
-        color: AppTheme.surfaceColor.withOpacity(0.5),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppTheme.borderBlue.withOpacity(0.3)),
-      ),
-      child: Row(
-        children: DiscoveryMode.values.map((mode) {
-          final isActive = _discoveryMode == mode;
-          return Expanded(
-            child: GestureDetector(
-              onTap: () => setState(() => _discoveryMode = mode),
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                padding: const EdgeInsets.symmetric(vertical: 8),
-                decoration: BoxDecoration(
-                  color: isActive ? AppTheme.primaryBlue.withOpacity(0.2) : Colors.transparent,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Center(
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        mode == DiscoveryMode.orders ? Icons.local_shipping_outlined : Icons.shopping_basket_outlined,
-                        size: 14,
-                        color: isActive ? AppTheme.primaryBlue : AppTheme.textSecondary,
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        mode.name.toUpperCase(),
-                        style: TextStyle(
-                          color: isActive ? Colors.white : AppTheme.textSecondary,
-                          fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
-                          fontSize: 10,
-                          letterSpacing: 1.1,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          );
-        }).toList(),
-      ),
+    // We now use the global ServiceModeToggle
+    return const Padding(
+      padding: EdgeInsets.fromLTRB(20, 0, 20, 20),
+      child: ServiceModeToggle(showLabel: true),
     );
   }
 

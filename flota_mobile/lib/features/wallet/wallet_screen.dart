@@ -2,16 +2,15 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flota_mobile/features/auth/auth_provider.dart';
-import 'package:flota_mobile/features/tracking/rider_earnings_screen.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:flota_mobile/theme/app_theme.dart';
-import 'package:flota_mobile/core/error_handler.dart';
 import 'package:intl/intl.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flota_mobile/core/payment_service.dart';
 import 'package:flota_mobile/features/wallet/withdrawal_screen.dart';
+import 'package:flota_mobile/features/wallet/buy_giga_cards_screen.dart';
 import 'wallet_provider.dart';
 
 class WalletScreen extends ConsumerStatefulWidget {
@@ -22,6 +21,8 @@ class WalletScreen extends ConsumerStatefulWidget {
 }
 
 class _WalletScreenState extends ConsumerState<WalletScreen> {
+  int _currentNavIndex = 0;
+
   @override
   void initState() {
     super.initState();
@@ -38,22 +39,6 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
   bool _isLoading = false;
   late String _region; 
   String _selectedMethod = '';
-
-  List<Map<String, dynamic>> _getPaymentMethods() {
-    final methods = [
-      {'id': 'stripe', 'label': 'Stripe', 'icon': Icons.credit_card},
-      {'id': 'gift_card', 'label': 'Giga Gift Card', 'icon': Icons.card_giftcard},
-      {'id': 'giga_card', 'label': 'Giga Card', 'icon': Icons.account_balance_wallet},
-    ];
-
-    if (Platform.isIOS) {
-      methods.insert(0, {'id': 'apple_pay', 'label': 'Apple Pay', 'icon': Icons.apple});
-    } else if (Platform.isAndroid) {
-      methods.insert(0, {'id': 'google_pay', 'label': 'Google Pay', 'icon': Icons.payment});
-    }
-
-    return methods;
-  }
 
   Future<void> _redeemGiftCard(AuthState authState) async {
     final pinController = TextEditingController();
@@ -73,17 +58,18 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
           children: [
             Text('Redeem Giga Card', style: GoogleFonts.outfit(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white)),
             const SizedBox(height: 12),
-            Text('Enter your 8-digit PIN to claim credit', style: TextStyle(color: AppTheme.textSecondary)),
+            Text('Enter your card PIN to claim credit', style: TextStyle(color: AppTheme.textSecondary)),
             const SizedBox(height: 20),
             TextField(
               controller: pinController,
               autofocus: true,
               textCapitalization: TextCapitalization.characters,
-              style: const TextStyle(color: Colors.white),
+              style: GoogleFonts.robotoMono(color: Colors.white, fontSize: 18, letterSpacing: 2),
               decoration: InputDecoration(
-                hintText: 'GIGA-XXXX',
+                hintText: 'GIGA-XXXX-XXXX',
+                hintStyle: TextStyle(color: Colors.white.withOpacity(0.3)),
                 filled: true,
-                fillColor: AppTheme.surfaceColor,
+                fillColor: AppTheme.backgroundColor,
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
                 prefixIcon: const Icon(Icons.vpn_key, color: AppTheme.primaryRed),
               ),
@@ -98,7 +84,7 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
                   backgroundColor: AppTheme.primaryRed,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                 ),
-                child: const Text('Redeem Now'),
+                child: const Text('Redeem Now', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
               ),
             ),
           ],
@@ -114,21 +100,31 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Succesfully redeemed ${ref.read(authProvider).currencySymbol}${data['amount']}!'),
+              content: Text('Successfully redeemed ${ref.read(authProvider).currencySymbol}${data['amount']}!'),
               backgroundColor: AppTheme.successGreen,
             ),
           );
         }
       } catch (e) {
-        if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
+        if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e'), backgroundColor: AppTheme.primaryRed));
       } finally {
         if (mounted) setState(() => _isLoading = false);
       }
     }
   }
 
-  Widget _buildAmountInputSheet(TextEditingController controller) {
-    return Container(
+  Future<void> _fundWallet(AuthState authState) async {
+    if (authState.userEmail == null) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please log in first')));
+      return;
+    }
+
+    final amountController = TextEditingController();
+    final result = await showModalBottomSheet<double>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
         padding: EdgeInsets.fromLTRB(24, 24, 24, MediaQuery.of(context).viewInsets.bottom + 24),
         decoration: const BoxDecoration(
           color: AppTheme.surfaceColor,
@@ -147,7 +143,7 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
             ),
             const SizedBox(height: 20),
             TextField(
-              controller: controller,
+              controller: amountController,
               keyboardType: const TextInputType.numberWithOptions(decimal: true),
               autofocus: true,
               style: GoogleFonts.outfit(fontSize: 32, fontWeight: FontWeight.bold, color: Colors.white),
@@ -157,7 +153,6 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
                 hintText: '0.00',
                 hintStyle: TextStyle(color: Colors.grey[700]),
                 border: InputBorder.none,
-                fillColor: Colors.transparent,
               ),
             ),
             const SizedBox(height: 24),
@@ -166,7 +161,7 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
               height: 56,
               child: ElevatedButton(
                 onPressed: () {
-                  final val = double.tryParse(controller.text);
+                  final val = double.tryParse(amountController.text);
                   Navigator.pop(context, val);
                 },
                 style: ElevatedButton.styleFrom(
@@ -178,21 +173,7 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
             ),
           ],
         ),
-      );
-  }
-
-  Future<void> _fundWallet(AuthState authState) async {
-    if (authState.userEmail == null) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please log in first')));
-      return;
-    }
-
-    final amountController = TextEditingController();
-    final result = await showModalBottomSheet<double>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => _buildAmountInputSheet(amountController),
+      ),
     );
 
     if (result != null && result > 0) {
@@ -226,6 +207,7 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
   }
 
   Future<void> _sendFunds(AuthState authState) async {
+    final walletState = ref.read(walletProvider);
     final emailController = TextEditingController();
     final amountController = TextEditingController();
     
@@ -243,16 +225,27 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Send Funds', style: GoogleFonts.outfit(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white)),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text('Send Funds', style: GoogleFonts.outfit(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white)),
+                IconButton(onPressed: () => Navigator.pop(context), icon: const Icon(Icons.close, color: Colors.white)),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Text('Available: ${authState.currencySymbol}${walletState.balance.toStringAsFixed(2)}', style: TextStyle(color: AppTheme.textSecondary)),
             const SizedBox(height: 20),
             TextField(
               controller: emailController,
+              keyboardType: TextInputType.emailAddress,
               style: const TextStyle(color: Colors.white),
               decoration: InputDecoration(
                 labelText: "Recipient's Email",
-                hintText: "Enter user's email",
+                labelStyle: TextStyle(color: AppTheme.textSecondary),
+                hintText: "Enter recipient email",
+                hintStyle: TextStyle(color: Colors.white.withOpacity(0.3)),
                 filled: true,
-                fillColor: AppTheme.surfaceColor,
+                fillColor: AppTheme.backgroundColor,
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
                 prefixIcon: const Icon(Icons.alternate_email, color: AppTheme.accentCyan),
               ),
@@ -261,35 +254,50 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
             TextField(
               controller: amountController,
               keyboardType: const TextInputType.numberWithOptions(decimal: true),
-              style: const TextStyle(color: Colors.white),
+              style: GoogleFonts.outfit(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
               decoration: InputDecoration(
-                labelText: "Amount (${authState.currencySymbol})",
+                labelText: "Amount",
+                labelStyle: TextStyle(color: AppTheme.textSecondary),
+                prefixText: '${authState.currencySymbol} ',
+                prefixStyle: GoogleFonts.outfit(fontSize: 24, fontWeight: FontWeight.bold, color: AppTheme.accentCyan),
                 hintText: "0.00",
+                hintStyle: TextStyle(color: Colors.white.withOpacity(0.3)),
                 filled: true,
-                fillColor: AppTheme.surfaceColor,
+                fillColor: AppTheme.backgroundColor,
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
-                prefixIcon: const Icon(Icons.send, color: AppTheme.accentCyan),
               ),
             ),
             const SizedBox(height: 24),
             SizedBox(
               width: double.infinity,
               height: 56,
-              child: ElevatedButton(
+              child: ElevatedButton.icon(
                 onPressed: () {
                   final amount = double.tryParse(amountController.text);
-                  if (emailController.text.isNotEmpty && amount != null && amount > 0) {
-                    Navigator.pop(context, {
-                      'email': emailController.text.trim(),
-                      'amount': amount,
-                    });
+                  if (emailController.text.trim().isEmpty) {
+                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Enter recipient email')));
+                    return;
                   }
+                  if (amount == null || amount <= 0) {
+                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Enter valid amount')));
+                    return;
+                  }
+                  if (amount > walletState.balance) {
+                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Insufficient balance'), backgroundColor: AppTheme.primaryRed));
+                    return;
+                  }
+                  Navigator.pop(context, {
+                    'email': emailController.text.trim(),
+                    'amount': amount,
+                  });
                 },
+                icon: const Icon(Icons.send),
+                label: const Text('Continue'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppTheme.accentCyan,
+                  foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                 ),
-                child: const Text('Send Instant'),
               ),
             ),
           ],
@@ -298,6 +306,59 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
     );
 
     if (result != null) {
+      // Show confirmation dialog
+      final confirmed = await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          backgroundColor: AppTheme.surfaceColor,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          title: Text('Confirm Transfer', style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold)),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: AppTheme.accentCyan.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Column(
+                  children: [
+                    Text(
+                      '${authState.currencySymbol}${result['amount'].toStringAsFixed(2)}',
+                      style: GoogleFonts.outfit(fontSize: 32, fontWeight: FontWeight.bold, color: AppTheme.accentCyan),
+                    ),
+                    const SizedBox(height: 8),
+                    const Icon(Icons.arrow_downward, color: AppTheme.accentCyan),
+                    const SizedBox(height: 8),
+                    Text(result['email'], style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'This transfer is instant and cannot be undone.',
+                textAlign: TextAlign.center,
+                style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 13),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.pop(context, true),
+              style: ElevatedButton.styleFrom(backgroundColor: AppTheme.accentCyan),
+              child: const Text('Send Now'),
+            ),
+          ],
+        ),
+      );
+
+      if (confirmed != true) return;
+
       setState(() => _isLoading = true);
       try {
         final success = await PaymentService.sendFunds(result['email'], result['amount']);
@@ -305,57 +366,36 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
           await ref.read(walletProvider.notifier).fetchWalletData();
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Funds sent successfully!'), backgroundColor: AppTheme.successGreen),
+              SnackBar(
+                content: Text('${authState.currencySymbol}${result['amount'].toStringAsFixed(2)} sent to ${result['email']}!'),
+                backgroundColor: AppTheme.successGreen,
+              ),
             );
           }
         }
       } catch (e) {
-        if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
+        if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e'), backgroundColor: AppTheme.primaryRed));
       } finally {
         if (mounted) setState(() => _isLoading = false);
       }
     }
   }
 
-  void _showMoreOptions(AuthState authState) {
-    showModalBottomSheet(
-      context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (context) => Container(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: const Icon(Icons.history, color: AppTheme.primaryBlue),
-              title: const Text('Transaction History'),
-              onTap: () {
-                Navigator.pop(context);
-                context.push('/transactions');
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.credit_card, color: AppTheme.primaryBlue),
-              title: const Text('Manage Payment Methods'),
-              onTap: () {
-                Navigator.pop(context);
-                context.push('/payment-methods');
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.help_outline, color: AppTheme.primaryBlue),
-              title: const Text('Help & Support'),
-              onTap: () {
-                Navigator.pop(context);
-                context.push('/support');
-              },
-            ),
-          ],
-        ),
-      ),
-    );
+  void _onNavTap(int index, AuthState authState) {
+    switch (index) {
+      case 0: // Fund
+        _fundWallet(authState);
+        break;
+      case 1: // Gift Cards
+        Navigator.push(context, MaterialPageRoute(builder: (_) => const BuyGigaCardsScreen()));
+        break;
+      case 2: // Send
+        _sendFunds(authState);
+        break;
+      case 3: // History
+        context.push('/transactions');
+        break;
+    }
   }
 
   @override
@@ -377,10 +417,6 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
             icon: const Icon(Icons.card_giftcard, color: AppTheme.primaryRed),
             tooltip: 'Redeem Card',
           ),
-          IconButton(
-            onPressed: () => _showMoreOptions(authState),
-            icon: const Icon(Icons.more_vert, color: Colors.white),
-          ),
         ],
       ),
       body: Stack(
@@ -392,107 +428,130 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
             color: AppTheme.primaryRed,
             backgroundColor: AppTheme.surfaceColor,
             child: SingleChildScrollView(
-              physics: const AlwaysScrollableScrollPhysics(), // Ensure scroll works even if content is short
+              physics: const AlwaysScrollableScrollPhysics(),
               padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(height: 20),
-                
-                const SizedBox(height: 12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 20),
 
-                // Glassmorphism Balance Card
-                FadeInDown(
-                  child: Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(30),
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [
-                          AppTheme.primaryBlue,
-                          AppTheme.primaryBlue.withOpacity(0.7),
-                        ],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
-                      borderRadius: BorderRadius.circular(24),
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppTheme.primaryBlue.withOpacity(0.3),
-                          blurRadius: 20,
-                          offset: const Offset(0, 10),
-                        ),
-                      ],
-                    ),
-                    child: Column(
-                      children: [
-                        Text('Total Balance', style: TextStyle(color: Colors.white.withOpacity(0.7), fontSize: 14, letterSpacing: 1.2)),
-                        const SizedBox(height: 12),
-                        walletState.isLoading 
-                          ? const SizedBox(height: 60, child: Center(child: CircularProgressIndicator(color: Colors.white)))
-                          : Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text('${authState.currencySymbol} ', style: GoogleFonts.outfit(fontSize: 24, color: Colors.white70, fontWeight: FontWeight.bold)),
-                                Text(
-                                  walletState.balance.toStringAsFixed(2),
-                                  style: GoogleFonts.outfit(
-                                    fontSize: 52,
-                                    fontWeight: FontWeight.w900,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                              ],
-                            ),
-                        const SizedBox(height: 30),
-                        Row(
-                          children: [
-                            Expanded(child: _CompactActionButton(icon: Icons.add_circle_outline, label: 'Fund', color: Colors.white, onPressed: () => _fundWallet(authState))),
-                            const SizedBox(width: 12),
-                            Expanded(child: _CompactActionButton(icon: Icons.outbond_outlined, label: 'Withdraw', color: Colors.white, onPressed: () => _handleWithdraw(authState))),
-                            const SizedBox(width: 12),
-                            Expanded(child: _CompactActionButton(icon: Icons.bolt, label: 'Send', color: AppTheme.accentCyan, onPressed: () => _sendFunds(authState))),
+                  // Glassmorphism Balance Card
+                  FadeInDown(
+                    child: Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(28),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            AppTheme.primaryBlue,
+                            AppTheme.primaryBlue.withOpacity(0.7),
                           ],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
                         ),
-                      ],
+                        borderRadius: BorderRadius.circular(24),
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppTheme.primaryBlue.withOpacity(0.3),
+                            blurRadius: 20,
+                            offset: const Offset(0, 10),
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        children: [
+                          Text('Total Balance', style: TextStyle(color: Colors.white.withOpacity(0.7), fontSize: 14, letterSpacing: 1.2)),
+                          const SizedBox(height: 12),
+                          walletState.isLoading 
+                            ? const SizedBox(height: 60, child: Center(child: CircularProgressIndicator(color: Colors.white)))
+                            : Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text('${authState.currencySymbol} ', style: GoogleFonts.outfit(fontSize: 24, color: Colors.white70, fontWeight: FontWeight.bold)),
+                                  Text(
+                                    walletState.balance.toStringAsFixed(2),
+                                    style: GoogleFonts.outfit(
+                                      fontSize: 48,
+                                      fontWeight: FontWeight.w900,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                          const SizedBox(height: 24),
+                          Row(
+                            children: [
+                              Expanded(child: _CompactActionButton(icon: Icons.add_circle_outline, label: 'Fund', color: Colors.white, onPressed: () => _fundWallet(authState))),
+                              const SizedBox(width: 10),
+                              Expanded(child: _CompactActionButton(icon: Icons.outbond_outlined, label: 'Withdraw', color: Colors.white, onPressed: () => _handleWithdraw(authState))),
+                              const SizedBox(width: 10),
+                              Expanded(child: _CompactActionButton(icon: Icons.bolt, label: 'Send', color: AppTheme.accentCyan, onPressed: () => _sendFunds(authState))),
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                ),
-                
-                const SizedBox(height: 32),
+                  
+                  const SizedBox(height: 28),
 
-                // Recent Activity
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text('Global Activity', style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
-                    TextButton(
-                      onPressed: () => context.push('/transactions'),
-                      child: Text('History', style: TextStyle(color: AppTheme.primaryRed, fontWeight: FontWeight.bold)),
-                    ),
-                  ],
-                ),
-                
-                const SizedBox(height: 12),
-                
-                if (walletState.transactions.isEmpty && !walletState.isLoading)
-                  _buildEmptyState()
-                else
-                  ListView.separated(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: walletState.transactions.take(5).length,
-                    separatorBuilder: (_, __) => const SizedBox(height: 12),
-                    itemBuilder: (context, index) {
-                      final tx = walletState.transactions[index];
-                      return _ModernTransactionTile(tx: tx, currencySymbol: authState.currencySymbol);
-                    },
+                  // Quick Actions
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _QuickActionCard(
+                          icon: Icons.card_giftcard,
+                          label: 'Buy Gift Card',
+                          color: AppTheme.primaryRed,
+                          onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const BuyGigaCardsScreen())),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: _QuickActionCard(
+                          icon: Icons.redeem,
+                          label: 'Redeem Card',
+                          color: AppTheme.successGreen,
+                          onTap: () => _redeemGiftCard(authState),
+                        ),
+                      ),
+                    ],
                   ),
-                const SizedBox(height: 40),
-              ],
+
+                  const SizedBox(height: 28),
+
+                  // Recent Activity
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text('Recent Activity', style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
+                      TextButton(
+                        onPressed: () => context.push('/transactions'),
+                        child: const Text('See All', style: TextStyle(color: AppTheme.primaryBlue, fontWeight: FontWeight.bold)),
+                      ),
+                    ],
+                  ),
+                  
+                  const SizedBox(height: 12),
+                  
+                  if (walletState.transactions.isEmpty && !walletState.isLoading)
+                    _buildEmptyState()
+                  else
+                    ListView.separated(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: walletState.transactions.take(5).length,
+                      separatorBuilder: (_, __) => const SizedBox(height: 10),
+                      itemBuilder: (context, index) {
+                        final tx = walletState.transactions[index];
+                        return _ModernTransactionTile(tx: tx, currencySymbol: authState.currencySymbol);
+                      },
+                    ),
+                  const SizedBox(height: 100), // Space for bottom nav
+                ],
+              ),
             ),
-          ),
           ),
           if (_isLoading)
             Container(
@@ -500,6 +559,26 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
               child: const Center(child: CircularProgressIndicator(color: AppTheme.primaryRed)),
             ),
         ],
+      ),
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          color: AppTheme.surfaceColor,
+          border: Border(top: BorderSide(color: AppTheme.borderBlue)),
+        ),
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                _NavItem(icon: Icons.add_circle_outline, label: 'Fund', onTap: () => _onNavTap(0, authState)),
+                _NavItem(icon: Icons.card_giftcard, label: 'Gift Cards', color: AppTheme.primaryRed, onTap: () => _onNavTap(1, authState)),
+                _NavItem(icon: Icons.send, label: 'Send', color: AppTheme.accentCyan, onTap: () => _onNavTap(2, authState)),
+                _NavItem(icon: Icons.receipt_long, label: 'History', onTap: () => _onNavTap(3, authState)),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -519,8 +598,68 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
           const SizedBox(height: 16),
           Text('No Transactions Yet', style: TextStyle(color: AppTheme.textSecondary, fontWeight: FontWeight.bold)),
           const SizedBox(height: 8),
-          Text('Top up your wallet to start!', style: TextStyle(color: AppTheme.textSecondary.withOpacity(0.6), fontSize: 12)),
+          Text('Fund your wallet to get started!', style: TextStyle(color: AppTheme.textSecondary.withOpacity(0.6), fontSize: 12)),
         ],
+      ),
+    );
+  }
+}
+
+class _NavItem extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final Color? color;
+  final VoidCallback onTap;
+
+  const _NavItem({required this.icon, required this.label, this.color, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, color: color ?? AppTheme.primaryBlue, size: 24),
+            const SizedBox(height: 4),
+            Text(label, style: TextStyle(color: color ?? AppTheme.primaryBlue, fontSize: 11, fontWeight: FontWeight.bold)),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _QuickActionCard extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final Color color;
+  final VoidCallback onTap;
+
+  const _QuickActionCard({required this.icon, required this.label, required this.color, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: color.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: color.withOpacity(0.3)),
+        ),
+        child: Row(
+          children: [
+            Icon(icon, color: color, size: 24),
+            const SizedBox(width: 12),
+            Expanded(child: Text(label, style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13))),
+          ],
+        ),
       ),
     );
   }
@@ -538,17 +677,17 @@ class _CompactActionButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: onPressed,
-      borderRadius: BorderRadius.circular(16),
+      borderRadius: BorderRadius.circular(14),
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 12),
         decoration: BoxDecoration(
           color: Colors.white.withOpacity(0.15),
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(14),
           border: Border.all(color: Colors.white.withOpacity(0.1)),
         ),
         child: Column(
           children: [
-            Icon(icon, color: color, size: 22),
+            Icon(icon, color: color, size: 20),
             const SizedBox(height: 6),
             Text(label, style: TextStyle(color: color, fontWeight: FontWeight.bold, fontSize: 11)),
           ],
@@ -570,7 +709,6 @@ class _ModernTransactionTile extends StatelessWidget {
     final isCredit = tx['type'] == 'credit' || amount > 0;
     final status = tx['status'] ?? 'completed';
     
-    // Handle FieldValue.serverTimestamp() for created_at
     String formattedDate = '';
     if (tx['created_at'] is Timestamp) {
       formattedDate = DateFormat('MMM dd, HH:mm').format((tx['created_at'] as Timestamp).toDate());
@@ -585,10 +723,10 @@ class _ModernTransactionTile extends StatelessWidget {
     }
 
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: AppTheme.surfaceColor,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(14),
         border: Border.all(color: AppTheme.borderBlue),
       ),
       child: Row(
@@ -602,27 +740,24 @@ class _ModernTransactionTile extends StatelessWidget {
             child: Icon(
               isCredit ? Icons.add : Icons.remove,
               color: isCredit ? AppTheme.successGreen : AppTheme.primaryRed,
-              size: 20,
+              size: 18,
             ),
           ),
-          const SizedBox(width: 16),
+          const SizedBox(width: 14),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   tx['description'] ?? 'Transaction',
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.white),
+                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.white),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 3),
                 Row(
                   children: [
-                    Text(
-                      formattedDate,
-                      style: TextStyle(color: AppTheme.textSecondary, fontSize: 11),
-                    ),
+                    Text(formattedDate, style: TextStyle(color: AppTheme.textSecondary, fontSize: 11)),
                     if (status != 'completed') ...[
                       const SizedBox(width: 8),
                       Container(
@@ -643,10 +778,10 @@ class _ModernTransactionTile extends StatelessWidget {
             ),
           ),
           Text(
-            '${isCredit ? '+' : ''}${currencySymbol}${amount.abs().toStringAsFixed(2)}',
+            '${isCredit ? '+' : ''}$currencySymbol${amount.abs().toStringAsFixed(2)}',
             style: GoogleFonts.outfit(
               fontWeight: FontWeight.w900,
-              fontSize: 16,
+              fontSize: 15,
               color: isCredit ? AppTheme.successGreen : Colors.white,
             ),
           ),

@@ -50,9 +50,14 @@ class _DocumentUploadScreenState extends ConsumerState<DocumentUploadScreen> {
     final scaffoldMessenger = ScaffoldMessenger.of(context);
 
     try {
+      final fileVal = File(_image!.path);
+      if (!fileVal.existsSync()) {
+         throw Exception("File not found at path: ${_image!.path}");
+      }
+
       final formData = FormData.fromMap({
         'type': widget.documentType,
-        'file': await MultipartFile.fromFile(_image!.path, filename: 'document.jpg'),
+        'file': await MultipartFile.fromFile(fileVal.path, filename: 'document.jpg'),
       });
 
       final response = await api.dio.post('profile/vehicle-document', data: formData);

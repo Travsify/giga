@@ -272,10 +272,12 @@ class PaymentService {
   static Future<bool> sendFunds(String recipientEmail, double amount) async {
     const storage = FlutterSecureStorage();
     final token = await storage.read(key: 'auth_token');
-    if (token == null) throw 'Authentication token not found';
+    if (token == null) throw 'Please log in again';
 
     final dio = Dio(BaseOptions(
       baseUrl: kApiBaseUrl,
+      connectTimeout: const Duration(seconds: 30),
+      receiveTimeout: const Duration(seconds: 30),
       headers: {
         'Authorization': 'Bearer $token',
         'Content-Type': 'application/json',
@@ -284,20 +286,37 @@ class PaymentService {
     ));
 
     try {
+      debugPrint('Sending $amount to $recipientEmail');
       final response = await dio.post('/wallet/transfer', data: {
         'recipient_email': recipientEmail,
         'amount': amount,
       });
 
+      debugPrint('Transfer Response: ${response.data}');
       return response.data['status'] == 'success';
+    } on DioException catch (e) {
+      debugPrint('Transfer DioException: ${e.response?.data}');
+      if (e.response?.statusCode == 400) {
+        final error = e.response?.data['error'] ?? 'Invalid request';
+        throw error;
+      } else if (e.response?.statusCode == 422) {
+        // Validation errors
+        final errors = e.response?.data['errors'];
+        if (errors is Map) {
+          final firstError = (errors.values.first as List).first;
+          throw firstError ?? 'Validation failed';
+        }
+        throw e.response?.data['message'] ?? 'Invalid data';
+      } else if (e.response?.statusCode == 401) {
+        throw 'Session expired. Please log in again';
+      }
+      throw e.response?.data['error'] ?? 'Transfer failed. Try again';
     } catch (e) {
       debugPrint('Transfer Error: $e');
-      if (e is DioException) {
-        throw e.response?.data['error'] ?? 'Transfer failed';
-      }
-      throw 'An unexpected error occurred';
+      rethrow;
     }
   }
+
 
   static Future<bool> withdrawFunds(double amount, String bankAccountId) async {
     const storage = FlutterSecureStorage();

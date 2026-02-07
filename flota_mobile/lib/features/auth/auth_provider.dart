@@ -16,6 +16,7 @@ class AuthState {
   final bool isEmailVerified;
   final String? countryCode;
   final String? currencyCode;
+  final String serviceMode; // 'delivery' or 'errand'
 
   AuthState({
     this.status = AuthStatus.unauthenticated,
@@ -29,6 +30,7 @@ class AuthState {
     this.isEmailVerified = false,
     this.countryCode,
     this.currencyCode,
+    this.serviceMode = 'delivery',
   });
 
   String get currencySymbol {
@@ -52,6 +54,7 @@ class AuthState {
     bool? isEmailVerified,
     String? countryCode,
     String? currencyCode,
+    String? serviceMode,
   }) {
     return AuthState(
       status: status ?? this.status,
@@ -65,6 +68,7 @@ class AuthState {
       isEmailVerified: isEmailVerified ?? this.isEmailVerified,
       countryCode: countryCode ?? this.countryCode,
       currencyCode: currencyCode ?? this.currencyCode,
+      serviceMode: serviceMode ?? this.serviceMode,
     );
   }
 }
@@ -265,6 +269,19 @@ class AuthNotifier extends StateNotifier<AuthState> {
   Future<void> markAsVerified() async {
     await _storage.write(key: 'is_verified', value: 'true');
     state = state.copyWith(isEmailVerified: true);
+  }
+
+  void toggleServiceMode() {
+    final newMode = state.serviceMode == 'delivery' ? 'errand' : 'delivery';
+    state = state.copyWith(serviceMode: newMode);
+    _storage.write(key: 'service_mode', value: newMode);
+  }
+
+  void setServiceMode(String mode) {
+    if (mode == 'delivery' || mode == 'errand') {
+      state = state.copyWith(serviceMode: mode);
+      _storage.write(key: 'service_mode', value: mode);
+    }
   }
 
   Future<String?> getStoredEmail() => _storage.read(key: 'saved_email');

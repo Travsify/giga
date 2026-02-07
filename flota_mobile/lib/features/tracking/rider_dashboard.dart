@@ -12,8 +12,11 @@ import 'package:flota_mobile/features/tracking/rider_jobs_screen.dart';
 import 'package:flota_mobile/features/profile/profile_screen.dart';
 import 'package:flota_mobile/features/profile/verification_screen.dart';
 import 'package:flota_mobile/features/tracking/rider_performance_screen.dart';
+import 'package:flota_mobile/features/safety/report_incident_screen.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:flota_mobile/features/shared/widgets/service_mode_toggle.dart';
+
 
 class RiderDashboard extends ConsumerStatefulWidget {
   const RiderDashboard({super.key});
@@ -390,7 +393,7 @@ class _ControlCenterHeader extends StatelessWidget {
                  )
                ],
              ),
-           ),
+            ),
 
             // Vehicle Selector / Verification Prompt
             GestureDetector(
@@ -473,54 +476,104 @@ class _SafetyToolkitSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(24),
       decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        color: AppTheme.surfaceColor,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        border: Border(top: BorderSide(color: AppTheme.borderBlue)),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text("Safety Toolkit", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-          const SizedBox(height: 20),
-          ListTile(
-            leading: const CircleAvatar(backgroundColor: Colors.red, child: Icon(Icons.sos, color: Colors.white)),
-            title: const Text("Emergency Assistance", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.red)),
-            subtitle: const Text("Call police or emergency services"),
+          Row(
+            children: [
+              const Icon(Icons.shield, color: AppTheme.primaryRed, size: 28),
+              const SizedBox(width: 12),
+              Text("Safety Toolkit", style: GoogleFonts.outfit(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white)),
+            ],
+          ),
+          const SizedBox(height: 24),
+          _SafetyOption(
+            icon: Icons.sos,
+            color: AppTheme.primaryRed,
+            title: "Emergency Assistance",
+            subtitle: "Call 112 for immediate help",
             onTap: () async {
               final Uri launchUri = Uri(scheme: 'tel', path: '112');
-              try {
-                if (await canLaunchUrl(launchUri)) {
-                  await launchUrl(launchUri);
-                }
-              } catch (e) {
-                debugPrint('Error launching dialer: $e');
-              }
+              if (await canLaunchUrl(launchUri)) await launchUrl(launchUri);
             },
           ),
-          const Divider(),
-          ListTile(
-            leading: const CircleAvatar(backgroundColor: Colors.blue, child: Icon(Icons.share, color: Colors.white)),
-            title: const Text("Share My Trip"),
-            subtitle: const Text("Share live location with trusted contacts"),
+          const SizedBox(height: 16),
+          _SafetyOption(
+            icon: Icons.share,
+            color: AppTheme.primaryBlue,
+            title: "Share My Trip",
+            subtitle: "Send live location to trusted contacts",
             onTap: () {
               Share.share('I am currently online and delivering with Giga. My location is secure.');
+              Navigator.pop(context);
             },
           ),
-          const Divider(),
-          ListTile(
-            leading: const CircleAvatar(backgroundColor: Colors.orange, child: Icon(Icons.warning, color: Colors.white)),
-            title: const Text("Report Incident"),
-            subtitle: const Text("Report an accident or safety issue"),
+          const SizedBox(height: 16),
+          _SafetyOption(
+            icon: Icons.report_problem,
+            color: Colors.orange,
+            title: "Report Incident",
+            subtitle: "Report accident or safety concern",
             onTap: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text("Incident Reporting feature coming soon")),
-              );
+              Navigator.pop(context);
+              Navigator.push(context, MaterialPageRoute(builder: (context) => const ReportIncidentScreen()));
             },
           ),
           const SizedBox(height: 20),
         ],
+      ),
+    );
+  }
+}
+
+class _SafetyOption extends StatelessWidget {
+  final IconData icon;
+  final Color color;
+  final String title;
+  final String subtitle;
+  final VoidCallback onTap;
+
+  const _SafetyOption({required this.icon, required this.color, required this.title, required this.subtitle, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: color.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: color.withOpacity(0.3)),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(color: color.withOpacity(0.2), shape: BoxShape.circle),
+              child: Icon(icon, color: color, size: 24),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(title, style: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
+                  const SizedBox(height: 4),
+                  Text(subtitle, style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 13)),
+                ],
+              ),
+            ),
+            Icon(Icons.chevron_right, color: Colors.white.withOpacity(0.3)),
+          ],
+        ),
       ),
     );
   }
