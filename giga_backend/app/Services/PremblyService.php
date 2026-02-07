@@ -35,12 +35,13 @@ class PremblyService
     }
 
     /**
-     * Verify Nigerian Plate Number (FRSC)
+     * Verify Nigerian Plate Number (IdentityPass)
      */
-    public function verifyPlateNumber(string $number)
+    public function verifyPlateNumber(string $number, string $country = 'NG')
     {
-        return $this->post('/identitypass/verification/frsc', [
-            'number' => $number,
+        return $this->post('/identitypass/verification/vehicle_verification', [
+            'vehicle_number' => $number,
+            'country' => $country,
         ]);
     }
 
@@ -106,6 +107,9 @@ class PremblyService
      */
     protected function post(string $endpoint, array $data)
     {
+        // Add mandatory customer_id for Prembly V2
+        $data['customer_id'] = 'GIGA_' . (\Illuminate\Support\Facades\Auth::id() ?? 'GUEST') . '_' . time();
+
         if (empty($this->apiKey) || $this->apiKey === 'MOCK') {
             Log::info("Prembly Service MOCK: $endpoint", $data);
             return [
@@ -129,12 +133,19 @@ class PremblyService
             }
 
             $this->lastError = "Prembly API Error [{$response->status()}]: " . $response->body();
-            Log::error($this->lastError);
+            Log::error($this->lastError, [
+                'endpoint' => $endpoint,
+                'payload' => $data,
+                'response' => $response->body()
+            ]);
             return null;
 
         } catch (\Exception $e) {
             $this->lastError = "Prembly Exception: " . $e->getMessage();
-            Log::error($this->lastError);
+            Log::error($this->lastError, [
+                'endpoint' => $endpoint,
+                'payload' => $data
+            ]);
             return null;
         }
     }

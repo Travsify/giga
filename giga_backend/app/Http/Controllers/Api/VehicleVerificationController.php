@@ -72,7 +72,7 @@ class VehicleVerificationController extends Controller
             ]);
         }
 
-        $response = $this->prembly->verifyPlateNumber($plateNumber);
+        $response = $this->prembly->verifyPlateNumber($plateNumber, 'NG');
 
         if ($response && ($response['status'] ?? false)) {
             $data = $response['data'];
@@ -144,7 +144,7 @@ class VehicleVerificationController extends Controller
     {
         try {
             $request->validate([
-                'type' => 'required|string|in:vehicle_license,insurance,driver_license,vehicle_registration,nin,intl_passport,dvla_license,passport_photo,brp,proof_of_address,incident_evidence,selfie_id',
+                'type' => 'required|string|in:vehicle_license,insurance,driver_license,vehicle_registration,nin,intl_passport,dvla_license,passport_photo,brp,proof_of_address,incident_evidence,selfie_id,vehicle_front,vehicle_side,vehicle_interior',
                 'file' => 'required|file|mimes:jpg,jpeg,png,pdf|max:10240', // 10MB max
             ]);
 
@@ -193,6 +193,15 @@ class VehicleVerificationController extends Controller
                     break;
                 case 'selfie_id':
                     $rider->selfie_id_path = $path;
+                    break;
+                case 'vehicle_front':
+                    $rider->vehicle_front_path = $path;
+                    break;
+                case 'vehicle_side':
+                    $rider->vehicle_side_path = $path;
+                    break;
+                case 'vehicle_interior':
+                    $rider->vehicle_interior_path = $path;
                     break;
                 // incident_evidence is supported in validation but logic was missing?
                 // Adding handling for it if it's stored in rider profile? 

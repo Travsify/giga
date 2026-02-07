@@ -36,6 +36,9 @@ class Rider extends Model
         'selfie_id_path',
         'rejection_reason',
         'verification_errors',
+        'vehicle_front_path',
+        'vehicle_side_path',
+        'vehicle_interior_path',
     ];
 
     protected $casts = [
