@@ -1,28 +1,46 @@
-/* Neon Logistics Admin Theme - Giga V3 */
+@import 'tailwindcss';
 
-:root {
-    /* Core Palette - High Contrast */
-    --giga-neon-cyan: #00F2FF;
-    --giga-neon-green: #39FF14;
-    --giga-neon-red: #FF0033;
-    --giga-midnight-pro: #020617; /* Deepest Midnight */
-    --giga-surface-dark: #0F172A;
-    --giga-glass-border: rgba(0, 242, 255, 0.15);
-    --giga-text-primary: #F1F5F9;
-    --giga-text-secondary: #94A3B8;
+@source '../../../../vendor/filament/**/*.blade.php';
+@source '../../../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../../../storage/framework/views/*.php';
+@source '../../../**/*.blade.php';
+@source '../../../**/*.js';
+
+@theme {
+    /* Neon Palette */
+    --color-primary-50: #f0fdff;
+    --color-primary-100: #e0f8ff;
+    --color-primary-200: #b9f3ff;
+    --color-primary-300: #7cedff;
+    --color-primary-400: #33e1ff;
+    --color-primary-500: #00f2ff;
+    --color-primary-600: #00b4d8;
+    --color-primary-700: #008eb4;
+    --color-primary-800: #007291;
+    --color-primary-900: #065e77;
+    --color-primary-950: #004052;
+
+    --color-success-500: #39FF14;
+    --color-danger-500: #FF0033;
 }
 
-/* Smooth Base Flow */
+/* Neon Logistics Custom Styles */
+:root {
+    --giga-midnight-pro: #020617;
+    --giga-surface-dark: #0F172A;
+    --giga-glass-border: rgba(0, 242, 255, 0.15);
+}
+
 .fi-body {
     background-color: var(--giga-midnight-pro);
     background-image: 
         radial-gradient(circle at 100% 0%, rgba(0, 242, 255, 0.07) 0%, transparent 40%),
         radial-gradient(circle at 0% 100%, rgba(57, 255, 20, 0.05) 0%, transparent 40%);
     background-attachment: fixed;
-    color: var(--giga-text-primary);
+    color: #F1F5F9;
 }
 
-/* Sidebar - Modern & Vibrant */
+/* Sidebar Fixes */
 .fi-sidebar {
     background-color: #0A0F1E !important;
     border-right: 1px solid var(--giga-glass-border) !important;
@@ -30,143 +48,46 @@
 }
 
 .fi-sidebar-item-button {
-    border-radius: 12px !important;
-    margin: 4px 8px !important;
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    border-radius: 12px;
+    margin: 4px 8px;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .fi-sidebar-active {
     background-color: rgba(0, 242, 255, 0.08) !important;
-    box-shadow: inset 4px 0 0 var(--giga-neon-cyan) !important;
 }
 
-.fi-sidebar-item-label, .fi-sidebar-item-icon {
-    color: var(--giga-text-secondary) !important;
-}
-
-.fi-sidebar-item-active .fi-sidebar-item-label, 
-.fi-sidebar-item-active .fi-sidebar-item-icon {
-    color: var(--giga-neon-cyan) !important;
-    font-weight: 700 !important;
-    filter: drop-shadow(0 0 5px rgba(0, 242, 255, 0.4));
-}
-
-/* Neon Glassmorphic Cards */
+/* Glassmorphism */
 .fi-section, .fi-wi-stats-overview-stat, .fi-ta-ctn {
     background-color: var(--giga-surface-dark) !important;
     border: 1px solid var(--giga-glass-border) !important;
     backdrop-filter: blur(20px) saturate(160%);
-    border-radius: 20px !important;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+    border-radius: 20px;
 }
 
-/* Stat Widgets - Punchy Numbers */
+/* Stat Widgets */
 .fi-wi-stats-overview-stat-value {
     color: #FFFFFF !important;
     font-size: 1.875rem !important;
-    font-weight: 800 !important;
-    letter-spacing: -0.05em;
-    filter: drop-shadow(0 0 15px rgba(255,255,255,0.1));
+    font-weight: 800;
 }
 
-.fi-wi-stats-overview-stat-label {
-    color: var(--giga-neon-cyan) !important;
-    text-transform: uppercase;
-    font-size: 0.7rem !important;
-    font-weight: 700 !important;
-    letter-spacing: 0.1em;
+/* Fix SVG Icon Sizing - This is likely why they are huge */
+.fi-sidebar-item-icon, 
+.fi-icon-btn-icon,
+.fi-ta-icon-column-icon {
+    width: 1.5rem;
+    height: 1.5rem;
 }
 
-/* Buttons - Neon Core */
-.fi-btn-primary, .fi-btn-color-primary {
-    background: linear-gradient(135deg, var(--giga-neon-cyan) 0%, #00B4D8 100%) !important;
-    color: #000000 !important;
-    border-radius: 14px !important;
-    font-weight: 800 !important;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    box-shadow: 0 4px 15px rgba(0, 242, 255, 0.3) !important;
-    border: none !important;
-}
-
-.fi-btn-primary:hover {
-    box-shadow: 0 0 25px rgba(0, 242, 255, 0.6) !important;
-    transform: scale(1.02);
-}
-
-/* Form Controls - Minimal & Sharp */
-.fi-fo-text-input input, .fi-fo-select select, .fi-fo-textarea textarea {
-    background: rgba(0, 0, 0, 0.2) !important;
-    border: 1px solid rgba(255, 255, 255, 0.1) !important;
-    border-radius: 12px !important;
-    color: #FFFFFF !important;
-    transition: all 0.2s ease !important;
-}
-
-.fi-fo-text-input input:focus {
-    border-color: var(--giga-neon-cyan) !important;
-    box-shadow: 0 0 0 3px rgba(0, 242, 255, 0.1) !important;
-}
-
-/* Navigation & Tabs */
-.fi-tabs {
-    border-bottom: 1px solid var(--giga-glass-border) !important;
-}
-
-.fi-tabs-item-active {
-    color: var(--giga-neon-cyan) !important;
-    border-bottom-color: var(--giga-neon-cyan) !important;
-}
-
-/* Tables - High Contrast Rows */
-.fi-ta-header-cell-label {
-    color: var(--giga-neon-cyan) !important;
-    text-transform: uppercase;
-    font-size: 0.75rem !important;
-    font-weight: 700 !important;
-}
-
-.fi-ta-row:hover {
-    background-color: rgba(255, 255, 255, 0.02) !important;
-}
-
-/* Global Search - Command Hub */
-.fi-global-search-field input {
-    background: var(--giga-surface-dark) !important;
-    border: 1px solid var(--giga-glass-border) !important;
-    border-radius: 30px !important;
-    padding-left: 2.5rem !important;
-}
-
-/* Scrollbar - Neon Pulse */
-::-webkit-scrollbar {
-    width: 6px;
-}
-
-::-webkit-scrollbar-track {
-    background: var(--giga-midnight-pro);
-}
-
-::-webkit-scrollbar-thumb {
-    background: var(--giga-neon-cyan);
-    border-radius: 10px;
-    box-shadow: 0 0 10px var(--giga-neon-cyan);
-}
-
-/* Auth Pages - Cinematic Neon */
+/* Auth Pages */
 .fi-simple-main {
-    background: radial-gradient(circle at center, rgba(0, 242, 255, 0.1) 0%, transparent 80%) !important;
+    background: radial-gradient(circle at center, rgba(0, 242, 255, 0.1) 0%, transparent 80%);
 }
 
 .fi-simple-card {
     background: rgba(15, 23, 42, 0.7) !important;
-    backdrop-filter: blur(32px) !important;
+    backdrop-filter: blur(32px);
     border: 1px solid var(--giga-glass-border) !important;
-    border-radius: 30px !important;
-}
-
-.fi-simple-header-heading {
-    color: #FFFFFF !important;
-    font-weight: 900 !important;
-    filter: drop-shadow(0 0 20px var(--giga-neon-cyan));
+    border-radius: 30px;
 }
