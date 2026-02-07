@@ -20,9 +20,10 @@ class EmailVerificationController extends Controller
     {
         $user = $request->user();
 
-        if ($user->email_verified_at) {
-            return response()->json(['message' => 'Email already verified.'], 400);
-        }
+        // REMOVED: if ($user->email_verified_at) check to allow Login OTP (2FA)
+        // if ($user->email_verified_at) {
+        //    return response()->json(['message' => 'Email already verified.'], 400);
+        // }
 
         // Generate 7-digit verification code
         $code = str_pad(random_int(0, 9999999), 7, '0', STR_PAD_LEFT);
@@ -81,9 +82,10 @@ class EmailVerificationController extends Controller
 
         $user = $request->user();
 
-        if ($user->email_verified_at) {
-            return response()->json(['message' => 'Email already verified.'], 400);
-        }
+        // REMOVED: if ($user->email_verified_at) check to allow Login OTP (2FA)
+        // if ($user->email_verified_at) {
+        //    return response()->json(['message' => 'Email already verified.'], 400);
+        // }
 
         // Find the verification record
         $record = DB::table('email_verification_codes')
