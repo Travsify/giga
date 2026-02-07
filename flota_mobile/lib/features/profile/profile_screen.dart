@@ -666,7 +666,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'Standard Fleet',
+                    'Active Vehicle',
                     style: GoogleFonts.outfit(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
                   ),
                 ],
@@ -683,16 +683,23 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               border: Border.all(color: Colors.black, width: 1.5),
             ),
             child: Text(
-              rider?['vehicle_plate_number'] ?? 'GIGA FLEET',
+              rider?['vehicle_plate_number'] ?? 'ACTIVE VEHICLE',
               style: GoogleFonts.outfit(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 22, letterSpacing: 2),
             ),
           ),
           const SizedBox(height: 16),
           Row(
             children: [
-              const Icon(Icons.check_circle, color: Colors.greenAccent, size: 14),
+              Icon(
+                rider?['verification_status'] == 'verified' ? Icons.verified : Icons.error_outline, 
+                color: rider?['verification_status'] == 'verified' ? Colors.greenAccent : Colors.orangeAccent, 
+                size: 14
+              ),
               const SizedBox(width: 6),
-              Text('Documents Verified', style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 12)),
+              Text(
+                rider?['verification_status'] == 'verified' ? 'Documents Verified' : 'Pending Verification', 
+                style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 12)
+              ),
             ],
           ),
         ],

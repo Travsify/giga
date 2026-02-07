@@ -440,45 +440,59 @@ class _ControlCenterHeader extends StatelessWidget {
             ),
 
             // Vehicle Selector / Verification Prompt
-            GestureDetector(
-              onTap: () {
-                if (stats?.hasVehicle == true) {
-                  // Show Vehicle Switcher
-                  showModalBottomSheet(
-                    context: context,
-                    builder: (context) => _buildVehicleSwitcher(context),
-                  );
-                } else {
-                  // Navigate to Verification flow directly
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const VerificationScreen()),
-                  );
-                }
-              },
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                decoration: BoxDecoration(
-                  color: (stats?.isVerified == true) ? Colors.white.withOpacity(0.2) : AppTheme.primaryRed.withOpacity(0.8),
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: Colors.white30),
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      (stats?.hasVehicle == true) ? Icons.directions_car : Icons.add_circle_outline, 
-                      size: 16, 
-                      color: Colors.white
+            Builder(
+              builder: (context) {
+                final bool isVerified = stats?.isVerified ?? false;
+                final bool hasVehicle = stats?.hasVehicle ?? false;
+                final bool isReady = isVerified && hasVehicle;
+
+                return GestureDetector(
+                  onTap: () {
+                    if (isReady) {
+                      showModalBottomSheet(
+                        context: context,
+                        builder: (context) => _buildVehicleSwitcher(context),
+                      );
+                    } else if (!hasVehicle) {
+                      // Navigate to profile to add vehicle
+                      context.push('/profile');
+                    } else {
+                      // Navigate to Verification flow (Wait for verification)
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const VerificationScreen()),
+                      );
+                    }
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: isReady 
+                          ? Colors.white.withOpacity(0.2) 
+                          : (hasVehicle ? AppTheme.primaryRed.withOpacity(0.8) : AppTheme.primaryBlue.withOpacity(0.8)),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: Colors.white30),
                     ),
-                    const SizedBox(width: 6),
-                    Text(
-                      (stats?.hasVehicle == true) ? "Standard Fleet" : "VERIFY NOW", 
-                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: Colors.white)
+                    child: Row(
+                      children: [
+                        Icon(
+                          isReady ? Icons.directions_car : (hasVehicle ? Icons.verified : Icons.add_circle_outline), 
+                          size: 16, 
+                          color: Colors.white
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          isReady 
+                              ? "Active Vehicle" 
+                              : (hasVehicle ? "VERIFY NOW" : "ADD VEHICLE"), 
+                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: Colors.white)
+                        ),
+                        if (isReady) const Icon(Icons.arrow_drop_down, size: 16, color: Colors.white),
+                      ],
                     ),
-                    if (stats?.hasVehicle == true) const Icon(Icons.arrow_drop_down, size: 16, color: Colors.white),
-                  ],
-                ),
-              ),
+                  ),
+                );
+              }
             ),
         ],
       ),
@@ -495,11 +509,11 @@ class _ControlCenterHeader extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text("Select Active Vehicle", style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
+          Text("Active Vehicle", style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
           const SizedBox(height: 15),
           ListTile(
             leading: const Icon(Icons.directions_car, color: Colors.white),
-            title: const Text("Giga Fleet • ABJ-123", style: TextStyle(color: Colors.white)),
+            title: const Text("Active Vehicle • ABJ-123", style: TextStyle(color: Colors.white)),
             trailing: const Icon(Icons.check_circle, color: AppTheme.primaryBlue),
             onTap: () => Navigator.pop(context),
           ),
