@@ -126,7 +126,7 @@ class _BillPaymentScreenState extends ConsumerState<BillPaymentScreen> {
         slivers: [
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+              padding: const EdgeInsets.symmetric(horizontal: 26.0, vertical: 8.0),
               child: TextField(
                 controller: _searchController,
                 onChanged: (v) => _filterBillers(v),
@@ -165,13 +165,13 @@ class _BillPaymentScreenState extends ConsumerState<BillPaymentScreen> {
                 ),
               ),
               SliverPadding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
+                padding: const EdgeInsets.symmetric(horizontal: 26),
                 sliver: SliverGrid(
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 4,
                     mainAxisSpacing: 16,
-                    crossAxisSpacing: 12,
-                    childAspectRatio: 0.8,
+                    crossAxisSpacing: 16,
+                    childAspectRatio: 0.75,
                   ),
                   delegate: SliverChildBuilderDelegate(
                     (context, index) {
