@@ -18,88 +18,41 @@ class StatsOverview extends BaseWidget
 
     protected function getStats(): array
     {
-        // Calculate revenue with trend
-        $currentRevenue = Wallet::sum('balance');
-        $lastMonthRevenue = Wallet::where('created_at', '<', Carbon::now()->startOfMonth())
-            ->sum('balance');
-        $revenueTrend = $lastMonthRevenue > 0 
-            ? round((($currentRevenue - $lastMonthRevenue) / $lastMonthRevenue) * 100, 1) 
+        // Today's Revenue (Transactions created today with 'completed' status)
+        $todayRevenue = \App\Models\Transaction::where('status', 'completed')
+            ->whereDate('created_at', today())
+            ->sum('amount');
+        
+        $yesterdayRevenue = \App\Models\Transaction::where('status', 'completed')
+            ->whereDate('created_at', today()->subDay())
+            ->sum('amount');
+        
+        $revenueTrend = $yesterdayRevenue > 0 
+            ? round((($todayRevenue - $yesterdayRevenue) / $yesterdayRevenue) * 100, 1) 
             : 0;
 
-        // Active deliveries (not completed)
+        // Active deliveries
         $activeDeliveries = Delivery::whereNotIn('status', ['delivered', 'cancelled'])->count();
-        $lastWeekActive = Delivery::whereNotIn('status', ['delivered', 'cancelled'])
-            ->where('created_at', '<', Carbon::now()->subWeek())
-            ->count();
-        $activeTrend = $lastWeekActive > 0 
-            ? round((($activeDeliveries - $lastWeekActive) / $lastWeekActive) * 100, 1) 
-            : 0;
-
-        // Online riders (riders with recent activity or just count)
-        $onlineRiders = User::where('role', 'Rider')->count();
-        $lastMonthRiders = User::where('role', 'Rider')
-            ->where('created_at', '<', Carbon::now()->startOfMonth())
-            ->count();
-        $riderTrend = $lastMonthRiders > 0 
-            ? round((($onlineRiders - $lastMonthRiders) / $lastMonthRiders) * 100, 1) 
-            : 0;
+        
+        // Pending Incidents
+        $pendingIncidents = \App\Models\Incident::where('status', 'pending')->count();
 
         return [
-            Stat::make('Total Revenue', '£' . number_format($currentRevenue, 0))
-                ->description($this->getTrendLabel($revenueTrend))
+            Stat::make("Today's Revenue", '£' . number_format($todayRevenue, 2))
+                ->description($revenueTrend >= 0 ? '+' . $revenueTrend . '% from yesterday' : $revenueTrend . '% from yesterday')
                 ->descriptionIcon($revenueTrend >= 0 ? 'heroicon-m-arrow-trending-up' : 'heroicon-m-arrow-trending-down')
-                ->color($revenueTrend >= 0 ? 'success' : 'danger')
-                ->chart($this->getRevenueChart()),
+                ->color($revenueTrend >= 0 ? 'primary' : 'danger')
+                ->chart([$yesterdayRevenue, $todayRevenue]),
                 
             Stat::make('Active Deliveries', $activeDeliveries)
-                ->description($this->getTrendLabel($activeTrend))
-                ->descriptionIcon($activeTrend >= 0 ? 'heroicon-m-arrow-trending-up' : 'heroicon-m-arrow-trending-down')
-                ->color('warning')
-                ->chart($this->getDeliveryChart()),
+                ->description('Orders currently in progress')
+                ->color('success')
+                ->descriptionIcon('heroicon-m-truck'),
                 
-            Stat::make('Online Riders', $onlineRiders)
-                ->description($this->getTrendLabel($riderTrend))
-                ->descriptionIcon($riderTrend >= 0 ? 'heroicon-m-arrow-trending-up' : 'heroicon-m-arrow-trending-down')
-                ->color('primary')
-                ->chart($this->getRiderChart()),
+            Stat::make('Safety Incidents', $pendingIncidents)
+                ->description($pendingIncidents > 0 ? 'Requires urgent attention' : 'All clear')
+                ->descriptionIcon('heroicon-m-shield-exclamation')
+                ->color($pendingIncidents > 0 ? 'danger' : 'success'),
         ];
-    }
-
-    private function getTrendLabel(float $trend): string
-    {
-        $sign = $trend >= 0 ? '+' : '';
-        return $sign . $trend . '%';
-    }
-
-    private function getRevenueChart(): array
-    {
-        // Get last 7 days of wallet transactions
-        return Delivery::selectRaw('DATE(created_at) as date, COUNT(*) as count')
-            ->where('created_at', '>=', Carbon::now()->subDays(7))
-            ->groupBy('date')
-            ->orderBy('date')
-            ->pluck('count')
-            ->toArray() ?: [0, 0, 0, 0, 0, 0, 0];
-    }
-
-    private function getDeliveryChart(): array
-    {
-        return Delivery::selectRaw('DATE(created_at) as date, COUNT(*) as count')
-            ->where('created_at', '>=', Carbon::now()->subDays(7))
-            ->groupBy('date')
-            ->orderBy('date')
-            ->pluck('count')
-            ->toArray() ?: [0, 0, 0, 0, 0, 0, 0];
-    }
-
-    private function getRiderChart(): array
-    {
-        return User::where('role', 'Rider')
-            ->selectRaw('DATE(created_at) as date, COUNT(*) as count')
-            ->where('created_at', '>=', Carbon::now()->subDays(7))
-            ->groupBy('date')
-            ->orderBy('date')
-            ->pluck('count')
-            ->toArray() ?: [0, 0, 0, 0, 0, 0, 0];
     }
 }

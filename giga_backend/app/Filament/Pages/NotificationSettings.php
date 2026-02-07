@@ -26,6 +26,8 @@ class NotificationSettings extends Page
             'delivery_notifications' => AppSetting::get('delivery_notifications', true),
             'promo_notifications' => AppSetting::get('promo_notifications', true),
             'chat_notifications' => AppSetting::get('chat_notifications', true),
+            'resend_api_key' => AppSetting::get('resend_api_key', ''),
+            'resend_from_email' => AppSetting::get('resend_from_email', 'noreply@giga.com'),
         ]);
     }
 
@@ -58,6 +60,20 @@ class NotificationSettings extends Page
                             ->label('Chat Messages')
                             ->helperText('Notify when rider/customer sends a message'),
                     ])->columns(3),
+
+                Forms\Components\Section::make('Resend (Email)')
+                    ->description('Configure email delivery via Resend API')
+                    ->schema([
+                        Forms\Components\TextInput::make('resend_api_key')
+                            ->label('Resend API Key')
+                            ->password()
+                            ->revealable()
+                            ->columnSpan(2),
+                        Forms\Components\TextInput::make('resend_from_email')
+                            ->label('From Email')
+                            ->email()
+                            ->placeholder('noreply@giga.com'),
+                    ])->columns(2),
             ])
             ->statePath('data');
     }

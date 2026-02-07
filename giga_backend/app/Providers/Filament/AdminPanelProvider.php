@@ -27,13 +27,14 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin')
             ->login()
-            ->brandName('Giga Logistics')
-            ->darkMode(false)
+            ->brandName('Giga Admin')
+            ->darkMode(true)
             ->colors([
-                'primary' => Color::hex('#2563EB'), // Deep Blue for primary actions
+                'primary' => Color::hex('#00F2FF'), // Giga Cyan
+                'success' => Color::hex('#00FF85'), // Giga Green
+                'danger' => Color::hex('#FF0055'),  // Giga Red
+                'warning' => Color::Amber,
                 'gray' => Color::Slate,
-                'orange' => Color::hex('#F97316'), // Brand orange accent
-                'gold' => Color::hex('#FFB800'), // Gold for toggles/radios
             ])
             ->font('Outfit')
             ->viteTheme('resources/css/filament/admin/theme.css')

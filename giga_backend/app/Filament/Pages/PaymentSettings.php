@@ -32,6 +32,10 @@ class PaymentSettings extends Page
             'paypal_secret' => AppSetting::get('paypal_secret', ''),
             'wallet_enabled' => AppSetting::get('wallet_enabled', true),
             'cod_enabled' => AppSetting::get('cod_enabled', true),
+            'flutterwave_enabled' => AppSetting::get('flutterwave_enabled', true),
+            'flutterwave_public_key' => AppSetting::get('flutterwave_public_key', ''),
+            'flutterwave_secret_key' => AppSetting::get('flutterwave_secret_key', ''),
+            'flutterwave_encryption_key' => AppSetting::get('flutterwave_encryption_key', ''),
         ]);
     }
 
@@ -98,6 +102,25 @@ class PaymentSettings extends Page
                             ->helperText('Allow users to top up and pay with wallet balance'),
                         Forms\Components\Toggle::make('cod_enabled')
                             ->label('Enable Cash on Delivery'),
+                    ])->columns(2),
+
+                Forms\Components\Section::make('Flutterwave')
+                    ->description('Flutterwave configuration (Airtime, Data, Bill Payments)')
+                    ->schema([
+                        Forms\Components\Toggle::make('flutterwave_enabled')
+                            ->label('Enable Flutterwave')
+                            ->live(),
+                        Forms\Components\TextInput::make('flutterwave_public_key')
+                            ->label('Public Key')
+                            ->columnSpan(2),
+                        Forms\Components\TextInput::make('flutterwave_secret_key')
+                            ->label('Secret Key')
+                            ->password()
+                            ->revealable(),
+                        Forms\Components\TextInput::make('flutterwave_encryption_key')
+                            ->label('Encryption Key')
+                            ->password()
+                            ->revealable(),
                     ])->columns(2),
             ])
             ->statePath('data');
