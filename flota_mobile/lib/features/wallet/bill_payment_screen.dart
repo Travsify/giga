@@ -153,7 +153,10 @@ class _BillPaymentScreenState extends ConsumerState<BillPaymentScreen> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => _BillPaymentSheet(biller: biller),
+      builder: (context) => Padding(
+        padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+        child: _BillPaymentSheet(biller: biller),
+      ),
     );
   }
 
@@ -508,7 +511,7 @@ class _BillPaymentSheetState extends ConsumerState<_BillPaymentSheet> {
     final showGrid = isAirtime || isData;
 
     return Container(
-      padding: EdgeInsets.fromLTRB(24, 24, 24, MediaQuery.of(context).viewInsets.bottom + 24),
+      padding: const EdgeInsets.all(24),
       decoration: const BoxDecoration(
         color: AppTheme.backgroundColor,
         borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
@@ -621,7 +624,6 @@ class _BillPaymentSheetState extends ConsumerState<_BillPaymentSheet> {
                 labelStyle: const TextStyle(color: Colors.grey),
                 filled: true,
                 fillColor: AppTheme.surfaceColor,
-              ),
               ),
             ),
             
