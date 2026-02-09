@@ -151,10 +151,7 @@ class _BillPaymentScreenState extends ConsumerState<BillPaymentScreen> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => Padding(
-        padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-        child: _BillPaymentSheet(biller: biller),
-      ),
+      builder: (context) => _BillPaymentSheet(biller: biller),
     );
   }
 
@@ -417,33 +414,50 @@ class _BillPaymentSheetState extends ConsumerState<_BillPaymentSheet> {
   }
 
   Future<void> _fetchPlans() async {
-      final billerName = widget.biller['biller_name'].toString().toUpperCase();
-      if (!billerName.contains('DATA')) return;
+    final String billerName = widget.biller['biller_name'].toString().toUpperCase();
+    final String itemCode = widget.biller['item_code'].toString().toUpperCase();
+    
+    // Services that require plan selection
+    final bool needsPlans = billerName.contains('DATA') || 
+                            billerName.contains('CABLE') || 
+                            billerName.contains('INTERNET') ||
+                            itemCode.startsWith('CB_') || 
+                            itemCode.startsWith('IS_');
 
-      setState(() => _fetchingPlans = true);
-      
-      try {
-          // Infer network ID from biller name or other logic
-          int networkId = 1; // Default to MTN
-          if (billerName.contains('MTN')) networkId = 1;
-          if (billerName.contains('GLO')) networkId = 2;
-          if (billerName.contains('AIRTEL')) networkId = 4;
-          if (billerName.contains('9MOBILE') || billerName.contains('ETISALAT')) networkId = 3;
+    if (!needsPlans) return;
 
-          final plans = await BillPaymentService.getDataPlans(networkId);
-          
-          if (mounted) {
-              setState(() {
-                  _dataPlans = plans;
-                  _fetchingPlans = false;
-              });
-          }
-      } catch (e) {
-          if (mounted) {
-              setState(() => _fetchingPlans = false);
-              ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error loading plans: $e')));
-          }
-      }
+    setState(() => _fetchingPlans = true);
+    
+    try {
+        // Use item_code or biller_code as the service identifier for the backend
+        // My backend now handles IS_ SMILE, CB_ DSTV, etc.
+        dynamic serviceId;
+        
+        if (billerName.contains('DATA')) {
+            // Data still uses network numbers for now or item_code
+            if (billerName.contains('MTN')) serviceId = 1;
+            else if (billerName.contains('GLO')) serviceId = 2;
+            else if (billerName.contains('AIRTEL')) serviceId = 4;
+            else if (billerName.contains('9MOBILE')) serviceId = 3;
+            else serviceId = widget.biller['item_code'];
+        } else {
+            serviceId = widget.biller['item_code'] ?? widget.biller['id'];
+        }
+
+        final plans = await BillPaymentService.getDataPlans(serviceId);
+        
+        if (mounted) {
+            setState(() {
+                _dataPlans = plans;
+                _fetchingPlans = false;
+            });
+        }
+    } catch (e) {
+        if (mounted) {
+            setState(() => _fetchingPlans = false);
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error loading plans: $e')));
+        }
+    }
   }
 
   Future<void> _validate() async {
@@ -509,16 +523,21 @@ class _BillPaymentSheetState extends ConsumerState<_BillPaymentSheet> {
     final showGrid = isAirtime || isData;
 
     return Container(
-      padding: const EdgeInsets.all(24),
+      constraints: BoxConstraints(
+        maxHeight: MediaQuery.of(context).size.height * 0.85,
+      ),
+      padding: EdgeInsets.fromLTRB(24, 24, 24, MediaQuery.of(context).viewInsets.bottom + 24),
       decoration: const BoxDecoration(
         color: AppTheme.backgroundColor,
         borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
         border: Border(top: BorderSide(color: Colors.white10)),
       ),
-      child: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
+      child: SafeArea(
+        top: false,
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Center(
               child: Container(
@@ -610,30 +629,18 @@ class _BillPaymentSheetState extends ConsumerState<_BillPaymentSheet> {
               const SizedBox(height: 16),
             ],
             
-            TextField(
-              controller: _amountController,
-              readOnly: widget.biller['amount'] > 0,
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
-              style: const TextStyle(color: Colors.white),
-              decoration: InputDecoration(
-                labelText: 'Manual Amount',
-                prefixText: '₦ ',
-                prefixStyle: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-                labelStyle: const TextStyle(color: Colors.grey),
-                filled: true,
-                fillColor: AppTheme.surfaceColor,
-              ),
-            ),
-            
-            if (isData) ...[
+            if (isData || _dataPlans.isNotEmpty) ...[
                 const SizedBox(height: 24),
-                Text('Select Data Plan', style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.w600)),
+                Text('Select Plan', style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.w600)),
                 const SizedBox(height: 12),
                 if (_fetchingPlans)
                     const LinearProgressIndicator(color: AppTheme.accentCyan)
+                else if (_dataPlans.isEmpty)
+                    Text('No plans available for this service', style: TextStyle(color: Colors.white.withOpacity(0.3), fontSize: 12))
                 else
                     DropdownButtonFormField<String>(
                         value: _selectedPlan,
+                        isExpanded: true,
                         dropdownColor: AppTheme.surfaceColor,
                         style: const TextStyle(color: Colors.white),
                         decoration: InputDecoration(
@@ -642,11 +649,15 @@ class _BillPaymentSheetState extends ConsumerState<_BillPaymentSheet> {
                             filled: true,
                             fillColor: AppTheme.surfaceColor,
                         ),
-                        validator: (v) => v == null ? 'Please select a plan' : null,
+                        hint: Text('Choose a plan', style: TextStyle(color: Colors.white.withOpacity(0.3))),
                         items: _dataPlans.map((plan) {
                             return DropdownMenuItem<String>(
                                 value: plan['plan_id'].toString(),
-                                child: Text('${plan['name']} - ₦${plan['amount']}', style: const TextStyle(color: Colors.white)),
+                                child: Text(
+                                  plan['name'], 
+                                  style: const TextStyle(color: Colors.white, fontSize: 14),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
                             );
                         }).toList(),
                         onChanged: (val) {
@@ -657,6 +668,24 @@ class _BillPaymentSheetState extends ConsumerState<_BillPaymentSheet> {
                             });
                         },
                     ),
+            ],
+            
+            if (_selectedPlan == null || !isData) ...[
+              const SizedBox(height: 24),
+              TextField(
+                controller: _amountController,
+                readOnly: widget.biller['amount'] > 0 || _selectedPlan != null,
+                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                style: const TextStyle(color: Colors.white),
+                decoration: InputDecoration(
+                  labelText: _selectedPlan != null ? 'Plan Amount' : 'Enter Amount',
+                  prefixText: '₦ ',
+                  prefixStyle: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                  labelStyle: const TextStyle(color: Colors.grey),
+                  filled: true,
+                  fillColor: AppTheme.surfaceColor,
+                ),
+              ),
             ],
             const SizedBox(height: 32),
             SizedBox(
@@ -675,8 +704,9 @@ class _BillPaymentSheetState extends ConsumerState<_BillPaymentSheet> {
           ],
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 
   String _getLabelForBiller() {
     final type = widget.biller['biller_name'].toString().toUpperCase();
