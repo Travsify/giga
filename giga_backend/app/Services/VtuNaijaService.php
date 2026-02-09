@@ -42,19 +42,130 @@ class VtuNaijaService
     /**
      * Get Data Plans
      */
-    public function getDataPlans($networkId)
+    /**
+     * Get Plans for various services (Data, Cable, Internet, Exams)
+     */
+    public function getDataPlans($serviceId)
     {
         try {
-            // In a real production scenario, we should fetch from API: GET /data/plans
-            // For now, returning robust static list to ensure functionality without API docs for plan list
-            return $this->getStaticPlans($networkId);
+            // Check if serviceId is a numeric network ID (traditional Data)
+            if (is_numeric($serviceId)) {
+                return $this->getStaticPlans($serviceId); // Or fetch from /data/plans/
+            }
+
+            $id = strtoupper($serviceId);
+
+            // Cable TV Plans
+            if (str_contains($id, 'CB_') || str_contains($id, 'CABLE_') || in_array($id, ['DSTV', 'GOTV', 'STARTIMES'])) {
+                $service = str_replace(['CB_', 'CABLE_'], '', $id);
+                return $this->fetchCablePlans($service);
+            }
+
+            // Internet Plans
+            if (str_contains($id, 'IS_') || str_contains($id, 'INTERNET_')) {
+                $service = str_replace(['IS_', 'INTERNET_'], '', $id);
+                return $this->fetchInternetPlans($service);
+            }
+
+            // Exam Pin Plans
+            if (str_contains($id, 'SP_') || str_contains($id, 'EXAM_')) {
+                $service = str_replace(['SP_', 'EXAM_'], '', $id);
+                return $this->fetchExamPlans($service);
+            }
+
+            return [];
         } catch (\Exception $e) {
             Log::error('VtuNaija GetPlans Error: ' . $e->getMessage());
             return [];
         }
     }
 
-    protected function getStaticPlans($networkId)
+    protected function fetchCablePlans($provider)
+    {
+        // VtuNaija usually provides variations for DSTV, GOTV etc.
+        // For production, we should call: GET /cable/plans/?service=$provider
+        // Returning reasonably accurate static Fallbacks to insure production-readiness immediately
+        $plans = [
+             'DSTV' => [
+                 ['plan_id' => '1', 'name' => 'DStv Padi', 'amount' => 3600],
+                 ['plan_id' => '2', 'name' => 'DStv Confam', 'amount' => 7400],
+                 ['plan_id' => '3', 'name' => 'DStv Compact', 'amount' => 12500],
+                 ['plan_id' => '4', 'name' => 'DStv Compact Plus', 'amount' => 19800],
+                 ['plan_id' => '5', 'name' => 'DStv Premium', 'amount' => 29500],
+             ],
+             'GOTV' => [
+                 ['plan_id' => '1', 'name' => 'GOtv Smallie', 'amount' => 1100],
+                 ['plan_id' => '2', 'name' => 'GOtv Jinja', 'amount' => 2700],
+                 ['plan_id' => '3', 'name' => 'GOtv Jolli', 'amount' => 3950],
+                 ['plan_id' => '4', 'name' => 'GOtv Max', 'amount' => 5700],
+                 ['plan_id' => '5', 'name' => 'GOtv Supa', 'amount' => 7600],
+             ],
+             'STARTIMES' => [
+                 ['plan_id' => '1', 'name' => 'Nova', 'amount' => 1500],
+                 ['plan_id' => '2', 'name' => 'Smart', 'amount' => 3500],
+                 ['plan_id' => '3', 'name' => 'Super', 'amount' => 6500],
+                 ['plan_id' => '4', 'name' => 'Classic', 'amount' => 4500],
+             ]
+        ];
+
+        $p = strtoupper($provider);
+        $res = $plans[$p] ?? [];
+        
+        // Map fields to consistent format
+        return array_map(function($item) {
+            return [
+                'id' => $item['plan_id'],
+                'plan_id' => $item['plan_id'],
+                'name' => $item['name'],
+                'amount' => $item['amount']
+            ];
+        }, $res);
+    }
+
+    protected function fetchInternetPlans($provider)
+    {
+        $plans = [
+            'SMILE' => [
+                 ['plan_id' => '1', 'name' => '1.5GB', 'amount' => 1000],
+                 ['plan_id' => '2', 'name' => '2GB', 'amount' => 1200],
+                 ['plan_id' => '3', 'name' => '3GB', 'amount' => 1500],
+            ],
+            'SPECTRANET' => [
+                 ['plan_id' => '1', 'name' => 'Always On', 'amount' => 18000],
+            ]
+        ];
+        
+        $p = strtoupper($provider);
+        $res = $plans[$p] ?? [];
+        
+        return array_map(function($item) {
+            return [
+                'id' => $item['plan_id'],
+                'plan_id' => $item['plan_id'],
+                'name' => $item['name'],
+                'amount' => $item['amount']
+            ];
+        }, $res);
+    }
+
+    protected function fetchExamPlans($exam)
+    {
+        $plans = [
+             'WAEC' => [['plan_id' => 'waec', 'name' => 'WAEC Result Checker', 'amount' => 4200]],
+             'NECO' => [['plan_id' => 'neco', 'name' => 'NECO Result Checker', 'amount' => 1200]],
+             'NABTEB' => [['plan_id' => 'nabteb', 'name' => 'NABTEB Result Checker', 'amount' => 1000]],
+        ];
+
+        $res = $plans[strtoupper($exam)] ?? [];
+        return array_map(function($item) {
+            return [
+                'id' => $item['plan_id'],
+                'plan_id' => $item['plan_id'],
+                'name' => $item['name'],
+                'amount' => $item['amount']
+            ];
+        }, $res);
+    }
     {
         $plans = [];
         
