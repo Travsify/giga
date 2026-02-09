@@ -212,33 +212,25 @@ class VtuNaijaService
     public function getCategories()
     {
          // We construct the list to match what the mobile app expects
-         // Mobile app expects: name, biller_name (type), item_code, etc.
-         
          $categories = [];
          
-         // Airtime
-         $categories[] = [
-             'id' => 'AIRTIME',
-             'biller_name' => 'AIRTIME', 
-             'name' => 'Airtime Top-up',
-             'country' => 'NG',
-             'is_airtime' => true,
-             'amount' => 0,
-             'label_name' => 'Phone Number',
-             'item_code' => 'AT',
+         // Airtime - Expanded to include all networks
+         $networks = [
+             ['id' => 'MTN_AIRTIME', 'name' => 'MTN Airtime', 'biller_name' => 'MTN AIRTIME', 'item_code' => 'AT_MTN', 'country' => 'NG', 'label_name' => 'Phone Number', 'amount' => 0, 'is_airtime' => true],
+             ['id' => 'GLO_AIRTIME', 'name' => 'Glo Airtime', 'biller_name' => 'GLO AIRTIME', 'item_code' => 'AT_GLO', 'country' => 'NG', 'label_name' => 'Phone Number', 'amount' => 0, 'is_airtime' => true],
+             ['id' => 'AIRTEL_AIRTIME', 'name' => 'Airtel Airtime', 'biller_name' => 'AIRTEL AIRTIME', 'item_code' => 'AT_AIRTEL', 'country' => 'NG', 'label_name' => 'Phone Number', 'amount' => 0, 'is_airtime' => true],
+             ['id' => '9MOBILE_AIRTIME', 'name' => '9Mobile Airtime', 'biller_name' => '9MOBILE AIRTIME', 'item_code' => 'AT_9MOBILE', 'country' => 'NG', 'label_name' => 'Phone Number', 'amount' => 0, 'is_airtime' => true],
          ];
+         $categories = array_merge($categories, $networks);
          
-         // Data
-          $categories[] = [
-             'id' => 'DATA',
-             'biller_name' => 'DATA BUNDLE', 
-             'name' => 'Mobile Data',
-             'country' => 'NG',
-             'is_airtime' => false,
-             'amount' => 0,
-             'label_name' => 'Phone Number',
-             'item_code' => 'MD',
+         // Data Bundle - Expanded to include all networks
+         $dataNetworks = [
+             ['id' => 'MTN_DATA', 'name' => 'MTN Data', 'biller_name' => 'MTN DATA', 'item_code' => 'DATA_MTN', 'country' => 'NG', 'label_name' => 'Phone Number', 'amount' => 0, 'is_airtime' => false],
+             ['id' => 'GLO_DATA', 'name' => 'Glo Data', 'biller_name' => 'GLO DATA', 'item_code' => 'DATA_GLO', 'country' => 'NG', 'label_name' => 'Phone Number', 'amount' => 0, 'is_airtime' => false],
+             ['id' => 'AIRTEL_DATA', 'name' => 'Airtel Data', 'biller_name' => 'AIRTEL DATA', 'item_code' => 'DATA_AIRTEL', 'country' => 'NG', 'label_name' => 'Phone Number', 'amount' => 0, 'is_airtime' => false],
+             ['id' => '9MOBILE_DATA', 'name' => '9Mobile Data', 'biller_name' => '9MOBILE DATA', 'item_code' => 'DATA_9MOBILE', 'country' => 'NG', 'label_name' => 'Phone Number', 'amount' => 0, 'is_airtime' => false],
          ];
+         $categories = array_merge($categories, $dataNetworks);
          
          // Electricity (Examples)
          $discos = ['IKEJA', 'EKO', 'ABUJA', 'KANO', 'PORT HARCOURT', 'JOS', 'KADUNA', 'ENUGU', 'IBADAN', 'BENIN'];
