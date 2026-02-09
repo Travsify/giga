@@ -32,11 +32,11 @@ class BillPaymentService {
     }
   }
 
-  static Future<List<dynamic>> getDataPlans(int networkId) async {
+  static Future<List<dynamic>> getDataPlans(dynamic serviceId) async {
     try {
       final token = await _storage.read(key: 'auth_token');
       final response = await _dio.get(
-        '/bills/plans/$networkId',
+        '/bills/plans/$serviceId',
         options: Options(headers: {'Authorization': 'Bearer $token'}),
       );
       if (response.data['data'] != null) {

@@ -151,7 +151,10 @@ class _BillPaymentScreenState extends ConsumerState<BillPaymentScreen> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => _BillPaymentSheet(biller: biller),
+      builder: (context) => Padding(
+        padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+        child: _BillPaymentSheet(biller: biller),
+      ),
     );
   }
 
@@ -523,15 +526,12 @@ class _BillPaymentSheetState extends ConsumerState<_BillPaymentSheet> {
     final showGrid = isAirtime || isData;
 
     return Container(
-      constraints: BoxConstraints(
-        maxHeight: MediaQuery.of(context).size.height * 0.85,
-      ),
-      padding: EdgeInsets.fromLTRB(24, 24, 24, MediaQuery.of(context).viewInsets.bottom + 24),
       decoration: const BoxDecoration(
         color: AppTheme.backgroundColor,
         borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
         border: Border(top: BorderSide(color: Colors.white10)),
       ),
+      padding: EdgeInsets.fromLTRB(24, 24, 24, MediaQuery.of(context).padding.bottom + 24),
       child: SafeArea(
         top: false,
         child: SingleChildScrollView(
@@ -670,15 +670,15 @@ class _BillPaymentSheetState extends ConsumerState<_BillPaymentSheet> {
                     ),
             ],
             
-            if (_selectedPlan == null || !isData) ...[
+            if (_selectedPlan == null) ...[
               const SizedBox(height: 24),
               TextField(
                 controller: _amountController,
-                readOnly: widget.biller['amount'] > 0 || _selectedPlan != null,
+                readOnly: widget.biller['amount'] > 0,
                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
                 style: const TextStyle(color: Colors.white),
                 decoration: InputDecoration(
-                  labelText: _selectedPlan != null ? 'Plan Amount' : 'Enter Amount',
+                  labelText: 'Enter Amount',
                   prefixText: '₦ ',
                   prefixStyle: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                   labelStyle: const TextStyle(color: Colors.grey),
@@ -686,6 +686,23 @@ class _BillPaymentSheetState extends ConsumerState<_BillPaymentSheet> {
                   fillColor: AppTheme.surfaceColor,
                 ),
               ),
+            ] else ...[
+               const SizedBox(height: 24),
+               Container(
+                 padding: const EdgeInsets.all(16),
+                 decoration: BoxDecoration(
+                   color: AppTheme.accentCyan.withOpacity(0.05),
+                   borderRadius: BorderRadius.circular(12),
+                   border: Border.all(color: AppTheme.accentCyan.withOpacity(0.3)),
+                 ),
+                 child: Row(
+                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                   children: [
+                     const Text('Plan Amount', style: TextStyle(color: Colors.grey)),
+                     Text('₦${_amountController.text}', style: const TextStyle(color: AppTheme.accentCyan, fontWeight: FontWeight.bold, fontSize: 18)),
+                   ],
+                 ),
+               ),
             ],
             const SizedBox(height: 32),
             SizedBox(
