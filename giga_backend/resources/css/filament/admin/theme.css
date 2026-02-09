@@ -6,8 +6,13 @@
 
 @config '../../../../tailwind.config.js';
 
-/* Light Mode Overrides for Sharp, Modern Look */
+/* ===================================
+   GIGA LOGISTICS - Sleek Minimalist Theme
+   Light Mode with Emerald Green Accents
+   =================================== */
+
 :root {
+    /* Emerald Green Primary Palette */
     --primary-50: 236 253 245;
     --primary-100: 209 250 229;
     --primary-200: 167 243 208;
@@ -19,87 +24,313 @@
     --primary-800: 6 95 70;
     --primary-900: 6 78 59;
     --primary-950: 2 44 34;
+    
+    /* Custom Giga Variables */
+    --giga-bg: #F8FAFC;
+    --giga-surface: #FFFFFF;
+    --giga-border: #E2E8F0;
+    --giga-text-primary: #0F172A;
+    --giga-text-secondary: #64748B;
+    --giga-emerald: #10B981;
+    --giga-emerald-light: #ECFDF5;
+    --giga-emerald-dark: #047857;
 }
 
-/* Force Light Backgrounds & High Contrast */
+/* ===== Global Layout ===== */
 body {
-    background-color: #f3f4f6 !important; /* Cool gray background */
-    color: #111827 !important; /* High contrast text */
+    background-color: var(--giga-bg) !important;
+    color: var(--giga-text-primary) !important;
+    font-family: 'Outfit', system-ui, sans-serif;
 }
 
+/* ===== Sidebar - Clean White ===== */
 .fi-sidebar {
-    background-color: #ffffff !important;
-    border-right: 1px solid #e5e7eb !important;
-    backdrop-filter: blur(12px);
+    background-color: var(--giga-surface) !important;
+    border-right: 1px solid var(--giga-border) !important;
+    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.03) !important;
 }
 
-.fi-header {
-    background-color: #ffffff !important;
-    border-bottom: 1px solid #e5e7eb !important;
+.fi-sidebar-nav {
+    padding: 0.75rem !important;
 }
 
-.fi-main {
-    background-color: #f3f4f6 !important;
+/* Sidebar Brand */
+.fi-sidebar-header {
+    padding: 1.25rem 1rem !important;
+    border-bottom: 1px solid var(--giga-border) !important;
+    margin-bottom: 0.5rem !important;
 }
 
-/* Sharp Cards with soft shadows */
-.fi-card, .fi-section {
-    background-color: #ffffff !important;
-    border: 1px solid #e5e7eb !important;
-    box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1) !important;
-    border-radius: 0.5rem !important;
-}
-
-/* High Contrast Inputs */
-input, select, textarea {
-    background-color: #ffffff !important;
-    border-color: #d1d5db !important;
-    color: #111827 !important;
-}
-
-input:focus, select:focus, textarea:focus {
-    border-color: #10b981 !important; /* Emerald green focus */
-    ring-color: #10b981 !important;
-}
-
+/* Navigation Items */
 .fi-sidebar-item-button {
-    border-radius: 8px;
-    margin: 4px 8px;
+    border-radius: 12px !important;
+    margin: 2px 0 !important;
+    padding: 0.75rem 1rem !important;
+    transition: all 0.2s ease !important;
 }
 
 .fi-sidebar-item-button:hover {
-    background-color: #f3f4f6 !important;
+    background-color: var(--giga-emerald-light) !important;
 }
 
 .fi-sidebar-item-active .fi-sidebar-item-button {
-    background-color: #ecfdf5 !important; /* Mint background */
-    color: #047857 !important; /* Emerald text */
-    font-weight: 600;
+    background-color: var(--giga-emerald) !important;
+    color: white !important;
+    font-weight: 600 !important;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3) !important;
 }
 
-/* Stat Widgets */
+.fi-sidebar-item-active .fi-sidebar-item-button .fi-sidebar-item-icon {
+    color: white !important;
+}
+
+.fi-sidebar-item-icon {
+    width: 1.25rem !important;
+    height: 1.25rem !important;
+    color: var(--giga-text-secondary) !important;
+}
+
+/* Sidebar Group Labels */
+.fi-sidebar-group-label {
+    text-transform: uppercase !important;
+    font-size: 0.65rem !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.1em !important;
+    color: var(--giga-text-secondary) !important;
+    padding: 1rem 1rem 0.5rem !important;
+}
+
+/* ===== Header - Minimal Clean ===== */
+.fi-header {
+    background-color: var(--giga-surface) !important;
+    border-bottom: 1px solid var(--giga-border) !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02) !important;
+}
+
+.fi-topbar {
+    background-color: transparent !important;
+}
+
+/* ===== Main Content Area ===== */
+.fi-main {
+    background-color: var(--giga-bg) !important;
+    padding: 1.5rem !important;
+}
+
+/* ===== Cards - Soft Modern ===== */
+.fi-card,
+.fi-section,
+.fi-ta-content,
+.fi-fo-component-ctn {
+    background-color: var(--giga-surface) !important;
+    border: 1px solid var(--giga-border) !important;
+    border-radius: 16px !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 4px 12px rgba(0, 0, 0, 0.02) !important;
+}
+
+/* Card Headers */
+.fi-section-header {
+    border-bottom: 1px solid var(--giga-border) !important;
+    padding: 1rem 1.25rem !important;
+}
+
+/* ===== Stats Overview Widgets ===== */
+.fi-wi-stats-overview-stat {
+    background-color: var(--giga-surface) !important;
+    border: 1px solid var(--giga-border) !important;
+    border-radius: 16px !important;
+    padding: 1.25rem !important;
+    transition: all 0.2s ease !important;
+}
+
+.fi-wi-stats-overview-stat:hover {
+    box-shadow: 0 8px 24px rgba(16, 185, 129, 0.1) !important;
+    border-color: var(--giga-emerald) !important;
+}
+
 .fi-wi-stats-overview-stat-value {
-    color: #FFFFFF !important;
-    font-size: 1.875rem !important;
-    font-weight: 800;
+    color: var(--giga-text-primary) !important;
+    font-size: 1.75rem !important;
+    font-weight: 800 !important;
 }
 
-/* Fix SVG Icon Sizing - This is likely why they are huge */
-.fi-sidebar-item-icon, 
-.fi-icon-btn-icon,
-.fi-ta-icon-column-icon {
-    width: 1.5rem;
-    height: 1.5rem;
+.fi-wi-stats-overview-stat-label {
+    color: var(--giga-text-secondary) !important;
+    font-size: 0.75rem !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
 }
 
-/* Auth Pages */
+/* Stat Icon Circle Background */
+.fi-wi-stats-overview-stat-icon {
+    background-color: var(--giga-emerald-light) !important;
+    color: var(--giga-emerald) !important;
+    border-radius: 12px !important;
+    padding: 0.75rem !important;
+}
+
+/* ===== Form Inputs - Clean Style ===== */
+input, select, textarea,
+.fi-input, .fi-select, .fi-textarea {
+    background-color: var(--giga-surface) !important;
+    border: 1.5px solid var(--giga-border) !important;
+    border-radius: 10px !important;
+    color: var(--giga-text-primary) !important;
+    transition: all 0.2s ease !important;
+}
+
+input:focus, select:focus, textarea:focus,
+.fi-input:focus, .fi-select:focus, .fi-textarea:focus {
+    border-color: var(--giga-emerald) !important;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15) !important;
+    outline: none !important;
+}
+
+/* ===== Buttons ===== */
+.fi-btn-primary {
+    background-color: var(--giga-emerald) !important;
+    border-radius: 10px !important;
+    font-weight: 600 !important;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25) !important;
+    transition: all 0.2s ease !important;
+}
+
+.fi-btn-primary:hover {
+    background-color: var(--giga-emerald-dark) !important;
+    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.35) !important;
+    transform: translateY(-1px) !important;
+}
+
+/* Secondary/Outline Buttons */
+.fi-btn-secondary {
+    border: 1.5px solid var(--giga-border) !important;
+    border-radius: 10px !important;
+    color: var(--giga-text-primary) !important;
+}
+
+.fi-btn-secondary:hover {
+    border-color: var(--giga-emerald) !important;
+    color: var(--giga-emerald) !important;
+    background-color: var(--giga-emerald-light) !important;
+}
+
+/* ===== Tables - Clean Data Display ===== */
+.fi-ta-header-cell {
+    background-color: var(--giga-bg) !important;
+    color: var(--giga-text-secondary) !important;
+    font-size: 0.7rem !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.08em !important;
+}
+
+.fi-ta-row {
+    border-bottom: 1px solid var(--giga-border) !important;
+    transition: background-color 0.15s ease !important;
+}
+
+.fi-ta-row:hover {
+    background-color: var(--giga-emerald-light) !important;
+}
+
+/* ===== Badges/Status Pills ===== */
+.fi-badge {
+    border-radius: 9999px !important;
+    font-size: 0.7rem !important;
+    font-weight: 600 !important;
+    padding: 0.25rem 0.75rem !important;
+}
+
+/* ===== Modal/Dialogs ===== */
+.fi-modal-window {
+    border-radius: 20px !important;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* ===== Search/Global Search ===== */
+.fi-global-search-field {
+    background-color: var(--giga-bg) !important;
+    border-radius: 12px !important;
+    border: 1px solid var(--giga-border) !important;
+}
+
+/* ===== Auth/Login Pages ===== */
 .fi-simple-main {
-    background: radial-gradient(circle at center, rgba(0, 242, 255, 0.1) 0%, transparent 80%);
+    background: linear-gradient(135deg, #F8FAFC 0%, #ECFDF5 50%, #F8FAFC 100%) !important;
+}
+
+.fi-simple-page {
+    min-height: 100vh !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
 }
 
 .fi-simple-card {
-    background: rgba(15, 23, 42, 0.7) !important;
-    backdrop-filter: blur(32px);
-    border: 1px solid var(--giga-glass-border) !important;
-    border-radius: 30px;
+    background: var(--giga-surface) !important;
+    border: 1px solid var(--giga-border) !important;
+    border-radius: 24px !important;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08) !important;
+    padding: 2.5rem !important;
+}
+
+/* ===== Charts/Widgets Area ===== */
+.fi-wi-chart {
+    border-radius: 16px !important;
+    overflow: hidden !important;
+}
+
+/* ===== Notifications/Toasts ===== */
+.fi-notification {
+    border-radius: 12px !important;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.12) !important;
+}
+
+/* ===== Breadcrumbs ===== */
+.fi-breadcrumbs {
+    color: var(--giga-text-secondary) !important;
+    font-size: 0.8rem !important;
+}
+
+/* ===== Empty States ===== */
+.fi-ta-empty-state {
+    padding: 3rem !important;
+}
+
+.fi-ta-empty-state-icon {
+    color: var(--giga-emerald) !important;
+    opacity: 0.5 !important;
+}
+
+/* ===== Icon Sizing Fix ===== */
+.fi-icon-btn-icon,
+.fi-ta-icon-column-icon {
+    width: 1.25rem !important;
+    height: 1.25rem !important;
+}
+
+/* ===== Pagination ===== */
+.fi-pagination {
+    border-top: 1px solid var(--giga-border) !important;
+    padding-top: 1rem !important;
+}
+
+/* ===== Scrollbar Styling ===== */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--giga-bg);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--giga-border);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--giga-text-secondary);
 }

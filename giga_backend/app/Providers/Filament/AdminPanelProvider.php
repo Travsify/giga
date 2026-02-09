@@ -30,9 +30,9 @@ class AdminPanelProvider extends PanelProvider
             ->brandName('Giga Logistics')
             ->darkMode(false)
             ->colors([
-                'primary' => Color::Hex('#0F172A'), // Slate 900 (Sharp Black/Blue)
+                'primary' => Color::Emerald,
                 'success' => Color::Emerald,
-                'danger' => Color::Red,
+                'danger' => Color::Rose,
                 'warning' => Color::Amber,
                 'gray' => Color::Slate,
             ])
