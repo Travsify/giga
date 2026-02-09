@@ -3,66 +3,79 @@
 @source '../../../../vendor/filament/**/*.blade.php';
 @source '../../../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../../../storage/framework/views/*.php';
-@source '../../../**/*.blade.php';
-@source '../../../**/*.js';
+@import '../../../../vendor/filament/filament/resources/css/theme.css';
 
-@theme {
-    /* Neon Palette */
-    --color-primary-50: #f0fdff;
-    --color-primary-100: #e0f8ff;
-    --color-primary-200: #b9f3ff;
-    --color-primary-300: #7cedff;
-    --color-primary-400: #33e1ff;
-    --color-primary-500: #00f2ff;
-    --color-primary-600: #00b4d8;
-    --color-primary-700: #008eb4;
-    --color-primary-800: #007291;
-    --color-primary-900: #065e77;
-    --color-primary-950: #004052;
+@config '../../../../tailwind.config.js';
 
-    --color-success-500: #39FF14;
-    --color-danger-500: #FF0033;
-}
-
-/* Neon Logistics Custom Styles */
+/* Light Mode Overrides for Sharp, Modern Look */
 :root {
-    --giga-midnight-pro: #020617;
-    --giga-surface-dark: #0F172A;
-    --giga-glass-border: rgba(0, 242, 255, 0.15);
+    --primary-50: 236 253 245;
+    --primary-100: 209 250 229;
+    --primary-200: 167 243 208;
+    --primary-300: 110 231 183;
+    --primary-400: 52 211 153;
+    --primary-500: 16 185 129;
+    --primary-600: 5 150 105;
+    --primary-700: 4 120 87;
+    --primary-800: 6 95 70;
+    --primary-900: 6 78 59;
+    --primary-950: 2 44 34;
 }
 
-.fi-body {
-    background-color: var(--giga-midnight-pro);
-    background-image: 
-        radial-gradient(circle at 100% 0%, rgba(0, 242, 255, 0.07) 0%, transparent 40%),
-        radial-gradient(circle at 0% 100%, rgba(57, 255, 20, 0.05) 0%, transparent 40%);
-    background-attachment: fixed;
-    color: #F1F5F9;
+/* Force Light Backgrounds & High Contrast */
+body {
+    background-color: #f3f4f6 !important; /* Cool gray background */
+    color: #111827 !important; /* High contrast text */
 }
 
-/* Sidebar Fixes */
 .fi-sidebar {
-    background-color: #0A0F1E !important;
-    border-right: 1px solid var(--giga-glass-border) !important;
+    background-color: #ffffff !important;
+    border-right: 1px solid #e5e7eb !important;
     backdrop-filter: blur(12px);
 }
 
+.fi-header {
+    background-color: #ffffff !important;
+    border-bottom: 1px solid #e5e7eb !important;
+}
+
+.fi-main {
+    background-color: #f3f4f6 !important;
+}
+
+/* Sharp Cards with soft shadows */
+.fi-card, .fi-section {
+    background-color: #ffffff !important;
+    border: 1px solid #e5e7eb !important;
+    box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1) !important;
+    border-radius: 0.5rem !important;
+}
+
+/* High Contrast Inputs */
+input, select, textarea {
+    background-color: #ffffff !important;
+    border-color: #d1d5db !important;
+    color: #111827 !important;
+}
+
+input:focus, select:focus, textarea:focus {
+    border-color: #10b981 !important; /* Emerald green focus */
+    ring-color: #10b981 !important;
+}
+
 .fi-sidebar-item-button {
-    border-radius: 12px;
+    border-radius: 8px;
     margin: 4px 8px;
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.fi-sidebar-active {
-    background-color: rgba(0, 242, 255, 0.08) !important;
+.fi-sidebar-item-button:hover {
+    background-color: #f3f4f6 !important;
 }
 
-/* Glassmorphism */
-.fi-section, .fi-wi-stats-overview-stat, .fi-ta-ctn {
-    background-color: var(--giga-surface-dark) !important;
-    border: 1px solid var(--giga-glass-border) !important;
-    backdrop-filter: blur(20px) saturate(160%);
-    border-radius: 20px;
+.fi-sidebar-item-active .fi-sidebar-item-button {
+    background-color: #ecfdf5 !important; /* Mint background */
+    color: #047857 !important; /* Emerald text */
+    font-weight: 600;
 }
 
 /* Stat Widgets */

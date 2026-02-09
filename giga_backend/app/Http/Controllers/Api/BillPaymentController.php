@@ -4,17 +4,17 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Services\FlutterwaveBillService;
+use App\Services\VtuNaijaService;
 use App\Services\SecurityNotificationService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class BillPaymentController extends Controller
 {
-    protected FlutterwaveBillService $billService;
+    protected VtuNaijaService $billService;
     protected SecurityNotificationService $notifications;
 
-    public function __construct(FlutterwaveBillService $billService, SecurityNotificationService $notifications)
+    public function __construct(VtuNaijaService $billService, SecurityNotificationService $notifications)
     {
         $this->billService = $billService;
         $this->notifications = $notifications;
@@ -25,8 +25,17 @@ class BillPaymentController extends Controller
      */
     public function getCategories()
     {
-        $categories = $this->billService->getBillCategories();
+        $categories = $this->billService->getCategories();
         return response()->json(['data' => $categories]);
+    }
+
+    /**
+     * Get data plans for a network.
+     */
+    public function getPlans($networkId)
+    {
+        $plans = $this->billService->getDataPlans($networkId);
+        return response()->json(['data' => $plans]);
     }
 
     /**
@@ -40,10 +49,10 @@ class BillPaymentController extends Controller
             'customer' => 'required|string', // The Customer ID / Smartcard Number
         ]);
 
-        $result = $this->billService->validateBillService(
+        $result = $this->billService->validateCustomer(
             $request->item_code,
-            $request->code,
-            $request->customer
+            $request->customer,
+            $request->code
         );
 
         if ($result['success']) {
@@ -60,10 +69,11 @@ class BillPaymentController extends Controller
     {
         $request->validate([
             'amount' => 'required|numeric|min:1',
-            'type' => 'required|string', // Biller Type (e.g. DSTV)
+            'type' => 'required|string', // Biller Type
             'customer' => 'required|string', // Smartcard/Phone
-            'country' => 'nullable|string|in:NG,GH,KE,ZA',
-            'biller_name' => 'nullable|string', // For description
+            'country' => 'nullable|string|in:NG',
+            'biller_name' => 'nullable|string', // Important for VTU Naija to know network/category
+            'plan' => 'nullable|string', // For Data
         ]);
 
         try {
@@ -93,6 +103,8 @@ class BillPaymentController extends Controller
                     'customer' => $request->customer,
                     'amount' => $amount,
                     'type' => $request->type,
+                    'biller_name' => $request->biller_name,
+                    'plan' => $request->plan ?? null,
                     'reference' => $reference,
                 ]);
 

@@ -497,6 +497,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/bills/categories', [App\Http\Controllers\Api\BillPaymentController::class, 'getCategories']);
     Route::post('/bills/validate', [App\Http\Controllers\Api\BillPaymentController::class, 'validateCustomer']);
     Route::post('/bills/pay', [App\Http\Controllers\Api\BillPaymentController::class, 'pay']);
+    Route::get('/bills/plans/{network_id}', [App\Http\Controllers\Api\BillPaymentController::class, 'getPlans']);
 
     // Subscriptions
     Route::get('/subscription/status', [App\Http\Controllers\Api\SubscriptionController::class, 'status']);
