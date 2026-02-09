@@ -166,6 +166,8 @@ class VtuNaijaService
             ];
         }, $res);
     }
+
+    protected function getStaticPlans($networkId)
     {
         $plans = [];
         
