@@ -408,24 +408,36 @@ class _BillPaymentSheetState extends ConsumerState<_BillPaymentSheet> {
   @override
   void initState() {
     super.initState();
-    if (widget.biller['amount'] > 0) {
+    if (widget.biller['amount'] != null && widget.biller['amount'] > 0) {
       _amountController.text = widget.biller['amount'].toString();
     }
-    if (widget.biller['biller_name'].toString().toUpperCase().contains('DATA')) {
+    
+    final String bName = widget.biller['biller_name'].toString().toUpperCase();
+    final String iCode = widget.biller['item_code']?.toString().toUpperCase() ?? '';
+    
+    if (bName.contains('DATA') || 
+        bName == 'CABLE_PAY' || 
+        bName == 'INTERNET_SERVICE' || 
+        bName == 'SCHOOL_FEES' ||
+        iCode.startsWith('CB_') ||
+        iCode.startsWith('IS_') ||
+        iCode.startsWith('SP_')) {
         _fetchPlans();
     }
   }
 
   Future<void> _fetchPlans() async {
-    final String billerName = widget.biller['biller_name'].toString().toUpperCase();
-    final String itemCode = widget.biller['item_code'].toString().toUpperCase();
+    final String bName = widget.biller['biller_name'].toString().toUpperCase();
+    final String iCode = widget.biller['item_code']?.toString().toUpperCase() ?? '';
     
     // Services that require plan selection
-    final bool needsPlans = billerName.contains('DATA') || 
-                            billerName.contains('CABLE') || 
-                            billerName.contains('INTERNET') ||
-                            itemCode.startsWith('CB_') || 
-                            itemCode.startsWith('IS_');
+    final bool needsPlans = bName.contains('DATA') || 
+                            bName == 'CABLE_PAY' || 
+                            bName == 'INTERNET_SERVICE' || 
+                            bName == 'SCHOOL_FEES' ||
+                            iCode.startsWith('CB_') ||
+                            iCode.startsWith('IS_') ||
+                            iCode.startsWith('SP_');
 
     if (!needsPlans) return;
 
@@ -446,8 +458,9 @@ class _BillPaymentSheetState extends ConsumerState<_BillPaymentSheet> {
         } else {
             serviceId = widget.biller['item_code'] ?? widget.biller['id'];
         }
-
+        print('Fetching plans for serviceId: $serviceId (Biller: ${widget.biller['name']})');
         final plans = await BillPaymentService.getDataPlans(serviceId);
+        print('Received ${plans.length} plans');
         
         if (mounted) {
             setState(() {
@@ -521,9 +534,17 @@ class _BillPaymentSheetState extends ConsumerState<_BillPaymentSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final isAirtime = widget.biller['biller_name'].toString().toUpperCase().contains('AIRTIME');
-    final isData = widget.biller['biller_name'].toString().toUpperCase().contains('DATA');
+    final String bName = widget.biller['biller_name'].toString().toUpperCase();
+    final String iCode = widget.biller['item_code']?.toString().toUpperCase() ?? '';
+
+    final isAirtime = bName.contains('AIRTIME');
+    final isData = bName.contains('DATA');
+    final isCable = bName == 'CABLE_PAY' || iCode.startsWith('CB_');
+    final isInternet = bName == 'INTERNET_SERVICE' || iCode.startsWith('IS_');
+    final isExam = bName == 'SCHOOL_FEES' || iCode.startsWith('SP_');
+
     final showGrid = isAirtime || isData;
+    final showPlans = isData || isCable || isInternet || isExam || _dataPlans.isNotEmpty;
 
     return Container(
       decoration: const BoxDecoration(
@@ -629,7 +650,7 @@ class _BillPaymentSheetState extends ConsumerState<_BillPaymentSheet> {
               const SizedBox(height: 16),
             ],
             
-            if (isData || _dataPlans.isNotEmpty) ...[
+            if (showPlans) ...[
                 const SizedBox(height: 24),
                 Text('Select Plan', style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.w600)),
                 const SizedBox(height: 12),
