@@ -448,12 +448,12 @@ class _BillPaymentSheetState extends ConsumerState<_BillPaymentSheet> {
         // My backend now handles IS_ SMILE, CB_ DSTV, etc.
         dynamic serviceId;
         
-        if (billerName.contains('DATA')) {
+        if (bName.contains('DATA')) {
             // Data still uses network numbers for now or item_code
-            if (billerName.contains('MTN')) serviceId = 1;
-            else if (billerName.contains('GLO')) serviceId = 2;
-            else if (billerName.contains('AIRTEL')) serviceId = 4;
-            else if (billerName.contains('9MOBILE')) serviceId = 3;
+            if (bName.contains('MTN')) serviceId = 1;
+            else if (bName.contains('GLO')) serviceId = 2;
+            else if (bName.contains('AIRTEL')) serviceId = 4;
+            else if (bName.contains('9MOBILE')) serviceId = 3;
             else serviceId = widget.biller['item_code'];
         } else {
             serviceId = widget.biller['item_code'] ?? widget.biller['id'];
