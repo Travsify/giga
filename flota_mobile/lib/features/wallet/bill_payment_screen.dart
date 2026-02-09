@@ -642,7 +642,7 @@ class _BillPaymentSheetState extends ConsumerState<_BillPaymentSheet> {
                             filled: true,
                             fillColor: AppTheme.surfaceColor,
                         ),
-                        validates: (v) => v == null ? 'Please select a plan' : null,
+                        validator: (v) => v == null ? 'Please select a plan' : null,
                         items: _dataPlans.map((plan) {
                             return DropdownMenuItem<String>(
                                 value: plan['plan_id'].toString(),
