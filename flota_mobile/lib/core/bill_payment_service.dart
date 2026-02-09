@@ -2,7 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter/foundation.dart';
 
-const String kApiBaseUrl = 'https://giga-ytn0.onrender.com/api';
+const String kApiBaseUrl = 'https://usegiga.site/api';
 
 class BillPaymentService {
   static final Dio _dio = Dio(BaseOptions(

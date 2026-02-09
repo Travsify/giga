@@ -8,7 +8,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'dart:math';
 
 // Render Production Backend
-const String kApiBaseUrl = 'https://giga-ytn0.onrender.com/api'; 
+const String kApiBaseUrl = 'https://usegiga.site/api'; 
 
 // NOTE: flutter_paystack is currently incompatible with the project's build configuration.
 // We are using a MockPaymentService to allow the app to be built and functionality tested.

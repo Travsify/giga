@@ -133,7 +133,7 @@ class SettingsService {
     // Use the base URL from ApiClient but point to /storage/
     // ApiClient uses /api/, so we need to go up one level
     // Easier to just hardcode or reuse logic if we expose baseUrl in ApiClient
-    const baseUrl = 'https://giga-ytn0.onrender.com';
+    const baseUrl = 'https://usegiga.site';
     return '$baseUrl/storage/$cleanPath';
   }
 
