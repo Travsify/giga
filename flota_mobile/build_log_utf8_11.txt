@@ -1,0 +1,236 @@
+﻿Running Gradle task 'assembleRelease'...                        
+flutter : Warning: 
+Flutter support for your 
+project's Gradle version 
+(8.5.0) will soon be 
+dropped. Please upgrade 
+your Gradle version to a 
+version of at least 8.7.0 
+soon.
+At line:1 char:1
++ flutter build apk > 
+build_log_retry_11.txt 
+2>&1
++ ~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo        
+      : NotSpecified: (W  
+  arning: Flutte...ast    
+ 8.7.0 soon.:String) [    
+], RemoteException
+    + FullyQualifiedError 
+   Id : NativeCommandErr  
+  or
+ 
+Alternatively, use the 
+flag "--android-skip-build
+-dependency-validation" 
+to bypass this check.
+
+Potential fix: Your 
+project's gradle version 
+is typically defined in 
+the gradle wrapper file. 
+By default, this can be 
+found at C:\Users\USER\Des
+ktop\giga\flota_mobile\and
+roid/gradle/wrapper/gradle
+-wrapper.properties. 
+For more information, see 
+https://docs.gradle.org/cu
+rrent/userguide/gradle_wra
+pper.html.
+
+Warning: Flutter support 
+for your project's 
+Android Gradle Plugin 
+version (Android Gradle 
+Plugin version 8.2.1) 
+will soon be dropped. 
+Please upgrade your 
+Android Gradle Plugin 
+version to a version of 
+at least Android Gradle 
+Plugin version 8.6.0 soon.
+Alternatively, use the 
+flag "--android-skip-build
+-dependency-validation" 
+to bypass this check.
+
+Potential fix: Your 
+project's AGP version is 
+typically defined in the 
+plugins block of the 
+`settings.gradle` file (C:
+\Users\USER\Desktop\giga\f
+lota_mobile\android/settin
+gs.gradle), by a plugin 
+with the id of 
+com.android.application. 
+If you don't see a 
+plugins block, your 
+project was likely 
+created with an older 
+template version. In this 
+case it is most likely 
+defined in the top-level 
+build.gradle file (C:\User
+s\USER\Desktop\giga\flota_
+mobile\android/build.gradl
+e) by the following line 
+in the dependencies block 
+of the buildscript: 
+"classpath 'com.android.to
+ols.build:gradle:<version>
+'".
+
+lib/features/tracking/ride
+r_dashboard.dart:466:1: 
+Error: Expected a 
+declaration, but got '}'.
+}
+^
+lib/features/tracking/ride
+r_dashboard.dart:360:19: 
+Error: Undefined name 
+'ref'.
+    final state = ref.read
+(riderDashboardControllerP
+rovider);
+                  ^^^
+lib/features/tracking/ride
+r_dashboard.dart:368:18: 
+Error: Undefined name 
+'context'.
+        context: context,
+                 ^^^^^^^
+lib/features/tracking/ride
+r_dashboard.dart:375:9: 
+Error: Undefined name 
+'context'.
+        context,
+        ^^^^^^^
+lib/features/tracking/ride
+r_dashboard.dart:382:37: 
+Error: Undefined name 
+'vehiclesProvider'.
+    final vehiclesAsync = 
+ref.watch(vehiclesProvider
+);
+                          
+          ^^^^^^^^^^^^^^^^
+lib/features/tracking/ride
+r_dashboard.dart:382:27: 
+Error: Undefined name 
+'ref'.
+    final vehiclesAsync = 
+ref.watch(vehiclesProvider
+);
+                          
+^^^
+lib/features/tracking/ride
+r_dashboard.dart:383:33: 
+Error: Undefined name 
+'profileProvider'.
+    final userState = ref.
+watch(profileProvider);
+                          
+      ^^^^^^^^^^^^^^^
+lib/features/tracking/ride
+r_dashboard.dart:383:23: 
+Error: Undefined name 
+'ref'.
+    final userState = ref.
+watch(profileProvider);
+                      ^^^
+lib/features/tracking/ride
+r_dashboard.dart:435:40: 
+Error: Undefined name 
+'vehicleServiceProvider'.
+                        
+await ref.read(vehicleServ
+iceProvider).activateVehic
+le(vehicle.id);
+                          
+             
+^^^^^^^^^^^^^^^^^^^^^^
+lib/features/tracking/ride
+r_dashboard.dart:435:31: 
+Error: Undefined name 
+'ref'.
+                        
+await ref.read(vehicleServ
+iceProvider).activateVehic
+le(vehicle.id);
+                          
+    ^^^
+lib/features/tracking/ride
+r_dashboard.dart:436:37: 
+Error: Undefined name 
+'profileProvider'.
+                        re
+f.refresh(profileProvider.
+notifier).refresh();
+                          
+          ^^^^^^^^^^^^^^^
+lib/features/tracking/ride
+r_dashboard.dart:436:25: 
+Error: Undefined name 
+'ref'.
+                        re
+f.refresh(profileProvider.
+notifier).refresh();
+                        
+^^^
+lib/features/tracking/ride
+r_dashboard.dart:437:37: 
+Error: Undefined name 
+'vehiclesProvider'.
+                        re
+f.refresh(vehiclesProvider
+);
+                          
+          ^^^^^^^^^^^^^^^^
+lib/features/tracking/ride
+r_dashboard.dart:437:25: 
+Error: Undefined name 
+'ref'.
+                        re
+f.refresh(vehiclesProvider
+);
+                        
+^^^
+Target 
+kernel_snapshot_program 
+failed: Exception
+
+
+FAILURE: Build failed 
+with an exception.
+
+* What went wrong:
+Execution failed for task 
+':app:compileFlutterBuildR
+elease'.
+> Process 'command 'C:\Flu
+tterVersions\flutter\bin\f
+lutter.bat'' finished 
+with non-zero exit value 1
+
+* Try:
+> Run with --stacktrace 
+option to get the stack 
+trace.
+> Run with --info or 
+--debug option to get 
+more log output.
+> Run with --scan to get 
+full insights.
+> Get more help at 
+https://help.gradle.org.
+
+BUILD FAILED in 25s
+Running Gradle task 'assembleRelease'...                           26.2s
+Gradle task 
+assembleRelease failed 
+with exit code 1

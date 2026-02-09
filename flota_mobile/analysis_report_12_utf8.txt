@@ -1,0 +1,12 @@
+﻿Analyzing rider_dashboard.dart...                               
+
+warning - The declaration '_GigaCenterButton' isn't referenced - lib\features\tracking\rider_dashboard.dart:147:7 - unused_element
+warning - The operand can't be 'null', so the condition is always 'true' - lib\features\tracking\rider_dashboard.dart:233:29 - unnecessary_null_comparison
+  error - Undefined name 'vehiclesProvider' - lib\features\tracking\rider_dashboard.dart:381:37 - undefined_identifier
+  error - Undefined name 'profileProvider' - lib\features\tracking\rider_dashboard.dart:382:33 - undefined_identifier
+  error - Undefined name 'vehicleServiceProvider' - lib\features\tracking\rider_dashboard.dart:434:40 - undefined_identifier
+  error - Undefined name 'profileProvider' - lib\features\tracking\rider_dashboard.dart:435:37 - undefined_identifier
+warning - The value of 'refresh' should be used - lib\features\tracking\rider_dashboard.dart:436:29 - unused_result
+  error - Undefined name 'vehiclesProvider' - lib\features\tracking\rider_dashboard.dart:436:37 - undefined_identifier
+  error - Expected a method, getter, setter or operator declaration - lib\features\tracking\rider_dashboard.dart:466:1 - expected_executable
+

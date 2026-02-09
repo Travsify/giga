@@ -32,6 +32,26 @@ class BillPaymentService {
     }
   }
 
+  static Future<List<dynamic>> getDataPlans(int networkId) async {
+    try {
+      final token = await _storage.read(key: 'auth_token');
+      final response = await _dio.get(
+        '/bills/plans/$networkId',
+        options: Options(headers: {'Authorization': 'Bearer $token'}),
+      );
+      if (response.data['data'] != null) {
+        return response.data['data'];
+      }
+      return [];
+    } on DioException catch (e) {
+      debugPrint('GetDataPlans Error: ${e.response?.data}');
+      throw e.response?.data['message'] ?? 'Failed to load data plans';
+    } catch (e) {
+      debugPrint('GetDataPlans unexpected error: $e');
+      throw 'An unexpected error occurred';
+    }
+  }
+
   static Future<Map<String, dynamic>> validateCustomer(String itemCode, String code, String customer) async {
     try {
       final token = await _storage.read(key: 'auth_token');
@@ -60,6 +80,7 @@ class BillPaymentService {
     required String customer,
     String country = 'NG',
     String? billerName,
+    String? plan,
   }) async {
     try {
       final token = await _storage.read(key: 'auth_token');
@@ -71,6 +92,7 @@ class BillPaymentService {
           'customer': customer,
           'country': country,
           'biller_name': billerName,
+          'plan': plan,
         },
         options: Options(headers: {'Authorization': 'Bearer $token'}),
       );

@@ -1,0 +1,19 @@
+﻿Analyzing rider_dashboard.dart...                               
+
+warning - The declaration '_GigaCenterButton' isn't referenced - lib\features\tracking\rider_dashboard.dart:147:7 - unused_element
+warning - The operand can't be 'null', so the condition is always 'true' - lib\features\tracking\rider_dashboard.dart:233:29 - unnecessary_null_comparison
+  error - Undefined name 'ref' - lib\features\tracking\rider_dashboard.dart:360:19 - undefined_identifier
+  error - Undefined name 'context' - lib\features\tracking\rider_dashboard.dart:368:18 - undefined_identifier
+  error - Undefined name 'context' - lib\features\tracking\rider_dashboard.dart:375:9 - undefined_identifier
+  error - Undefined name 'ref' - lib\features\tracking\rider_dashboard.dart:382:27 - undefined_identifier
+  error - Undefined name 'vehiclesProvider' - lib\features\tracking\rider_dashboard.dart:382:37 - undefined_identifier
+  error - Undefined name 'ref' - lib\features\tracking\rider_dashboard.dart:383:23 - undefined_identifier
+  error - Undefined name 'profileProvider' - lib\features\tracking\rider_dashboard.dart:383:33 - undefined_identifier
+  error - Undefined name 'ref' - lib\features\tracking\rider_dashboard.dart:435:31 - undefined_identifier
+  error - Undefined name 'vehicleServiceProvider' - lib\features\tracking\rider_dashboard.dart:435:40 - undefined_identifier
+  error - Undefined name 'ref' - lib\features\tracking\rider_dashboard.dart:436:25 - undefined_identifier
+  error - Undefined name 'profileProvider' - lib\features\tracking\rider_dashboard.dart:436:37 - undefined_identifier
+  error - Undefined name 'ref' - lib\features\tracking\rider_dashboard.dart:437:25 - undefined_identifier
+  error - Undefined name 'vehiclesProvider' - lib\features\tracking\rider_dashboard.dart:437:37 - undefined_identifier
+  error - Expected a method, getter, setter or operator declaration - lib\features\tracking\rider_dashboard.dart:466:1 - expected_executable
+

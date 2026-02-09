@@ -398,6 +398,9 @@ class _BillPaymentSheetState extends ConsumerState<_BillPaymentSheet> {
   bool _isLoading = false;
   String? _customerName;
   String? _validationError;
+  String? _selectedPlan;
+  List<dynamic> _dataPlans = [];
+  bool _fetchingPlans = false;
 
   final List<double> _quickAmounts = [100, 200, 500, 1000, 2000, 5000];
 
@@ -407,6 +410,39 @@ class _BillPaymentSheetState extends ConsumerState<_BillPaymentSheet> {
     if (widget.biller['amount'] > 0) {
       _amountController.text = widget.biller['amount'].toString();
     }
+    if (widget.biller['biller_name'].toString().toUpperCase().contains('DATA')) {
+        _fetchPlans();
+    }
+  }
+
+  Future<void> _fetchPlans() async {
+      final billerName = widget.biller['biller_name'].toString().toUpperCase();
+      if (!billerName.contains('DATA')) return;
+
+      setState(() => _fetchingPlans = true);
+      
+      try {
+          // Infer network ID from biller name or other logic
+          int networkId = 1; // Default to MTN
+          if (billerName.contains('MTN')) networkId = 1;
+          if (billerName.contains('GLO')) networkId = 2;
+          if (billerName.contains('AIRTEL')) networkId = 4;
+          if (billerName.contains('9MOBILE') || billerName.contains('ETISALAT')) networkId = 3;
+
+          final plans = await BillPaymentService.getDataPlans(networkId);
+          
+          if (mounted) {
+              setState(() {
+                  _dataPlans = plans;
+                  _fetchingPlans = false;
+              });
+          }
+      } catch (e) {
+          if (mounted) {
+              setState(() => _fetchingPlans = false);
+              ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error loading plans: $e')));
+          }
+      }
   }
 
   Future<void> _validate() async {
@@ -450,6 +486,7 @@ class _BillPaymentSheetState extends ConsumerState<_BillPaymentSheet> {
         customer: _customerController.text,
         country: widget.biller['country'],
         billerName: widget.biller['name'],
+        plan: _selectedPlan,
       );
       
       if (mounted) {
@@ -585,7 +622,42 @@ class _BillPaymentSheetState extends ConsumerState<_BillPaymentSheet> {
                 filled: true,
                 fillColor: AppTheme.surfaceColor,
               ),
+              ),
             ),
+            
+            if (isData) ...[
+                const SizedBox(height: 24),
+                Text('Select Data Plan', style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.w600)),
+                const SizedBox(height: 12),
+                if (_fetchingPlans)
+                    const LinearProgressIndicator(color: AppTheme.accentCyan)
+                else
+                    DropdownButtonFormField<String>(
+                        value: _selectedPlan,
+                        dropdownColor: AppTheme.surfaceColor,
+                        style: const TextStyle(color: Colors.white),
+                        decoration: InputDecoration(
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                            filled: true,
+                            fillColor: AppTheme.surfaceColor,
+                        ),
+                        validates: (v) => v == null ? 'Please select a plan' : null,
+                        items: _dataPlans.map((plan) {
+                            return DropdownMenuItem<String>(
+                                value: plan['plan_id'].toString(),
+                                child: Text('${plan['name']} - ₦${plan['amount']}', style: const TextStyle(color: Colors.white)),
+                            );
+                        }).toList(),
+                        onChanged: (val) {
+                            final plan = _dataPlans.firstWhere((p) => p['plan_id'].toString() == val);
+                            setState(() {
+                                _selectedPlan = val;
+                                _amountController.text = plan['amount'].toString();
+                            });
+                        },
+                    ),
+            ],
             const SizedBox(height: 32),
             SizedBox(
               width: double.infinity,

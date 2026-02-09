@@ -18,6 +18,8 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:flota_mobile/features/shared/widgets/service_mode_toggle.dart';
 import 'package:flota_mobile/features/wallet/bill_payment_screen.dart';
+import 'package:flota_mobile/features/vehicle/vehicle_service.dart';
+import 'package:flota_mobile/features/profile/profile_provider.dart';
 
 
 class RiderDashboard extends ConsumerStatefulWidget {
@@ -272,6 +274,7 @@ class _RiderHomeTabState extends ConsumerState<_RiderHomeTab> {
                   );
                 }
               },
+              onVehicleAction: _handleVehicleAction,
             ),
           ),
 
@@ -353,6 +356,114 @@ class _RiderHomeTabState extends ConsumerState<_RiderHomeTab> {
       ),
     );
   }
+
+  void _handleVehicleAction() {
+    final state = ref.read(riderDashboardControllerProvider);
+    final stats = state.stats;
+    final bool isVerified = stats?.isVerified ?? false;
+    final bool hasVehicle = stats?.hasVehicle ?? false;
+    final bool isReady = isVerified && hasVehicle;
+
+    if (isReady || !hasVehicle) {
+      showModalBottomSheet(
+        context: context,
+        backgroundColor: Colors.transparent,
+        isScrollControlled: true,
+        builder: (context) => _buildVehicleSelector(context),
+      );
+    } else {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const VerificationScreen()),
+      );
+    }
+  }
+
+  Widget _buildVehicleSelector(BuildContext context) {
+    final vehiclesAsync = ref.watch(vehiclesProvider);
+    final userState = ref.watch(profileProvider);
+    final activeVehicleId = userState.user?['rider']?['active_vehicle_id'];
+
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: const BoxDecoration(
+        color: AppTheme.surfaceColor,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      child: vehiclesAsync.when(
+        data: (vehicles) {
+          if (vehicles.isEmpty) {
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text("No Vehicles Found", style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
+                const SizedBox(height: 15),
+                const Text("You haven't added any vehicles yet.", style: TextStyle(color: Colors.white70)),
+                const SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.pop(context); // Close sheet
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => const VehicleManagementScreen()));
+                  },
+                  style: ElevatedButton.styleFrom(backgroundColor: AppTheme.primaryBlue),
+                  child: const Text("Add Vehicle"),
+                ),
+              ],
+            );
+          }
+
+          return Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text("Switch Active Vehicle", style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
+              const SizedBox(height: 15),
+              ...vehicles.map((vehicle) {
+                final isActive = vehicle.id == activeVehicleId;
+                return ListTile(
+                  leading: Icon(
+                    vehicle.vehicleType.toLowerCase() == 'bike' ? Icons.motorcycle : Icons.directions_car, 
+                    color: isActive ? AppTheme.primaryBlue : Colors.white
+                  ),
+                  title: Text(
+                    "${vehicle.make ?? 'Vehicle'} • ${vehicle.vehiclePlateNumber}", 
+                    style: TextStyle(color: isActive ? AppTheme.primaryBlue : Colors.white, fontWeight: isActive ? FontWeight.bold : FontWeight.normal)
+                  ),
+                  trailing: isActive ? const Icon(Icons.check_circle, color: AppTheme.primaryBlue) : null,
+                  onTap: () async {
+                    Navigator.pop(context); // Close sheet
+                    if (!isActive) {
+                      try {
+                        await ref.read(vehicleServiceProvider).activateVehicle(vehicle.id);
+                        ref.refresh(profileProvider.notifier).refresh();
+                        ref.refresh(vehiclesProvider);
+                        if (context.mounted) {
+                           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Vehicle Activated!')));
+                        }
+                      } catch (e) {
+                        if (context.mounted) {
+                           ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to switch: $e')));
+                        }
+                      }
+                    }
+                  },
+                );
+              }).toList(),
+              const SizedBox(height: 10),
+              TextButton(
+                onPressed: () {
+                   Navigator.pop(context);
+                   Navigator.push(context, MaterialPageRoute(builder: (context) => const VehicleManagementScreen()));
+                },
+                child: const Text("Manage Vehicles", style: TextStyle(color: Colors.white70)),
+              )
+            ],
+          );
+        },
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (err, stack) => Center(child: Text("Error: $err", style: const TextStyle(color: Colors.red))),
+      ),
+    );
+  }
 }
 
 // ---------------- HELPER WIDGETS ----------------
@@ -399,8 +510,14 @@ class _ControlCenterHeader extends StatelessWidget {
   final bool isOnline;
   final RiderStats? stats;
   final Function(bool) onToggleStatus;
+  final VoidCallback onVehicleAction;
 
-  const _ControlCenterHeader({required this.isOnline, this.stats, required this.onToggleStatus});
+  const _ControlCenterHeader({
+    required this.isOnline, 
+    this.stats, 
+    required this.onToggleStatus,
+    required this.onVehicleAction,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -448,23 +565,7 @@ class _ControlCenterHeader extends StatelessWidget {
                 final bool isReady = isVerified && hasVehicle;
 
                 return GestureDetector(
-                  onTap: () {
-                    if (isReady) {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => const VehicleManagementScreen()),
-                      );
-                    } else if (!hasVehicle) {
-                      // Navigate to profile to add vehicle
-                      context.push('/profile');
-                    } else {
-                      // Navigate to Verification flow (Wait for verification)
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => const VerificationScreen()),
-                      );
-                    }
-                  },
+                  onTap: onVehicleAction,
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
@@ -500,33 +601,7 @@ class _ControlCenterHeader extends StatelessWidget {
     );
   }
 
-  Widget _buildVehicleSwitcher(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: const BoxDecoration(
-        color: AppTheme.surfaceColor,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text("Active Vehicle", style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
-          const SizedBox(height: 15),
-          ListTile(
-            leading: const Icon(Icons.directions_car, color: Colors.white),
-            title: const Text("Active Vehicle • ABJ-123", style: TextStyle(color: Colors.white)),
-            trailing: const Icon(Icons.check_circle, color: AppTheme.primaryBlue),
-            onTap: () => Navigator.pop(context),
-          ),
-          ListTile(
-            leading: const Icon(Icons.motorcycle, color: Colors.white),
-            title: const Text("Honda Ace • KJA-456", style: TextStyle(color: Colors.white)),
-            onTap: () => Navigator.pop(context),
-          ),
-        ],
-      ),
-    );
-  }
+
 }
 
 class _SafetyToolkitSheet extends StatelessWidget {
