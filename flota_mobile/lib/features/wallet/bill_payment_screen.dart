@@ -140,9 +140,7 @@ class _BillPaymentScreenState extends ConsumerState<BillPaymentScreen> {
         _searchController.clear();
       } else {
         _selectedCategory = categoryId;
-        if (exactName != null) {
-          _searchController.text = exactName.split(' ')[0];
-        }
+        // Do not auto-fill search controller
       }
       _filterBillers();
     });
