@@ -13,6 +13,8 @@ import 'package:flota_mobile/features/marketplace/delivery_provider.dart';
 import 'package:flota_mobile/features/profile/profile_provider.dart';
 import 'package:flota_mobile/features/auth/auth_provider.dart';
 import 'package:intl/intl.dart';
+import 'package:google_places_flutter/google_places_flutter.dart';
+import 'package:google_places_flutter/model/prediction.dart';
 
 class DeliveryRequestScreen extends ConsumerStatefulWidget {
   final bool initiallyScheduled;
@@ -43,6 +45,8 @@ class _DeliveryRequestScreenState extends ConsumerState<DeliveryRequestScreen> {
   bool isScheduled = false;
   DateTime? scheduledDate;
   TimeOfDay? scheduledTime;
+  bool withInsurance = false;
+  bool withEscrow = false;
 
   @override
   void initState() {
@@ -119,6 +123,8 @@ class _DeliveryRequestScreenState extends ConsumerState<DeliveryRequestScreen> {
           serviceTier: selectedTier,
           parcelCategory: selectedCategory,
           parcelSize: selectedSize,
+          withInsurance: withInsurance,
+          withEscrow: withEscrow,
         ),
       );
     }
@@ -209,9 +215,15 @@ class _DeliveryRequestScreenState extends ConsumerState<DeliveryRequestScreen> {
             ),
           ),
           const SizedBox(height: 32),
-          _buildPostcodeField('Pickup Postcode', _pickupPostcode, Icons.my_location, true),
-          const SizedBox(height: 16),
-          _buildPostcodeField('Drop-off Postcode', _dropoffPostcode, Icons.location_on, false),
+          if (ref.read(authProvider).isNigeria) ...[
+            _buildAddressSearchField('Pickup Address', _pickupController, Icons.my_location, true),
+            const SizedBox(height: 16),
+            _buildAddressSearchField('Drop-off Address', _dropoffController, Icons.location_on, false),
+          ] else ...[
+            _buildPostcodeField('Pickup Postcode', _pickupPostcode, Icons.my_location, true),
+            const SizedBox(height: 16),
+            _buildPostcodeField('Drop-off Postcode', _dropoffPostcode, Icons.location_on, false),
+          ],
           const SizedBox(height: 32),
           TextButton.icon(
             onPressed: () => _pickLocation(true),
@@ -220,6 +232,45 @@ class _DeliveryRequestScreenState extends ConsumerState<DeliveryRequestScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildAddressSearchField(String label, TextEditingController controller, IconData icon, bool isPickup) {
+    return GooglePlaceAutoCompleteTextField(
+      textEditingController: controller,
+      googleAPIKey: "AIzaSyDVqP4CjWp_fcFim7d_E0kAL35Ie2gWMzE",
+      inputDecoration: AppTheme.inputDecoration(label, prefixIcon: Icon(icon, color: isPickup ? AppTheme.primaryBlue : AppTheme.primaryRed)),
+      debounceTime: 400,
+      countries: const ["NG"],
+      boxDecoration: BoxDecoration(
+        color: AppTheme.surfaceColor,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      textStyle: GoogleFonts.outfit(fontSize: 16, color: Colors.black), // The plugin uses white text often, force black for visibility if background is light
+      itemClick: (Prediction prediction) {
+        controller.text = prediction.description ?? "";
+        controller.selection = TextSelection.fromPosition(TextPosition(offset: controller.text.length));
+        
+        // In a real app, we'd use Geocoding to get LatLng from prediction.placeId
+        // For now we simulate
+        setState(() {
+          if (isPickup) pickupLatLng = const LatLng(6.5244, 3.3792);
+          else dropoffLatLng = const LatLng(6.4281, 3.4219);
+        });
+        _updateEstimation();
+      },
+      itemBuilder: (context, index, prediction) {
+        return Container(
+          padding: const EdgeInsets.all(12),
+          child: Row(
+            children: [
+              const Icon(Icons.location_on, size: 16, color: Colors.grey),
+              const SizedBox(width: 8),
+              Expanded(child: Text(prediction.description ?? "", style: GoogleFonts.outfit(fontSize: 14))),
+            ],
+          ),
+        );
+      },
     );
   }
 
@@ -410,6 +461,33 @@ class _DeliveryRequestScreenState extends ConsumerState<DeliveryRequestScreen> {
           _buildTierCard('Standard', '30-45 mins', AppTheme.primaryBlue, 'Standard'),
           _buildTierCard('Giga Expo', 'Instant (15-20 mins)', AppTheme.primaryRed, 'Expo'),
           
+          if (ref.watch(authProvider).isNigeria) ...[
+            const SizedBox(height: 32),
+            Text("Regional Features", style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 12),
+            _buildToggleOption(
+              'Transit Insurance', 
+              'Protect against loss/damage', 
+              Icons.security_rounded, 
+              withInsurance, 
+              (val) => setState(() {
+                withInsurance = val;
+                _updateEstimation();
+              })
+            ),
+            const SizedBox(height: 12),
+            _buildToggleOption(
+              'Insta-Escrow', 
+              'Secure payment until delivery', 
+              Icons.verified_user_rounded, 
+              withEscrow, 
+              (val) => setState(() {
+                withEscrow = val;
+                _updateEstimation();
+              })
+            ),
+          ],
+
           const SizedBox(height: 32),
           Text("Timing", style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold)),
           SwitchListTile(
@@ -525,6 +603,24 @@ class _DeliveryRequestScreenState extends ConsumerState<DeliveryRequestScreen> {
     );
   }
 
+  Widget _buildToggleOption(String title, String subtitle, IconData icon, bool value, Function(bool) onChanged) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10)],
+      ),
+      child: SwitchListTile(
+        title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
+        subtitle: Text(subtitle, style: const TextStyle(fontSize: 12)),
+        secondary: Icon(icon, color: AppTheme.primaryBlue),
+        value: value,
+        activeColor: AppTheme.primaryBlue,
+        onChanged: onChanged,
+      ),
+    );
+  }
+
   // --- STEP 5: REVIEW ---
   Widget _buildReviewStep() {
     return SingleChildScrollView(
@@ -538,6 +634,8 @@ class _DeliveryRequestScreenState extends ConsumerState<DeliveryRequestScreen> {
           _buildReviewItem("Drop-off", _dropoffController.text.isEmpty ? 'To Postcode' : _dropoffController.text, Icons.location_on),
           _buildReviewItem("Parcel", "$selectedSize ($selectedCategory)", Icons.inventory),
           _buildReviewItem("Vehicle", "$selectedVehicle ($selectedTier)", Icons.local_shipping),
+          if (withInsurance) _buildReviewItem("Insurance", "Secured (Giga-Insure)", Icons.security),
+          if (withEscrow) _buildReviewItem("Payment", "Escrow Protected", Icons.verified_user),
           if (isScheduled)
             _buildReviewItem("Scheduled For", 
               "${DateFormat('MMM dd').format(scheduledDate!)} at ${scheduledTime!.format(context)}", 
@@ -614,6 +712,8 @@ class _DeliveryRequestScreenState extends ConsumerState<DeliveryRequestScreen> {
                   parcelCategory: selectedCategory,
                   parcelSize: selectedSize,
                   fare: state.estimation?.finalFare ?? 0,
+                  withInsurance: withInsurance,
+                  withEscrow: withEscrow,
                   scheduledTime: isScheduled && scheduledDate != null && scheduledTime != null
                       ? DateTime(scheduledDate!.year, scheduledDate!.month, scheduledDate!.day, scheduledTime!.hour, scheduledTime!.minute)
                       : null,

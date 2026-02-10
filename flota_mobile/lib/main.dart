@@ -45,6 +45,10 @@ import 'package:flota_mobile/features/business/presentation/screens/bulk_booking
 import 'package:flota_mobile/features/business/presentation/screens/billing_screen.dart';
 import 'package:flota_mobile/features/business/presentation/screens/team_management_screen.dart';
 import 'package:flota_mobile/features/business/presentation/screens/api_key_screen.dart';
+import 'package:flota_mobile/features/marketplace/retail_returns_screen.dart';
+import 'package:flota_mobile/features/marketplace/gift_shipping_screen.dart';
+import 'package:flota_mobile/features/marketplace/send_to_contact_screen.dart';
+import 'package:flota_mobile/features/marketplace/shop_and_ship_screen.dart';
 import 'package:flota_mobile/theme/app_theme.dart';
 
 
@@ -397,6 +401,22 @@ final routerProvider = Provider<GoRouter>((ref) {
         GoRoute(
           path: '/api-keys',
           builder: (context, state) => const ApiKeyScreen(),
+        ),
+        GoRoute(
+          path: '/returns',
+          builder: (context, state) => const RetailReturnsScreen(),
+        ),
+        GoRoute(
+          path: '/gifts',
+          builder: (context, state) => const GiftShippingScreen(),
+        ),
+        GoRoute(
+          path: '/send-to-contact',
+          builder: (context, state) => const SendToContactScreen(),
+        ),
+        GoRoute(
+          path: '/ship-and-shop',
+          builder: (context, state) => const ShopAndShipScreen(),
         ),
       ],
   );

@@ -3,6 +3,9 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:flota_mobile/features/location/traffic_service.dart';
+import 'package:geolocator/geolocator.dart';
+import '../auth/auth_provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // Payment Method Chip Widget
 class PaymentMethodChip extends StatelessWidget {
@@ -117,26 +120,59 @@ Widget buildDiscountBanner({
 
 // Live Heatmap Widget for Home Screen
 
-class LiveHeatmapWidget extends StatefulWidget {
+class LiveHeatmapWidget extends ConsumerStatefulWidget {
   const LiveHeatmapWidget({super.key});
 
   @override
-  State<LiveHeatmapWidget> createState() => _LiveHeatmapWidgetState();
+  ConsumerState<LiveHeatmapWidget> createState() => _LiveHeatmapWidgetState();
 }
 
-class _LiveHeatmapWidgetState extends State<LiveHeatmapWidget> {
+class _LiveHeatmapWidgetState extends ConsumerState<LiveHeatmapWidget> {
+  static const LatLng _lagos = LatLng(6.5244, 3.3792);
   static const LatLng _london = LatLng(51.5074, -0.1278);
+  
   Map<String, dynamic>? _trafficStatus;
+  LatLng? _currentPosition;
+  bool _isLocationLoaded = false;
+  String _demandText = "High demand in your area. Expected pickup: 5-8 mins.";
 
   @override
   void initState() {
     super.initState();
     _loadTraffic();
+    _determinePosition();
+  }
+
+  Future<void> _determinePosition() async {
+    try {
+      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) return;
+
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) return;
+      }
+
+      final pos = await Geolocator.getCurrentPosition();
+      if (mounted) {
+        setState(() {
+          _currentPosition = LatLng(pos.latitude, pos.longitude);
+          _isLocationLoaded = true;
+          _demandText = "High demand in your current zone. Bidding is active.";
+        });
+      }
+    } catch (e) {
+      debugPrint("Location error: $e");
+    }
   }
 
   Future<void> _loadTraffic() async {
-    final status = await TrafficService.getTFLStatus();
-    if (mounted) setState(() => _trafficStatus = status);
+    final authState = ref.read(authProvider);
+    if (authState.isUK) {
+      final status = await TrafficService.getTFLStatus();
+      if (mounted) setState(() => _trafficStatus = status);
+    }
   }
 
   @override
@@ -205,14 +241,22 @@ class _LiveHeatmapWidgetState extends State<LiveHeatmapWidget> {
                 ClipRRect(
                   borderRadius: BorderRadius.circular(16),
                   child: GoogleMap(
-                    initialCameraPosition: const CameraPosition(
-                      target: _london,
-                      zoom: 11,
+                    initialCameraPosition: CameraPosition(
+                      target: _currentPosition ?? (ref.read(authProvider).isNigeria ? _lagos : _london),
+                      zoom: 13,
                     ),
-                    myLocationEnabled: false,
+                    myLocationEnabled: true,
+                    myLocationButtonEnabled: false,
                     zoomControlsEnabled: false,
                     liteModeEnabled: true,
                     mapType: MapType.normal,
+                    markers: _currentPosition != null ? {
+                      Marker(
+                        markerId: const MarkerId('current_pos'),
+                        position: _currentPosition!,
+                        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueCyan),
+                      )
+                    } : {},
                   ),
                 ),
                 if (_trafficStatus != null)
@@ -255,8 +299,8 @@ class _LiveHeatmapWidgetState extends State<LiveHeatmapWidget> {
           ),
           const SizedBox(height: 12),
           Text(
-            'High demand in Central London. Expected pickup: 5-8 mins.',
-            style: TextStyle(color: Colors.grey[600], fontSize: 13),
+            _demandText,
+            style: TextStyle(color: Colors.grey[400], fontSize: 13),
           ),
         ],
       ),

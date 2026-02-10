@@ -31,6 +31,8 @@ class DeliveryEstimationRequest {
   final String serviceTier;
   final String? parcelCategory;
   final String? parcelSize;
+  final bool? withInsurance;
+  final bool? withEscrow;
   final List<DeliveryStopModel>? stops;
 
   DeliveryEstimationRequest({
@@ -42,6 +44,8 @@ class DeliveryEstimationRequest {
     required this.serviceTier,
     this.parcelCategory,
     this.parcelSize,
+    this.withInsurance = false,
+    this.withEscrow = false,
     this.stops,
   });
 
@@ -54,6 +58,8 @@ class DeliveryEstimationRequest {
     'service_tier': serviceTier,
     'parcel_category': parcelCategory,
     'parcel_size': parcelSize,
+    'with_insurance': withInsurance,
+    'with_escrow': withEscrow,
     'stops': stops?.map((s) => s.toJson()).toList(),
   };
 }
@@ -73,6 +79,9 @@ class DeliveryRequest {
   final String? parcelPhotoUrl;
   final String? description;
   final DateTime? scheduledTime;
+  final bool withInsurance;
+  final bool withEscrow;
+  final bool isGift;
   final List<DeliveryStopModel>? stops;
 
   DeliveryRequest({
@@ -90,6 +99,9 @@ class DeliveryRequest {
     this.parcelPhotoUrl,
     this.description,
     this.scheduledTime,
+    this.withInsurance = false,
+    this.withEscrow = false,
+    this.isGift = false,
     this.stops,
   });
 
@@ -108,6 +120,9 @@ class DeliveryRequest {
     'parcel_photo_url': parcelPhotoUrl,
     'description': description,
     'scheduled_time': scheduledTime?.toIso8601String(),
+    'with_insurance': withInsurance,
+    'with_escrow': withEscrow,
+    'is_gift': isGift,
     'stops': stops?.map((s) => s.toJson()).toList(),
   };
 }

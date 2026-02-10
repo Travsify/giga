@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:flota_mobile/theme/app_theme.dart';
 import 'package:flota_mobile/core/bill_payment_service.dart';
 import 'package:flota_mobile/features/profile/profile_provider.dart';
+import 'package:flota_mobile/features/auth/auth_provider.dart';
 
 class BillPaymentScreen extends ConsumerStatefulWidget {
   const BillPaymentScreen({super.key});
@@ -521,8 +522,13 @@ class _BillPaymentSheetState extends ConsumerState<_BillPaymentSheet> {
       );
       
       if (mounted) {
+        final isNigeria = ref.read(authProvider).isNigeria;
         Navigator.pop(context); // Close sheet
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Payment Successful!'), backgroundColor: AppTheme.successGreen));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(isNigeria ? 'Payment Successful! ₦50 reward added to your wallet.' : 'Payment Successful!'),
+          backgroundColor: AppTheme.successGreen,
+          duration: const Duration(seconds: 4),
+        ));
       }
     } catch (e) {
       if (mounted) {
@@ -586,6 +592,27 @@ class _BillPaymentSheetState extends ConsumerState<_BillPaymentSheet> {
                 ),
               ],
             ),
+            if (ref.read(authProvider).isNigeria) ...[
+              const SizedBox(height: 12),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                decoration: BoxDecoration(
+                  color: AppTheme.successGreen.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: AppTheme.successGreen.withOpacity(0.3)),
+                ),
+                child: const Row(
+                  children: [
+                    Icon(Icons.stars_rounded, color: AppTheme.successGreen, size: 16),
+                    SizedBox(width: 8),
+                    Text(
+                      'Earn ₦50 logistics credit for this payment!',
+                      style: TextStyle(color: AppTheme.successGreen, fontSize: 11, fontWeight: FontWeight.bold),
+                    ),
+                  ],
+                ),
+              ),
+            ],
             const SizedBox(height: 24),
             TextField(
               controller: _customerController,

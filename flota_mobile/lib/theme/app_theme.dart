@@ -117,4 +117,26 @@ class AppTheme {
   static const Color slateBlue = Color(0xFF475569);
   static const Color cardBg = surfaceColor;
   static const Color primaryOrange = Color(0xFFF59E0B);
+
+  static InputDecoration inputDecoration(String hint, {Widget? prefixIcon}) {
+    return InputDecoration(
+      hintText: hint,
+      prefixIcon: prefixIcon,
+      filled: true,
+      fillColor: const Color(0xFF0F1219),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: borderBlue),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: borderBlue),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: primaryBlue, width: 2),
+      ),
+      contentPadding: const EdgeInsets.all(16),
+    );
+  }
 }

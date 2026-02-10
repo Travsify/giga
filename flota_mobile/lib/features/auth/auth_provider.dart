@@ -38,6 +38,9 @@ class AuthState {
     this.serviceMode = 'delivery',
   });
 
+  bool get isNigeria => countryCode == 'NG' || currencyCode == 'NGN';
+  bool get isUK => countryCode == 'GB' || countryCode == 'UK' || currencyCode == 'GBP';
+
   String get currencySymbol {
     switch(currencyCode) {
       case 'NGN': return '₦';
