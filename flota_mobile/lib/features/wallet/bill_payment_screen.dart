@@ -523,6 +523,9 @@ class _BillPaymentSheetState extends ConsumerState<_BillPaymentSheet> {
       
       if (mounted) {
         final isNigeria = ref.read(authProvider).isNigeria;
+        // Refresh profile to reflect the instant ₦50 reward in wallet
+        await ref.read(profileProvider.notifier).refresh();
+        
         Navigator.pop(context); // Close sheet
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Text(isNigeria ? 'Payment Successful! ₦50 reward added to your wallet.' : 'Payment Successful!'),

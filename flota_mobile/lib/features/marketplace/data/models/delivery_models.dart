@@ -33,6 +33,7 @@ class DeliveryEstimationRequest {
   final String? parcelSize;
   final bool? withInsurance;
   final bool? withEscrow;
+  final bool? isErrand;
   final List<DeliveryStopModel>? stops;
 
   DeliveryEstimationRequest({
@@ -46,6 +47,7 @@ class DeliveryEstimationRequest {
     this.parcelSize,
     this.withInsurance = false,
     this.withEscrow = false,
+    this.isErrand = false,
     this.stops,
   });
 
@@ -60,6 +62,7 @@ class DeliveryEstimationRequest {
     'parcel_size': parcelSize,
     'with_insurance': withInsurance,
     'with_escrow': withEscrow,
+    'is_errand': isErrand,
     'stops': stops?.map((s) => s.toJson()).toList(),
   };
 }
@@ -82,6 +85,7 @@ class DeliveryRequest {
   final bool withInsurance;
   final bool withEscrow;
   final bool isGift;
+  final bool isErrand;
   final List<DeliveryStopModel>? stops;
 
   DeliveryRequest({
@@ -102,6 +106,7 @@ class DeliveryRequest {
     this.withInsurance = false,
     this.withEscrow = false,
     this.isGift = false,
+    this.isErrand = false,
     this.stops,
   });
 
@@ -123,6 +128,7 @@ class DeliveryRequest {
     'with_insurance': withInsurance,
     'with_escrow': withEscrow,
     'is_gift': isGift,
+    'is_errand': isErrand,
     'stops': stops?.map((s) => s.toJson()).toList(),
   };
 }

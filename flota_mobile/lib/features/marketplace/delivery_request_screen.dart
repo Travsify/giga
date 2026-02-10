@@ -47,6 +47,7 @@ class _DeliveryRequestScreenState extends ConsumerState<DeliveryRequestScreen> {
   TimeOfDay? scheduledTime;
   bool withInsurance = false;
   bool withEscrow = false;
+  bool isErrand = false;
 
   @override
   void initState() {
@@ -125,6 +126,7 @@ class _DeliveryRequestScreenState extends ConsumerState<DeliveryRequestScreen> {
           parcelSize: selectedSize,
           withInsurance: withInsurance,
           withEscrow: withEscrow,
+          isErrand: isErrand,
         ),
       );
     }
@@ -187,7 +189,7 @@ class _DeliveryRequestScreenState extends ConsumerState<DeliveryRequestScreen> {
                 _buildParcelSpecStep(),
                 _buildSnapshotStep(),
                 _buildPreferenceStep(),
-                _buildReviewStep(),
+                _buildReviewStep(deliveryState),
               ],
             ),
           ),
@@ -377,7 +379,7 @@ class _DeliveryRequestScreenState extends ConsumerState<DeliveryRequestScreen> {
   }
 
   Widget _buildCategoryPills() {
-    final categories = ['General', 'Fragile', 'Electronics', 'Grocery', 'Fashion'];
+    final categories = ['General', 'Fragile', 'Electronics', 'Grocery', 'Fashion', 'Errand'];
     return Wrap(
       spacing: 10,
       children: categories.map((cat) {
@@ -385,7 +387,13 @@ class _DeliveryRequestScreenState extends ConsumerState<DeliveryRequestScreen> {
         return FilterChip(
           label: Text(cat),
           selected: isSelected,
-          onSelected: (val) => setState(() => selectedCategory = cat),
+          onSelected: (val) {
+             setState(() {
+               selectedCategory = cat;
+               isErrand = cat == 'Errand';
+             });
+             _updateEstimation();
+          },
           selectedColor: AppTheme.primaryBlue.withOpacity(0.2),
           checkmarkColor: AppTheme.primaryBlue,
         );
@@ -622,7 +630,7 @@ class _DeliveryRequestScreenState extends ConsumerState<DeliveryRequestScreen> {
   }
 
   // --- STEP 5: REVIEW ---
-  Widget _buildReviewStep() {
+  Widget _buildReviewStep(DeliveryState deliveryState) {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24),
       child: Column(
@@ -634,19 +642,50 @@ class _DeliveryRequestScreenState extends ConsumerState<DeliveryRequestScreen> {
           _buildReviewItem("Drop-off", _dropoffController.text.isEmpty ? 'To Postcode' : _dropoffController.text, Icons.location_on),
           _buildReviewItem("Parcel", "$selectedSize ($selectedCategory)", Icons.inventory),
           _buildReviewItem("Vehicle", "$selectedVehicle ($selectedTier)", Icons.local_shipping),
-          if (withInsurance) _buildReviewItem("Insurance", "Secured (Giga-Insure)", Icons.security),
-          if (withEscrow) _buildReviewItem("Payment", "Escrow Protected", Icons.verified_user),
           if (isScheduled)
             _buildReviewItem("Scheduled For", 
               "${DateFormat('MMM dd').format(scheduledDate!)} at ${scheduledTime!.format(context)}", 
               Icons.calendar_today
             ),
-          const SizedBox(height: 24),
-          const Divider(),
-          const SizedBox(height: 24),
-          Text("Safety First", style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold)),
           const SizedBox(height: 12),
-          Text("By clicking Book Now, you confirm the parcel contains no hazardous or illegal materials according to UK law.", style: TextStyle(color: Colors.grey, fontSize: 12)),
+          const Divider(),
+          const SizedBox(height: 12),
+          if (deliveryState.estimation != null) ...[
+            _buildReviewRow("Distance", "${deliveryState.estimation!.distanceKm.toStringAsFixed(1)} KM"),
+            _buildReviewRow("Base Fare", "${deliveryState.estimation!.currency} ${NumberFormat('#,###').format(deliveryState.estimation!.estimatedTotal)}"),
+            if (deliveryState.estimation!.discount > 0)
+              _buildReviewRow("Discount", "- ${deliveryState.estimation!.currency} ${NumberFormat('#,###').format(deliveryState.estimation!.discount)}", color: Colors.green),
+            const SizedBox(height: 8),
+            _buildReviewRow("Total Fare", "${deliveryState.estimation!.currency} ${NumberFormat('#,###').format(deliveryState.estimation!.finalFare)}", isBold: true),
+          ],
+          Text("Safety & Compliance", style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 12),
+          Text(
+            ref.read(authProvider).isNigeria 
+              ? "By clicking Book Now, you confirm the parcel contains no hazardous or illegal materials according to Nigerian law."
+              : "By clicking Book Now, you confirm the parcel contains no hazardous or illegal materials according to UK law.", 
+            style: const TextStyle(color: Colors.black87, fontSize: 13),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildReviewRow(String label, String value, {Color? color, bool isBold = false}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(label, style: TextStyle(color: Colors.grey[600], fontSize: 14)),
+          Text(
+            value, 
+            style: TextStyle(
+              fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
+              fontSize: isBold ? 18 : 14,
+              color: color ?? Colors.black,
+            )
+          ),
         ],
       ),
     );
@@ -701,10 +740,10 @@ class _DeliveryRequestScreenState extends ConsumerState<DeliveryRequestScreen> {
               else {
                 // Final confirm logic
                 final req = DeliveryRequest(
-                  pickupAddress: _pickupPostcode.text,
+                  pickupAddress: _pickupController.text.isNotEmpty ? _pickupController.text : _pickupPostcode.text,
                   pickupLat: pickupLatLng?.latitude ?? 0,
                   pickupLng: pickupLatLng?.longitude ?? 0,
-                  dropoffAddress: _dropoffPostcode.text,
+                  dropoffAddress: _dropoffController.text.isNotEmpty ? _dropoffController.text : _dropoffPostcode.text,
                   dropoffLat: dropoffLatLng?.latitude ?? 0,
                   dropoffLng: dropoffLatLng?.longitude ?? 0,
                   vehicleType: selectedVehicle,
@@ -714,6 +753,7 @@ class _DeliveryRequestScreenState extends ConsumerState<DeliveryRequestScreen> {
                   fare: state.estimation?.finalFare ?? 0,
                   withInsurance: withInsurance,
                   withEscrow: withEscrow,
+                  isErrand: isErrand,
                   scheduledTime: isScheduled && scheduledDate != null && scheduledTime != null
                       ? DateTime(scheduledDate!.year, scheduledDate!.month, scheduledDate!.day, scheduledTime!.hour, scheduledTime!.minute)
                       : null,
