@@ -234,7 +234,7 @@ class _BillPaymentScreenState extends ConsumerState<BillPaymentScreen> {
                     crossAxisCount: 4,
                     mainAxisSpacing: 16,
                     crossAxisSpacing: 16,
-                    childAspectRatio: 0.75,
+                    childAspectRatio: 0.7,
                   ),
                   delegate: SliverChildBuilderDelegate(
                     (context, index) {

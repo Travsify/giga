@@ -136,6 +136,8 @@ class _LiveHeatmapWidgetState extends ConsumerState<LiveHeatmapWidget> {
   bool _isLocationLoaded = false;
   String _demandText = "High demand in your area. Expected pickup: 5-8 mins.";
 
+  GoogleMapController? _mapController;
+
   @override
   void initState() {
     super.initState();
@@ -161,6 +163,11 @@ class _LiveHeatmapWidgetState extends ConsumerState<LiveHeatmapWidget> {
           _isLocationLoaded = true;
           _demandText = "High demand in your current zone. Bidding is active.";
         });
+        
+        // Animate to current position if map is ready
+        _mapController?.animateCamera(
+          CameraUpdate.newLatLngZoom(_currentPosition!, 14),
+        );
       }
     } catch (e) {
       debugPrint("Location error: $e");
@@ -199,11 +206,13 @@ class _LiveHeatmapWidgetState extends ConsumerState<LiveHeatmapWidget> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                'Live Delivery Heatmap',
-                style: GoogleFonts.outfit(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
+              Expanded(
+                child: Text(
+                  'Live Delivery Heatmap',
+                  style: GoogleFonts.outfit(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
               Container(
@@ -245,6 +254,7 @@ class _LiveHeatmapWidgetState extends ConsumerState<LiveHeatmapWidget> {
                       target: _currentPosition ?? (ref.read(authProvider).isNigeria ? _lagos : _london),
                       zoom: 13,
                     ),
+                    onMapCreated: (controller) => _mapController = controller,
                     myLocationEnabled: true,
                     myLocationButtonEnabled: false,
                     zoomControlsEnabled: false,
