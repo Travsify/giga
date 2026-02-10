@@ -280,12 +280,13 @@ class _DeliveryRequestScreenState extends ConsumerState<DeliveryRequestScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
-        color: Colors.grey[100],
+        color: AppTheme.surfaceColor,
         borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppTheme.borderBlue),
       ),
       child: TextField(
         controller: controller,
-        style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold, letterSpacing: 2),
+        style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold, letterSpacing: 2, color: Colors.white),
         decoration: InputDecoration(
           border: InputBorder.none,
           labelText: label,
@@ -352,9 +353,9 @@ class _DeliveryRequestScreenState extends ConsumerState<DeliveryRequestScreen> {
             margin: const EdgeInsets.only(bottom: 12),
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: isSelected ? AppTheme.primaryBlue.withOpacity(0.05) : Colors.white,
+              color: isSelected ? AppTheme.primaryBlue.withOpacity(0.1) : AppTheme.surfaceColor,
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: isSelected ? AppTheme.primaryBlue : Colors.grey[200]!, width: 2),
+              border: Border.all(color: isSelected ? AppTheme.primaryBlue : AppTheme.borderBlue, width: 2),
             ),
             child: Row(
               children: [
@@ -364,7 +365,7 @@ class _DeliveryRequestScreenState extends ConsumerState<DeliveryRequestScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(item['label'] as String, style: const TextStyle(fontWeight: FontWeight.bold)),
+                      Text(item['label'] as String, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
                       Text(item['desc'] as String, style: TextStyle(color: Colors.grey, fontSize: 12)),
                     ],
                   ),
@@ -385,7 +386,7 @@ class _DeliveryRequestScreenState extends ConsumerState<DeliveryRequestScreen> {
       children: categories.map((cat) {
         final isSelected = selectedCategory == cat;
         return FilterChip(
-          label: Text(cat),
+          label: Text(cat, style: TextStyle(color: isSelected ? Colors.white : AppTheme.textSecondary)),
           selected: isSelected,
           onSelected: (val) {
              setState(() {
@@ -613,14 +614,16 @@ class _DeliveryRequestScreenState extends ConsumerState<DeliveryRequestScreen> {
 
   Widget _buildToggleOption(String title, String subtitle, IconData icon, bool value, Function(bool) onChanged) {
     return Container(
+      margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        color: AppTheme.surfaceColor,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppTheme.borderBlue),
         boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10)],
       ),
       child: SwitchListTile(
-        title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
-        subtitle: Text(subtitle, style: const TextStyle(fontSize: 12)),
+        title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold, color: AppTheme.textPrimary)),
+        subtitle: Text(subtitle, style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary)),
         secondary: Icon(icon, color: AppTheme.primaryBlue),
         value: value,
         activeColor: AppTheme.primaryBlue,
@@ -664,7 +667,7 @@ class _DeliveryRequestScreenState extends ConsumerState<DeliveryRequestScreen> {
             ref.read(authProvider).isNigeria 
               ? "By clicking Book Now, you confirm the parcel contains no hazardous or illegal materials according to Nigerian law."
               : "By clicking Book Now, you confirm the parcel contains no hazardous or illegal materials according to UK law.", 
-            style: const TextStyle(color: Colors.black87, fontSize: 13),
+            style: const TextStyle(color: AppTheme.textSecondary, fontSize: 13),
           ),
         ],
       ),
@@ -683,7 +686,7 @@ class _DeliveryRequestScreenState extends ConsumerState<DeliveryRequestScreen> {
             style: TextStyle(
               fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
               fontSize: isBold ? 18 : 14,
-              color: color ?? Colors.black,
+              color: color ?? Colors.white,
             )
           ),
         ],
@@ -703,8 +706,8 @@ class _DeliveryRequestScreenState extends ConsumerState<DeliveryRequestScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(label, style: const TextStyle(fontSize: 12, color: Colors.grey)),
-                Text(val, style: const TextStyle(fontWeight: FontWeight.bold)),
+                Text(label, style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary)),
+                Text(val, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
               ],
             ),
           )
@@ -717,8 +720,8 @@ class _DeliveryRequestScreenState extends ConsumerState<DeliveryRequestScreen> {
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: Colors.white,
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 20, offset: const Offset(0, -5))],
+        color: AppTheme.surfaceColor,
+        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.2), blurRadius: 20, offset: const Offset(0, -5))],
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
