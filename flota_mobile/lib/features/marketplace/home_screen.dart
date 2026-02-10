@@ -118,8 +118,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         ),
                         Row(
                           children: [
-                            _UlezStatusBubble(),
-                            const SizedBox(width: 8),
+                            if (!authState.isNigeria) _UlezStatusBubble(),
+                            if (!authState.isNigeria) const SizedBox(width: 8),
                             GestureDetector(
                               onTap: () => context.push('/profile'),
                               child: Container(

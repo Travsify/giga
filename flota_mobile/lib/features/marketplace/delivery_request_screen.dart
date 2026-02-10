@@ -246,7 +246,7 @@ class _DeliveryRequestScreenState extends ConsumerState<DeliveryRequestScreen> {
         color: AppTheme.surfaceColor,
         borderRadius: BorderRadius.circular(16),
       ),
-      textStyle: GoogleFonts.outfit(fontSize: 16, color: AppTheme.textPrimary), 
+      textStyle: GoogleFonts.outfit(fontSize: 16, color: Colors.white), 
       itemClick: (Prediction prediction) {
         controller.text = prediction.description ?? "";
         controller.selection = TextSelection.fromPosition(TextPosition(offset: controller.text.length));
@@ -266,7 +266,7 @@ class _DeliveryRequestScreenState extends ConsumerState<DeliveryRequestScreen> {
             children: [
               const Icon(Icons.location_on, size: 16, color: Colors.grey),
               const SizedBox(width: 8),
-              Expanded(child: Text(prediction.description ?? "", style: GoogleFonts.outfit(fontSize: 14, color: Colors.black87))),
+              Expanded(child: Text(prediction.description ?? "", style: GoogleFonts.outfit(fontSize: 14, color: Colors.white))),
             ],
           ),
         );
