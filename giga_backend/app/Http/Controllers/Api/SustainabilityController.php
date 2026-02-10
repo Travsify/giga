@@ -13,37 +13,49 @@ class SustainabilityController extends Controller
     {
         $user = $request->user();
         
-        // Fetch all delivered orders for this user
         $deliveries = Delivery::where('customer_id', $user->id)
             ->where('status', 'delivered')
             ->get();
 
         $totalDistanceKm = 0;
+        $greenDistanceKm = 0;
 
         foreach ($deliveries as $delivery) {
             if ($delivery->pickup_lat && $delivery->pickup_lng && $delivery->dropoff_lat && $delivery->dropoff_lng) {
-                $totalDistanceKm += $this->calculateDistance(
+                $dist = $this->calculateDistance(
                     $delivery->pickup_lat,
                     $delivery->pickup_lng,
                     $delivery->dropoff_lat,
                     $delivery->dropoff_lng
                 );
+                $totalDistanceKm += $dist;
+                
+                if (in_array($delivery->green_choice, ['ev', 'bicycle'])) {
+                    $greenDistanceKm += $dist;
+                }
             }
         }
 
-        // Carbon Calculation: 
-        // Average petrol car emits ~120g CO2 per km.
-        // Giga (Electric/Bike) assumes 0g tailpipe.
-        // Saved = 0.12 kg * km.
         $co2SavedKg = $totalDistanceKm * 0.12;
+        $extraGreenSavings = $greenDistanceKm * 0.05; 
 
         return response()->json([
-            'total_co2_saved_kg' => round($co2SavedKg, 2),
+            'total_co2_saved_kg' => round($co2SavedKg + $extraGreenSavings, 2),
             'eco_deliveries_count' => $deliveries->count(),
             'distance_cycled_km' => round($totalDistanceKm, 1),
-            'paper_saved_sheets' => $deliveries->count() * 5, // Approx 5 sheets per paper waybill
-            'trees_equivalent' => round($co2SavedKg / 20, 1) // 1 tree absorbs ~20kg CO2/year
+            'green_choice_distance_km' => round($greenDistanceKm, 1),
+            'paper_saved_sheets' => $deliveries->count() * 5,
+            'trees_equivalent' => round(($co2SavedKg + $extraGreenSavings) / 20, 1),
+            'social_badge' => $this->getBadge($totalDistanceKm),
         ]);
+    }
+
+    private function getBadge($distance)
+    {
+        if ($distance > 500) return 'Giga Legend';
+        if ($distance > 100) return 'Eco Warrior';
+        if ($distance > 10) return 'Green Starter';
+        return 'Seedling';
     }
 
     // Haversine Formula

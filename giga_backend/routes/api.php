@@ -6,7 +6,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\DeliveryController;
 use App\Http\Controllers\Api\ChatController;
 use App\Http\Controllers\Api\ProfileController;
-// use App\Http\Controllers\Api\NotificationController; // FIXME: Class does not exist
+use App\Http\Controllers\Api\NotificationController;
 
 use App\Http\Controllers\Api\PasswordResetController;
 use App\Http\Controllers\Api\PaymentController;
@@ -19,7 +19,15 @@ use App\Http\Controllers\Api\PromoController;
 use App\Http\Controllers\Api\LockerController;
 use App\Http\Controllers\Api\SustainabilityController;
 use App\Http\Controllers\Api\SettingsController;
-// use App\Http\Controllers\Api\CurrencyController; // FIXME: Class does not exist
+use App\Http\Controllers\Api\CurrencyController;
+use App\Http\Controllers\Api\InterStateController;
+use App\Http\Controllers\Api\ShopAndShipController;
+use App\Http\Controllers\Api\BiddingController;
+use App\Http\Controllers\Api\EscrowController;
+use App\Http\Controllers\Api\InsuranceController;
+use App\Http\Controllers\Api\ReturnRequestController;
+use App\Http\Controllers\Api\GiftController;
+use App\Http\Controllers\Api\LoyaltyController;
 use App\Http\Controllers\Api\BankController;
 
 \Illuminate\Support\Facades\Log::info('REQUEST: ' . request()->method() . ' ' . request()->fullUrl(), request()->all());
@@ -186,8 +194,8 @@ Route::get('/live-resend-test', function() {
 });
 
 // Route::get('/test-smtp', [App\Http\Controllers\Api\TestSmtpController::class, 'test']); // FIXME: Class does not exist
-// Route::get('/currency-rates', [CurrencyController::class, 'getRates']); // FIXME: Class does not exist
-// Route::get('/currencies', [CurrencyController::class, 'index']); // FIXME: Class does not exist
+Route::get('/currency-rates', [CurrencyController::class, 'getRates']);
+// Route::get('/currencies', [CurrencyController::class, 'index']);
 // SECRET: Force Migration (Delete after use!)
 Route::get('/fix-migrations', function() {
     try {
@@ -441,7 +449,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/email/resend', [EmailVerificationController::class, 'resendCode']);
 
     // Notifications
-    // Route::get('/notifications', [NotificationController::class, 'index']); // FIXME: Class does not exist
+    Route::get('/notifications', [NotificationController::class, 'getNotifications']);
+    Route::post('/notifications/token', [NotificationController::class, 'updateToken']);
 
     // Deliveries
     Route::get('/deliveries', [DeliveryController::class, 'index']);
@@ -529,10 +538,31 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/sustainability/stats', [App\Http\Controllers\Api\SustainabilityController::class, 'getStats']);
 
     // Inter-state Delivery
-    // Route::get('/inter-state/price', [App\Http\Controllers\Api\InterStateController::class, 'getPrice']); // FIXME: Class does not exist
-    // Route::post('/inter-state/waybill', [App\Http\Controllers\Api\InterStateController::class, 'createWaybill']); // FIXME: Class does not exist
+    Route::get('/inter-state/price', [InterStateController::class, 'getPrice']);
+    Route::post('/inter-state/waybill', [InterStateController::class, 'createWaybill']);
 
     // Shop & Ship
-    // Route::get('/shop-and-ship/address', [App\Http\Controllers\Api\ShopAndShipController::class, 'getAddress']); // FIXME: Class does not exist
-    // Route::get('/shop-and-ship/packages', [App\Http\Controllers\Api\ShopAndShipController::class, 'getPackages']); // FIXME: Class does not exist
+    Route::get('/shop-and-ship/address', [ShopAndShipController::class, 'getAddress']);
+    Route::get('/shop-and-ship/packages', [ShopAndShipController::class, 'getPackages']);
+
+    // Nigeria Disruptors
+    Route::get('/bidding/delivery/{delivery}', [BiddingController::class, 'getBids']);
+    Route::post('/bidding/delivery/{delivery}/bid', [BiddingController::class, 'placeBid']);
+    Route::post('/bidding/bid/{bid}/accept', [BiddingController::class, 'acceptBid']);
+
+    Route::post('/escrow/initiate/{delivery}', [EscrowController::class, 'initiateEscrow']);
+    Route::post('/escrow/release/{delivery}', [EscrowController::class, 'releaseEscrow']);
+    Route::post('/escrow/dispute/{delivery}', [EscrowController::class, 'disputeEscrow']);
+
+    Route::get('/insurance/premium', [InsuranceController::class, 'getPremium']);
+    Route::post('/insurance/opt-in/{delivery}', [InsuranceController::class, 'optIn']);
+
+    // UK Disruptors
+    Route::post('/returns/create', [ReturnRequestController::class, 'create']);
+    Route::get('/returns', [ReturnRequestController::class, 'index']);
+
+    Route::post('/gifts/create', [GiftController::class, 'createGift']);
+
+    Route::post('/loyalty/reward/bill-payment', [LoyaltyController::class, 'rewardBillPayment']);
+    Route::post('/lockers/p2p-shipment', [LockerController::class, 'initiateP2PShipment']);
 });

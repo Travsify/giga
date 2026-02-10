@@ -31,6 +31,18 @@ class Delivery extends Model
         'locker_id',
         'locker_code',
         'service_tier',
+        'escrow_pin',
+        'is_escrow',
+        'escrow_status',
+        'green_choice',
+        'service_category',
+        'recipient_phone',
+        'location_requested',
+        'group_id',
+        'is_insured',
+        'insurance_premium',
+        'insured_value',
+        'insurance_policy_no',
     ];
 
     protected $casts = [
@@ -39,6 +51,11 @@ class Delivery extends Model
         'delivered_at' => 'datetime',
         'fare' => 'decimal:2',
         'contactless_delivery' => 'boolean',
+        'is_escrow' => 'boolean',
+        'is_insured' => 'boolean',
+        'location_requested' => 'boolean',
+        'insurance_premium' => 'decimal:2',
+        'insured_value' => 'decimal:2',
     ];
 
     public function customer()
@@ -54,6 +71,16 @@ class Delivery extends Model
     public function stops()
     {
         return $this->hasMany(DeliveryStop::class)->orderBy('stop_order');
+    }
+
+    public function bids()
+    {
+        return $this->hasMany(DeliveryBid::class);
+    }
+
+    public function returnRequest()
+    {
+        return $this->hasOne(ReturnRequest::class);
     }
 
     protected static function boot()

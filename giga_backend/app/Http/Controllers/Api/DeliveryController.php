@@ -156,6 +156,10 @@ class DeliveryController extends Controller
             'service_tier' => 'required|string',
             'fare' => 'required|numeric',
             'contactless_delivery' => 'boolean',
+            'recipient_phone' => 'nullable|string',
+            'group_id' => 'nullable|string',
+            'is_escrow' => 'boolean',
+            'service_category' => 'nullable|string',
         ]);
 
         if ($validator->fails()) {
@@ -177,6 +181,11 @@ class DeliveryController extends Controller
             'fare' => $request->fare,
             'status' => 'pending',
             'contactless_delivery' => $request->contactless_delivery ?? false,
+            'recipient_phone' => $request->recipient_phone,
+            'location_requested' => $request->has('recipient_phone') && empty($request->dropoff_address),
+            'group_id' => $request->group_id,
+            'is_escrow' => $request->is_escrow ?? false,
+            'service_category' => $request->service_category ?? 'standard',
         ]);
 
         if ($request->has('stops')) {

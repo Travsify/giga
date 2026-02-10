@@ -3,33 +3,25 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 /// Real London ULEZ Boundary (Simplified polygon - North/South Circular approximation)
 /// For production, use the official TFL GeoJSON boundary.
 class ULEZService {
-  // Approximate ULEZ boundary (London-wide as of 2023 expansion)
-  // This is a simplified polygon; real zones use ~2000+ points
+  // Expanded ULEZ boundary (Approximate London-wide as of Aug 2023)
   static const List<LatLng> _ulezPolygon = [
-    LatLng(51.6135, -0.2700), // Brent Cross
-    LatLng(51.6015, -0.1500), // Finchley
-    LatLng(51.5935, -0.0700), // Bounds Green
-    LatLng(51.5850, 0.0000),  // Edmonton
-    LatLng(51.5500, 0.0500),  // Walthamstow
-    LatLng(51.5100, 0.0700),  // Stratford
-    LatLng(51.4700, 0.0600),  // Beckton
-    LatLng(51.4500, 0.0200),  // Woolwich
-    LatLng(51.4300, -0.0500), // Greenwich
-    LatLng(51.4100, -0.1000), // Lewisham
-    LatLng(51.3900, -0.1500), // Norwood
-    LatLng(51.3800, -0.2000), // Streatham
-    LatLng(51.4000, -0.2700), // Wimbledon
-    LatLng(51.4500, -0.3100), // Richmond
-    LatLng(51.5000, -0.3400), // Chiswick
-    LatLng(51.5500, -0.3200), // Ealing
-    LatLng(51.5800, -0.2900), // Wembley
-    LatLng(51.6135, -0.2700), // Back to Brent Cross (close polygon)
+    LatLng(51.6914, -0.4724), // Harefield (NW)
+    LatLng(51.6668, -0.1643), // Barnet (N)
+    LatLng(51.5973, 0.2289),  // Romford (NE)
+    LatLng(51.4882, 0.3201),  // Rainham (E)
+    LatLng(51.3411, 0.1504),  // Orpington (SE)
+    LatLng(51.2980, -0.1197), // Coulsdon (S)
+    LatLng(51.3653, -0.3664), // Chessington (SW)
+    LatLng(51.4820, -0.5011), // Heathrow (W)
+    LatLng(51.6914, -0.4724), // Back to Harefield
   ];
 
-  /// Check if a coordinate is inside the ULEZ boundary using Ray Casting algorithm
+  /// Check if a coordinate is inside the ULEZ boundary.
+  /// NOTE: For production, this should integrate with the TFL Unified API 
+  /// (https://api.tfl.gov.uk/Vehicle/UlezCompliance) using the vehicle VRN.
   static Future<bool> isAddressInULEZ(LatLng location) async {
-    // Simulate small network delay for consistent UX
-    await Future.delayed(const Duration(milliseconds: 100));
+    // Simulate API latency
+    await Future.delayed(const Duration(milliseconds: 300));
     return _isPointInPolygon(location, _ulezPolygon);
   }
 
