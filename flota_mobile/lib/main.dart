@@ -418,6 +418,10 @@ final routerProvider = Provider<GoRouter>((ref) {
           path: '/ship-and-shop',
           builder: (context, state) => const ShopAndShipScreen(),
         ),
+        GoRoute(
+          path: '/bill-payment',
+          builder: (context, state) => const BillPaymentScreen(),
+        ),
       ],
   );
 });

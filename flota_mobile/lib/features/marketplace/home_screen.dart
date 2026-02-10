@@ -251,45 +251,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ),
           ),
 
-          // Search Bar Section
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.all(20.0),
-              child: FadeInUp(
-                delay: const Duration(milliseconds: 200),
-                child: GestureDetector(
-                  onTap: () => context.push('/search'),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                    decoration: BoxDecoration(
-                      color: theme.cardTheme.color,
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: theme.primaryColor.withOpacity(0.1)),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.2),
-                          blurRadius: 15,
-                          offset: const Offset(0, 5),
-                        ),
-                      ],
-                    ),
-                    child: Row(
-                      children: [
-                        const Icon(Icons.search_rounded, color: AppTheme.primaryBlue, size: 28),
-                        const SizedBox(width: 15),
-                        Expanded(
-                          child: Text(
-                            'Enter postcode (e.g., SW1A 1AA)',
-                            style: TextStyle(color: Colors.grey[400], fontSize: 16),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
 
           // Giga-Bid Live Monitor (Nigeria Only)
           if (authState.isNigeria)

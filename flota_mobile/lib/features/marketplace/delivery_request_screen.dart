@@ -669,6 +669,7 @@ class _DeliveryRequestScreenState extends ConsumerState<DeliveryRequestScreen> {
               : "By clicking Book Now, you confirm the parcel contains no hazardous or illegal materials according to UK law.", 
             style: const TextStyle(color: AppTheme.textSecondary, fontSize: 13),
           ),
+          const SizedBox(height: 120), // Ensure content is not hidden by bottom bar
         ],
       ),
     );
