@@ -13,6 +13,7 @@ import 'package:flota_mobile/features/onboarding/onboarding_screen.dart';
 import 'package:flota_mobile/features/onboarding/welcome_screen.dart';
 import 'package:flota_mobile/features/splash/splash_screen.dart';
 import 'package:flota_mobile/features/marketplace/home_screen.dart';
+import 'package:flota_mobile/features/wallet/bill_payment_screen.dart';
 import 'package:flota_mobile/features/marketplace/delivery_request_screen.dart';
 import 'package:flota_mobile/features/marketplace/search_screen.dart';
 import 'package:flota_mobile/features/wallet/checkout_screen.dart';
@@ -420,6 +421,10 @@ final routerProvider = Provider<GoRouter>((ref) {
         ),
         GoRoute(
           path: '/bill-payment',
+          builder: (context, state) => const BillPaymentScreen(),
+        ),
+        GoRoute(
+          path: '/bill-payments',
           builder: (context, state) => const BillPaymentScreen(),
         ),
       ],

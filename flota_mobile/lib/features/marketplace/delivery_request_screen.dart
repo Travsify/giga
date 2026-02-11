@@ -645,6 +645,8 @@ class _DeliveryRequestScreenState extends ConsumerState<DeliveryRequestScreen> {
           _buildReviewItem("Drop-off", _dropoffController.text.isEmpty ? 'To Postcode' : _dropoffController.text, Icons.location_on),
           _buildReviewItem("Parcel", "$selectedSize ($selectedCategory)", Icons.inventory),
           _buildReviewItem("Vehicle", "$selectedVehicle ($selectedTier)", Icons.local_shipping),
+          if (withInsurance) _buildReviewItem("Insurance", "Secured (Giga-Insure)", Icons.security),
+          if (withEscrow) _buildReviewItem("Payment", "Escrow Protected", Icons.verified_user),
           if (isScheduled)
             _buildReviewItem("Scheduled For", 
               "${DateFormat('MMM dd').format(scheduledDate!)} at ${scheduledTime!.format(context)}", 
