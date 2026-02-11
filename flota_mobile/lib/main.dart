@@ -499,6 +499,12 @@ class MyApp extends ConsumerWidget {
         debugShowCheckedModeBanner: false,
         theme: AppTheme.lightTheme,
         routerConfig: router,
+        builder: (context, child) {
+          return ScrollConfiguration(
+            behavior: const ScrollBehavior().copyWith(overscroll: false),
+            child: child!,
+          );
+        },
       ),
     );
   }
