@@ -34,6 +34,7 @@ import 'package:flota_mobile/features/tracking/chat_screen.dart';
 import 'package:flota_mobile/features/delivery/parcel_locker_screen.dart';
 import 'package:flota_mobile/features/profile/profile_screen.dart';
 import 'package:flota_mobile/features/profile/giga_plus_screen.dart';
+import 'package:flota_mobile/features/errand/errand_screen.dart';
 import 'package:flota_mobile/features/wallet/wallet_screen.dart';
 import 'package:flota_mobile/features/wallet/payment_methods_screen.dart';
 import 'package:flota_mobile/features/wallet/help_support_screen.dart';
@@ -300,9 +301,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/errand',
-        builder: (context, state) => const DeliveryRequestScreen(
-          initiallyErrand: true,
-        ),
+        builder: (context, state) => const ErrandScreen(),
       ),
       GoRoute(
         path: '/checkout',

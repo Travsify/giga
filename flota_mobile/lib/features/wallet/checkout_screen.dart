@@ -78,6 +78,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     final profile = ref.read(profileProvider);
     final authState = ref.read(authProvider);
     final user = profile.user;
+    final isNG = authState.countryCode == 'NG';
 
     // Handle COD
     if (selectedMethod == 'COD') {
@@ -89,52 +90,62 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
        return;
     }
     
-    // Handle Paystack (Stub)
-    if (selectedMethod == 'Paystack') {
-       messenger.showSnackBar(const SnackBar(content: Text('Paystack integration coming in next update.')));
-       return;
+    // Handle Wallet
+    if (selectedMethod == 'Giga Wallet') {
+      setState(() => _isProcessing = true);
+      final success = await ref.read(deliveryProvider.notifier).createDelivery(widget.deliveryRequest);
+      setState(() => _isProcessing = false);
+      
+      if (success && mounted) {
+        messenger.showSnackBar(const SnackBar(content: Text('Payment Successful & Delivery Booked!'), backgroundColor: AppTheme.successGreen));
+        context.go('/marketplace');
+      } else if (mounted) {
+        final error = ref.read(deliveryProvider).error ?? 'Transaction failed. Please check your balance.';
+        _showPaymentFailedDialog(context, error);
+      }
+      return;
     }
 
-    // Handle Stripe
-    if (selectedMethod == 'Stripe' || selectedMethod == 'Digital Wallet') {
+    // Handle Card/Digital Payments
+    if (selectedMethod == 'Stripe' || selectedMethod == 'Digital Wallet' || selectedMethod == 'Paystack') {
       if (user == null || user['email'] == null) {
-        messenger.showSnackBar(
-          const SnackBar(content: Text('Please wait for profile to load...')),
-        );
+        messenger.showSnackBar(const SnackBar(content: Text('Please wait for profile to load...')));
         return;
       }
 
       setState(() => _isProcessing = true);
       
-      messenger.showSnackBar(
-        SnackBar(
-          content: Text('Processing ${selectedMethod == 'Stripe' ? 'Card' : 'Digital'} Payment...'),
-          duration: const Duration(seconds: 1),
-        ),
-      );
-
       try {
-        await PaymentService.initialize();
-        final userId = authState.userId;
-        if (userId == null) throw 'User session expired';
+        bool paymentSuccess = false;
+        final currency = isNG ? 'NGN' : (authState.currencyCode ?? 'GBP');
 
-        final paymentSuccess = await PaymentService.fundWallet(
-          context, 
-          _effectiveFare, 
-          user['email'], 
-          userId,
-          currency: authState.currencyCode?.toLowerCase() ?? 'gbp',
-        );
+        if (isNG && (selectedMethod == 'Paystack' || selectedMethod == 'Stripe' || selectedMethod == 'Digital Wallet')) {
+          // Nigeria -> Flutterwave (NGN)
+          paymentSuccess = await PaymentService.fundWithFlutterwave(
+            context, 
+            _effectiveFare, 
+            currency
+          );
+        } else {
+          // UK -> Stripe (GBP)
+          await PaymentService.initialize();
+          paymentSuccess = await PaymentService.fundWallet(
+            context, 
+            _effectiveFare, 
+            user['email'], 
+            authState.userId!,
+            currency: currency.toLowerCase(),
+          );
+        }
 
         if (!paymentSuccess) {
           setState(() => _isProcessing = false);
+          if (mounted) _showPaymentFailedDialog(context, 'Payment was declined or cancelled.');
           return; 
         }
       } catch (e) {
         setState(() => _isProcessing = false);
-        messenger.showSnackBar(
-          SnackBar(content: Text('Payment Error: $e'), backgroundColor: AppTheme.errorRed),
-        );
+        if (mounted) _showPaymentFailedDialog(context, e.toString());
         return;
       }
     }
@@ -152,13 +163,74 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
       context.go('/marketplace');
     } else if (mounted) {
       final error = ref.read(deliveryProvider).error ?? 'Transaction failed. Please try again.';
-      messenger.showSnackBar(
-        SnackBar(
-          content: Text(error),
-          backgroundColor: AppTheme.errorRed,
-        ),
-      );
+      _showPaymentFailedDialog(context, error);
     }
+  }
+
+  void _showPaymentFailedDialog(BuildContext context, String errorMessage) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.red[50],
+                shape: BoxShape.circle,
+              ),
+              child: Icon(Icons.error_outline_rounded, color: Colors.red[400], size: 24),
+            ),
+            const SizedBox(width: 12),
+            const Expanded(child: Text('Payment Failed', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold))),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: Colors.red[50],
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Text(
+                errorMessage,
+                style: TextStyle(fontSize: 13, color: Colors.red[700]),
+              ),
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              'Your request could not be processed. You can try again or check your payment method.',
+              style: TextStyle(fontSize: 13, color: Colors.grey),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel', style: TextStyle(color: Colors.grey)),
+          ),
+          ElevatedButton.icon(
+            onPressed: () {
+              Navigator.pop(ctx);
+              _handlePayment(); // Retry
+            },
+            icon: const Icon(Icons.refresh_rounded, size: 18),
+            label: const Text('Try Again'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppTheme.primaryBlue,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   @override

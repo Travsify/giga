@@ -177,7 +177,7 @@ class GigaPlusScreen extends ConsumerWidget {
                                   }
 
                                     if (success) {
-                                      // Activate Subscription on Backend
+                                      // Payment confirmed → activate subscription
                                       await ref.read(profileProvider.notifier).subscribe();
                                       if (context.mounted) {
                                         ScaffoldMessenger.of(context).showSnackBar(
@@ -187,12 +187,15 @@ class GigaPlusScreen extends ConsumerWidget {
                                           ),
                                         );
                                       }
+                                    } else {
+                                      // Payment was NOT successful — show retry dialog
+                                      if (context.mounted) {
+                                        _showPaymentFailedDialog(context, ref, 'Payment was declined or cancelled. Please try again.');
+                                      }
                                     }
                                   } catch (e) {
                                     if (context.mounted) {
-                                      ScaffoldMessenger.of(context).showSnackBar(
-                                        SnackBar(content: Text(e.toString())),
-                                      );
+                                      _showPaymentFailedDialog(context, ref, e.toString());
                                     }
                                   }
                                 },
@@ -322,6 +325,80 @@ class GigaPlusScreen extends ConsumerWidget {
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
             child: const Text('Cancel Membership'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  static void _showPaymentFailedDialog(BuildContext context, WidgetRef ref, String errorMessage) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.red[50],
+                shape: BoxShape.circle,
+              ),
+              child: Icon(Icons.payment_rounded, color: Colors.red[400], size: 24),
+            ),
+            const SizedBox(width: 12),
+            const Expanded(child: Text('Payment Failed', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold))),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: Colors.red[50],
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Text(
+                errorMessage,
+                style: TextStyle(fontSize: 13, color: Colors.red[700]),
+              ),
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              'Your subscription was not activated. You can try again or cancel.',
+              style: TextStyle(fontSize: 13, color: Colors.grey),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel', style: TextStyle(color: Colors.grey)),
+          ),
+          ElevatedButton.icon(
+            onPressed: () {
+              Navigator.pop(ctx);
+              // Re-trigger the payment — the button's onPressed will run again
+              // when user taps 'Join Giga+ Now' after this dialog closes
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Tap "Join Giga+ Now" to try again'),
+                  backgroundColor: AppTheme.primaryBlue,
+                  duration: Duration(seconds: 3),
+                ),
+              );
+            },
+            icon: const Icon(Icons.refresh_rounded, size: 18),
+            label: const Text('Try Again'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppTheme.primaryBlue,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
           ),
         ],
       ),

@@ -200,11 +200,88 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
               SnackBar(content: Text('${authState.currencySymbol}${result.toStringAsFixed(2)} added!'), backgroundColor: AppTheme.successGreen),
             );
           }
+        } else {
+          if (mounted) _showPaymentFailedDialog(context, authState, 'Payment was declined or cancelled. Please try again.', result);
         }
+      } catch (e) {
+        if (mounted) _showPaymentFailedDialog(context, authState, e.toString(), result);
       } finally {
         if (mounted) setState(() => _isLoading = false);
       }
     }
+  }
+
+  void _showPaymentFailedDialog(BuildContext context, AuthState authState, String errorMessage, double amount) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppTheme.surfaceColor,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.red.withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.error_outline_rounded, color: AppTheme.primaryRed, size: 24),
+            ),
+            const SizedBox(width: 12),
+            const Expanded(child: Text('Payment Failed', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white))),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: AppTheme.backgroundColor,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: AppTheme.primaryRed.withOpacity(0.2)),
+              ),
+              child: Text(
+                errorMessage,
+                style: const TextStyle(fontSize: 13, color: AppTheme.textPrimary),
+              ),
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              'Your wallet was not funded. You can try again or check your payment method.',
+              style: TextStyle(fontSize: 13, color: AppTheme.textSecondary),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel', style: TextStyle(color: AppTheme.textSecondary)),
+          ),
+          ElevatedButton.icon(
+            onPressed: () {
+              Navigator.pop(ctx);
+              // Retry with the same amount
+              // We simulate result = amount by passing it back to a retry-able path
+              // For simplicity in this screen, we tell the user to re-initiate
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Please tap Add Funds to try again'), backgroundColor: AppTheme.primaryBlue),
+              );
+            },
+            icon: const Icon(Icons.refresh_rounded, size: 18),
+            label: const Text('Try Again'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppTheme.primaryBlue,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   Future<void> _handleWithdraw(AuthState authState) async {
