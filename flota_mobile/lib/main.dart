@@ -100,29 +100,7 @@ final sessionProvider = StateNotifierProvider<SessionService, DateTime>((ref) {
   return SessionService(ref);
 });
 
-class BiometricService {
-  final LocalAuthentication auth = LocalAuthentication();
-
-  Future<bool> authenticate() async {
-    try {
-      final bool canAuthenticateWithBiometrics = await auth.canCheckBiometrics;
-      if (!canAuthenticateWithBiometrics) return true; // Fallback or assume success if not supported
-
-      return await auth.authenticate(
-        localizedReason: 'Please authenticate to access Giga',
-        options: const AuthenticationOptions(
-          stickyAuth: true,
-          biometricOnly: true,
-        ),
-      );
-    } catch (e) {
-      print('Biometric error: $e');
-      return false;
-    }
-  }
-}
-
-final biometricServiceProvider = Provider((ref) => BiometricService());
+// Biometric service moved to dedicated provider file.
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

@@ -5,6 +5,7 @@ import 'package:animate_do/animate_do.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flota_mobile/theme/app_theme.dart';
 import 'package:flota_mobile/features/auth/auth_provider.dart';
+import 'package:flota_mobile/features/business/business_provider.dart';
 
 class BusinessDashboardScreen extends ConsumerWidget {
   const BusinessDashboardScreen({super.key});
