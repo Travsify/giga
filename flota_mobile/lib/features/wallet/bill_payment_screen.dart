@@ -409,12 +409,17 @@ class _BillPaymentSheetState extends ConsumerState<_BillPaymentSheet> {
   @override
   void initState() {
     super.initState();
-    if (widget.biller['amount'] != null && widget.biller['amount'] > 0) {
-      _amountController.text = widget.biller['amount'].toString();
+    // Pre-fill amount if the biller has a fixed price
+    final billerAmount = widget.biller['amount'];
+    if (billerAmount != null && billerAmount is num && billerAmount > 0) {
+      _amountController.text = billerAmount.toString();
     }
     
-    final String bName = widget.biller['biller_name'].toString().toUpperCase();
-    final String iCode = widget.biller['item_code']?.toString().toUpperCase() ?? '';
+    // Ensure profile/wallet data is loaded for balance check
+    Future.microtask(() => ref.read(profileProvider.notifier).refresh());
+    
+    final String bName = (widget.biller['biller_name'] ?? '').toString().toUpperCase();
+    final String iCode = (widget.biller['item_code'] ?? '').toString().toUpperCase();
     
     if (bName.contains('DATA') || 
         bName == 'CABLE_PAY' || 
@@ -428,8 +433,8 @@ class _BillPaymentSheetState extends ConsumerState<_BillPaymentSheet> {
   }
 
   Future<void> _fetchPlans() async {
-    final String bName = widget.biller['biller_name'].toString().toUpperCase();
-    final String iCode = widget.biller['item_code']?.toString().toUpperCase() ?? '';
+    final String bName = (widget.biller['biller_name'] ?? '').toString().toUpperCase();
+    final String iCode = (widget.biller['item_code'] ?? '').toString().toUpperCase();
     
     // Services that require plan selection
     final bool needsPlans = bName.contains('DATA') || 
@@ -482,9 +487,9 @@ class _BillPaymentSheetState extends ConsumerState<_BillPaymentSheet> {
     setState(() { _isLoading = true; _validationError = null; });
     try {
       final res = await BillPaymentService.validateCustomer(
-        widget.biller['item_code'],
-        widget.biller['biller_code'],
-        _customerController.text,
+        widget.biller['item_code'] ?? '',
+        widget.biller['biller_code'] ?? '',
+        _customerController.text.trim(),
       );
       setState(() {
         _customerName = res['name'] ?? res['customer_name'] ?? 'Verified Customer';
@@ -496,28 +501,44 @@ class _BillPaymentSheetState extends ConsumerState<_BillPaymentSheet> {
   }
 
   Future<void> _pay() async {
-    final amount = double.tryParse(_amountController.text);
-    if (amount == null || amount <= 0) return;
-
-    final profile = ref.read(profileProvider);
-    final wallet = profile.user?['wallet'];
-    final balance = (wallet?['balance'] ?? 0).toDouble();
-
-    if (balance < amount) {
+    // 1. Validate customer field
+    if (_customerController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Insufficient wallet balance'), backgroundColor: AppTheme.primaryRed),
+        SnackBar(content: Text('Please enter your ${_getLabelForBiller()}'), backgroundColor: AppTheme.primaryRed),
       );
       return;
+    }
+
+    // 2. Validate amount
+    final amount = double.tryParse(_amountController.text);
+    if (amount == null || amount <= 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter a valid amount'), backgroundColor: AppTheme.primaryRed),
+      );
+      return;
+    }
+
+    // 3. Optional client-side balance check (backend is authoritative)
+    final profile = ref.read(profileProvider);
+    final wallet = profile.user?['wallet'];
+    if (wallet != null) {
+      final balance = (wallet['balance'] ?? 0).toDouble();
+      if (balance < amount) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Insufficient wallet balance. Please top up first.'), backgroundColor: AppTheme.primaryRed),
+        );
+        return;
+      }
     }
 
     setState(() => _isLoading = true);
     try {
       await BillPaymentService.payBill(
         amount: amount,
-        type: widget.biller['biller_name'],
-        customer: _customerController.text,
-        country: widget.biller['country'],
-        billerName: widget.biller['name'],
+        type: widget.biller['biller_name'] ?? '',
+        customer: _customerController.text.trim(),
+        country: widget.biller['country'] ?? 'NG',
+        billerName: widget.biller['name'] ?? '',
         plan: _selectedPlan,
       );
       
@@ -536,7 +557,11 @@ class _BillPaymentSheetState extends ConsumerState<_BillPaymentSheet> {
     } catch (e) {
       if (mounted) {
         setState(() => _isLoading = false);
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e'), backgroundColor: AppTheme.primaryRed));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('Payment failed: $e'),
+          backgroundColor: AppTheme.primaryRed,
+          duration: const Duration(seconds: 4),
+        ));
       }
     }
   }
