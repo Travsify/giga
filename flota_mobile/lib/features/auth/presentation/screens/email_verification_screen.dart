@@ -330,7 +330,7 @@ class _EmailVerificationScreenState extends ConsumerState<EmailVerificationScree
                             return true;
                           },
                           child: SingleChildScrollView(
-                          child: Column(
+                            child: Column(
                             children: [
                               // PIN Input with shake animation
                               AnimatedBuilder(
@@ -345,9 +345,7 @@ class _EmailVerificationScreenState extends ConsumerState<EmailVerificationScree
                                 child: LayoutBuilder(
                                   builder: (context, constraints) {
                                     // Calculate available width for 7 items + spacing
-                                    // 7 items, 6 spaces. Let's say spacing is roughly half item width
-                                    // Total = 7w + 6(w/2) = 10w approx
-                                    final itemWidth = (constraints.maxWidth - 32) / 8; // generous spacing
+                                    final itemWidth = (constraints.maxWidth - 32) / 8;
                                     
                                     return PinCodeTextField(
                                       appContext: context,
@@ -373,13 +371,13 @@ class _EmailVerificationScreenState extends ConsumerState<EmailVerificationScree
                                       cursorColor: AppTheme.primaryRed,
                                       textStyle: GoogleFonts.robotoMono(
                                         fontSize: itemWidth * 0.5,
-                                        fontWeight: FontWeight.bold, // Reduced boldness
+                                        fontWeight: FontWeight.bold,
                                         color: Colors.white,
                                       ),
                                       onCompleted: (value) => _verifyCode(),
                                       onChanged: (value) => setState(() => _errorMessage = null),
                                     );
-                                  }
+                                  },
                                 ),
                               ),
 
@@ -495,6 +493,7 @@ class _EmailVerificationScreenState extends ConsumerState<EmailVerificationScree
                           ),
                         ),
                       ),
+                    ),
                     ),
                   ),
 

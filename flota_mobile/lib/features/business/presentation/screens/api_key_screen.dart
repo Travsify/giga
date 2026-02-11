@@ -264,20 +264,35 @@ class _ApiKeyScreenState extends ConsumerState<ApiKeyScreen> {
 
   Widget _buildDocumentationLink() {
     return Container(
-      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: AppTheme.primaryBlue.withOpacity(0.05),
         borderRadius: BorderRadius.circular(16),
       ),
-      child: Row(
-        children: [
-          const Icon(Icons.menu_book_rounded, color: AppTheme.primaryBlue),
-          const SizedBox(width: 16),
-          const Expanded(
-            child: Text('API Documentation', style: TextStyle(fontWeight: FontWeight.bold)),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () {
+            // In a real app, use url_launcher
+            // launchUrl(Uri.parse('https://giga-backend.com/business/documentation/download'));
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Downloading Giga_API_Integration_Guide.html...')),
+            );
+          },
+          borderRadius: BorderRadius.circular(16),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              children: [
+                const Icon(Icons.code_rounded, color: AppTheme.primaryBlue),
+                const SizedBox(width: 16),
+                const Expanded(
+                  child: Text('Download Integration Guide', style: TextStyle(fontWeight: FontWeight.bold)),
+                ),
+                const Icon(Icons.html_rounded, size: 24, color: AppTheme.primaryBlue),
+              ],
+            ),
           ),
-          const Icon(Icons.launch, size: 18, color: AppTheme.primaryBlue),
-        ],
+        ),
       ),
     );
   }

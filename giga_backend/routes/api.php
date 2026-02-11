@@ -530,6 +530,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/business/api-keys', [BusinessController::class, 'generateApiKey']);
     Route::post('/ship-and-shop/request', [BusinessController::class, 'requestShopAndShip']);
     Route::delete('/business/api-keys/{id}', [BusinessController::class, 'revokeApiKey']);
+    Route::get('/business/documentation/download', [BusinessController::class, 'downloadDocumentation']);
 
     // Bulk Operations
     Route::post('/business/bulk-book', [BulkBookingController::class, 'processBatch']);

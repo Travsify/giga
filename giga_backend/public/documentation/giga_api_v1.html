@@ -1,0 +1,441 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Giga API Integration Guide</title>
+        <style>
+            :root {
+                --primary-color: #0052cc;
+                --bg-color: #f8f9fa;
+                --sidebar-width: 280px;
+                --code-bg: #282c34;
+                --text-color: #333;
+            }
+            body {
+                font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+                margin: 0;
+                display: flex;
+                background-color: var(--bg-color);
+                color: var(--text-color);
+                line-height: 1.6;
+            }
+            /* Sidebar */
+            nav {
+                width: var(--sidebar-width);
+                height: 100vh;
+                position: fixed;
+                background: white;
+                border-right: 1px solid #ddd;
+                overflow-y: auto;
+                padding: 20px;
+                box-shadow: 2px 0 5px rgba(0, 0, 0, 0.05);
+            }
+            nav h1 {
+                font-size: 24px;
+                color: var(--primary-color);
+                margin-bottom: 20px;
+            }
+            nav ul {
+                list-style: none;
+                padding: 0;
+            }
+            nav li {
+                margin-bottom: 10px;
+            }
+            nav a {
+                text-decoration: none;
+                color: #555;
+                font-weight: 500;
+                display: block;
+                padding: 5px 0;
+            }
+            nav a:hover,
+            nav a.active {
+                color: var(--primary-color);
+            }
+            nav h3 {
+                font-size: 14px;
+                text-transform: uppercase;
+                color: #888;
+                margin-top: 20px;
+                margin-bottom: 10px;
+            }
+
+            /* Main Content */
+            main {
+                margin-left: var(--sidebar-width);
+                padding: 40px 60px;
+                max-width: 900px;
+                width: 100%;
+            }
+            h2 {
+                border-bottom: 2px solid #eee;
+                padding-bottom: 10px;
+                margin-top: 40px;
+            }
+            h3 {
+                margin-top: 30px;
+            }
+            p {
+                margin-bottom: 15px;
+            }
+
+            /* Code Blocks */
+            pre {
+                background: var(--code-bg);
+                color: #abb2bf;
+                padding: 20px;
+                border-radius: 8px;
+                overflow-x: auto;
+                position: relative;
+            }
+            code {
+                font-family: "Consolas", "Monaco", monospace;
+                font-size: 14px;
+            }
+            .copy-btn {
+                position: absolute;
+                top: 10px;
+                right: 10px;
+                background: rgba(255, 255, 255, 0.1);
+                border: none;
+                color: white;
+                padding: 5px 10px;
+                border-radius: 4px;
+                cursor: pointer;
+                font-size: 12px;
+            }
+            .copy-btn:hover {
+                background: rgba(255, 255, 255, 0.2);
+            }
+
+            /* Tables */
+            table {
+                width: 100%;
+                border-collapse: collapse;
+                margin: 20px 0;
+                background: white;
+            }
+            th,
+            td {
+                border: 1px solid #ddd;
+                padding: 12px;
+                text-align: left;
+            }
+            th {
+                background-color: #f1f1f1;
+            }
+
+            /* Badges */
+            .method {
+                display: inline-block;
+                padding: 4px 8px;
+                border-radius: 4px;
+                font-weight: bold;
+                font-size: 12px;
+                color: white;
+            }
+            .post {
+                background-color: #49cc90;
+            }
+            .get {
+                background-color: #61affe;
+            }
+            .required {
+                color: #e74c3c;
+                font-size: 12px;
+                vertical-align: super;
+            }
+
+            /* Responsive */
+            @media (max-width: 768px) {
+                body {
+                    flex-direction: column;
+                }
+                nav {
+                    width: 100%;
+                    height: auto;
+                    position: relative;
+                    border-right: none;
+                    border-bottom: 1px solid #ddd;
+                }
+                main {
+                    margin-left: 0;
+                    padding: 20px;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <nav>
+            <h1>Giga API</h1>
+            <ul>
+                <li><a href="#introduction">Introduction</a></li>
+                <li><a href="#authentication">Authentication</a></li>
+                <li><a href="#base-url">Base URL & Rate limits</a></li>
+
+                <h3>Endpoints</h3>
+                <li><a href="#create-order">Create Order</a></li>
+                <li><a href="#get-order">Get Order Status</a></li>
+
+                <h3>SDKs</h3>
+                <li>
+                    <a href="#swift-integration">Swift (iOS) Integration</a>
+                </li>
+            </ul>
+        </nav>
+
+        <main>
+            <section id="introduction">
+                <h2>Introduction</h2>
+                <p>
+                    Welcome to the Giga Logistics API. This API allows
+                    businesses to integrate on-demand delivery services directly
+                    into their applications. You can programmatically create
+                    orders, track shipments, and receive real-time status
+                    updates.
+                </p>
+            </section>
+
+            <section id="authentication">
+                <h2>Authentication</h2>
+                <p>
+                    The Giga API uses
+                    <strong>Bearer Token</strong> authentication. You must
+                    include your API Key in the
+                    <code>Authorization</code> header of every request.
+                </p>
+                <pre>Authorization: Bearer YOUR_API_KEY</pre>
+                <p>
+                    You can generate and manage your API keys from the Giga
+                    Business Dashboard.
+                </p>
+            </section>
+
+            <section id="base-url">
+                <h2>Base URL</h2>
+                <pre>https://giga-backend.com/api/v1</pre>
+                <p><strong>Rate Limit:</strong> 60 requests per minute.</p>
+            </section>
+
+            <section id="create-order">
+                <h2>Create Order</h2>
+                <p>
+                    Creates a new delivery request. The fare is calculated
+                    automatically based on distance and vehicle type.
+                </p>
+
+                <span class="method post">POST</span> <code>/orders</code>
+
+                <h3>Parameters</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Field</th>
+                            <th>Type</th>
+                            <th>Required</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>pickup_address</td>
+                            <td>string</td>
+                            <td>Yes</td>
+                            <td>Full address for pickup</td>
+                        </tr>
+                        <tr>
+                            <td>pickup_lat</td>
+                            <td>float</td>
+                            <td>Yes</td>
+                            <td>Latitude of pickup location</td>
+                        </tr>
+                        <tr>
+                            <td>pickup_lng</td>
+                            <td>float</td>
+                            <td>Yes</td>
+                            <td>Longitude of pickup location</td>
+                        </tr>
+                        <tr>
+                            <td>dropoff_address</td>
+                            <td>string</td>
+                            <td>Yes</td>
+                            <td>Full address for delivery</td>
+                        </tr>
+                        <tr>
+                            <td>dropoff_lat</td>
+                            <td>float</td>
+                            <td>Yes</td>
+                            <td>Latitude of delivery location</td>
+                        </tr>
+                        <tr>
+                            <td>dropoff_lng</td>
+                            <td>float</td>
+                            <td>Yes</td>
+                            <td>Longitude of delivery location</td>
+                        </tr>
+                        <tr>
+                            <td>vehicle_type</td>
+                            <td>string</td>
+                            <td>Yes</td>
+                            <td>
+                                <code>Bike</code>, <code>Van</code>, or
+                                <code>Truck</code>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>service_tier</td>
+                            <td>string</td>
+                            <td>Yes</td>
+                            <td>
+                                <code>Standard</code>, <code>Priority</code>, or
+                                <code>Saver</code>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>recipient_phone</td>
+                            <td>string</td>
+                            <td>Yes</td>
+                            <td>Phone number of the recipient</td>
+                        </tr>
+                        <tr>
+                            <td>description</td>
+                            <td>string</td>
+                            <td>No</td>
+                            <td>Details about the package</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3>Response</h3>
+                <pre><code>{
+  "status": "success",
+  "message": "Order placed successfully...",
+  "data": {
+    "order_id": 1024,
+    "tracking_number": "TRK-883920",
+    "fare": 1200.50,
+    "status": "pending",
+    "security_code": "X7Y2Z9"
+  }
+}</code></pre>
+            </section>
+
+            <section id="get-order">
+                <h2>Get Order Status</h2>
+                <p>
+                    Retrieve the current status and details of a specific order.
+                </p>
+
+                <span class="method get">GET</span> <code>/orders/{id}</code>
+
+                <h3>Response</h3>
+                <pre><code>{
+  "status": "success",
+  "data": {
+    "order_id": 1024,
+    "status": "picked_up",
+    "rider_id": 55,
+    "updated_at": "2026-02-11T12:00:00Z"
+    ...
+  }
+}</code></pre>
+            </section>
+
+            <section id="swift-integration">
+                <h2>Swift (iOS) Integration</h2>
+                <p>
+                    Copy and paste this helper class to quickly integrate Giga
+                    API into your iOS app.
+                </p>
+
+                <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code class="language-swift">import Foundation
+
+struct GigaDeliveryRequest: Encodable {
+    let pickup_address: String
+    let pickup_lat: Double
+    let pickup_lng: Double
+    let dropoff_address: String
+    let dropoff_lat: Double
+    let dropoff_lng: Double
+    let vehicle_type: String // "Bike", "Van", "Truck"
+    let service_tier: String // "Standard", "Priority"
+    let recipient_phone: String
+    let description: String?
+}
+
+class GigaAPI {
+    static let shared = GigaAPI()
+    private let apiKey = "YOUR_API_KEY" // Replace with your key
+    private let baseURL = "https://giga-backend.com/api/v1"
+
+    func createOrder(request: GigaDeliveryRequest, completion: @escaping (Result<[String: Any], Error>) -> Void) {
+        let url = URL(string: "\(baseURL)/orders")!
+        var urlRequest = URLRequest(url: url)
+        urlRequest.httpMethod = "POST"
+        urlRequest.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
+        urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
+
+        do {
+            urlRequest.httpBody = try JSONEncoder().encode(request)
+        } catch {
+            completion(.failure(error))
+            return
+        }
+
+        URLSession.shared.dataTask(with: urlRequest) { data, response, error in
+            if let error = error {
+                completion(.failure(error))
+                return
+            }
+            
+            guard let data = data else { return }
+            
+            do {
+                if let json = try JSONSerialization.jsonObject(with: data) as? [String: Any] {
+                    completion(.success(json))
+                }
+            } catch {
+                completion(.failure(error))
+            }
+        }.resume()
+    }
+}
+
+// Usage Example
+let request = GigaDeliveryRequest(
+    pickup_address: "123 Main St",
+    pickup_lat: 6.5244,
+    pickup_lng: 3.3792,
+    dropoff_address: "456 Broad St",
+    dropoff_lat: 6.4544,
+    dropoff_lng: 3.4192,
+    vehicle_type: "Bike",
+    service_tier: "Standard",
+    recipient_phone: "+2348000000000",
+    description: "Documents"
+)
+
+GigaAPI.shared.createOrder(request: request) { result in
+    switch result {
+    case .success(let response):
+        print("Order Created: \(response)")
+    case .failure(let error):
+        print("Error: \(error)")
+    }
+}</code></pre>
+            </section>
+        </main>
+
+        <script>
+            function copyCode(btn) {
+                const code = btn.nextElementSibling.innerText;
+                navigator.clipboard.writeText(code).then(() => {
+                    btn.innerText = "Copied!";
+                    setTimeout(() => (btn.innerText = "Copy"), 2000);
+                });
+            }
+        </script>
+    </body>
+</html>
