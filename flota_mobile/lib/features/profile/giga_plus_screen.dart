@@ -153,20 +153,31 @@ class GigaPlusScreen extends ConsumerWidget {
                                   final double rate = settings.get<double>('ngn_exchange_rate', 2000.0);
                                   final bool isNG = authState.countryCode == 'NG';
                                   final double finalAmount = isNG ? (basePrice * rate) : basePrice;
+                                  final String currency = isNG ? 'NGN' : 'GBP';
 
-                                  // 1. Initialize Stripe (if UK)
-                                  if (!isNG) await PaymentService.initialize();
-                                  
-                                  // 2. Charge localized amount
-                                  final success = await PaymentService.fundWallet(
-                                    context, 
-                                    finalAmount, 
-                                    authState.userEmail!, 
-                                    authState.userId!
-                                  );
+                                  bool success = false;
+
+                                  if (isNG) {
+                                    // Nigeria → Flutterwave (NGN)
+                                    success = await PaymentService.fundWithFlutterwave(
+                                      context, 
+                                      finalAmount, 
+                                      currency,
+                                    );
+                                  } else {
+                                    // UK → Stripe (GBP)
+                                    await PaymentService.initialize();
+                                    success = await PaymentService.fundWallet(
+                                      context, 
+                                      finalAmount, 
+                                      authState.userEmail!, 
+                                      authState.userId!,
+                                      currency: currency.toLowerCase(),
+                                    );
+                                  }
 
                                     if (success) {
-                                      // 3. Activate Subscription on Backend
+                                      // Activate Subscription on Backend
                                       await ref.read(profileProvider.notifier).subscribe();
                                       if (context.mounted) {
                                         ScaffoldMessenger.of(context).showSnackBar(

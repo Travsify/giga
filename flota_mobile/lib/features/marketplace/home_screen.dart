@@ -385,7 +385,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           // Main Logistics Hero Actions (Send & Track)
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(20, 10, 20, 10),
+              padding: const EdgeInsets.fromLTRB(20, 10, 20, 5),
               child: Row(
                 children: [
                   Expanded(
@@ -408,6 +408,41 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         icon: Icons.location_searching_rounded,
                         color: theme.primaryColor,
                         onTap: () => context.push('/tracking/enhanced/123'),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          // Errand & Schedule Row
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(20, 10, 20, 10),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: FadeInLeft(
+                      delay: const Duration(milliseconds: 150),
+                      child: _HeroActionCard(
+                        title: 'Errand',
+                        subtitle: 'Run tasks for you',
+                        icon: Icons.shopping_basket_rounded,
+                        color: const Color(0xFFFF6B35),
+                        onTap: () => context.push('/errand'),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 15),
+                  Expanded(
+                    child: FadeInRight(
+                      delay: const Duration(milliseconds: 150),
+                      child: _HeroActionCard(
+                        title: 'Schedule',
+                        subtitle: 'Book ahead',
+                        icon: Icons.schedule_rounded,
+                        color: const Color(0xFF6C63FF),
+                        onTap: () => context.push('/delivery-request?scheduled=true'),
                       ),
                     ),
                   ),

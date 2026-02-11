@@ -299,6 +299,12 @@ final routerProvider = Provider<GoRouter>((ref) {
         ),
       ),
       GoRoute(
+        path: '/errand',
+        builder: (context, state) => const DeliveryRequestScreen(
+          initiallyErrand: true,
+        ),
+      ),
+      GoRoute(
         path: '/checkout',
         builder: (context, state) => CheckoutScreen(
           deliveryRequest: state.extra as DeliveryRequest,

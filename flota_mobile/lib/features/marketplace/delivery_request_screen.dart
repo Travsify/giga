@@ -18,7 +18,8 @@ import 'package:google_places_flutter/model/prediction.dart';
 
 class DeliveryRequestScreen extends ConsumerStatefulWidget {
   final bool initiallyScheduled;
-  const DeliveryRequestScreen({super.key, this.initiallyScheduled = false});
+  final bool initiallyErrand;
+  const DeliveryRequestScreen({super.key, this.initiallyScheduled = false, this.initiallyErrand = false});
 
   @override
   ConsumerState<DeliveryRequestScreen> createState() => _DeliveryRequestScreenState();
@@ -56,6 +57,10 @@ class _DeliveryRequestScreenState extends ConsumerState<DeliveryRequestScreen> {
     if (isScheduled) {
       scheduledDate = DateTime.now().add(const Duration(days: 1));
       scheduledTime = const TimeOfDay(hour: 10, minute: 0);
+    }
+    if (widget.initiallyErrand) {
+      isErrand = true;
+      selectedCategory = 'Errand';
     }
   }
 
