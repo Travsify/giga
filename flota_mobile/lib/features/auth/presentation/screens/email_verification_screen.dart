@@ -324,7 +324,12 @@ class _EmailVerificationScreenState extends ConsumerState<EmailVerificationScree
                           borderRadius: BorderRadius.circular(32),
                           border: Border.all(color: Colors.white.withOpacity(0.1)),
                         ),
-                        child: SingleChildScrollView(
+                        child: NotificationListener<OverscrollIndicatorNotification>(
+                          onNotification: (overscroll) {
+                            overscroll.disallowIndicator();
+                            return true;
+                          },
+                          child: SingleChildScrollView(
                           child: Column(
                             children: [
                               // PIN Input with shake animation
@@ -337,35 +342,44 @@ class _EmailVerificationScreenState extends ConsumerState<EmailVerificationScree
                                     child: child,
                                   );
                                 },
-                                child: PinCodeTextField(
-                                  appContext: context,
-                                  controller: _codeController,
-                                  length: _otpLength,
-                                  keyboardType: TextInputType.number,
-                                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                                  animationType: AnimationType.scale,
-                                  pinTheme: PinTheme(
-                                    shape: PinCodeFieldShape.box,
-                                    borderRadius: BorderRadius.circular(14),
-                                    fieldHeight: 54,
-                                    fieldWidth: 40,
-                                    activeFillColor: Colors.white.withOpacity(0.1),
-                                    inactiveFillColor: Colors.white.withOpacity(0.05),
-                                    selectedFillColor: AppTheme.primaryRed.withOpacity(0.15),
-                                    activeColor: AppTheme.primaryRed,
-                                    inactiveColor: Colors.white.withOpacity(0.2),
-                                    selectedColor: AppTheme.primaryRed,
-                                    borderWidth: 2,
-                                  ),
-                                  enableActiveFill: true,
-                                  cursorColor: AppTheme.primaryRed,
-                                  textStyle: GoogleFonts.robotoMono(
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.white,
-                                  ),
-                                  onCompleted: (value) => _verifyCode(),
-                                  onChanged: (value) => setState(() => _errorMessage = null),
+                                child: LayoutBuilder(
+                                  builder: (context, constraints) {
+                                    // Calculate available width for 7 items + spacing
+                                    // 7 items, 6 spaces. Let's say spacing is roughly half item width
+                                    // Total = 7w + 6(w/2) = 10w approx
+                                    final itemWidth = (constraints.maxWidth - 32) / 8; // generous spacing
+                                    
+                                    return PinCodeTextField(
+                                      appContext: context,
+                                      controller: _codeController,
+                                      length: _otpLength,
+                                      keyboardType: TextInputType.number,
+                                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                                      animationType: AnimationType.scale,
+                                      pinTheme: PinTheme(
+                                        shape: PinCodeFieldShape.box,
+                                        borderRadius: BorderRadius.circular(8),
+                                        fieldHeight: itemWidth * 1.3,
+                                        fieldWidth: itemWidth,
+                                        activeFillColor: Colors.white.withOpacity(0.1),
+                                        inactiveFillColor: Colors.white.withOpacity(0.05),
+                                        selectedFillColor: AppTheme.primaryRed.withOpacity(0.15),
+                                        activeColor: AppTheme.primaryRed,
+                                        inactiveColor: Colors.white.withOpacity(0.2),
+                                        selectedColor: AppTheme.primaryRed,
+                                        borderWidth: 1.5,
+                                      ),
+                                      enableActiveFill: true,
+                                      cursorColor: AppTheme.primaryRed,
+                                      textStyle: GoogleFonts.robotoMono(
+                                        fontSize: itemWidth * 0.5,
+                                        fontWeight: FontWeight.bold, // Reduced boldness
+                                        color: Colors.white,
+                                      ),
+                                      onCompleted: (value) => _verifyCode(),
+                                      onChanged: (value) => setState(() => _errorMessage = null),
+                                    );
+                                  }
                                 ),
                               ),
 

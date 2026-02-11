@@ -28,15 +28,11 @@ class _SplashScreenState extends State<SplashScreen> {
     if (!mounted) return;
     
     // Use GoRouter for consistent navigation
-    // FORCE ONBOARDING FOR TESTING
-    GoRouter.of(context).go('/onboarding');
-    /*
     if (hasSeenOnboarding) {
-      GoRouter.of(context).go('/welcome');
+      if (mounted) context.go('/welcome');
     } else {
-      GoRouter.of(context).go('/onboarding');
+      if (mounted) context.go('/onboarding');
     }
-    */
   }
 
   @override

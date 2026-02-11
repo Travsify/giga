@@ -121,11 +121,15 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
 
         if (isNG && (selectedMethod == 'Paystack' || selectedMethod == 'Stripe' || selectedMethod == 'Digital Wallet')) {
           // Nigeria -> Flutterwave (NGN)
-          paymentSuccess = await PaymentService.fundWithFlutterwave(
+          final reference = await PaymentService.fundWithFlutterwave(
             context, 
             _effectiveFare, 
             currency
           );
+          
+          if (reference != null && context.mounted) {
+            paymentSuccess = await _showVerificationDialog(context, reference);
+          }
         } else {
           // UK -> Stripe (GBP)
           await PaymentService.initialize();
@@ -165,6 +169,64 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
       final error = ref.read(deliveryProvider).error ?? 'Transaction failed. Please try again.';
       _showPaymentFailedDialog(context, error);
     }
+  }
+
+  Future<bool> _showVerificationDialog(BuildContext context, String reference) async {
+    return await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => StatefulBuilder(
+        builder: (context, setDialogState) {
+          bool isVerifying = false;
+          return AlertDialog(
+            backgroundColor: AppTheme.surfaceColor,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            title: Text('Verify Payment', style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold)),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text(
+                  'Please complete the payment in your browser, then tap verify to book your delivery.',
+                  style: TextStyle(color: AppTheme.textSecondary),
+                ),
+                if (isVerifying) 
+                   const Padding(
+                     padding: EdgeInsets.all(24.0),
+                     child: CircularProgressIndicator(color: AppTheme.primaryBlue),
+                   ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx, false), 
+                child: const Text('Cancel', style: TextStyle(color: AppTheme.textSecondary)),
+              ),
+              ElevatedButton(
+                onPressed: isVerifying ? null : () async {
+                  setDialogState(() => isVerifying = true);
+                  final success = await PaymentService.verifyFlutterwavePayment(reference);
+                  if (success) {
+                    Navigator.pop(ctx, true);
+                  } else {
+                    setDialogState(() => isVerifying = false);
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Payment not confirmed yet. Please try again.')),
+                      );
+                    }
+                  }
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppTheme.primaryBlue,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+                child: const Text('Verify Now'),
+              ),
+            ],
+          );
+        }
+      ),
+    ) ?? false;
   }
 
   void _showPaymentFailedDialog(BuildContext context, String errorMessage) {

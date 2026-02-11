@@ -159,11 +159,19 @@ class GigaPlusScreen extends ConsumerWidget {
 
                                   if (isNG) {
                                     // Nigeria → Flutterwave (NGN)
-                                    success = await PaymentService.fundWithFlutterwave(
+                                    final reference = await PaymentService.fundWithFlutterwave(
                                       context, 
                                       finalAmount, 
                                       currency,
                                     );
+                                    
+                                    if (reference != null && context.mounted) {
+                                      // Show Verification Dialog
+                                      final verified = await _showVerificationDialog(context, reference);
+                                      if (verified) {
+                                        success = true;
+                                      }
+                                    }
                                   } else {
                                     // UK → Stripe (GBP)
                                     await PaymentService.initialize();
@@ -178,6 +186,7 @@ class GigaPlusScreen extends ConsumerWidget {
 
                                     if (success) {
                                       // Payment confirmed → activate subscription
+                                      // This will now call the backend which actually deducts the funds
                                       await ref.read(profileProvider.notifier).subscribe();
                                       if (context.mounted) {
                                         ScaffoldMessenger.of(context).showSnackBar(
@@ -329,6 +338,65 @@ class GigaPlusScreen extends ConsumerWidget {
         ],
       ),
     );
+  }
+
+  static Future<bool> _showVerificationDialog(BuildContext context, String reference) async {
+    return await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => StatefulBuilder(
+        builder: (context, setDialogState) {
+          bool isVerifying = false;
+          return AlertDialog(
+            backgroundColor: AppTheme.surfaceColor,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            title: Text('Verify Payment', style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold)),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text(
+                  'Please complete the payment in your browser, then tap verify to activate your membership.',
+                  style: TextStyle(color: AppTheme.textSecondary),
+                ),
+                if (isVerifying) 
+                   const Padding(
+                     padding: EdgeInsets.all(24.0),
+                     child: CircularProgressIndicator(color: AppTheme.primaryBlue),
+                   ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx, false), 
+                child: const Text('Cancel', style: TextStyle(color: AppTheme.textSecondary)),
+              ),
+              ElevatedButton(
+                onPressed: isVerifying ? null : () async {
+                  setDialogState(() => isVerifying = true);
+                  // Polling/Verification call
+                  final success = await PaymentService.verifyFlutterwavePayment(reference);
+                  if (success) {
+                    Navigator.pop(ctx, true);
+                  } else {
+                    setDialogState(() => isVerifying = false);
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Payment not confirmed yet. Please try again in a moment.')),
+                      );
+                    }
+                  }
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppTheme.primaryBlue,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+                child: const Text('Verify Now'),
+              ),
+            ],
+          );
+        }
+      ),
+    ) ?? false;
   }
 
   static void _showPaymentFailedDialog(BuildContext context, WidgetRef ref, String errorMessage) {

@@ -162,19 +162,20 @@ class _BillPaymentScreenState extends ConsumerState<BillPaymentScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.backgroundColor,
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
+        backgroundColor: Colors.white,
         elevation: 0,
-        title: Text('All Service', style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold)),
+        centerTitle: true,
+        title: Text('All Services', style: GoogleFonts.outfit(color: const Color(0xFF0F172A), fontWeight: FontWeight.bold)),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Color(0xFF0F172A), size: 20),
           onPressed: () => Navigator.pop(context),
         ),
         actions: [
           if (_selectedCategory != null || _searchController.text.isNotEmpty)
             IconButton(
-              icon: const Icon(Icons.close, color: Colors.white),
+              icon: const Icon(Icons.close, color: Color(0xFF0F172A)),
               onPressed: () {
                 setState(() {
                   _selectedCategory = null;
@@ -193,13 +194,13 @@ class _BillPaymentScreenState extends ConsumerState<BillPaymentScreen> {
               child: TextField(
                 controller: _searchController,
                 onChanged: (v) => _filterBillers(v),
-                style: const TextStyle(color: Colors.white),
+                style: const TextStyle(color: Color(0xFF0F172A)),
                 decoration: InputDecoration(
                   hintText: 'Search for services...',
-                  hintStyle: TextStyle(color: Colors.white.withOpacity(0.3)),
-                  prefixIcon: const Icon(Icons.search, color: AppTheme.accentCyan),
+                  hintStyle: TextStyle(color: const Color(0xFF0F172A).withOpacity(0.3)),
+                  prefixIcon: const Icon(Icons.search, color: AppTheme.primaryBlue),
                   filled: true,
-                  fillColor: AppTheme.surfaceColor,
+                  fillColor: const Color(0xFFF8FAFC),
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
                 ),
               ),
@@ -209,7 +210,7 @@ class _BillPaymentScreenState extends ConsumerState<BillPaymentScreen> {
           if (_isLoading)
             const SliverFillRemaining(
               child: Center(
-                child: CircularProgressIndicator(color: AppTheme.accentCyan),
+                child: CircularProgressIndicator(color: AppTheme.primaryBlue),
               ),
             )
           else if (_selectedCategory == null && _searchController.text.isEmpty) ...[
@@ -220,7 +221,7 @@ class _BillPaymentScreenState extends ConsumerState<BillPaymentScreen> {
                   child: Text(
                     entry.key,
                     style: GoogleFonts.outfit(
-                      color: Colors.white,
+                      color: const Color(0xFF0F172A),
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                     ),
@@ -261,28 +262,32 @@ class _BillPaymentScreenState extends ConsumerState<BillPaymentScreen> {
                   (context, index) {
                     final biller = _filteredBillers[index];
                     return Card(
-                      color: AppTheme.surfaceColor,
+                      color: Colors.white,
                       margin: const EdgeInsets.only(bottom: 12),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                        side: BorderSide(color: const Color(0xFFE2E8F0), width: 1),
+                      ),
                       child: ListTile(
                         leading: Container(
                           width: 44,
                           height: 44,
                           decoration: BoxDecoration(
-                            color: AppTheme.accentCyan.withOpacity(0.1),
+                            color: AppTheme.primaryBlue.withOpacity(0.05),
                             shape: BoxShape.circle,
                           ),
                           child: Center(
                             child: Icon(
                               _getIconForBiller(biller['biller_name']),
-                              color: AppTheme.accentCyan,
+                              color: AppTheme.primaryBlue,
                               size: 20,
                             ),
                           ),
                         ),
-                        title: Text(biller['name'], style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                        subtitle: Text(biller['label_name'] ?? 'Ready to pay', style: TextStyle(color: Colors.white.withOpacity(0.5))),
-                        trailing: const Icon(Icons.arrow_forward_ios, size: 14, color: Colors.white24),
+                        title: Text(biller['name'], style: const TextStyle(color: Color(0xFF0F172A), fontWeight: FontWeight.bold)),
+                        subtitle: Text(biller['label_name'] ?? 'Ready to pay', style: TextStyle(color: const Color(0xFF0F172A).withOpacity(0.5))),
+                        trailing: const Icon(Icons.arrow_forward_ios, size: 14, color: Color(0xFF94A3B8)),
                         onTap: () => _showPaymentSheet(biller),
                       ),
                     );
@@ -335,12 +340,12 @@ class _ServiceGridItem extends StatelessWidget {
                 width: 50,
                 height: 50,
                 decoration: BoxDecoration(
-                  color: AppTheme.surfaceColor,
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: Colors.white.withOpacity(0.05)),
+                  color: const Color(0xFFF8FAFC),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: const Color(0xFFE2E8F0)),
                 ),
                 child: Center(
-                  child: Icon(icon, color: AppTheme.accentCyan, size: 24),
+                  child: Icon(icon, color: AppTheme.primaryBlue, size: 24),
                 ),
               ),
               if (badge != null)
@@ -375,7 +380,7 @@ class _ServiceGridItem extends StatelessWidget {
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
             style: GoogleFonts.outfit(
-              color: Colors.white.withOpacity(0.7),
+              color: const Color(0xFF1E293B),
               fontSize: 11,
               fontWeight: FontWeight.w500,
             ),
@@ -403,6 +408,7 @@ class _BillPaymentSheetState extends ConsumerState<_BillPaymentSheet> {
   String? _selectedPlan;
   List<dynamic> _dataPlans = [];
   bool _fetchingPlans = false;
+  String? _detectedNetwork;
 
   final List<double> _quickAmounts = [100, 200, 500, 1000, 2000, 5000];
 
@@ -415,7 +421,6 @@ class _BillPaymentSheetState extends ConsumerState<_BillPaymentSheet> {
       _amountController.text = billerAmount.toString();
     }
     
-    // Ensure profile/wallet data is loaded for balance check
     Future.microtask(() => ref.read(profileProvider.notifier).refresh());
     
     final String bName = (widget.biller['biller_name'] ?? '').toString().toUpperCase();
@@ -432,11 +437,46 @@ class _BillPaymentSheetState extends ConsumerState<_BillPaymentSheet> {
     }
   }
 
+  void _detectNetwork(String val) {
+    if (val.length < 4) {
+      setState(() => _detectedNetwork = null);
+      return;
+    }
+    
+    final prefix = val.substring(0, 4);
+    String? network;
+    
+    // MTN
+    if (['0803', '0806', '0810', '0813', '0814', '0816', '0903', '0906', '0913', '0916'].contains(prefix)) {
+      network = 'MTN';
+    }
+    // Airtel
+    else if (['0802', '0808', '0812', '0701', '0708', '0901', '0902', '0904', '0907', '0912'].contains(prefix)) {
+      network = 'Airtel';
+    }
+    // Glo
+    else if (['0805', '0807', '0811', '0815', '0705', '0905', '0915'].contains(prefix)) {
+      network = 'Glo';
+    }
+    // 9mobile
+    else if (['0809', '0817', '0818', '0908', '0909'].contains(prefix)) {
+      network = '9mobile';
+    }
+    
+    if (_detectedNetwork != network) {
+      setState(() => _detectedNetwork = network);
+    }
+    
+    // Auto-validate if it's a phone number length
+    if (val.length == 11 && _customerName == null) {
+      _validate();
+    }
+  }
+
   Future<void> _fetchPlans() async {
     final String bName = (widget.biller['biller_name'] ?? '').toString().toUpperCase();
     final String iCode = (widget.biller['item_code'] ?? '').toString().toUpperCase();
     
-    // Services that require plan selection
     final bool needsPlans = bName.contains('DATA') || 
                             bName == 'CABLE_PAY' || 
                             bName == 'INTERNET_SERVICE' || 
@@ -450,12 +490,8 @@ class _BillPaymentSheetState extends ConsumerState<_BillPaymentSheet> {
     setState(() => _fetchingPlans = true);
     
     try {
-        // Use item_code or biller_code as the service identifier for the backend
-        // My backend now handles IS_ SMILE, CB_ DSTV, etc.
         dynamic serviceId;
-        
         if (bName.contains('DATA')) {
-            // Data still uses network numbers for now or item_code
             if (bName.contains('MTN')) serviceId = 1;
             else if (bName.contains('GLO')) serviceId = 2;
             else if (bName.contains('AIRTEL')) serviceId = 4;
@@ -464,10 +500,7 @@ class _BillPaymentSheetState extends ConsumerState<_BillPaymentSheet> {
         } else {
             serviceId = widget.biller['item_code'] ?? widget.biller['id'];
         }
-        print('Fetching plans for serviceId: $serviceId (Biller: ${widget.biller['name']})');
         final plans = await BillPaymentService.getDataPlans(serviceId);
-        print('Received ${plans.length} plans');
-        
         if (mounted) {
             setState(() {
                 _dataPlans = plans;
@@ -501,7 +534,6 @@ class _BillPaymentSheetState extends ConsumerState<_BillPaymentSheet> {
   }
 
   Future<void> _pay() async {
-    // 1. Validate customer field
     if (_customerController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Please enter your ${_getLabelForBiller()}'), backgroundColor: AppTheme.primaryRed),
@@ -509,7 +541,6 @@ class _BillPaymentSheetState extends ConsumerState<_BillPaymentSheet> {
       return;
     }
 
-    // 2. Validate amount
     final amount = double.tryParse(_amountController.text);
     if (amount == null || amount <= 0) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -518,7 +549,6 @@ class _BillPaymentSheetState extends ConsumerState<_BillPaymentSheet> {
       return;
     }
 
-    // 3. Optional client-side balance check (backend is authoritative)
     final profile = ref.read(profileProvider);
     final wallet = profile.user?['wallet'];
     if (wallet != null) {
@@ -544,10 +574,9 @@ class _BillPaymentSheetState extends ConsumerState<_BillPaymentSheet> {
       
       if (mounted) {
         final isNigeria = ref.read(authProvider).isNigeria;
-        // Refresh profile to reflect the instant ₦50 reward in wallet
         await ref.read(profileProvider.notifier).refresh();
         
-        Navigator.pop(context); // Close sheet
+        Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Text(isNigeria ? 'Payment Successful! ₦50 reward added to your wallet.' : 'Payment Successful!'),
           backgroundColor: AppTheme.successGreen,
@@ -582,11 +611,11 @@ class _BillPaymentSheetState extends ConsumerState<_BillPaymentSheet> {
 
     return Container(
       decoration: const BoxDecoration(
-        color: AppTheme.backgroundColor,
+        color: Colors.white,
         borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
-        border: Border(top: BorderSide(color: Colors.white10)),
+        boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 20)],
       ),
-      padding: EdgeInsets.fromLTRB(24, 24, 24, MediaQuery.of(context).padding.bottom + 24),
+      padding: EdgeInsets.fromLTRB(24, 16, 24, MediaQuery.of(context).padding.bottom + 24),
       child: SafeArea(
         top: false,
         child: SingleChildScrollView(
@@ -598,7 +627,7 @@ class _BillPaymentSheetState extends ConsumerState<_BillPaymentSheet> {
               child: Container(
                 width: 40,
                 height: 4,
-                decoration: BoxDecoration(color: Colors.white24, borderRadius: BorderRadius.circular(2)),
+                decoration: BoxDecoration(color: const Color(0xFFE2E8F0), borderRadius: BorderRadius.circular(2)),
               ),
             ),
             const SizedBox(height: 24),
@@ -608,66 +637,81 @@ class _BillPaymentSheetState extends ConsumerState<_BillPaymentSheet> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(widget.biller['name'], style: GoogleFonts.outfit(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white)),
-                      Text(widget.biller['biller_name'] ?? 'Bill Payment', style: TextStyle(color: Colors.white.withOpacity(0.5))),
+                      Text(widget.biller['name'], style: GoogleFonts.outfit(fontSize: 20, fontWeight: FontWeight.bold, color: const Color(0xFF0F172A))),
+                      Text(widget.biller['biller_name'] ?? 'Bill Payment', style: TextStyle(color: const Color(0xFF64748B))),
                     ],
                   ),
                 ),
                 Container(
                   padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(color: AppTheme.accentCyan.withOpacity(0.1), shape: BoxShape.circle),
-                  child: Icon(_getIconForSheet(widget.biller['biller_name']), color: AppTheme.accentCyan),
+                  decoration: BoxDecoration(color: AppTheme.primaryBlue.withOpacity(0.05), shape: BoxShape.circle),
+                  child: Icon(_getIconForSheet(widget.biller['biller_name']), color: AppTheme.primaryBlue),
                 ),
               ],
             ),
             if (ref.read(authProvider).isNigeria) ...[
-              const SizedBox(height: 12),
+              const SizedBox(height: 16),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 decoration: BoxDecoration(
-                  color: AppTheme.successGreen.withOpacity(0.1),
+                  color: const Color(0xFFECFDF5),
                   borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: AppTheme.successGreen.withOpacity(0.3)),
+                  border: Border.all(color: const Color(0xFF10B981).withOpacity(0.2)),
                 ),
                 child: const Row(
                   children: [
-                    Icon(Icons.stars_rounded, color: AppTheme.successGreen, size: 16),
+                    Icon(Icons.stars_rounded, color: Color(0xFF10B981), size: 16),
                     SizedBox(width: 8),
                     Text(
                       'Earn ₦50 logistics credit for this payment!',
-                      style: TextStyle(color: AppTheme.successGreen, fontSize: 11, fontWeight: FontWeight.bold),
+                      style: TextStyle(color: Color(0xFF059669), fontSize: 11, fontWeight: FontWeight.bold),
                     ),
                   ],
                 ),
               ),
             ],
             const SizedBox(height: 24),
-            TextField(
-              controller: _customerController,
-              style: const TextStyle(color: Colors.white),
-              onChanged: (v) {
-                if (v.length > 5 && (isAirtime || isData)) {
-                   // Auto-validate or similar? Maybe just leave manual
-                }
-              },
-              decoration: InputDecoration(
-                labelText: _getLabelForBiller(),
-                hintText: _getHintForBiller(),
-                labelStyle: const TextStyle(color: Colors.grey),
-                filled: true,
-                fillColor: AppTheme.surfaceColor,
-                suffixIcon: IconButton(
-                  icon: const Icon(Icons.check_circle, color: AppTheme.accentCyan),
-                  onPressed: _validate,
+            Stack(
+              alignment: Alignment.centerRight,
+              children: [
+                TextField(
+                  controller: _customerController,
+                  style: const TextStyle(color: Color(0xFF0F172A)),
+                  keyboardType: (isAirtime || isData) ? TextInputType.phone : TextInputType.text,
+                  onChanged: (v) {
+                    if (isAirtime || isData) _detectNetwork(v);
+                  },
+                  decoration: InputDecoration(
+                    labelText: _getLabelForBiller(),
+                    hintText: _getHintForBiller(),
+                    suffixIcon: _isLoading ? const Padding(padding: EdgeInsets.all(12), child: SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))) : IconButton(
+                      icon: const Icon(Icons.check_circle_outline, color: AppTheme.primaryBlue),
+                      onPressed: _validate,
+                    ),
+                  ),
                 ),
-              ),
+                if (_detectedNetwork != null)
+                  Positioned(
+                    right: 48,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: AppTheme.primaryBlue.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Text(
+                        _detectedNetwork!,
+                        style: const TextStyle(color: AppTheme.primaryBlue, fontWeight: FontWeight.bold, fontSize: 10),
+                      ),
+                    ),
+                  ),
+              ],
             ),
-            if (_isLoading && _customerName == null) const Padding(padding: EdgeInsets.symmetric(vertical: 8), child: LinearProgressIndicator(color: AppTheme.accentCyan)),
             if (_validationError != null) Padding(padding: const EdgeInsets.only(top: 8), child: Text(_validationError!, style: const TextStyle(color: AppTheme.primaryRed, fontSize: 12))),
-            if (_customerName != null) Padding(padding: const EdgeInsets.only(top: 8), child: Text('Verified: $_customerName', style: const TextStyle(color: AppTheme.successGreen, fontWeight: FontWeight.bold))),
+            if (_customerName != null) Padding(padding: const EdgeInsets.only(top: 8), child: Text('Verified: $_customerName', style: const TextStyle(color: Color(0xFF059669), fontWeight: FontWeight.bold, fontSize: 12))),
             
             const SizedBox(height: 24),
-            Text('Select Amount', style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.w600)),
+            Text('Select Amount', style: GoogleFonts.outfit(color: const Color(0xFF0F172A), fontWeight: FontWeight.w600)),
             const SizedBox(height: 12),
             if (showGrid) ...[
               GridView.builder(
@@ -688,14 +732,14 @@ class _BillPaymentSheetState extends ConsumerState<_BillPaymentSheet> {
                     onTap: () => setState(() => _amountController.text = amount.toString()),
                     child: Container(
                       decoration: BoxDecoration(
-                        color: isSelected ? AppTheme.accentCyan.withOpacity(0.2) : AppTheme.surfaceColor,
+                        color: isSelected ? AppTheme.primaryBlue.withOpacity(0.1) : const Color(0xFFF8FAFC),
                         borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: isSelected ? AppTheme.accentCyan : Colors.white10),
+                        border: Border.all(color: isSelected ? AppTheme.primaryBlue : const Color(0xFFE2E8F0)),
                       ),
                       child: Center(
                         child: Text(
                           '₦${amount.toInt()}',
-                          style: TextStyle(color: isSelected ? AppTheme.accentCyan : Colors.white, fontWeight: FontWeight.bold),
+                          style: TextStyle(color: isSelected ? AppTheme.primaryBlue : const Color(0xFF0F172A), fontWeight: FontWeight.bold),
                         ),
                       ),
                     ),
@@ -706,32 +750,32 @@ class _BillPaymentSheetState extends ConsumerState<_BillPaymentSheet> {
             ],
             
             if (showPlans) ...[
-                const SizedBox(height: 24),
-                Text('Select Plan', style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.w600)),
+                const SizedBox(height: 20),
+                Text('Select Plan', style: GoogleFonts.outfit(color: const Color(0xFF0F172A), fontWeight: FontWeight.w600)),
                 const SizedBox(height: 12),
                 if (_fetchingPlans)
-                    const LinearProgressIndicator(color: AppTheme.accentCyan)
+                    const LinearProgressIndicator(color: AppTheme.primaryBlue)
                 else if (_dataPlans.isEmpty)
-                    Text('No plans available for this service', style: TextStyle(color: Colors.white.withOpacity(0.3), fontSize: 12))
+                    Text('No plans available', style: TextStyle(color: const Color(0xFF64748B), fontSize: 12))
                 else
                     DropdownButtonFormField<String>(
                         value: _selectedPlan,
                         isExpanded: true,
-                        dropdownColor: AppTheme.surfaceColor,
-                        style: const TextStyle(color: Colors.white),
+                        dropdownColor: Colors.white,
+                        style: const TextStyle(color: Color(0xFF0F172A)),
                         decoration: InputDecoration(
                             contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                             border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                             filled: true,
-                            fillColor: AppTheme.surfaceColor,
+                            fillColor: const Color(0xFFF8FAFC),
                         ),
-                        hint: Text('Choose a plan', style: TextStyle(color: Colors.white.withOpacity(0.3))),
+                        hint: const Text('Choose a plan', style: TextStyle(color: Color(0xFF94A3B8))),
                         items: _dataPlans.map((plan) {
                             return DropdownMenuItem<String>(
                                 value: plan['plan_id'].toString(),
                                 child: Text(
                                   plan['name'], 
-                                  style: const TextStyle(color: Colors.white, fontSize: 14),
+                                  style: const TextStyle(color: Color(0xFF0F172A), fontSize: 14),
                                   overflow: TextOverflow.ellipsis,
                                 ),
                             );
@@ -747,35 +791,32 @@ class _BillPaymentSheetState extends ConsumerState<_BillPaymentSheet> {
             ],
             
             if (_selectedPlan == null) ...[
-              const SizedBox(height: 24),
+              const SizedBox(height: 20),
               TextField(
                 controller: _amountController,
-                readOnly: widget.biller['amount'] > 0,
+                readOnly: (widget.biller['amount'] ?? 0) > 0,
                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                style: const TextStyle(color: Colors.white),
-                decoration: InputDecoration(
+                style: const TextStyle(color: Color(0xFF0F172A)),
+                decoration: const InputDecoration(
                   labelText: 'Enter Amount',
                   prefixText: '₦ ',
-                  prefixStyle: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-                  labelStyle: const TextStyle(color: Colors.grey),
-                  filled: true,
-                  fillColor: AppTheme.surfaceColor,
+                  prefixStyle: TextStyle(color: Color(0xFF0F172A), fontWeight: FontWeight.bold),
                 ),
               ),
             ] else ...[
-               const SizedBox(height: 24),
+               const SizedBox(height: 20),
                Container(
                  padding: const EdgeInsets.all(16),
                  decoration: BoxDecoration(
-                   color: AppTheme.accentCyan.withOpacity(0.05),
+                   color: AppTheme.primaryBlue.withOpacity(0.05),
                    borderRadius: BorderRadius.circular(12),
-                   border: Border.all(color: AppTheme.accentCyan.withOpacity(0.3)),
+                   border: Border.all(color: AppTheme.primaryBlue.withOpacity(0.2)),
                  ),
                  child: Row(
                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                    children: [
-                     const Text('Plan Amount', style: TextStyle(color: Colors.grey)),
-                     Text('₦${_amountController.text}', style: const TextStyle(color: AppTheme.accentCyan, fontWeight: FontWeight.bold, fontSize: 18)),
+                     const Text('Plan Amount', style: TextStyle(color: Color(0xFF64748B))),
+                     Text('₦${_amountController.text}', style: const TextStyle(color: AppTheme.primaryBlue, fontWeight: FontWeight.bold, fontSize: 18)),
                    ],
                  ),
                ),
@@ -785,13 +826,14 @@ class _BillPaymentSheetState extends ConsumerState<_BillPaymentSheet> {
               width: double.infinity,
               height: 56,
               child: ElevatedButton(
-                onPressed: _isLoading ? null : _pay,
+                onPressed: (_isLoading || _customerController.text.isEmpty || _amountController.text.isEmpty) ? null : _pay,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppTheme.accentCyan,
-                  foregroundColor: Colors.black,
+                  backgroundColor: AppTheme.primaryBlue,
+                  foregroundColor: Colors.white,
+                  disabledBackgroundColor: const Color(0xFFE2E8F0),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                 ),
-                child: _isLoading ? const CircularProgressIndicator(color: Colors.black) : const Text('Pay Bill Now', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                child: _isLoading ? const CircularProgressIndicator(color: Colors.white) : const Text('Pay Bill Now', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
               ),
             ),
           ],

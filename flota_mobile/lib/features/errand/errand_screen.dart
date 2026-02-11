@@ -11,6 +11,7 @@ import 'package:flota_mobile/features/auth/auth_provider.dart';
 import 'package:flota_mobile/features/marketplace/delivery_provider.dart';
 import 'package:flota_mobile/features/marketplace/data/models/delivery_models.dart';
 import 'package:flota_mobile/core/location_service.dart';
+import 'package:flota_mobile/core/api_config.dart';
 
 // ──────────────── Errand Category Model ────────────────
 class ErrandCategory {
@@ -260,11 +261,11 @@ class _ErrandScreenState extends ConsumerState<ErrandScreen> {
       appBar: AppBar(
         leading: IconButton(
           onPressed: _currentStep == 0 ? () => context.pop() : _prevStep,
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.black87, size: 20),
+          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Color(0xFF0F172A), size: 20),
         ),
         title: Text(
           'Run Errand',
-          style: GoogleFonts.outfit(color: Colors.black87, fontWeight: FontWeight.bold),
+          style: GoogleFonts.outfit(color: const Color(0xFF0F172A), fontWeight: FontWeight.bold),
         ),
         backgroundColor: Colors.white,
         elevation: 0,
@@ -275,12 +276,12 @@ class _ErrandScreenState extends ConsumerState<ErrandScreen> {
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFFF6B35).withOpacity(0.1),
+                  color: AppTheme.primaryBlue.withOpacity(0.05),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
                   'Step ${_currentStep + 1}/$_totalSteps',
-                  style: GoogleFonts.outfit(color: const Color(0xFFFF6B35), fontWeight: FontWeight.bold, fontSize: 13),
+                  style: GoogleFonts.outfit(color: AppTheme.primaryBlue, fontWeight: FontWeight.bold, fontSize: 13),
                 ),
               ),
             ),
@@ -289,11 +290,10 @@ class _ErrandScreenState extends ConsumerState<ErrandScreen> {
       ),
       body: Column(
         children: [
-          // Progress bar
           LinearProgressIndicator(
             value: (_currentStep + 1) / _totalSteps,
-            backgroundColor: Colors.grey[100],
-            valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFFFF6B35)),
+            backgroundColor: const Color(0xFFF1F5F9),
+            valueColor: const AlwaysStoppedAnimation<Color>(AppTheme.primaryBlue),
             minHeight: 3,
           ),
           Expanded(
@@ -327,10 +327,10 @@ class _ErrandScreenState extends ConsumerState<ErrandScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text('What do you need done?',
-                    style: GoogleFonts.outfit(fontSize: 24, fontWeight: FontWeight.bold)),
+                    style: GoogleFonts.outfit(fontSize: 24, fontWeight: FontWeight.bold, color: const Color(0xFF0F172A))),
                 const SizedBox(height: 8),
                 Text('Pick the type of errand and we\'ll match you with a runner.',
-                    style: GoogleFonts.outfit(fontSize: 14, color: Colors.grey[600])),
+                    style: GoogleFonts.outfit(fontSize: 14, color: const Color(0xFF64748B))),
               ],
             ),
           ),
@@ -355,14 +355,14 @@ class _ErrandScreenState extends ConsumerState<ErrandScreen> {
                   child: AnimatedContainer(
                     duration: const Duration(milliseconds: 250),
                     decoration: BoxDecoration(
-                      color: isSelected ? cat.color.withOpacity(0.12) : Colors.grey[50],
+                      color: isSelected ? Colors.white : const Color(0xFFF8FAFC),
                       borderRadius: BorderRadius.circular(20),
                       border: Border.all(
-                        color: isSelected ? cat.color : Colors.grey[200]!,
+                        color: isSelected ? AppTheme.primaryBlue : const Color(0xFFE2E8F0),
                         width: isSelected ? 2 : 1,
                       ),
                       boxShadow: isSelected ? [
-                        BoxShadow(color: cat.color.withOpacity(0.2), blurRadius: 12, offset: const Offset(0, 4)),
+                        BoxShadow(color: AppTheme.primaryBlue.withOpacity(0.1), blurRadius: 15, offset: const Offset(0, 8)),
                       ] : null,
                     ),
                     child: Column(
@@ -371,20 +371,20 @@ class _ErrandScreenState extends ConsumerState<ErrandScreen> {
                         Container(
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: isSelected ? cat.color.withOpacity(0.2) : cat.color.withOpacity(0.08),
+                            color: isSelected ? AppTheme.primaryBlue.withOpacity(0.1) : cat.color.withOpacity(0.08),
                             shape: BoxShape.circle,
                           ),
-                          child: Icon(cat.icon, color: cat.color, size: 28),
+                          child: Icon(cat.icon, color: isSelected ? AppTheme.primaryBlue : cat.color, size: 28),
                         ),
                         const SizedBox(height: 10),
                         Text(cat.name, style: GoogleFonts.outfit(
                           fontWeight: FontWeight.w600,
                           fontSize: 14,
-                          color: isSelected ? cat.color : Colors.black87,
+                          color: isSelected ? AppTheme.primaryBlue : const Color(0xFF1E293B),
                         )),
                         Text(cat.subtitle, style: GoogleFonts.outfit(
                           fontSize: 11,
-                          color: Colors.grey[500],
+                          color: const Color(0xFF94A3B8),
                         )),
                       ],
                     ),
@@ -398,7 +398,7 @@ class _ErrandScreenState extends ConsumerState<ErrandScreen> {
     );
   }
 
-  // ──────────────── Step 2: Instructions + Location ────────────────
+  // ──────────────── Step 2: Instructions ────────────────
   Widget _buildInstructionsStep() {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(20),
@@ -409,11 +409,11 @@ class _ErrandScreenState extends ConsumerState<ErrandScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Tell your runner what to do',
-                    style: GoogleFonts.outfit(fontSize: 22, fontWeight: FontWeight.bold)),
+                Text('Instructions & Location',
+                    style: GoogleFonts.outfit(fontSize: 22, fontWeight: FontWeight.bold, color: const Color(0xFF0F172A))),
                 const SizedBox(height: 6),
                 Text('Be as specific as possible — it helps your runner complete the errand faster.',
-                    style: GoogleFonts.outfit(fontSize: 13, color: Colors.grey[600])),
+                    style: GoogleFonts.outfit(fontSize: 13, color: const Color(0xFF64748B))),
               ],
             ),
           ),
@@ -432,15 +432,13 @@ class _ErrandScreenState extends ConsumerState<ErrandScreen> {
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                     decoration: BoxDecoration(
-                      color: _selectedCategory!.color.withOpacity(0.08),
+                      color: AppTheme.primaryBlue.withOpacity(0.05),
                       borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: _selectedCategory!.color.withOpacity(0.3)),
+                      border: Border.all(color: AppTheme.primaryBlue.withOpacity(0.1)),
                     ),
                     child: Text(
                       _selectedCategory!.prompts[i],
-                      style: GoogleFonts.outfit(fontSize: 12, color: _selectedCategory!.color),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+                      style: GoogleFonts.outfit(fontSize: 12, color: AppTheme.primaryBlue, fontWeight: FontWeight.w500),
                     ),
                   ),
                 ),
@@ -452,17 +450,17 @@ class _ErrandScreenState extends ConsumerState<ErrandScreen> {
           // Instructions text area
           Container(
             decoration: BoxDecoration(
-              color: Colors.grey[50],
+              color: const Color(0xFFF8FAFC),
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: Colors.grey[200]!),
+              border: Border.all(color: const Color(0xFFE2E8F0)),
             ),
             child: TextField(
               controller: _instructionsController,
               maxLines: 4,
-              style: GoogleFonts.outfit(fontSize: 14),
+              style: GoogleFonts.outfit(fontSize: 14, color: const Color(0xFF0F172A)),
               decoration: InputDecoration(
                 hintText: 'Describe what you need done...',
-                hintStyle: GoogleFonts.outfit(color: Colors.grey[400]),
+                hintStyle: GoogleFonts.outfit(color: const Color(0xFF94A3B8)),
                 border: InputBorder.none,
                 contentPadding: const EdgeInsets.all(16),
               ),
@@ -474,11 +472,11 @@ class _ErrandScreenState extends ConsumerState<ErrandScreen> {
           if (_selectedCategory?.name == 'Shopping' || _selectedCategory?.name == 'Food Run' || _selectedCategory?.name == 'Pharmacy') ...[
             Row(
               children: [
-                Icon(Icons.checklist_rounded, color: _selectedCategory!.color, size: 20),
+                const Icon(Icons.checklist_rounded, color: AppTheme.primaryBlue, size: 20),
                 const SizedBox(width: 8),
-                Text('Shopping List', style: GoogleFonts.outfit(fontWeight: FontWeight.w600, fontSize: 15)),
+                Text('Shopping List', style: GoogleFonts.outfit(fontWeight: FontWeight.w600, fontSize: 15, color: const Color(0xFF1E293B))),
                 const Spacer(),
-                Text('${_shoppingList.length} items', style: GoogleFonts.outfit(color: Colors.grey[500], fontSize: 12)),
+                Text('${_shoppingList.length} items', style: GoogleFonts.outfit(color: const Color(0xFF64748B), fontSize: 12)),
               ],
             ),
             const SizedBox(height: 10),
@@ -488,16 +486,16 @@ class _ErrandScreenState extends ConsumerState<ErrandScreen> {
                   child: Container(
                     height: 46,
                     decoration: BoxDecoration(
-                      color: Colors.grey[50],
+                      color: const Color(0xFFF8FAFC),
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.grey[200]!),
+                      border: Border.all(color: const Color(0xFFE2E8F0)),
                     ),
                     child: TextField(
                       controller: _itemNameController,
-                      style: GoogleFonts.outfit(fontSize: 14),
+                      style: GoogleFonts.outfit(fontSize: 14, color: const Color(0xFF0F172A)),
                       decoration: InputDecoration(
                         hintText: 'Add item (e.g., Rice, Bread)',
-                        hintStyle: GoogleFonts.outfit(color: Colors.grey[400], fontSize: 13),
+                        hintStyle: GoogleFonts.outfit(color: const Color(0xFF94A3B8), fontSize: 13),
                         border: InputBorder.none,
                         contentPadding: const EdgeInsets.symmetric(horizontal: 14),
                       ),
@@ -512,8 +510,9 @@ class _ErrandScreenState extends ConsumerState<ErrandScreen> {
                     height: 46,
                     width: 46,
                     decoration: BoxDecoration(
-                      color: _selectedCategory!.color,
+                      color: AppTheme.primaryBlue,
                       borderRadius: BorderRadius.circular(12),
+                      boxShadow: [BoxShadow(color: AppTheme.primaryBlue.withOpacity(0.2), blurRadius: 8, offset: const Offset(0, 4))],
                     ),
                     child: const Icon(Icons.add, color: Colors.white),
                   ),
@@ -531,13 +530,13 @@ class _ErrandScreenState extends ConsumerState<ErrandScreen> {
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.grey[200]!),
+                    border: Border.all(color: const Color(0xFFF1F5F9)),
                   ),
                   child: Row(
                     children: [
-                      Icon(Icons.check_circle_outline, color: _selectedCategory!.color, size: 18),
+                      const Icon(Icons.check_circle_outline, color: AppTheme.primaryBlue, size: 18),
                       const SizedBox(width: 12),
-                      Expanded(child: Text(item.name, style: GoogleFonts.outfit(fontSize: 14))),
+                      Expanded(child: Text(item.name, style: GoogleFonts.outfit(fontSize: 14, color: const Color(0xFF1E293B)))),
                       // Quantity controls
                       GestureDetector(
                         onTap: () => setState(() {
@@ -546,31 +545,31 @@ class _ErrandScreenState extends ConsumerState<ErrandScreen> {
                         child: Container(
                           padding: const EdgeInsets.all(4),
                           decoration: BoxDecoration(
-                            color: Colors.grey[100],
+                            color: const Color(0xFFF1F5F9),
                             borderRadius: BorderRadius.circular(6),
                           ),
-                          child: const Icon(Icons.remove, size: 16),
+                          child: const Icon(Icons.remove, size: 16, color: Color(0xFF64748B)),
                         ),
                       ),
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 10),
-                        child: Text('${item.quantity}', style: GoogleFonts.outfit(fontWeight: FontWeight.w600)),
+                        child: Text('${item.quantity}', style: GoogleFonts.outfit(fontWeight: FontWeight.w600, color: const Color(0xFF1E293B))),
                       ),
                       GestureDetector(
                         onTap: () => setState(() => item.quantity++),
                         child: Container(
                           padding: const EdgeInsets.all(4),
                           decoration: BoxDecoration(
-                            color: _selectedCategory!.color.withOpacity(0.1),
+                            color: AppTheme.primaryBlue.withOpacity(0.1),
                             borderRadius: BorderRadius.circular(6),
                           ),
-                          child: Icon(Icons.add, size: 16, color: _selectedCategory!.color),
+                          child: const Icon(Icons.add, size: 16, color: AppTheme.primaryBlue),
                         ),
                       ),
                       const SizedBox(width: 8),
                       GestureDetector(
                         onTap: () => setState(() => _shoppingList.removeAt(i)),
-                        child: const Icon(Icons.close, size: 16, color: Colors.red),
+                        child: const Icon(Icons.close, size: 16, color: AppTheme.primaryRed),
                       ),
                     ],
                   ),
@@ -581,13 +580,13 @@ class _ErrandScreenState extends ConsumerState<ErrandScreen> {
           ],
 
           // Errand Location
-          Text('Where should the runner go?', style: GoogleFonts.outfit(fontWeight: FontWeight.w600, fontSize: 15)),
+          Text('Where should the runner go?', style: GoogleFonts.outfit(fontWeight: FontWeight.w600, fontSize: 15, color: const Color(0xFF1E293B))),
           const SizedBox(height: 10),
           _buildLocationField(
             controller: _errandLocationController,
             hint: 'Shop, pharmacy, office address...',
             icon: Icons.storefront_rounded,
-            iconColor: const Color(0xFFFF6B35),
+            iconColor: AppTheme.primaryBlue,
             onPicked: (lat, lng) => setState(() => _errandLatLng = LatLng(lat, lng)),
           ),
           const SizedBox(height: 16),
@@ -595,7 +594,7 @@ class _ErrandScreenState extends ConsumerState<ErrandScreen> {
           // Delivery Location
           Row(
             children: [
-              Text('Deliver to', style: GoogleFonts.outfit(fontWeight: FontWeight.w600, fontSize: 15)),
+              Text('Deliver to', style: GoogleFonts.outfit(fontWeight: FontWeight.w600, fontSize: 15, color: const Color(0xFF1E293B))),
               const Spacer(),
               GestureDetector(
                 onTap: _useMyLocation,
@@ -631,9 +630,9 @@ class _ErrandScreenState extends ConsumerState<ErrandScreen> {
   }) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.grey[50],
+        color: const Color(0xFFF8FAFC),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.grey[200]!),
+        border: Border.all(color: const Color(0xFFE2E8F0)),
       ),
       child: Row(
         children: [
@@ -644,14 +643,14 @@ class _ErrandScreenState extends ConsumerState<ErrandScreen> {
           Expanded(
             child: GooglePlaceAutoCompleteTextField(
               textEditingController: controller,
-              googleAPIKey: 'AIzaSyBP0WPFDFznZjnKl5B0ELkzHJiECw2cOgs',
+              googleAPIKey: ApiConfig.googleMapsApiKey,
               inputDecoration: InputDecoration(
                 hintText: hint,
-                hintStyle: GoogleFonts.outfit(color: Colors.grey[400], fontSize: 14),
+                hintStyle: GoogleFonts.outfit(color: const Color(0xFF94A3B8), fontSize: 14),
                 border: InputBorder.none,
                 contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
               ),
-              textStyle: GoogleFonts.outfit(fontSize: 14),
+              textStyle: GoogleFonts.outfit(fontSize: 14, color: const Color(0xFF0F172A)),
               debounceTime: 400,
               isLatLngRequired: true,
               getPlaceDetailWithLatLng: (prediction) {
@@ -684,8 +683,6 @@ class _ErrandScreenState extends ConsumerState<ErrandScreen> {
 
   // ──────────────── Step 3: Budget & Urgency ────────────────
   Widget _buildBudgetStep() {
-    final catColor = _selectedCategory?.color ?? const Color(0xFFFF6B35);
-
     return SingleChildScrollView(
       padding: const EdgeInsets.all(20),
       child: Column(
@@ -696,10 +693,10 @@ class _ErrandScreenState extends ConsumerState<ErrandScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text('Budget & Preferences',
-                    style: GoogleFonts.outfit(fontSize: 22, fontWeight: FontWeight.bold)),
+                    style: GoogleFonts.outfit(fontSize: 22, fontWeight: FontWeight.bold, color: const Color(0xFF0F172A))),
                 const SizedBox(height: 6),
                 Text('Set a spending limit for items and choose urgency.',
-                    style: GoogleFonts.outfit(fontSize: 13, color: Colors.grey[600])),
+                    style: GoogleFonts.outfit(fontSize: 13, color: const Color(0xFF64748B))),
               ],
             ),
           ),
@@ -710,33 +707,33 @@ class _ErrandScreenState extends ConsumerState<ErrandScreen> {
             child: Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: catColor.withOpacity(0.05),
+                color: AppTheme.primaryBlue.withOpacity(0.05),
                 borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: catColor.withOpacity(0.15)),
+                border: Border.all(color: AppTheme.primaryBlue.withOpacity(0.1)),
               ),
               child: Column(
                 children: [
                   Row(
                     children: [
-                      Icon(Icons.account_balance_wallet_rounded, color: catColor, size: 22),
+                      const Icon(Icons.account_balance_wallet_rounded, color: AppTheme.primaryBlue, size: 22),
                       const SizedBox(width: 10),
-                      Text('Item Budget', style: GoogleFonts.outfit(fontWeight: FontWeight.w600, fontSize: 15)),
+                      Text('Item Budget', style: GoogleFonts.outfit(fontWeight: FontWeight.w600, fontSize: 15, color: const Color(0xFF1E293B))),
                     ],
                   ),
                   const SizedBox(height: 16),
                   Text(
                     '$_currencySymbol${_budget.toStringAsFixed(0)}',
-                    style: GoogleFonts.outfit(fontSize: 36, fontWeight: FontWeight.bold, color: catColor),
+                    style: GoogleFonts.outfit(fontSize: 36, fontWeight: FontWeight.bold, color: AppTheme.primaryBlue),
                   ),
                   Text('Maximum the runner can spend on items',
-                      style: GoogleFonts.outfit(fontSize: 12, color: Colors.grey[500])),
+                      style: GoogleFonts.outfit(fontSize: 12, color: const Color(0xFF64748B))),
                   const SizedBox(height: 12),
                   SliderTheme(
                     data: SliderThemeData(
-                      activeTrackColor: catColor,
-                      inactiveTrackColor: catColor.withOpacity(0.15),
-                      thumbColor: catColor,
-                      overlayColor: catColor.withOpacity(0.1),
+                      activeTrackColor: AppTheme.primaryBlue,
+                      inactiveTrackColor: AppTheme.primaryBlue.withOpacity(0.15),
+                      thumbColor: AppTheme.primaryBlue,
+                      overlayColor: AppTheme.primaryBlue.withOpacity(0.1),
                       trackHeight: 6,
                     ),
                     child: Slider(
@@ -751,9 +748,9 @@ class _ErrandScreenState extends ConsumerState<ErrandScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text('$_currencySymbol${_minBudget.toStringAsFixed(0)}',
-                          style: GoogleFonts.outfit(fontSize: 11, color: Colors.grey[400])),
+                          style: GoogleFonts.outfit(fontSize: 11, color: const Color(0xFF94A3B8))),
                       Text('$_currencySymbol${_maxBudget.toStringAsFixed(0)}',
-                          style: GoogleFonts.outfit(fontSize: 11, color: Colors.grey[400])),
+                          style: GoogleFonts.outfit(fontSize: 11, color: const Color(0xFF94A3B8))),
                     ],
                   ),
                 ],
@@ -763,7 +760,7 @@ class _ErrandScreenState extends ConsumerState<ErrandScreen> {
           const SizedBox(height: 20),
 
           // Urgency Tiers
-          Text('How urgent?', style: GoogleFonts.outfit(fontWeight: FontWeight.w600, fontSize: 15)),
+          Text('How urgent?', style: GoogleFonts.outfit(fontWeight: FontWeight.w600, fontSize: 15, color: const Color(0xFF1E293B))),
           const SizedBox(height: 12),
           Row(
             children: [
@@ -795,19 +792,19 @@ class _ErrandScreenState extends ConsumerState<ErrandScreen> {
                       child: Container(
                         padding: const EdgeInsets.all(14),
                         decoration: BoxDecoration(
-                          color: Colors.grey[50],
+                          color: const Color(0xFFF8FAFC),
                           borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: Colors.grey[200]!),
+                          border: Border.all(color: const Color(0xFFE2E8F0)),
                         ),
                         child: Row(
                           children: [
-                            const Icon(Icons.calendar_today, size: 18, color: Colors.grey),
+                            const Icon(Icons.calendar_today, size: 18, color: Color(0xFF64748B)),
                             const SizedBox(width: 8),
                             Text(
                               _scheduledDate != null
                                   ? '${_scheduledDate!.day}/${_scheduledDate!.month}/${_scheduledDate!.year}'
                                   : 'Pick date',
-                              style: GoogleFonts.outfit(fontSize: 13),
+                              style: GoogleFonts.outfit(fontSize: 13, color: const Color(0xFF0F172A)),
                             ),
                           ],
                         ),
@@ -827,19 +824,19 @@ class _ErrandScreenState extends ConsumerState<ErrandScreen> {
                       child: Container(
                         padding: const EdgeInsets.all(14),
                         decoration: BoxDecoration(
-                          color: Colors.grey[50],
+                          color: const Color(0xFFF8FAFC),
                           borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: Colors.grey[200]!),
+                          border: Border.all(color: const Color(0xFFE2E8F0)),
                         ),
                         child: Row(
                           children: [
-                            const Icon(Icons.access_time, size: 18, color: Colors.grey),
+                            const Icon(Icons.access_time, size: 18, color: Color(0xFF64748B)),
                             const SizedBox(width: 8),
                             Text(
                               _scheduledTime != null
                                   ? _scheduledTime!.format(context)
                                   : 'Pick time',
-                              style: GoogleFonts.outfit(fontSize: 13),
+                              style: GoogleFonts.outfit(fontSize: 13, color: const Color(0xFF0F172A)),
                             ),
                           ],
                         ),
@@ -853,7 +850,7 @@ class _ErrandScreenState extends ConsumerState<ErrandScreen> {
           const SizedBox(height: 20),
 
           // Vehicle Type
-          Text('Runner vehicle', style: GoogleFonts.outfit(fontWeight: FontWeight.w600, fontSize: 15)),
+          Text('Runner vehicle', style: GoogleFonts.outfit(fontWeight: FontWeight.w600, fontSize: 15, color: const Color(0xFF1E293B))),
           const SizedBox(height: 12),
           Row(
             children: [
@@ -885,22 +882,22 @@ class _ErrandScreenState extends ConsumerState<ErrandScreen> {
           duration: const Duration(milliseconds: 250),
           padding: const EdgeInsets.symmetric(vertical: 16),
           decoration: BoxDecoration(
-            color: isSelected ? color.withOpacity(0.1) : Colors.grey[50],
+            color: isSelected ? color.withOpacity(0.08) : const Color(0xFFF8FAFC),
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: isSelected ? color : Colors.grey[200]!,
+              color: isSelected ? color : const Color(0xFFE2E8F0),
               width: isSelected ? 2 : 1,
             ),
           ),
           child: Column(
             children: [
-              Icon(icon, color: isSelected ? color : Colors.grey[400], size: 24),
+              Icon(icon, color: isSelected ? color : const Color(0xFF94A3B8), size: 24),
               const SizedBox(height: 6),
               Text(label, style: GoogleFonts.outfit(
                 fontWeight: FontWeight.w600, fontSize: 12,
-                color: isSelected ? color : Colors.grey[600],
+                color: isSelected ? color : const Color(0xFF64748B),
               )),
-              Text(subtitle, style: GoogleFonts.outfit(fontSize: 10, color: Colors.grey[400])),
+              Text(subtitle, style: GoogleFonts.outfit(fontSize: 10, color: const Color(0xFF94A3B8))),
             ],
           ),
         ),
@@ -910,7 +907,6 @@ class _ErrandScreenState extends ConsumerState<ErrandScreen> {
 
   Widget _buildVehicleChip(String label, IconData icon) {
     final isSelected = _vehicleType == label;
-    final catColor = _selectedCategory?.color ?? const Color(0xFFFF6B35);
     return Expanded(
       child: GestureDetector(
         onTap: () => setState(() => _vehicleType = label),
@@ -918,16 +914,16 @@ class _ErrandScreenState extends ConsumerState<ErrandScreen> {
           duration: const Duration(milliseconds: 200),
           padding: const EdgeInsets.symmetric(vertical: 14),
           decoration: BoxDecoration(
-            color: isSelected ? catColor.withOpacity(0.1) : Colors.grey[50],
+            color: isSelected ? AppTheme.primaryBlue.withOpacity(0.08) : const Color(0xFFF8FAFC),
             borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: isSelected ? catColor : Colors.grey[200]!, width: isSelected ? 2 : 1),
+            border: Border.all(color: isSelected ? AppTheme.primaryBlue : const Color(0xFFE2E8F0), width: isSelected ? 2 : 1),
           ),
           child: Column(
             children: [
-              Icon(icon, color: isSelected ? catColor : Colors.grey[400], size: 22),
+              Icon(icon, color: isSelected ? AppTheme.primaryBlue : const Color(0xFF94A3B8), size: 22),
               const SizedBox(height: 4),
               Text(label, style: GoogleFonts.outfit(fontSize: 12, fontWeight: FontWeight.w500,
-                  color: isSelected ? catColor : Colors.grey[600])),
+                  color: isSelected ? AppTheme.primaryBlue : const Color(0xFF64748B))),
             ],
           ),
         ),
@@ -937,8 +933,6 @@ class _ErrandScreenState extends ConsumerState<ErrandScreen> {
 
   // ──────────────── Step 4: Review ────────────────
   Widget _buildReviewStep() {
-    final catColor = _selectedCategory?.color ?? const Color(0xFFFF6B35);
-
     return SingleChildScrollView(
       padding: const EdgeInsets.all(20),
       child: Column(
@@ -946,7 +940,7 @@ class _ErrandScreenState extends ConsumerState<ErrandScreen> {
         children: [
           FadeInDown(
             child: Text('Review Your Errand',
-                style: GoogleFonts.outfit(fontSize: 22, fontWeight: FontWeight.bold)),
+                style: GoogleFonts.outfit(fontSize: 22, fontWeight: FontWeight.bold, color: const Color(0xFF0F172A))),
           ),
           const SizedBox(height: 20),
 
@@ -955,13 +949,9 @@ class _ErrandScreenState extends ConsumerState<ErrandScreen> {
             child: Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [catColor.withOpacity(0.08), catColor.withOpacity(0.02)],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
+                color: const Color(0xFFF8FAFC),
                 borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: catColor.withOpacity(0.2)),
+                border: Border.all(color: const Color(0xFFE2E8F0)),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -970,44 +960,44 @@ class _ErrandScreenState extends ConsumerState<ErrandScreen> {
                     children: [
                       Container(
                         padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(color: catColor.withOpacity(0.15), shape: BoxShape.circle),
-                        child: Icon(_selectedCategory?.icon ?? Icons.shopping_basket, color: catColor, size: 24),
+                        decoration: BoxDecoration(color: AppTheme.primaryBlue.withOpacity(0.1), shape: BoxShape.circle),
+                        child: Icon(_selectedCategory?.icon ?? Icons.shopping_basket, color: AppTheme.primaryBlue, size: 24),
                       ),
                       const SizedBox(width: 14),
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(_selectedCategory?.name ?? 'Errand',
-                              style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 18)),
+                              style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 18, color: const Color(0xFF0F172A))),
                           Text('$_urgency • $_vehicleType',
-                              style: GoogleFonts.outfit(color: Colors.grey[600], fontSize: 13)),
+                              style: GoogleFonts.outfit(color: const Color(0xFF64748B), fontSize: 13)),
                         ],
                       ),
                     ],
                   ),
                   if (_instructionsController.text.trim().isNotEmpty) ...[
                     const SizedBox(height: 14),
-                    const Divider(height: 1),
+                    const Divider(height: 1, color: Color(0xFFE2E8F0)),
                     const SizedBox(height: 14),
                     Text(_instructionsController.text.trim(),
-                        style: GoogleFonts.outfit(fontSize: 13, color: Colors.grey[700]),
+                        style: GoogleFonts.outfit(fontSize: 13, color: const Color(0xFF1E293B)),
                         maxLines: 4, overflow: TextOverflow.ellipsis),
                   ],
                   if (_shoppingList.isNotEmpty) ...[
                     const SizedBox(height: 14),
-                    const Divider(height: 1),
+                    const Divider(height: 1, color: Color(0xFFE2E8F0)),
                     const SizedBox(height: 14),
                     Text('📋 Shopping List (${_shoppingList.length} items)',
-                        style: GoogleFonts.outfit(fontWeight: FontWeight.w600, fontSize: 13)),
+                        style: GoogleFonts.outfit(fontWeight: FontWeight.w600, fontSize: 13, color: const Color(0xFF0F172A))),
                     const SizedBox(height: 6),
                     ..._shoppingList.take(5).map((item) => Padding(
                       padding: const EdgeInsets.only(bottom: 2),
                       child: Text('  • ${item.name} × ${item.quantity}',
-                          style: GoogleFonts.outfit(fontSize: 13, color: Colors.grey[600])),
+                          style: GoogleFonts.outfit(fontSize: 13, color: const Color(0xFF64748B))),
                     )),
                     if (_shoppingList.length > 5)
                       Text('  ...and ${_shoppingList.length - 5} more',
-                          style: GoogleFonts.outfit(fontSize: 12, color: Colors.grey[400])),
+                          style: GoogleFonts.outfit(fontSize: 12, color: const Color(0xFF94A3B8))),
                   ],
                 ],
               ),
@@ -1021,16 +1011,16 @@ class _ErrandScreenState extends ConsumerState<ErrandScreen> {
             child: Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.grey[50],
+                color: const Color(0xFFF8FAFC),
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: Colors.grey[200]!),
+                border: Border.all(color: const Color(0xFFE2E8F0)),
               ),
               child: Column(
                 children: [
-                  _buildReviewRow(Icons.storefront_rounded, 'Runner goes to', _errandLocationController.text, const Color(0xFFFF6B35)),
+                  _buildReviewRow(Icons.storefront_rounded, 'Runner goes to', _errandLocationController.text, AppTheme.primaryBlue),
                   const Padding(
                     padding: EdgeInsets.only(left: 14),
-                    child: Divider(height: 20),
+                    child: Divider(height: 20, color: Color(0xFFE2E8F0)),
                   ),
                   _buildReviewRow(Icons.home_rounded, 'Delivers to you', _deliveryLocationController.text, const Color(0xFF10B981)),
                 ],
@@ -1047,7 +1037,7 @@ class _ErrandScreenState extends ConsumerState<ErrandScreen> {
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: Colors.grey[200]!),
+                border: Border.all(color: const Color(0xFFE2E8F0)),
                 boxShadow: [
                   BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 10, offset: const Offset(0, 4)),
                 ],
@@ -1057,28 +1047,29 @@ class _ErrandScreenState extends ConsumerState<ErrandScreen> {
                   _buildPriceRow('Runner Service Fee', '$_currencySymbol${_estimatedFee.toStringAsFixed(0)}'),
                   const SizedBox(height: 8),
                   _buildPriceRow('Item Budget (max)', '$_currencySymbol${_budget.toStringAsFixed(0)}'),
-                  const Divider(height: 20),
+                  const Divider(height: 20, color: Color(0xFFE2E8F0)),
                   _buildPriceRow(
                     'Estimated Total',
                     '$_currencySymbol${(_estimatedFee + _budget).toStringAsFixed(0)}',
                     isBold: true,
-                    color: catColor,
+                    color: AppTheme.primaryBlue,
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 12),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                     decoration: BoxDecoration(
-                      color: Colors.amber.withOpacity(0.1),
+                      color: const Color(0xFFFFF7ED),
                       borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: const Color(0xFFFFEDD5)),
                     ),
                     child: Row(
                       children: [
-                        const Icon(Icons.info_outline, size: 14, color: Colors.amber),
-                        const SizedBox(width: 6),
+                        const Icon(Icons.info_outline, size: 14, color: Color(0xFFF59E0B)),
+                        const SizedBox(width: 8),
                         Expanded(
                           child: Text(
                             'You\'ll only be charged for what the runner actually spends + service fee.',
-                            style: GoogleFonts.outfit(fontSize: 11, color: Colors.amber[800]),
+                            style: GoogleFonts.outfit(fontSize: 11, color: const Color(0xFF92400E)),
                           ),
                         ),
                       ],
@@ -1096,9 +1087,9 @@ class _ErrandScreenState extends ConsumerState<ErrandScreen> {
               child: Container(
                 padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF8B5CF6).withOpacity(0.06),
+                  color: const Color(0xFFF5F3FF),
                   borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: const Color(0xFF8B5CF6).withOpacity(0.2)),
+                  border: Border.all(color: const Color(0xFFDDD6FE)),
                 ),
                 child: Row(
                   children: [
@@ -1106,7 +1097,7 @@ class _ErrandScreenState extends ConsumerState<ErrandScreen> {
                     const SizedBox(width: 10),
                     Text(
                       'Scheduled: ${_scheduledDate!.day}/${_scheduledDate!.month}/${_scheduledDate!.year} at ${_scheduledTime?.format(context) ?? '10:00'}',
-                      style: GoogleFonts.outfit(fontSize: 13, color: const Color(0xFF8B5CF6), fontWeight: FontWeight.w500),
+                      style: GoogleFonts.outfit(fontSize: 13, color: const Color(0xFF7C3AED), fontWeight: FontWeight.w500),
                     ),
                   ],
                 ),
@@ -1155,7 +1146,6 @@ class _ErrandScreenState extends ConsumerState<ErrandScreen> {
   // ──────────────── Bottom Navigation Bar ────────────────
   Widget _buildBottomBar() {
     final canProceed = _canProceed();
-    final catColor = _selectedCategory?.color ?? const Color(0xFFFF6B35);
     final isLastStep = _currentStep == _totalSteps - 1;
 
     return Container(
@@ -1174,13 +1164,12 @@ class _ErrandScreenState extends ConsumerState<ErrandScreen> {
               ? (isLastStep ? _submitErrand : _nextStep)
               : null,
           style: ElevatedButton.styleFrom(
-            backgroundColor: canProceed ? catColor : Colors.grey[300],
+            backgroundColor: canProceed ? AppTheme.primaryBlue : const Color(0xFFE2E8F0),
             foregroundColor: Colors.white,
-            disabledBackgroundColor: Colors.grey[200],
-            disabledForegroundColor: Colors.grey[400],
+            disabledBackgroundColor: const Color(0xFFF1F5F9),
+            disabledForegroundColor: const Color(0xFF94A3B8),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-            elevation: canProceed ? 4 : 0,
-            shadowColor: catColor.withOpacity(0.3),
+            elevation: canProceed ? 2 : 0,
           ),
           child: _isLoading
               ? const SizedBox(height: 24, width: 24, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
@@ -1188,7 +1177,7 @@ class _ErrandScreenState extends ConsumerState<ErrandScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      isLastStep ? 'Confirm Errand' : 'Continue',
+                      isLastStep ? 'Confirm & Publish' : 'Continue',
                       style: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.w600),
                     ),
                     const SizedBox(width: 8),

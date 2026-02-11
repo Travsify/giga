@@ -212,7 +212,7 @@ class PaymentService {
     }
   }
 
-  static Future<bool> fundWithFlutterwave(BuildContext context, double amount, String currency) async {
+  static Future<String?> fundWithFlutterwave(BuildContext context, double amount, String currency) async {
     const storage = FlutterSecureStorage();
     final token = await storage.read(key: 'auth_token');
     if (token == null) throw 'Authentication token not found';
@@ -234,12 +234,13 @@ class PaymentService {
 
       if (response.data['status'] == 'success') {
         final checkoutUrl = response.data['checkout_url'];
+        final reference = response.data['reference'];
         if (checkoutUrl != null) {
-          debugPrint('Flutterwave: Redirecting to $checkoutUrl');
+          debugPrint('Flutterwave: Redirecting to $checkoutUrl with ref $reference');
           final uri = Uri.parse(checkoutUrl);
           if (await canLaunchUrl(uri)) {
              await launchUrl(uri, mode: LaunchMode.externalApplication);
-             return true; 
+             return reference; 
           } else {
             throw 'Could not launch payment browser. Please check your device settings.';
           }
@@ -265,6 +266,41 @@ class PaymentService {
           ),
         );
       }
+      return null;
+    }
+  }
+
+  static Future<bool> verifyFlutterwavePayment(String reference) async {
+    const storage = FlutterSecureStorage();
+    final token = await storage.read(key: 'auth_token');
+    if (token == null) return false;
+
+    final dio = Dio(BaseOptions(
+      baseUrl: kApiBaseUrl,
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      }
+    ));
+
+    try {
+      // The backend has verifyFlutterwavePayment(Request $request) that expects 'transaction_id'
+      // BUT it also has flutterwaveCallback that uses 'tx_ref'.
+      // Looking at backend PaymentController.php:501: $request->validate(['transaction_id' => 'required|string']);
+      // Actually, 'transaction_id' is the Flutterwave internal ID, not our 'tx_ref'.
+      // However, our backend has verifyFlutterwavePayment that works with transaction_id.
+      // WE NEED an endpoint that verifies by tx_ref if we don't have the transaction_id yet.
+      // Alternative: We can check if a transaction with this reference exists in our DB.
+      
+      final response = await dio.get('/wallet/transactions');
+      if (response.statusCode == 200) {
+        final List transactions = response.data['transactions'] ?? [];
+        return transactions.any((tx) => tx['reference'] == reference);
+      }
+      return false;
+    } catch (e) {
+      debugPrint('Verification Error: $e');
       return false;
     }
   }

@@ -11,6 +11,7 @@ import 'package:flota_mobile/shared/map_picker_screen.dart';
 import 'package:flota_mobile/features/marketplace/data/models/delivery_models.dart';
 import 'package:flota_mobile/features/marketplace/delivery_provider.dart';
 import 'package:flota_mobile/features/profile/profile_provider.dart';
+import 'package:flota_mobile/core/api_config.dart';
 import 'package:flota_mobile/features/auth/auth_provider.dart';
 import 'package:intl/intl.dart';
 import 'package:google_places_flutter/google_places_flutter.dart';
@@ -245,7 +246,7 @@ class _DeliveryRequestScreenState extends ConsumerState<DeliveryRequestScreen> {
   Widget _buildAddressSearchField(String label, TextEditingController controller, IconData icon, bool isPickup) {
     return GooglePlaceAutoCompleteTextField(
       textEditingController: controller,
-      googleAPIKey: "AIzaSyDVqP4CjWp_fcFim7d_E0kAL35Ie2gWMzE",
+      googleAPIKey: ApiConfig.googleMapsApiKey,
       inputDecoration: AppTheme.inputDecoration(label, prefixIcon: Icon(icon, color: isPickup ? AppTheme.primaryBlue : AppTheme.primaryRed)),
       debounceTime: 400,
       countries: const ["NG"],

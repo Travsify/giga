@@ -149,7 +149,7 @@ class MaintenanceApp extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(Icons.build_rounded, size: 64, color: Colors.orange),
+                const Icon(Icons.build_rounded, size: 64, color: AppTheme.primaryBlue),
                 const SizedBox(height: 24),
                 Text(
                   "Under Maintenance",

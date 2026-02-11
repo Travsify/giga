@@ -428,7 +428,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         title: 'Errand',
                         subtitle: 'Run tasks for you',
                         icon: Icons.shopping_basket_rounded,
-                        color: const Color(0xFFFF6B35),
+                        color: AppTheme.primaryBlue,
                         onTap: () => context.push('/errand'),
                       ),
                     ),
@@ -486,7 +486,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               title: 'Bill Payments',
                               subtitle: 'Earn ₦50 Loyalty',
                               icon: Icons.receipt_long_rounded,
-                              color: Colors.orange,
+                              color: AppTheme.primaryBlue,
                               onTap: () => context.push('/bill-payment'),
                             ),
                           ),
@@ -917,23 +917,23 @@ class _UlezStatusBubbleState extends State<_UlezStatusBubble> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: _isInZone! ? Colors.orange.withOpacity(0.2) : Colors.green.withOpacity(0.2),
+        color: _isInZone! ? const Color(0xFFFEF3C7) : const Color(0xFFDCFCE7),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: _isInZone! ? Colors.orange : Colors.green, width: 0.5),
+        border: Border.all(color: _isInZone! ? const Color(0xFFF59E0B) : const Color(0xFF10B981), width: 0.5),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(
             _isInZone! ? Icons.warning_amber_rounded : Icons.check_circle_outline,
-            color: Colors.white,
+            color: _isInZone! ? const Color(0xFFB45309) : const Color(0xFF15803D),
             size: 10,
           ),
           const SizedBox(width: 4),
           Text(
             _isInZone! ? 'ULEZ: Inside' : 'ULEZ: Clear',
-            style: const TextStyle(
-              color: Colors.white,
+            style: TextStyle(
+              color: _isInZone! ? const Color(0xFFB45309) : const Color(0xFF15803D),
               fontSize: 10,
               fontWeight: FontWeight.bold,
             ),

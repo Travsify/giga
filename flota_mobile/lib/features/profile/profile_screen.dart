@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flota_mobile/features/profile/profile_provider.dart';
 import '../auth/auth_provider.dart';
+import 'package:flota_mobile/core/api_config.dart'; // Added this import
 import 'package:flota_mobile/theme/app_theme.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -172,7 +173,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             ),
             const SizedBox(height: 16),
             GooglePlaceAutoCompleteTextField(
-              googleAPIKey: "AIzaSyDVqP4CjWp_fcFim7d_E0kAL35Ie2gWMzE",
+              googleAPIKey: ApiConfig.googleMapsApiKey,
               textEditingController: _homeController,
               inputDecoration: InputDecoration(
                 labelText: 'Home Address',
