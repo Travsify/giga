@@ -78,24 +78,113 @@ class ExternalOrderController extends Controller
         ], 201);
     }
 
-    private function calculateFare(Request $request)
+    /**
+     * Get the status of an existing order.
+     */
+    public function getOrderStatus(Request $request, $id)
     {
-        // Simple placeholder fare logic
-        $base = match($request->vehicle_type) {
-            'Bike' => 5.0,
-            'Van' => 15.0,
-            'Truck' => 40.0,
-            default => 10.0
-        };
+        $business = $request->external_business;
 
-        if ($request->service_tier === 'Priority') $base *= 1.5;
-        
-        return $base;
+        $delivery = Delivery::where('id', $id)
+            ->where('logistics_company_id', $business->id)
+            ->first();
+
+        if (!$delivery) {
+            return response()->json(['message' => 'Order not found.'], 404);
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'data' => [
+                'order_id' => $delivery->id,
+                'tracking_number' => $delivery->tracking_number,
+                'status' => $delivery->status,
+                'parcel_type' => $delivery->parcel_type,
+                'pickup_address' => $delivery->pickup_address,
+                'dropoff_address' => $delivery->dropoff_address,
+                'vehicle_type' => $delivery->vehicle_type,
+                'service_tier' => $delivery->service_tier,
+                'fare' => (float) $delivery->fare,
+                'security_code' => $delivery->security_code,
+                'rider_id' => $delivery->rider_id,
+                'created_at' => $delivery->created_at,
+                'updated_at' => $delivery->updated_at,
+            ]
+        ]);
     }
 
+    /**
+     * Calculate fare based on distance and vehicle type.
+     */
+    private function calculateFare(Request $request)
+    {
+        // Haversine distance calculation
+        $lat1 = deg2rad($request->pickup_lat);
+        $lat2 = deg2rad($request->dropoff_lat);
+        $dLat = $lat2 - $lat1;
+        $dLng = deg2rad($request->dropoff_lng - $request->pickup_lng);
+
+        $a = sin($dLat / 2) * sin($dLat / 2)
+           + cos($lat1) * cos($lat2) * sin($dLng / 2) * sin($dLng / 2);
+        $c = 2 * atan2(sqrt($a), sqrt(1 - $a));
+        $distanceKm = 6371 * $c; // Earth radius in km
+
+        // Base fare + per-km rate by vehicle type
+        $pricing = match($request->vehicle_type) {
+            'Bike' => ['base' => 500, 'per_km' => 100],    // NGN pricing
+            'Van' => ['base' => 2000, 'per_km' => 250],
+            'Truck' => ['base' => 5000, 'per_km' => 400],
+            default => ['base' => 800, 'per_km' => 150],
+        };
+
+        $fare = $pricing['base'] + ($distanceKm * $pricing['per_km']);
+
+        // Service tier multipliers
+        $fare = match($request->service_tier) {
+            'Priority' => $fare * 1.5,
+            'Saver' => $fare * 0.85,
+            default => $fare, // Standard
+        };
+
+        // Minimum fare
+        $minimumFare = match($request->vehicle_type) {
+            'Bike' => 500,
+            'Van' => 2000,
+            'Truck' => 5000,
+            default => 800,
+        };
+
+        return round(max($fare, $minimumFare), 2);
+    }
+
+    /**
+     * Notify nearby riders about a new external order.
+     */
     private function notifyRiders(Delivery $delivery)
     {
-        // Integration point for notification system
-        // e.g. Notification::send($nearbyRiders, new NewExternalOrderNotification($delivery));
+        // Find online riders near the pickup location (within 10km)
+        $nearbyRiders = \App\Models\Rider::where('is_online', true)
+            ->where('verification_status', 'verified')
+            ->whereRaw("
+                (6371 * acos(
+                    cos(radians(?)) * cos(radians(current_lat)) *
+                    cos(radians(current_lng) - radians(?)) +
+                    sin(radians(?)) * sin(radians(current_lat))
+                )) < 10
+            ", [$delivery->pickup_lat, $delivery->pickup_lng, $delivery->pickup_lat])
+            ->limit(20)
+            ->get();
+
+        // Log notification for audit trail
+        \Illuminate\Support\Facades\Log::info('External API order created', [
+            'delivery_id' => $delivery->id,
+            'notified_riders' => $nearbyRiders->count(),
+            'pickup' => $delivery->pickup_address,
+        ]);
+
+        // Send push notifications if FCM/Pusher is configured
+        // foreach ($nearbyRiders as $rider) {
+        //     $rider->user->notify(new \App\Notifications\NewDeliveryNotification($delivery));
+        // }
     }
 }

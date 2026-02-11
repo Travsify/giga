@@ -248,4 +248,110 @@ class BusinessController extends Controller
 
         return response()->json($deliveries);
     }
+
+    /**
+     * Generate a new API key for the business.
+     */
+    public function generateApiKey(Request $request)
+    {
+        $business = $request->user()->logisticsCompany;
+        if (!$business) {
+            return response()->json(['message' => 'Not a business account.'], 403);
+        }
+
+        if (!$business->is_verified) {
+            return response()->json(['message' => 'Your business must be verified before generating API keys.'], 403);
+        }
+
+        $request->validate([
+            'name' => 'required|string|max:100',
+        ]);
+
+        // Limit to 5 active keys per business
+        $activeKeys = ApiKey::where('logistics_company_id', $business->id)
+            ->where('is_active', true)
+            ->count();
+
+        if ($activeKeys >= 5) {
+            return response()->json(['message' => 'Maximum 5 active API keys allowed. Revoke an existing key first.'], 422);
+        }
+
+        // Generate a secure random key
+        $plainKey = 'giga_' . Str::random(48);
+        $prefix = substr($plainKey, 0, 12); // Visible prefix for identification
+
+        $apiKey = ApiKey::create([
+            'logistics_company_id' => $business->id,
+            'name' => $request->name,
+            'key' => hash('sha256', $plainKey),
+            'prefix' => $prefix,
+            'is_active' => true,
+        ]);
+
+        return response()->json([
+            'message' => 'API key generated successfully. Store this key securely — it will not be shown again.',
+            'data' => [
+                'id' => $apiKey->id,
+                'name' => $apiKey->name,
+                'key' => $plainKey, // Only shown once
+                'prefix' => $prefix,
+                'created_at' => $apiKey->created_at,
+            ]
+        ], 201);
+    }
+
+    /**
+     * List all API keys for the business (keys are masked).
+     */
+    public function listApiKeys(Request $request)
+    {
+        $business = $request->user()->logisticsCompany;
+        if (!$business) {
+            return response()->json(['message' => 'Not a business account.'], 403);
+        }
+
+        $keys = ApiKey::where('logistics_company_id', $business->id)
+            ->select('id', 'name', 'prefix', 'is_active', 'last_used_at', 'created_at')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $keys,
+        ]);
+    }
+
+    /**
+     * Revoke (deactivate) an API key.
+     */
+    public function revokeApiKey(Request $request, $keyId)
+    {
+        $business = $request->user()->logisticsCompany;
+        if (!$business) {
+            return response()->json(['message' => 'Not a business account.'], 403);
+        }
+
+        $apiKey = ApiKey::where('id', $keyId)
+            ->where('logistics_company_id', $business->id)
+            ->first();
+
+        if (!$apiKey) {
+            return response()->json(['message' => 'API key not found.'], 404);
+        }
+
+        if (!$apiKey->is_active) {
+            return response()->json(['message' => 'API key is already revoked.'], 422);
+        }
+
+        $apiKey->update(['is_active' => false]);
+
+        return response()->json([
+            'message' => 'API key revoked successfully.',
+            'data' => [
+                'id' => $apiKey->id,
+                'name' => $apiKey->name,
+                'is_active' => false,
+            ]
+        ]);
+    }
 }

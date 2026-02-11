@@ -575,8 +575,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/lockers/p2p-shipment', [LockerController::class, 'initiateP2PShipment']);
 });
 
-// External Partner API (Secured by API Key)
-Route::middleware(['api_key'])->prefix('v1')->group(function () {
+// External Partner API (Secured by API Key, Rate Limited: 60 req/min)
+Route::middleware(['api_key', 'throttle:60,1'])->prefix('v1')->group(function () {
     Route::post('/orders', [ExternalOrderController::class, 'createOrder']);
     Route::get('/orders/{id}', [ExternalOrderController::class, 'getOrderStatus']);
 });
