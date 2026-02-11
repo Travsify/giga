@@ -6,6 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Models\LogisticsCompany;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
+use App\Models\ApiKey;
 
 class BusinessController extends Controller
 {
@@ -121,5 +125,127 @@ class BusinessController extends Controller
                 ['id' => 2, 'amount' => 450.00, 'status' => 'Pending', 'date' => '2026-01-20'],
             ]
         ]);
+    }
+
+    public function getFleetRiders(Request $request)
+    {
+        $business = $request->user()->logisticsCompany;
+        if (!$business) {
+            return response()->json(['message' => 'Not a business account.'], 403);
+        }
+
+        $riders = $business->riders()->with('user')->get();
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $riders
+        ]);
+    }
+
+    public function onboardRider(Request $request)
+    {
+        $business = $request->user()->logisticsCompany;
+        if (!$business) {
+            return response()->json(['message' => 'Not a business account.'], 403);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email',
+            'phone' => 'nullable|string',
+            'password' => 'required|string|min:8',
+            'license_number' => 'required|string|unique:riders,license_number',
+            'vehicle_type' => 'required|string',
+            'vehicle_plate_number' => 'required|string|unique:riders,vehicle_plate_number',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        return DB::transaction(function () use ($request, $business) {
+            // Create the user
+            $user = \App\Models\User::create([
+                'name' => $request->name,
+                'email' => $request->email,
+                'password' => Hash::make($request->password),
+                'role' => 'Rider',
+                'uk_phone' => $request->phone,
+                'email_verified_at' => now(), // Auto-verify fleet-onboarded riders
+                'country_code' => $business->user->country_code,
+                'currency_code' => $business->user->currency_code,
+            ]);
+
+            // Create the rider profile linked to the company
+            $rider = \App\Models\Rider::create([
+                'user_id' => $user->id,
+                'logistics_company_id' => $business->id,
+                'license_number' => $request->license_number,
+                'vehicle_type' => $request->vehicle_type,
+                'vehicle_plate_number' => $request->vehicle_plate_number,
+                'verification_status' => 'verified', // Fleet riders are verified by their company
+                'is_online' => false,
+                'has_vehicle' => true,
+                'vehicle_verified' => true,
+            ]);
+
+            // Create wallet
+            \App\Models\Wallet::create([
+                'user_id' => $user->id,
+                'balance' => 0.00,
+                'currency' => $user->currency_code,
+            ]);
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Rider onboarded successfully to your fleet.',
+                'rider' => $rider->load('user')
+            ], 201);
+        });
+    }
+
+    public function getStats(Request $request)
+    {
+        $business = $request->user()->logisticsCompany;
+        if (!$business) {
+            return response()->json(['message' => 'Not a business account.'], 403);
+        }
+
+        // Aggregate stats for the fleet
+        $riderIds = $business->riders()->pluck('id');
+        
+        $totalEarnings = \App\Models\Transaction::whereIn('user_id', function($query) use ($business) {
+            $query->select('user_id')->from('riders')->where('logistics_company_id', $business->id);
+        })->where('type', 'credit')->sum('amount');
+
+        $activeDeliveries = \App\Models\Delivery::whereIn('rider_id', $riderIds)
+            ->whereIn('status', ['accepted', 'picked_up'])
+            ->count();
+
+        return response()->json([
+            'total_riders' => $riderIds->count(),
+            'online_riders' => $business->riders()->where('is_online', true)->count(),
+            'total_fleet_earnings' => (float)$totalEarnings,
+            'active_deliveries' => $activeDeliveries,
+            'credit_limit' => $business->credit_limit,
+            'outstanding_balance' => $business->outstanding_balance,
+        ]);
+    }
+
+    public function getRecentActivity(Request $request)
+    {
+        $business = $request->user()->logisticsCompany;
+        if (!$business) {
+            return response()->json(['message' => 'Not a business account.'], 403);
+        }
+
+        $riderIds = $business->riders()->pluck('id');
+
+        $deliveries = \App\Models\Delivery::whereIn('rider_id', $riderIds)
+            ->orderBy('updated_at', 'desc')
+            ->limit(10)
+            ->get();
+
+        return response()->json($deliveries);
     }
 }

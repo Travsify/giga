@@ -32,19 +32,46 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             _passwordController.text.trim(),
           );
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(e.toString().replaceAll('Exception: ', '')),
-            backgroundColor: Colors.red,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          ),
-        );
-      }
+      _showError(e.toString());
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
+  }
+
+  Future<void> _loginWithBiometrics() async {
+    final bio = ref.read(biometricServiceProvider);
+    final authNotifier = ref.read(authProvider.notifier);
+    
+    final success = await bio.authenticate();
+    if (success) {
+      final email = await authNotifier.getStoredEmail();
+      final password = await authNotifier.getStoredPassword();
+      
+      if (email != null && password != null) {
+        setState(() => _isLoading = true);
+        try {
+          await authNotifier.login(email, password);
+        } catch (e) {
+          _showError('Biometric login failed. Please use your password.');
+        } finally {
+          if (mounted) setState(() => _isLoading = false);
+        }
+      } else {
+        _showError('No saved credentials found. Please log in with your password first.');
+      }
+    }
+  }
+
+  void _showError(String message) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message.replaceAll('Exception: ', '')),
+        backgroundColor: Colors.red,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      ),
+    );
   }
 
   @override
@@ -227,24 +254,18 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             ),
                           ),
 
-                          const SizedBox(height: 32),
+                          const SizedBox(height: 24),
 
-                          // Divider
-                          Row(
-                            children: [
-                              Expanded(child: Divider(color: Colors.grey[300])),
-                              Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 16),
-                                child: Text(
-                                  "OR",
-                                  style: GoogleFonts.outfit(color: Colors.grey[500], fontSize: 12),
-                                ),
-                              ),
-                              Expanded(child: Divider(color: Colors.grey[300])),
-                            ],
+                          // Biometric Login Option
+                          Center(
+                            child: IconButton(
+                              icon: const Icon(Icons.fingerprint_rounded, size: 48, color: _primaryBlue),
+                              onPressed: _isLoading ? null : _loginWithBiometrics,
+                              tooltip: 'Login with Biometrics',
+                            ),
                           ),
 
-                          const SizedBox(height: 24),
+                          const SizedBox(height: 16),
 
                           // Sign Up Link
                           Center(

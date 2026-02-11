@@ -12,8 +12,9 @@ use App\Http\Controllers\Api\PasswordResetController;
 use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Api\TestMailController;
 use App\Http\Controllers\Api\EmailVerificationController;
-use App\Http\Controllers\Api\SubscriptionController;
 use App\Http\Controllers\Api\BusinessController;
+use App\Http\Controllers\Api\ExternalOrderController;
+use App\Http\Controllers\Api\SubscriptionController;
 use App\Http\Controllers\Api\BulkBookingController;
 use App\Http\Controllers\Api\PromoController;
 use App\Http\Controllers\Api\LockerController;
@@ -521,10 +522,17 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/business/billing', [BusinessController::class, 'getBilling']);
     Route::get('/business/stats', [BusinessController::class, 'getStats']);
     Route::get('/business/activity', [BusinessController::class, 'getRecentActivity']);
-    Route::post('/business/bulk-book', [BulkBookingController::class, 'processBatch']);
+    Route::get('/business/fleet', [BusinessController::class, 'getFleetRiders']);
+    Route::post('/business/fleet/onboard', [BusinessController::class, 'onboardRider']);
     
-    // Placeholder for API Keys
-    Route::post('/business/api-keys', function() { return response()->json(['token' => 'mock_token_' . time()]); });
+    // API Key Management
+    Route::get('/business/api-keys', [BusinessController::class, 'listApiKeys']);
+    Route::post('/business/api-keys', [BusinessController::class, 'generateApiKey']);
+    Route::post('/ship-and-shop/request', [BusinessController::class, 'requestShopAndShip']);
+    Route::delete('/business/api-keys/{id}', [BusinessController::class, 'revokeApiKey']);
+
+    // Bulk Operations
+    Route::post('/business/bulk-book', [BulkBookingController::class, 'processBatch']);
 
     // Promos & Offers
     Route::get('/promos', [App\Http\Controllers\Api\PromoController::class, 'index']);
@@ -565,4 +573,10 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::post('/loyalty/reward/bill-payment', [LoyaltyController::class, 'rewardBillPayment']);
     Route::post('/lockers/p2p-shipment', [LockerController::class, 'initiateP2PShipment']);
+});
+
+// External Partner API (Secured by API Key)
+Route::middleware(['api_key'])->prefix('v1')->group(function () {
+    Route::post('/orders', [ExternalOrderController::class, 'createOrder']);
+    Route::get('/orders/{id}', [ExternalOrderController::class, 'getOrderStatus']);
 });

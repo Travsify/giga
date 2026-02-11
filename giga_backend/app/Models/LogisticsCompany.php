@@ -43,6 +43,11 @@ class LogisticsCompany extends Model
         return $this->hasMany(Rider::class);
     }
 
+    public function apiKeys()
+    {
+        return $this->hasMany(ApiKey::class);
+    }
+
     public function members()
     {
         return $this->hasMany(User::class, 'business_id');

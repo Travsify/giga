@@ -51,6 +51,8 @@ import 'package:flota_mobile/features/marketplace/retail_returns_screen.dart';
 import 'package:flota_mobile/features/marketplace/gift_shipping_screen.dart';
 import 'package:flota_mobile/features/marketplace/send_to_contact_screen.dart';
 import 'package:flota_mobile/features/marketplace/shop_and_ship_screen.dart';
+import 'package:flota_mobile/features/business/presentation/screens/fleet_management_screen.dart';
+import 'package:flota_mobile/features/business/presentation/screens/fleet_onboarding_screen.dart';
 import 'package:flota_mobile/theme/app_theme.dart';
 
 
@@ -59,6 +61,68 @@ import 'package:flota_mobile/features/business/presentation/screens/bulk_shippin
 import 'firebase_options.dart';
 
 import 'package:flota_mobile/core/settings_service.dart';
+import 'package:local_auth/local_auth.dart';
+import 'dart:async';
+
+class SessionService extends StateNotifier<DateTime> {
+  final Ref ref;
+  Timer? _inactivityTimer;
+  static const inactivityLimit = Duration(minutes: 10);
+
+  SessionService(this.ref) : super(DateTime.now()) {
+    _startTimer();
+  }
+
+  void resetTimer() {
+    state = DateTime.now();
+    _startTimer();
+  }
+
+  void _startTimer() {
+    _inactivityTimer?.cancel();
+    _inactivityTimer = Timer(inactivityLimit, () {
+      final auth = ref.read(authProvider);
+      if (auth.status == AuthStatus.authenticated) {
+        ref.read(authProvider.notifier).logout();
+        print('User logged out due to 10 minutes of inactivity');
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _inactivityTimer?.cancel();
+    super.dispose();
+  }
+}
+
+final sessionProvider = StateNotifierProvider<SessionService, DateTime>((ref) {
+  return SessionService(ref);
+});
+
+class BiometricService {
+  final LocalAuthentication auth = LocalAuthentication();
+
+  Future<bool> authenticate() async {
+    try {
+      final bool canAuthenticateWithBiometrics = await auth.canCheckBiometrics;
+      if (!canAuthenticateWithBiometrics) return true; // Fallback or assume success if not supported
+
+      return await auth.authenticate(
+        localizedReason: 'Please authenticate to access Giga',
+        options: const AuthenticationOptions(
+          stickyAuth: true,
+          biometricOnly: true,
+        ),
+      );
+    } catch (e) {
+      print('Biometric error: $e');
+      return false;
+    }
+  }
+}
+
+final biometricServiceProvider = Provider((ref) => BiometricService());
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -263,6 +327,13 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(path: 'team', builder: (context, state) => const TeamManagementScreen()),
           GoRoute(path: 'billing', builder: (context, state) => const BillingScreen()),
           GoRoute(path: 'bulk-shipping', builder: (context, state) => const BulkShippingScreen()),
+          GoRoute(
+            path: 'fleet', 
+            builder: (context, state) => const FleetManagementScreen(),
+            routes: [
+              GoRoute(path: 'onboard', builder: (context, state) => const FleetOnboardingScreen()),
+            ],
+          ),
         ],
       ),
       GoRoute(
@@ -443,11 +514,14 @@ class MyApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final router = ref.watch(routerProvider);
 
-    return MaterialApp.router(
-      title: 'Giga',
-      debugShowCheckedModeBanner: false,
-      theme: AppTheme.lightTheme,
-      routerConfig: router,
+    return Listener(
+      onPointerDown: (_) => ref.read(sessionProvider.notifier).resetTimer(),
+      child: MaterialApp.router(
+        title: 'Giga',
+        debugShowCheckedModeBanner: false,
+        theme: AppTheme.lightTheme,
+        routerConfig: router,
+      ),
     );
   }
 }

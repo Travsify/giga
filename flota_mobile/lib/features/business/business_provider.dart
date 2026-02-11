@@ -4,22 +4,38 @@ import 'package:flota_mobile/features/business/data/business_repository.dart';
 class BusinessState {
   final bool isLoading;
   final Map<String, dynamic>? profile;
+  final Map<String, dynamic>? fleetStats;
+  final List<dynamic>? fleetRiders;
+  final List<dynamic>? recentActivity;
+  final List<dynamic>? apiKeys;
   final String? error;
 
   BusinessState({
     this.isLoading = false,
     this.profile,
+    this.fleetStats,
+    this.fleetRiders,
+    this.recentActivity,
+    this.apiKeys,
     this.error,
   });
 
   BusinessState copyWith({
     bool? isLoading,
     Map<String, dynamic>? profile,
+    Map<String, dynamic>? fleetStats,
+    List<dynamic>? fleetRiders,
+    List<dynamic>? recentActivity,
+    List<dynamic>? apiKeys,
     String? error,
   }) {
     return BusinessState(
       isLoading: isLoading ?? this.isLoading,
       profile: profile ?? this.profile,
+      fleetStats: fleetStats ?? this.fleetStats,
+      fleetRiders: fleetRiders ?? this.fleetRiders,
+      recentActivity: recentActivity ?? this.recentActivity,
+      apiKeys: apiKeys ?? this.apiKeys,
       error: error ?? this.error,
     );
   }
@@ -71,12 +87,75 @@ class BusinessNotifier extends StateNotifier<BusinessState> {
   Future<void> fetchTeam() async {
     state = state.copyWith(isLoading: true, error: null);
     try {
-      // For now we just check if it works, storing in state could be complex 
-      // if we need separate state for each feature, but for MVP this is fine.
       await _repository.getTeam();
       state = state.copyWith(isLoading: false);
     } catch (e) {
       state = state.copyWith(isLoading: false, error: e.toString());
+    }
+  }
+
+  Future<void> fetchFleetDashboard() async {
+    state = state.copyWith(isLoading: true, error: null);
+    try {
+      final stats = await _repository.getFleetStats();
+      final riders = await _repository.getFleetRiders();
+      final activity = await _repository.getRecentActivity();
+      
+      state = state.copyWith(
+        isLoading: false,
+        fleetStats: stats,
+        fleetRiders: riders,
+        recentActivity: activity,
+      );
+    } catch (e) {
+      state = state.copyWith(isLoading: false, error: e.toString());
+    }
+  }
+
+  Future<bool> onboardRider(Map<String, dynamic> data) async {
+    state = state.copyWith(isLoading: true, error: null);
+    try {
+      await _repository.onboardRider(data);
+      await fetchFleetDashboard(); // Refresh
+      return true;
+    } catch (e) {
+      state = state.copyWith(isLoading: false, error: e.toString());
+      return false;
+    }
+  }
+
+  Future<void> fetchApiKeys() async {
+    state = state.copyWith(isLoading: true, error: null);
+    try {
+      final keys = await _repository.getApiKeys();
+      state = state.copyWith(isLoading: false, apiKeys: keys);
+    } catch (e) {
+      state = state.copyWith(isLoading: false, error: e.toString());
+    }
+  }
+
+  Future<Map<String, dynamic>?> generateApiKey(String name) async {
+    state = state.copyWith(isLoading: true, error: null);
+    try {
+      final response = await _repository.generateApiKey(name);
+      await fetchApiKeys(); // Refresh list
+      state = state.copyWith(isLoading: false);
+      return response;
+    } catch (e) {
+      state = state.copyWith(isLoading: false, error: e.toString());
+      return null;
+    }
+  }
+
+  Future<bool> revokeApiKey(int id) async {
+    state = state.copyWith(isLoading: true, error: null);
+    try {
+      await _repository.revokeApiKey(id);
+      await fetchApiKeys(); // Refresh list
+      return true;
+    } catch (e) {
+      state = state.copyWith(isLoading: false, error: e.toString());
+      return false;
     }
   }
 }

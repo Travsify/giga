@@ -96,12 +96,16 @@ class BusinessDashboardScreen extends ConsumerWidget {
   }
 
   Widget _buildMetricsRow(WidgetRef ref) {
+    final businessState = ref.watch(businessProvider);
+    final stats = businessState.fleetStats;
+    final auth = ref.watch(authProvider);
+
     return Row(
       children: [
         Expanded(
           child: _MetricCard(
-            title: 'Team Active',
-            value: '12',
+            title: 'Fleet Riders',
+            value: stats?['total_riders']?.toString() ?? '12',
             icon: Icons.people_alt_rounded,
             color: AppTheme.primaryBlue,
           ),
@@ -109,10 +113,10 @@ class BusinessDashboardScreen extends ConsumerWidget {
         const SizedBox(width: 16),
         Expanded(
           child: _MetricCard(
-            title: 'Credit Used',
-            value: '${ref.watch(authProvider).currencySymbol}450.00',
-            icon: Icons.account_balance_wallet_rounded,
-            color: Colors.green,
+            title: 'Fleet Jobs',
+            value: stats?['active_deliveries']?.toString() ?? '8',
+            icon: Icons.local_shipping_rounded,
+            color: Colors.orange,
           ),
         ),
       ],
@@ -141,18 +145,18 @@ class BusinessDashboardScreen extends ConsumerWidget {
           childAspectRatio: 1.1,
           children: [
             _ActionCard(
+              title: 'Fleet OS',
+              subtitle: 'Manage & track riders',
+              icon: Icons.delivery_dining_rounded,
+              color: AppTheme.primaryBlue,
+              onTap: () => context.push('/business/fleet'),
+            ),
+            _ActionCard(
               title: 'Bulk Shipping',
               subtitle: 'Multi-order entry',
               icon: Icons.inventory_2_rounded,
-              color: AppTheme.primaryBlue,
-              onTap: () => context.push('/business/bulk-shipping'),
-            ),
-            _ActionCard(
-              title: 'Team Mgmt',
-              subtitle: 'Invite & set roles',
-              icon: Icons.group_add_rounded,
               color: Colors.deepPurple,
-              onTap: () => context.push('/business/team'),
+              onTap: () => context.push('/business/bulk-shipping'),
             ),
             _ActionCard(
               title: 'Billing',
@@ -162,11 +166,11 @@ class BusinessDashboardScreen extends ConsumerWidget {
               onTap: () => context.push('/business/billing'),
             ),
             _ActionCard(
-              title: 'Analytics',
-              subtitle: 'Logistics data',
-              icon: Icons.insert_chart_rounded,
+              title: 'Team Mgmt',
+              subtitle: 'Invite & set roles',
+              icon: Icons.group_add_rounded,
               color: Colors.orange,
-              onTap: () {},
+              onTap: () => context.push('/business/team'),
             ),
           ],
         ),
@@ -258,20 +262,28 @@ class _MetricCard extends StatelessWidget {
             child: Icon(icon, color: color, size: 20),
           ),
           const SizedBox(height: 16),
-          Text(
-            value,
-            style: GoogleFonts.outfit(
-              fontSize: 22,
-              fontWeight: FontWeight.w800,
-              color: Colors.black87,
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text(
+              value,
+              style: GoogleFonts.outfit(
+                fontSize: 22,
+                fontWeight: FontWeight.w800,
+                color: Colors.black87,
+              ),
             ),
           ),
-          Text(
-            title,
-            style: GoogleFonts.outfit(
-              fontSize: 13,
-              fontWeight: FontWeight.w500,
-              color: Colors.black45,
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text(
+              title,
+              style: GoogleFonts.outfit(
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
+                color: Colors.black45,
+              ),
             ),
           ),
         ],
@@ -311,20 +323,28 @@ class _ActionCard extends StatelessWidget {
           children: [
             Icon(icon, color: color, size: 32),
             const Spacer(),
-            Text(
-              title,
-              style: GoogleFonts.outfit(
-                fontSize: 16,
-                fontWeight: FontWeight.w800,
-                color: Colors.black87,
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerLeft,
+              child: Text(
+                title,
+                style: GoogleFonts.outfit(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w800,
+                  color: Colors.black87,
+                ),
               ),
             ),
-            Text(
-              subtitle,
-              style: GoogleFonts.outfit(
-                fontSize: 11,
-                fontWeight: FontWeight.w500,
-                color: Colors.black45,
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerLeft,
+              child: Text(
+                subtitle,
+                style: GoogleFonts.outfit(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.black45,
+                ),
               ),
             ),
           ],

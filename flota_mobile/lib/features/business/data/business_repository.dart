@@ -52,6 +52,68 @@ class BusinessRepository {
     }
   }
 
+  Future<Map<String, dynamic>> getFleetStats() async {
+    try {
+      final response = await _dio.get('/business/stats');
+      return response.data;
+    } on DioException catch (e) {
+      throw _handleError(e);
+    }
+  }
+
+  Future<List<dynamic>> getFleetRiders() async {
+    try {
+      final response = await _dio.get('/business/fleet');
+      return response.data['data'];
+    } on DioException catch (e) {
+      throw _handleError(e);
+    }
+  }
+
+  Future<Map<String, dynamic>> onboardRider(Map<String, dynamic> riderData) async {
+    try {
+      final response = await _dio.post('/business/fleet/onboard', data: riderData);
+      return response.data;
+    } on DioException catch (e) {
+      throw _handleError(e);
+    }
+  }
+
+  Future<List<dynamic>> getRecentActivity() async {
+    try {
+      final response = await _dio.get('/business/activity');
+      return response.data;
+    } on DioException catch (e) {
+      throw _handleError(e);
+    }
+  }
+
+  Future<List<dynamic>> getApiKeys() async {
+    try {
+      final response = await _dio.get('/business/api-keys');
+      return response.data['data'];
+    } on DioException catch (e) {
+      throw _handleError(e);
+    }
+  }
+
+  Future<Map<String, dynamic>> generateApiKey(String name) async {
+    try {
+      final response = await _dio.post('/business/api-keys', data: {'name': name});
+      return response.data;
+    } on DioException catch (e) {
+      throw _handleError(e);
+    }
+  }
+
+  Future<void> revokeApiKey(int id) async {
+    try {
+      await _dio.delete('/business/api-keys/$id');
+    } on DioException catch (e) {
+      throw _handleError(e);
+    }
+  }
+
   String _handleError(DioException e) {
     if (e.response?.data != null) {
       final data = e.response!.data;
