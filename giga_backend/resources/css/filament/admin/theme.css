@@ -30,7 +30,7 @@
     --giga-surface: #FFFFFF;
     --giga-border: #E2E8F0;
     --giga-text-primary: #0F172A;
-    --giga-text-secondary: #64748B;
+    --giga-text-secondary: #334155; /* Darkened from #64748B for better contrast */
     --giga-emerald: #10B981;
     --giga-emerald-light: #ECFDF5;
     --giga-emerald-dark: #047857;
@@ -93,11 +93,11 @@ body {
 /* Sidebar Group Labels */
 .fi-sidebar-group-label {
     text-transform: uppercase !important;
-    font-size: 0.65rem !important;
-    font-weight: 700 !important;
-    letter-spacing: 0.1em !important;
+    font-size: 0.75rem !important; /* Increased from 0.65rem */
+    font-weight: 800 !important;
+    letter-spacing: 0.12em !important;
     color: var(--giga-text-secondary) !important;
-    padding: 1rem 1rem 0.5rem !important;
+    padding: 1.25rem 1rem 0.5rem !important;
 }
 
 /* ===== Header - Minimal Clean ===== */
@@ -156,7 +156,8 @@ body {
 
 .fi-wi-stats-overview-stat-label {
     color: var(--giga-text-secondary) !important;
-    font-size: 0.75rem !important;
+    font-size: 0.85rem !important; /* Increased from 0.75rem */
+    font-weight: 600 !important;
     text-transform: uppercase !important;
     letter-spacing: 0.05em !important;
 }
@@ -216,10 +217,10 @@ input:focus, select:focus, textarea:focus,
 
 /* ===== Tables - Clean Data Display ===== */
 .fi-ta-header-cell {
-    background-color: var(--giga-bg) !important;
-    color: var(--giga-text-secondary) !important;
-    font-size: 0.7rem !important;
-    font-weight: 700 !important;
+    background-color: #F1F5F9 !important; /* Slightly darker background for better separation */
+    color: var(--giga-text-primary) !important; /* Changed to primary for better contrast */
+    font-size: 0.75rem !important; /* Increased from 0.7rem */
+    font-weight: 800 !important; /* Bolder for prominence */
     text-transform: uppercase !important;
     letter-spacing: 0.08em !important;
 }
@@ -288,8 +289,9 @@ input:focus, select:focus, textarea:focus,
 
 /* ===== Breadcrumbs ===== */
 .fi-breadcrumbs {
-    color: var(--giga-text-secondary) !important;
-    font-size: 0.8rem !important;
+    color: var(--giga-text-primary) !important; /* Improved contrast */
+    font-size: 0.85rem !important; /* Increased from 0.8rem */
+    font-weight: 500 !important;
 }
 
 /* ===== Empty States ===== */
